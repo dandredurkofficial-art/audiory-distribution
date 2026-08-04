@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign In | Audiory</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-950 text-zinc-100 flex items-center justify-center min-h-screen p-4 font-sans">
+  <div class="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-8 max-w-sm w-full space-y-6 shadow-2xl backdrop-blur">
+    <div class="text-center">
+      <div class="h-10 w-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black text-white text-lg mx-auto mb-3">A</div>
+      <h1 class="text-xl font-bold text-white">Welcome Back</h1>
+      <p class="text-xs text-zinc-400 mt-1">Sign in to manage your music and royalties</p>
+    </div>
+
+    <form id="auth-form" class="space-y-4">
+      <div>
+        <label class="text-[11px] font-semibold text-zinc-400 block mb-1">Email Address</label>
+        <input type="email" id="email" required placeholder="artist@label.com" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-indigo-500">
+      </div>
+      <div>
+        <label class="text-[11px] font-semibold text-zinc-400 block mb-1">Password</label>
+        <input type="password" id="password" required placeholder="••••••••" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-indigo-500">
+      </div>
+      <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 font-bold py-3 rounded-lg text-xs text-white transition shadow-lg shadow-indigo-600/20">
+        Sign In to Portal
+      </button>
+    </form>
+    
+    <p class="text-[11px] text-center text-zinc-500">Need an account? <a href="/signup/index.html" class="text-indigo-400 font-semibold hover:underline">Apply for Distribution</a></p>
+  </div>
+</body>
+</html>
