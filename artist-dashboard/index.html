@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artist Portal | Audiory Distribution</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-zinc-800/80 bg-zinc-900/60 backdrop-blur-md sticky top-0 z-40 px-6 py-3.5 flex justify-between items-center">
+    <div class="flex items-center space-x-6">
+      <a href="/" class="flex items-center space-x-2">
+        <div class="h-7 w-7 bg-brand-600 rounded-lg flex items-center justify-center font-black text-white text-sm tracking-tighter">A</div>
+        <span class="font-extrabold text-lg tracking-wider text-white">AUDIORY</span>
+      </a>
+      <nav class="hidden md:flex space-x-1 text-xs font-semibold text-zinc-400">
+        <a href="#" class="px-3 py-1.5 text-white bg-zinc-800/80 rounded-md">Dashboard</a>
+        <a href="#" class="px-3 py-1.5 hover:text-white transition rounded-md">Catalog</a>
+        <a href="#" class="px-3 py-1.5 hover:text-white transition rounded-md">Analytics</a>
+        <a href="#" class="px-3 py-1.5 hover:text-white transition rounded-md">Royalties & Splits</a>
+      </nav>
+    </div>
+    
+    <div class="flex items-center space-x-4">
+      <button onclick="openReleaseWizard()" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-lg shadow-brand-600/20 flex items-center space-x-2">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <span>Create Release</span>
+      </button>
+      <div class="h-8 w-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-300">
+        DA
+      </div>
+    </div>
+  </header>
+
+  <!-- Dashboard Content -->
+  <main class="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full space-y-8">
+    
+    <!-- Header Banner -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-900 pb-6">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white">Catalog & Performance</h1>
+        <p class="text-xs md:text-sm text-zinc-400 mt-1">Real-time store delivery status, stream telemetry, and earnings.</p>
+      </div>
+      <div class="flex items-center space-x-2 bg-zinc-900 p-1 border border-zinc-800 rounded-lg text-xs font-medium">
+        <button class="px-3 py-1.5 bg-zinc-800 text-white rounded">Last 30 Days</button>
+        <button class="px-3 py-1.5 text-zinc-400 hover:text-white">Q2 2026</button>
+        <button class="px-3 py-1.5 text-zinc-400 hover:text-white">All Time</button>
+      </div>
+    </div>
+
+    <!-- Analytics Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-5 relative overflow-hidden">
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-medium text-zinc-400">Total Streams</span>
+          <span class="text-emerald-400 text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">+14.2%</span>
+        </div>
+        <p id="metric-streams" class="text-2xl md:text-3xl font-extrabold mt-3 text-white">2,849,120</p>
+        <p class="text-[11px] text-zinc-500 mt-2">Spotify, Apple, TikTok, Amazon</p>
+      </div>
+
+      <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-5 relative overflow-hidden">
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-medium text-zinc-400">Net Balance</span>
+          <span class="text-zinc-400 text-xs">Unpaid</span>
+        </div>
+        <p id="metric-balance" class="text-2xl md:text-3xl font-extrabold mt-3 text-white">$14,892.40</p>
+        <p class="text-[11px] text-zinc-500 mt-2">Next Payout: Aug 15, 2026</p>
+      </div>
+
+      <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-5 relative overflow-hidden">
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-medium text-zinc-400">Active Releases</span>
+          <i class="fa-solid fa-compact-disc text-zinc-600"></i>
+        </div>
+        <p id="metric-catalog" class="text-2xl md:text-3xl font-extrabold mt-3 text-white">18</p>
+        <p class="text-[11px] text-zinc-500 mt-2">16 Live | 2 Pending Inspection</p>
+      </div>
+
+      <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-5 relative overflow-hidden">
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-medium text-zinc-400">Active Split Contracts</span>
+          <i class="fa-solid fa-file-contract text-zinc-600"></i>
+        </div>
+        <p class="text-2xl md:text-3xl font-extrabold mt-3 text-white">6</p>
+        <p class="text-[11px] text-zinc-500 mt-2">Auto-routed to collaborators</p>
+      </div>
+    </div>
+
+    <!-- Catalog Table Section -->
+    <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-xl overflow-hidden">
+      <div class="p-5 border-b border-zinc-800/80 flex justify-between items-center">
+        <h3 class="font-bold text-sm text-white">Recent Releases</h3>
+        <div class="flex items-center space-x-3">
+          <input type="text" placeholder="Search Title, ISRC, UPC..." class="bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-brand-500 w-48 md:w-64">
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs text-zinc-300">
+          <thead class="bg-zinc-900/80 text-zinc-400 font-semibold border-b border-zinc-800">
+            <tr>
+              <th class="p-4">Release Title</th>
+              <th class="p-4">Primary Artist</th>
+              <th class="p-4">UPC</th>
+              <th class="p-4">Release Date</th>
+              <th class="p-4">Store Delivery</th>
+              <th class="p-4 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="catalog-table-body" class="divide-y divide-zinc-800/60">
+            <tr class="hover:bg-zinc-900/40 transition">
+              <td class="p-4 flex items-center space-x-3">
+                <div class="h-10 w-10 rounded bg-zinc-800 border border-zinc-700 flex-shrink-0 overflow-hidden">
+                  <div class="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-[10px]">COVER</div>
+                </div>
+                <div>
+                  <p class="font-bold text-white text-sm">Midnight Resonance</p>
+                  <p class="text-[10px] text-zinc-500">Single • 1 Track</p>
+                </div>
+              </td>
+              <td class="p-4 font-medium">Dan Durk</td>
+              <td class="p-4 font-mono text-zinc-400 text-[11px]">889240192341</td>
+              <td class="p-4 text-zinc-400">Aug 20, 2026</td>
+              <td class="p-4">
+                <span class="inline-flex items-center space-x-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full text-[10px] font-semibold">
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                  <span>Delivered to 150+ Stores</span>
+                </span>
+              </td>
+              <td class="p-4 text-right">
+                <button class="text-zinc-400 hover:text-white px-2 py-1"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Production Release Submission Wizard (Modal) -->
+  <div id="release-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl space-y-0">
+      
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
+        <div>
+          <h3 class="text-lg font-bold text-white">Create New Release</h3>
+          <p class="text-xs text-zinc-400">Step <span id="wizard-step-num">1</span> of 4: Metadata & Artwork</p>
+        </div>
+        <button onclick="closeReleaseWizard()" class="text-zinc-500 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <!-- Step 1: Metadata Form -->
+      <div id="wizard-step-1" class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-xs font-semibold text-zinc-300 block mb-1">Release Title</label>
+            <input type="text" id="wiz-title" placeholder="e.g. Neon Horizon" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-brand-500">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-zinc-300 block mb-1">Version / Subtitle</label>
+            <input type="text" id="wiz-version" placeholder="e.g. Deluxe Edition / Extended Mix" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-brand-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-xs font-semibold text-zinc-300 block mb-1">Primary Genre</label>
+            <select id="wiz-genre" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-brand-500">
+              <option value="hiphop">Hip Hop / Rap</option>
+              <option value="electronic">Electronic / Dance</option>
+              <option value="pop">Pop</option>
+              <option value="afrobeats">Afrobeats</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-zinc-300 block mb-1">Target Release Date</label>
+            <input type="date" id="wiz-date" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-brand-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-zinc-300 block mb-1">Cover Artwork (3000x3000px RGB)</label>
+          <div class="border-2 border-dashed border-zinc-800 rounded-xl p-6 text-center hover:border-brand-500 transition cursor-pointer bg-zinc-950">
+            <i class="fa-solid fa-image text-2xl text-zinc-600 mb-2"></i>
+            <p class="text-xs font-medium text-zinc-300">Drag artwork file here or click to browse</p>
+            <p class="text-[10px] text-zinc-500 mt-1">PNG or JPEG format required</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Actions -->
+      <div class="p-4 border-t border-zinc-800 bg-zinc-950/60 flex justify-between items-center">
+        <button onclick="closeReleaseWizard()" class="text-xs font-semibold text-zinc-400 hover:text-white px-4 py-2">Cancel</button>
+        <button onclick="submitReleaseWizard()" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition shadow-lg shadow-brand-600/20">
+          Validate & Submit to Stores
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { distributionApi } from '../src/services/distributionApi.js';
+
+    window.openReleaseWizard = () => document.getElementById('release-modal').classList.remove('hidden');
+    window.closeReleaseWizard = () => document.getElementById('release-modal').classList.add('hidden');
+
+    window.submitReleaseWizard = async () => {
+      const title = document.getElementById('wiz-title').value;
+      const genre = document.getElementById('wiz-genre').value;
+      const releaseDate = document.getElementById('wiz-date').value;
+
+      if (!title || !releaseDate) {
+        alert("Please complete all required fields.");
+        return;
+      }
+
+      try {
+        await distributionApi.submitRelease({
+          title,
+          genre,
+          releaseDate,
+          artists: ["Dan Durk"],
+          tracks: [],
+          splits: []
+        });
+        closeReleaseWizard();
+        alert("Release submitted successfully for QC inspection.");
+      } catch (err) {
+        console.error(err);
+        alert(err.message || "Failed to submit release");
+      }
+    };
+  </script>
+</body>
+</html>
