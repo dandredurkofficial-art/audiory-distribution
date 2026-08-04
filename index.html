@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Label & Artist Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen flex flex-col font-sans">
+
+  <!-- Navigation -->
+  <header class="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur px-6 py-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold tracking-wider text-white">LABEL PORTAL</h1>
+    <nav class="space-x-4 text-sm font-medium">
+      <button onclick="switchTab('artist')" class="text-zinc-400 hover:text-white transition">Artist View</button>
+      <button onclick="switchTab('admin')" class="text-zinc-400 hover:text-white transition">Label Admin</button>
+    </nav>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 p-8 max-w-7xl mx-auto w-full">
+    
+    <!-- Artist Portal View -->
+    <section id="artist-view" class="space-y-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-2xl font-bold">Artist Overview</h2>
+          <p class="text-zinc-400 text-sm">Real-time music streams and distribution status.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <p class="text-zinc-400 text-sm font-medium">Total Streams</p>
+          <p id="artist-streams" class="text-3xl font-bold mt-2">Loading...</p>
+        </div>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <p class="text-zinc-400 text-sm font-medium">Royalties Earned</p>
+          <p id="artist-royalties" class="text-3xl font-bold mt-2">Loading...</p>
+        </div>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <p class="text-zinc-400 text-sm font-medium">Active Releases</p>
+          <p id="artist-releases" class="text-3xl font-bold mt-2">Loading...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Admin View -->
+    <section id="admin-view" class="hidden space-y-6">
+      <div>
+        <h2 class="text-2xl font-bold">Label Administration</h2>
+        <p class="text-zinc-400 text-sm">Manage roster contracts, catalog, and cloud API endpoints.</p>
+      </div>
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-zinc-800/50 text-zinc-400 border-b border-zinc-800">
+            <tr>
+              <th class="p-4">Artist Name</th>
+              <th class="p-4">Email</th>
+              <th class="p-4">Status</th>
+            </tr>
+          </thead>
+          <tbody id="admin-users-list">
+            <!-- Dynamic API Content Rows Insert Here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Tab Switching Logic
+    function switchTab(tab) {
+      document.getElementById('artist-view').classList.toggle('hidden', tab !== 'artist');
+      document.getElementById('admin-view').classList.toggle('hidden', tab !== 'admin');
+    }
+
+    // Dynamic Cloud Run Backend API Fetching Function
+    const CLOUD_RUN_API_URL = "https://your-cloud-run-service-url.a.run.app"; // Update with live endpoint
+
+    async function fetchPortalData() {
+      try {
+        // Fetch live artist data from Cloud Run backend
+        const res = await fetch(`${CLOUD_RUN_API_URL}/api/artist/stats`);
+        const data = await res.json();
+
+        document.getElementById('artist-streams').textContent = data.streams.toLocaleString();
+        document.getElementById('artist-royalties').textContent = `$${data.royalties.toFixed(2)}`;
+        document.getElementById('artist-releases').textContent = data.releases;
+      } catch (err) {
+        console.warn("Backend API unavailable. Plug in Cloud Run URL once deployed.");
+      }
+    }
+
+    fetchPortalData();
+  </script>
+</body>
+</html>
