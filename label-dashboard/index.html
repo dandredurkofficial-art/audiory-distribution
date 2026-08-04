@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Label Administration | Audiory</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen flex flex-col font-sans antialiased">
+
+  <header class="border-b border-zinc-800 bg-zinc-900/60 backdrop-blur-md px-6 py-3.5 flex justify-between items-center">
+    <div class="flex items-center space-x-3">
+      <span class="font-black text-lg text-white tracking-wider">AUDIORY</span>
+      <span class="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded font-bold">LABEL ENTERPRISE</span>
+    </div>
+    <div class="flex items-center space-x-4">
+      <span class="text-xs text-zinc-400 flex items-center space-x-2">
+        <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>Cloud Run API: Operational</span>
+      </span>
+    </div>
+  </header>
+
+  <main class="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full space-y-8">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Roster & Contract Operations</h1>
+        <p class="text-xs text-zinc-400 mt-1">Manage artist splits, bulk catalog distribution, and accounting cycles.</p>
+      </div>
+      <button class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition">
+        + Add Artist Account
+      </button>
+    </div>
+
+    <!-- Roster Management Table -->
+    <div class="bg-zinc-900/40 border border-zinc-800 rounded-xl overflow-hidden">
+      <table class="w-full text-left text-xs text-zinc-300">
+        <thead class="bg-zinc-900 text-zinc-400 font-semibold border-b border-zinc-800">
+          <tr>
+            <th class="p-4">Artist / Account</th>
+            <th class="p-4">Assigned Label</th>
+            <th class="p-4">Catalog Count</th>
+            <th class="p-4">Default Contract Split</th>
+            <th class="p-4">Account Status</th>
+            <th class="p-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-800">
+          <tr class="hover:bg-zinc-900/40 transition">
+            <td class="p-4 font-bold text-white">Dan Durk</td>
+            <td class="p-4 text-zinc-400">Diaspora Records</td>
+            <td class="p-4 font-mono">18 Titles</td>
+            <td class="p-4 font-mono text-purple-400">80% Artist / 20% Label</td>
+            <td class="p-4">
+              <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded text-[10px] font-semibold">Active</span>
+            </td>
+            <td class="p-4 text-right">
+              <button class="text-xs text-zinc-400 hover:text-white bg-zinc-800 px-3 py-1 rounded">Edit Contract</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>
