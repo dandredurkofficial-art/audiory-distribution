@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account — Audiory Distribution</title>
+    <meta name="description" content="Sign up for Audiory Distribution. Distribute your tracks globally, keep 100% of your royalties, and manage your catalog with ease.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            accent: '#00f2fe',
+                            purple: '#7928ca',
+                            pink: '#ff0080',
+                            dark: '#0a0d14',
+                            card: '#121824',
+                            border: '#1f293d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #07090e;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+        }
+
+        .gradient-border-card {
+            position: relative;
+            background: #121824;
+            border-radius: 1.25rem;
+        }
+
+        .gradient-border-card::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 1.3rem;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(0,242,254,0.3), rgba(121,40,202,0.3), rgba(255,0,128,0.3));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .glow-effect {
+            box-shadow: 0 0 50px -10px rgba(0, 242, 254, 0.15);
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between antialiased selection:bg-brand-accent selection:text-brand-dark">
+
+    <!-- Background Ambient Glow -->
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-accent/10 rounded-full blur-[140px] pointer-events-none"></div>
+
+    <!-- ==================== HEADER / NAV ==================== -->
+    <header class="w-full py-6 px-4 sm:px-8 relative z-20">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20 group-hover:scale-105 transition-transform duration-300">
+                    <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
+                        <i class="fa-solid fa-wave-square text-brand-accent group-hover:rotate-12 transition-transform duration-300"></i>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-display font-bold text-xl tracking-wider text-white">AUDIORY</span>
+                    <span class="text-[8px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">DISTRIBUTION</span>
+                </div>
+            </a>
+
+            <div class="text-sm text-gray-400">
+                Already have an account? 
+                <a href="login.html" class="font-bold text-brand-accent hover:underline ml-1">Sign In</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN SIGNUP CARD ==================== -->
+    <main class="my-8 px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="max-w-md mx-auto">
+            
+            <div class="gradient-border-card p-6 sm:p-10 glow-effect">
+                
+                <div class="text-center mb-8">
+                    <h1 class="text-2xl sm:text-3xl font-extrabold font-display text-white mb-2">Create Your Account</h1>
+                    <p class="text-xs sm:text-sm text-gray-400">Start distributing tracks to over 200+ DSPs today</p>
+                </div>
+
+                <!-- Alert Notification Banner -->
+                <div id="alertBox" class="hidden mb-6 p-4 rounded-xl text-xs font-semibold border flex items-start gap-3 transition-all">
+                    <i id="alertIcon" class="fa-solid text-base mt-0.5"></i>
+                    <span id="alertMessage" class="flex-1 leading-relaxed"></span>
+                </div>
+
+                <!-- Google Sign-In Quick Action -->
+                <button type="button" id="googleBtn" class="w-full py-3 px-4 rounded-xl bg-brand-dark border border-brand-border hover:border-gray-500 hover:bg-brand-card text-white text-sm font-semibold flex items-center justify-center gap-3 transition-all group mb-6">
+                    <i class="fa-brands fa-google text-lg text-brand-accent group-hover:scale-110 transition-transform"></i>
+                    <span>Continue with Google</span>
+                </button>
+
+                <!-- Divider -->
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="flex-1 h-px bg-brand-border"></div>
+                    <span class="text-xs text-gray-500 uppercase font-semibold">Or with email</span>
+                    <div class="flex-1 h-px bg-brand-border"></div>
+                </div>
+
+                <!-- Registration Form -->
+                <form id="signupForm" class="space-y-4">
+                    
+                    <!-- Artist / Label Name -->
+                    <div>
+                        <label for="displayName" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                            Artist / Label Name
+                        </label>
+                        <div class="relative">
+                            <i class="fa-solid fa-user-gear absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                            <input type="text" id="displayName" required placeholder="e.g. Neon Horizon Records" class="w-full pl-11 pr-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-white text-sm focus:outline-none focus:border-brand-accent transition-colors">
+                        </div>
+                    </div>
+
+                    <!-- Email Address -->
+                    <div>
+                        <label for="email" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                            Email Address
+                        </label>
+                        <div class="relative">
+                            <i class="fa-solid fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                            <input type="email" id="email" required placeholder="name@domain.com" class="w-full pl-11 pr-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-white text-sm focus:outline-none focus:border-brand-accent transition-colors">
+                        </div>
+                    </div>
+
+                    <!-- Account Type Selector -->
+                    <div>
+                        <label for="accountRole" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                            Account Type
+                        </label>
+                        <div class="relative">
+                            <i class="fa-solid fa-compact-disc absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                            <select id="accountRole" class="w-full pl-11 pr-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-white text-sm focus:outline-none focus:border-brand-accent transition-colors appearance-none">
+                                <option value="artist">Independent Artist / Creator</option>
+                                <option value="band">Band / Producer Collective</option>
+                                <option value="label">Record Label / Manager</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <!-- Password Input -->
+                    <div>
+                        <label for="password" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                            Password
+                        </label>
+                        <div class="relative">
+                            <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                            <input type="password" id="password" required minlength="6" placeholder="At least 6 characters" class="w-full pl-11 pr-12 py-3 rounded-xl bg-brand-dark border border-brand-border text-white text-sm focus:outline-none focus:border-brand-accent transition-colors">
+                            <button type="button" id="togglePasswordBtn" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
+                                <i class="fa-solid fa-eye" id="passwordIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Terms Checkbox -->
+                    <div class="flex items-start gap-3 pt-2">
+                        <input type="checkbox" id="termsCheck" required class="mt-1 w-4 h-4 rounded bg-brand-dark border-brand-border text-brand-accent focus:ring-0 cursor-pointer">
+                        <label for="termsCheck" class="text-xs text-gray-400 leading-relaxed cursor-pointer">
+                            I agree to Audiory Distribution's <a href="#" class="text-brand-accent hover:underline">Terms of Service</a> and <a href="#" class="text-brand-accent hover:underline">Privacy Policy</a>.
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="submitBtn" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:shadow-lg hover:shadow-brand-accent/25 text-white font-bold text-sm tracking-wide transition-all mt-4 flex items-center justify-center gap-2">
+                        <span id="btnText">Create Free Account</span>
+                        <i class="fa-solid fa-arrow-right text-xs" id="btnIcon"></i>
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="py-6 px-4 text-center text-xs text-gray-500 border-t border-brand-border/40 relative z-10">
+        <p>&copy; 2026 Audiory Distribution Inc. All rights reserved.</p>
+    </footer>
+
+    <!-- ==================== FIREBASE SDK IMPLEMENTATION ==================== -->
+    <script type="module">
+        // 1. Firebase Modular SDK Version 10 Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            updateProfile, 
+            GoogleAuthProvider, 
+            signInWithPopup 
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // 2. Firebase Project Configuration
+        // NOTE: Replace these values with your Firebase Console Credentials
+        const firebaseConfig = {
+          apiKey: "AIzaSyBtii4iYkm7ummyi5SHiQMOMUPrOpwhdrk",
+          authDomain: "audiory-distribution.firebaseapp.com",
+          projectId: "audiory-distribution",
+          storageBucket: "audiory-distribution.firebasestorage.app",
+          messagingSenderId: "944053428828",
+          appId: "1:944053428828:web:30277072355728f9c8fc99",
+          measurementId: "G-MXDJH52XX4"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // UI DOM Elements
+        const signupForm = document.getElementById('signupForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnIcon = document.getElementById('btnIcon');
+        const googleBtn = document.getElementById('googleBtn');
+        const alertBox = document.getElementById('alertBox');
+        const alertIcon = document.getElementById('alertIcon');
+        const alertMessage = document.getElementById('alertMessage');
+        const passwordInput = document.getElementById('password');
+        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+        const passwordIcon = document.getElementById('passwordIcon');
+
+        // Toggle Password Visibility
+        togglePasswordBtn.addEventListener('click', () => {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.classList.remove('fa-eye');
+                passwordIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.classList.remove('fa-eye-slash');
+                passwordIcon.classList.add('fa-eye');
+            }
+        });
+
+        // Display Alert Banner Utility
+        function showAlert(message, isError = true) {
+            alertBox.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/30', 'text-red-400', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+            
+            if (isError) {
+                alertBox.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-400');
+                alertIcon.className = 'fa-solid fa-circle-exclamation text-base mt-0.5';
+            } else {
+                alertBox.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+                alertIcon.className = 'fa-solid fa-circle-check text-base mt-0.5';
+            }
+            
+            alertMessage.textContent = message;
+        }
+
+        // Set Loading State Utility
+        function setLoading(isLoading) {
+            submitBtn.disabled = isLoading;
+            googleBtn.disabled = isLoading;
+            if (isLoading) {
+                btnText.textContent = "Creating Account...";
+                btnIcon.className = "fa-solid fa-circle-notch fa-spin text-xs";
+            } else {
+                btnText.textContent = "Create Free Account";
+                btnIcon.className = "fa-solid fa-arrow-right text-xs";
+            }
+        }
+
+        // Create Database Record in Firestore
+        async function createUserDocument(user, extraData = {}) {
+            const userRef = doc(db, "users", user.uid);
+            const userProfile = {
+                uid: user.uid,
+                email: user.email,
+                displayName: extraData.displayName || user.displayName || "Audiory Creator",
+                accountRole: extraData.accountRole || "artist",
+                subscriptionPlan: "starter",
+                royaltyBalance: 0.00,
+                activeReleases: 0,
+                accountStatus: "active",
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            };
+
+            await setDoc(userRef, userProfile, { merge: true });
+        }
+
+        // Handle Email/Password Registration
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const displayName = document.getElementById('displayName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = passwordInput.value;
+            const accountRole = document.getElementById('accountRole').value;
+
+            setLoading(true);
+
+            try {
+                // 1. Create Auth Account
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // 2. Update Auth Profile Display Name
+                await updateProfile(user, { displayName });
+
+                // 3. Create User Document in Firestore
+                await createUserDocument(user, { displayName, accountRole });
+
+                showAlert("Account successfully created! Redirecting to dashboard...", false);
+                
+                // Redirect to dashboard after brief delay
+                setTimeout(() => {
+                    window.location.href = "dashboard.html";
+                }, 1500);
+
+            } catch (error) {
+                console.error("Signup Error:", error);
+                let errorMsg = "Failed to create account. Please try again.";
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMsg = "This email is already registered. Try signing in instead.";
+                } else if (error.code === 'auth/weak-password') {
+                    errorMsg = "Password should be at least 6 characters long.";
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg = "Please enter a valid email address.";
+                }
+                showAlert(errorMsg, true);
+                setLoading(false);
+            }
+        });
+
+        // Handle Google Sign-In
+        googleBtn.addEventListener('click', async () => {
+            setLoading(true);
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                const user = result.user;
+
+                // Save or merge user profile in Firestore
+                await createUserDocument(user, { accountRole: "artist" });
+
+                showAlert("Google Sign-In successful! Redirecting...", false);
+                setTimeout(() => {
+                    window.location.href = "dashboard.html";
+                }, 1500);
+
+            } catch (error) {
+                console.error("Google Auth Error:", error);
+                showAlert("Google authentication was canceled or failed.", true);
+                setLoading(false);
+            }
+        });
+    </script>
+</body>
+</html>
