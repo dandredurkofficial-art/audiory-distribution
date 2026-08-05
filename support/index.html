@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Support — Audiory Distribution</title>
+    <meta name="description" content="Contact Audiory Distribution support. Submit a ticket for help with music releases, royalty payouts, artist profile mapping, or general inquiries.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            accent: '#00f2fe',
+                            purple: '#7928ca',
+                            pink: '#ff0080',
+                            dark: '#0a0d14',
+                            card: '#121824',
+                            border: '#1f293d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #07090e;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00f2fe 0%, #4f46e5 50%, #ff0080 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0a0d14;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+
+        .glow-box {
+            box-shadow: 0 0 35px -10px rgba(0, 242, 254, 0.15);
+        }
+        
+        /* Custom Select Arrow Styling */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+        }
+    </style>
+</head>
+<body class="custom-scrollbar antialiased selection:bg-brand-accent selection:text-brand-dark">
+
+    <!-- ==================== HEADER / NAVIGATION ==================== -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-brand-dark/80 border-b border-brand-border/60 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20 group-hover:scale-105 transition-transform duration-300">
+                        <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
+                            <i class="fa-solid font-bold fa-wave-square text-brand-accent group-hover:rotate-12 transition-transform duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-display font-bold text-2xl tracking-wider text-white">AUDIORY</span>
+                        <span class="text-[9px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">DISTRIBUTION</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden lg:flex items-center gap-8">
+                    <a href="/#services" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Services</a>
+                    <a href="/#dsp-network" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">DSP Network</a>
+                    <a href="/pricing/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Pricing</a>
+                    <a href="/royalty-guide/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Royalty Guide</a>
+                    <a href="/knowledge-base/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Knowledge Base</a>
+                </nav>
+
+                <!-- Action Buttons (Desktop) -->
+                <div class="hidden sm:flex items-center gap-4">
+                    <a href="/login/" class="text-sm font-semibold text-gray-200 hover:text-white px-4 py-2.5 rounded-xl border border-brand-border hover:border-gray-500 transition-all duration-200">
+                        Sign In
+                    </a>
+                    <a href="/signup/" class="text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:shadow-lg hover:shadow-brand-accent/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+                        Start Distributing
+                    </a>
+                </div>
+
+                <!-- Mobile Header Right Actions -->
+                <div class="flex items-center gap-3 sm:hidden">
+                    <a href="/signup/" class="text-xs font-semibold text-white px-3 py-2 rounded-lg bg-gradient-to-r from-brand-accent to-brand-purple">
+                        Get Started
+                    </a>
+                    <button id="mobileMenuBtn" aria-label="Toggle Navigation Menu" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-brand-card focus:outline-none">
+                        <svg id="menuIconSvg" class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                            <path id="hamburgerPath" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobileMenu" class="hidden lg:hidden border-b border-brand-border bg-brand-dark/95 backdrop-blur-2xl transition-all duration-300">
+            <div class="px-4 pt-2 pb-6 space-y-3">
+                <a href="/#services" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Services</a>
+                <a href="/#dsp-network" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">DSP Network</a>
+                <a href="/pricing/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Pricing</a>
+                <a href="/royalty-guide/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Royalty Guide</a>
+                <a href="/knowledge-base/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Knowledge Base</a>
+                
+                <div class="pt-4 flex flex-col gap-3">
+                    <a href="/login/" class="text-center w-full py-2.5 rounded-xl border border-brand-border text-gray-200 font-semibold">Sign In</a>
+                    <a href="/signup/" class="text-center w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-accent to-brand-purple text-white font-semibold">Start Distributing</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== HERO & QUICK LINKS ==================== -->
+    <section class="relative pt-16 pb-12 overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,242,254,0.1),rgba(255,255,255,0))]"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-card border border-brand-border mb-6">
+                <i class="fa-solid fa-headset text-brand-accent text-xs"></i>
+                <span class="text-xs font-semibold text-gray-300 uppercase tracking-widest">Artist Services</span>
+            </div>
+
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-display text-white tracking-tight leading-tight">
+                How Can We <span class="gradient-text">Help You?</span>
+            </h1>
+
+            <p class="text-gray-400 text-base sm:text-lg mt-6 max-w-2xl mx-auto leading-relaxed">
+                Whether you need a release approved quickly, a royalty payout query resolved, or your artist profile mapped correctly on DSPs—we're here.
+            </p>
+
+        </div>
+    </section>
+
+    <!-- ==================== SUPPORT ROUTING CARDS ==================== -->
+    <section class="py-8 z-20 relative">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Knowledge Base Card -->
+                <a href="/knowledge-base/" class="bg-brand-card border border-brand-border p-6 rounded-3xl hover:border-brand-accent/50 transition-all group">
+                    <div class="w-12 h-12 rounded-xl bg-brand-accent/10 text-brand-accent flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-book"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2 font-display">Knowledge Base</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed mb-4">Find instant answers to common questions about formatting, release specs, and royalties.</p>
+                    <span class="text-xs font-bold text-brand-accent flex items-center gap-1 group-hover:gap-2 transition-all">Browse Articles <i class="fa-solid fa-arrow-right"></i></span>
+                </a>
+
+                <!-- DMCA / Rights Card -->
+                <a href="/dmca/" class="bg-brand-card border border-brand-border p-6 rounded-3xl hover:border-brand-pink/50 transition-all group">
+                    <div class="w-12 h-12 rounded-xl bg-brand-pink/10 text-brand-pink flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2 font-display">Copyright & Takedowns</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed mb-4">Submit a formal DMCA notice or a counter-notification for content on the Audiory network.</p>
+                    <span class="text-xs font-bold text-brand-pink flex items-center gap-1 group-hover:gap-2 transition-all">Legal Portal <i class="fa-solid fa-arrow-right"></i></span>
+                </a>
+
+                <!-- Direct Email Card -->
+                <div class="bg-brand-card border border-brand-border p-6 rounded-3xl relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-brand-purple/20 blur-2xl rounded-full"></div>
+                    <div class="w-12 h-12 rounded-xl bg-brand-purple/10 text-brand-purple flex items-center justify-center text-xl mb-4 relative z-10">
+                        <i class="fa-solid fa-envelope-open-text"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2 font-display relative z-10">Direct Email</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed mb-4 relative z-10">Prefer email? Reach our support desk directly. Average response time is 24 hours.</p>
+                    <a href="mailto:support@audiory.io" class="text-xs font-bold text-brand-purple hover:text-white transition-colors relative z-10">support@audiory.io</a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== CONTACT FORM SECTION ==================== -->
+    <section class="py-16 mb-10 border-b border-brand-border/40" id="ticket-form">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="bg-brand-card border border-brand-border rounded-3xl p-6 sm:p-10 glow-box relative">
+                
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-bold font-display text-white mb-2">Submit a Support Ticket</h2>
+                    <p class="text-xs text-gray-400">Fill out the form below. Please provide as much detail as possible so we can route your ticket to the correct specialist.</p>
+                </div>
+
+                <form id="supportForm" class="space-y-6">
+                    
+                    <!-- Department Selection -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-2">How can we help you today? *</label>
+                        <select required id="department" class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-sm text-gray-200 focus:outline-none focus:border-brand-accent cursor-pointer transition-colors">
+                            <option value="" disabled selected>Select a category...</option>
+                            <option value="release_issue">Release Pending / Metadata Issue</option>
+                            <option value="profile_mapping">Artist Profile Mapping (Spotify/Apple)</option>
+                            <option value="royalties">Royalties, Payouts & Splits</option>
+                            <option value="youtube">YouTube Content ID & Allowlisting</option>
+                            <option value="account">Account Access & Billing</option>
+                            <option value="other">Other / General Inquiry</option>
+                        </select>
+                    </div>
+
+                    <!-- Personal Info -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-2">Your Name *</label>
+                            <input type="text" required id="userName" placeholder="First & Last Name" class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-sm text-white focus:outline-none focus:border-brand-accent transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-2">Account Email Address *</label>
+                            <input type="email" required id="userEmail" placeholder="name@domain.com" class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-sm text-white focus:outline-none focus:border-brand-accent transition-colors">
+                        </div>
+                    </div>
+
+                    <!-- Release Info (Optional but recommended) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-2">Artist or Label Name</label>
+                            <input type="text" id="artistName" placeholder="Primary Artist Name" class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-sm text-white focus:outline-none focus:border-brand-accent transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-2 flex items-center justify-between">
+                                <span>UPC / ISRC Code</span>
+                                <span class="text-[10px] font-normal text-brand-purple">Optional</span>
+                            </label>
+                            <input type="text" id="code" placeholder="e.g. US-XXX-26-00001" class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-sm text-white focus:outline-none focus:border-brand-accent transition-colors">
+                        </div>
+                    </div>
+
+                    <!-- Message -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-2">Message Details *</label>
+                        <textarea required id="message" rows="5" placeholder="Please describe your issue in detail. If this is regarding a release, please include the release title..." class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-sm text-white focus:outline-none focus:border-brand-accent transition-colors custom-scrollbar"></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple text-white font-bold text-sm tracking-wide hover:opacity-95 hover:shadow-lg hover:shadow-brand-accent/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                        <span>Send Support Ticket</span>
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                    </button>
+
+                    <p class="text-[10px] text-gray-500 text-center mt-4">
+                        By submitting this form, you agree to Audiory Distribution's <a href="/privacy/" class="text-gray-400 hover:text-brand-accent underline underline-offset-2">Privacy Policy</a>.
+                    </p>
+
+                </form>
+
+                <!-- Success Confirmation State (Hidden by default) -->
+                <div id="formSuccess" class="hidden text-center py-12 px-4 space-y-5">
+                    <div class="w-20 h-20 rounded-full bg-brand-dark border border-brand-accent/30 text-brand-accent flex items-center justify-center text-4xl mx-auto shadow-[0_0_30px_-5px_rgba(0,242,254,0.3)] mb-4">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <h3 class="text-3xl font-bold font-display text-white">Ticket Submitted Successfully</h3>
+                    <p class="text-sm text-gray-400 max-w-md mx-auto leading-relaxed">
+                        We've received your request. An automated email with your <strong class="text-gray-200">Ticket ID</strong> has been sent to your inbox. Our support specialists will be in touch shortly.
+                    </p>
+                    <div class="pt-6">
+                        <button id="resetFormBtn" class="px-6 py-3 rounded-xl bg-brand-dark border border-brand-border text-xs font-semibold text-gray-300 hover:text-white hover:border-brand-accent transition-all">
+                            Submit Another Request
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="bg-brand-dark border-t border-brand-border/60 pt-16 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-16">
+                
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-accent to-brand-purple flex items-center justify-center text-white text-sm font-bold">
+                            <i class="fa-solid fa-wave-square"></i>
+                        </div>
+                        <span class="font-display font-bold text-xl text-white">AUDIORY</span>
+                    </div>
+                    <p class="text-gray-400 text-sm max-w-sm mb-6 leading-relaxed">
+                        Audiory Distribution provides premier global music distribution infrastructure, automated splits, rights protection, and API capabilities.
+                    </p>
+                </div>
+
+                <!-- Col 2: Navigation -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Solutions</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/music-distribution/" class="hover:text-brand-accent transition-colors">Music Distribution</a></li>
+                        <li><a href="/content-id/" class="hover:text-brand-accent transition-colors">YouTube Content ID</a></li>
+                        <li><a href="/splits/" class="hover:text-brand-accent transition-colors">Automated Splits</a></li>
+                        <li><a href="/analytics/" class="hover:text-brand-accent transition-colors">Analytics Telemetry</a></li>
+                        <li><a href="/smart-links/" class="hover:text-brand-accent transition-colors">Smart Links Engine</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Resources -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Resources</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/knowledge-base/" class="hover:text-brand-accent transition-colors">Knowledge Base</a></li>
+                        <li><a href="/royalty-guide/" class="hover:text-brand-accent transition-colors">Royalty Guide</a></li>
+                        <li><a href="/api-documentation/" class="hover:text-brand-accent transition-colors">API Documentation</a></li>
+                        <li><a href="/platform-status/" class="hover:text-brand-accent transition-colors">Platform Status</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Legal -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Legal & Company</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/privacy/" class="hover:text-brand-accent transition-colors">Privacy Policy</a></li>
+                        <li><a href="/terms/" class="hover:text-brand-accent transition-colors">Terms of Service</a></li>
+                        <li><a href="/dmca/" class="hover:text-brand-accent transition-colors">Copyright / DMCA</a></li>
+                        <li><a href="/support/" class="hover:text-brand-accent transition-colors">Contact Support</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="pt-8 border-t border-brand-border/40 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+                <p>&copy; 2026 Audiory Distribution Inc. All rights reserved.</p>
+                <div class="flex gap-6">
+                    <a href="/security/" class="hover:text-gray-400">Security</a>
+                    <a href="/privacy/" class="hover:text-gray-400">Privacy</a>
+                    <a href="/cookies/" class="hover:text-gray-400">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+    <script>
+        // 1. Mobile Header Navigation Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const hamburgerPath = document.getElementById('hamburgerPath');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            if (mobileMenu.classList.contains('hidden')) {
+                hamburgerPath.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+            } else {
+                hamburgerPath.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+            }
+        });
+
+        // 2. Form Submission Handling
+        const supportForm = document.getElementById('supportForm');
+        const formSuccess = document.getElementById('formSuccess');
+        const resetFormBtn = document.getElementById('resetFormBtn');
+
+        supportForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Prevent page reload
+            
+            // In a real application, you'd send an AJAX/fetch request here to your backend API.
+            // For now, we simulate a successful submission visually.
+            
+            supportForm.classList.add('hidden');
+            formSuccess.classList.remove('hidden');
+            formSuccess.classList.add('animate-[fadeIn_0.5s_ease-out]');
+        });
+
+        resetFormBtn.addEventListener('click', () => {
+            supportForm.reset();
+            formSuccess.classList.add('hidden');
+            supportForm.classList.remove('hidden');
+            supportForm.classList.add('animate-[fadeIn_0.5s_ease-out]');
+        });
+
+        // Add tailwind arbitrary animation definition for fade in
+        tailwind.config.theme.extend.keyframes = {
+            fadeIn: {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+        };
+    </script>
+</body>
+</html>
