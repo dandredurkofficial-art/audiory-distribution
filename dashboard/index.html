@@ -584,10 +584,13 @@ function renderCurrentPage() {
     }
 
     switch(window.currentPage) {
+        // DASHBOARD
         case 'dashboard':
             container.innerHTML = renderDashboardView();
             initDashboardChart();
             break;
+
+        // CATALOG
         case 'cat_releases':
             container.innerHTML = renderReleasesView();
             break;
@@ -606,6 +609,8 @@ function renderCurrentPage() {
         case 'cat_master':
             container.innerHTML = renderGenericFormView('Master Your Track', 'Run automated AI audio mastering on uncompressed WAV files before submission.');
             break;
+
+        // MARKETING
         case 'mkt_dsp':
             container.innerHTML = renderDspPitching();
             break;
@@ -613,17 +618,19 @@ function renderCurrentPage() {
             container.innerHTML = renderCampaignBuilder();
             break;
         case 'mkt_playlist':
-            container.innerHTML = renderGenericFormView('3rd Party Playlisting', 'Submit catalog entries to vetted independent playlist curators.');
+            container.innerHTML = render3rdPartyPlaylisting();
             break;
         case 'mkt_adbox':
-            container.innerHTML = renderGenericFormView('Audiory Ad Box', 'Launch targeted social ad campaigns directly from your balance.');
+            container.innerHTML = renderAudioryAdBox();
             break;
         case 'mkt_influencers':
-            container.innerHTML = renderGenericFormView('Influencer Campaigns', 'Send audio snippets to TikTok and Instagram creators for viral marketing.');
+            container.innerHTML = renderInfluencerCampaigns();
             break;
         case 'mkt_luminate':
-            container.innerHTML = renderGenericFormView('Luminate Registration', 'Register ISRCs and UPCs with Luminate for official Billboard chart inclusion.');
+            container.innerHTML = renderLuminateRegistration();
             break;
+
+        // ANALYTICS
         case 'ana_streams':
             container.innerHTML = renderStreamsView();
             initStreamsChart();
@@ -643,6 +650,8 @@ function renderCurrentPage() {
         case 'ana_spotify':
             container.innerHTML = renderAnalyticsDetailView('Discovery Mode Insights', 'Analyze algorithm uplift and radio/autoplay stream breakdown.');
             break;
+
+        // FINANCE & ROYALTIES
         case 'roy_summary':
             container.innerHTML = renderRoyaltySummaryView();
             break;
@@ -655,6 +664,8 @@ function renderCurrentPage() {
         case 'spl_collabs':
             container.innerHTML = renderSplitsView();
             break;
+
+        // RIGHTS PROTECTION
         case 'rgt_yt_allow':
             container.innerHTML = renderRightsView('YouTube Allowlist', 'Add YouTube channel URLs to your allowlist to prevent Content ID claims.');
             break;
@@ -676,11 +687,14 @@ function renderCurrentPage() {
         case 'rgt_cover':
             container.innerHTML = renderRightsView('Cover Song Licensing', 'Acquire automated mechanical licenses for releasing cover songs worldwide.');
             break;
+
+        // DEFAULT FALLBACK
         default:
             container.innerHTML = renderDashboardView();
             initDashboardChart();
     }
 }
+        
         function renderDspPitching() {
     const hasReleases = window.userReleases && window.userReleases.length > 0;
 
@@ -951,6 +965,227 @@ function renderCampaignBuilder() {
                     <span class="text-[10px] font-mono text-gray-400">Includes free SSL certificate & automated URL redirection on release day.</span>
                     <button type="submit" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/20">
                         Launch Campaign & Generate Link
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+}
+
+// 1. 3RD PARTY PLAYLISTING
+function render3rdPartyPlaylisting() {
+    const hasReleases = window.userReleases && window.userReleases.length > 0;
+    return `
+        <div class="max-w-5xl mx-auto space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
+                <div>
+                    <h1 class="text-2xl font-extrabold font-display text-white">3rd Party Playlisting</h1>
+                    <p class="text-xs text-gray-400 mt-1">Submit catalog tracks to vetted independent curators across Spotify, Apple Music, and Deezer.</p>
+                </div>
+            </div>
+
+            <form onsubmit="event.preventDefault(); alert('Playlisting submission sent to curator network!');" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="too-lost-form-label">Select Release / Track *</label>
+                        <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                            ${hasReleases 
+                                ? window.userReleases.map(r => `<option value="${r.id}">${r.title || r.releaseTitle}</option>`).join('')
+                                : `<option value="" disabled selected>No active releases found</option>`
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="too-lost-form-label">Genre Network *</label>
+                        <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                            <option value="hiphop">Hip-Hop & Trap Curators</option>
+                            <option value="edm">EDM & Dance Network</option>
+                            <option value="pop">Pop & Mainstream Hits</option>
+                            <option value="indie">Indie & Alternative</option>
+                            <option value="afrobeats">Afrobeats & Amapiano</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="too-lost-form-label mb-2 block">Target Curator Networks</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
+                            <input type="checkbox" checked class="accent-brand-accent">
+                            <span class="text-xs text-gray-200 font-medium">Verified Spotify Curators</span>
+                        </label>
+                        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
+                            <input type="checkbox" checked class="accent-brand-accent">
+                            <span class="text-xs text-gray-200 font-medium">Apple Music Tastemakers</span>
+                        </label>
+                        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
+                            <input type="checkbox" class="accent-brand-accent">
+                            <span class="text-xs text-gray-200 font-medium">YouTube Music Channels</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="too-lost-form-label">Pitch Pitch Note for Curators *</label>
+                    <textarea rows="3" required placeholder="Highlight similar artists, sound style, and key streaming momentum..." class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 focus:outline-none focus:border-brand-accent resize-y"></textarea>
+                </div>
+
+                <div class="pt-4 border-t border-brand-border flex justify-end">
+                    <button type="submit" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/20">
+                        Submit to Curator Network
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+}
+
+// 2. AUDIORY AD BOX
+function renderAudioryAdBox() {
+    return `
+        <div class="max-w-5xl mx-auto space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
+                <div>
+                    <h1 class="text-2xl font-extrabold font-display text-white">Audiory Ad Box</h1>
+                    <p class="text-xs text-gray-400 mt-1">Run targeted Meta (IG/FB), TikTok, and YouTube audio ads directly from your account balance.</p>
+                </div>
+            </div>
+
+            <form onsubmit="event.preventDefault(); alert('Ad Box campaign submitted for review!');" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="too-lost-form-label">Ad Network *</label>
+                        <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                            <option value="meta">Meta Ads (Instagram Stories/Reels)</option>
+                            <option value="tiktok">TikTok In-Feed Ads</option>
+                            <option value="youtube">YouTube Audio & Bumper Ads</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="too-lost-form-label">Total Budget ($USD) *</label>
+                        <input type="number" min="50" required placeholder="e.g. 200" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                    </div>
+                    <div>
+                        <label class="too-lost-form-label">Campaign Duration</label>
+                        <select class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                            <option value="7">7 Days Boost</option>
+                            <option value="14">14 Days Run</option>
+                            <option value="30">30 Days Ongoing</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="too-lost-form-label">Ad Video Asset URL or Upload *</label>
+                    <input type="text" required placeholder="https://drive.google.com/file/d/your-ad-creative-link" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                </div>
+
+                <div>
+                    <label class="too-lost-form-label">Destination Link (SmartLink / Spotify / Apple Music)</label>
+                    <input type="url" placeholder="https://audiory.link/your-track" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                </div>
+
+                <div class="pt-4 border-t border-brand-border flex justify-end">
+                    <button type="submit" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/20">
+                        Launch Ad Campaign
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+}
+
+// 3. INFLUENCER CAMPAIGNS
+function renderInfluencerCampaigns() {
+    const hasReleases = window.userReleases && window.userReleases.length > 0;
+    return `
+        <div class="max-w-5xl mx-auto space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
+                <div>
+                    <h1 class="text-2xl font-extrabold font-display text-white">Influencer Campaigns</h1>
+                    <p class="text-xs text-gray-400 mt-1">Send audio snippets directly to TikTok and Instagram creators for viral video production.</p>
+                </div>
+            </div>
+
+            <form onsubmit="event.preventDefault(); alert('Influencer campaign brief submitted!');" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="too-lost-form-label">Target Release / Sound *</label>
+                        <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                            ${hasReleases 
+                                ? window.userReleases.map(r => `<option value="${r.id}">${r.title || r.releaseTitle}</option>`).join('')
+                                : `<option value="" disabled selected>No active releases found</option>`
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="too-lost-form-label">Platform Tier *</label>
+                        <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                            <option value="tiktok_micro">TikTok Micro Creators (10k-50k followers)</option>
+                            <option value="tiktok_macro">TikTok Macro Creators (100k+ followers)</option>
+                            <option value="reels">Instagram Reels Influencers</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="too-lost-form-label">Number of Creators Target</label>
+                        <input type="number" min="5" placeholder="e.g. 15" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                    </div>
+                    <div>
+                        <label class="too-lost-form-label">Content Concept / Trend Prompt *</label>
+                        <input type="text" required placeholder="e.g. Dance challenge / Outfit transition / Travel vlog" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-brand-border flex justify-end">
+                    <button type="submit" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/20">
+                        Dispatch Influencer Brief
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+}
+
+// 4. LUMINATE REGISTRATION
+function renderLuminateRegistration() {
+    const hasReleases = window.userReleases && window.userReleases.length > 0;
+    return `
+        <div class="max-w-5xl mx-auto space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
+                <div>
+                    <h1 class="text-2xl font-extrabold font-display text-white">Luminate Registration</h1>
+                    <p class="text-xs text-gray-400 mt-1">Register ISRCs and UPCs with Luminate (formerly SoundScan) for official Billboard chart inclusion.</p>
+                </div>
+            </div>
+
+            <form onsubmit="event.preventDefault(); alert('Luminate registration request submitted!');" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="too-lost-form-label">Select Catalog Release *</label>
+                        <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                            ${hasReleases 
+                                ? window.userReleases.map(r => `<option value="${r.id}">${r.title || r.releaseTitle}</option>`).join('')
+                                : `<option value="" disabled selected>No active releases found</option>`
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="too-lost-form-label">UPC / EAN Code *</label>
+                        <input type="text" required placeholder="e.g. 889000123456" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 font-mono">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="too-lost-form-label">Primary Artist / Label Entity *</label>
+                    <input type="text" required placeholder="e.g. Juice the Mac / Audiory Records" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                </div>
+
+                <div class="pt-4 border-t border-brand-border flex justify-end">
+                    <button type="submit" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/20">
+                        Submit to Luminate Database
                     </button>
                 </div>
             </form>
