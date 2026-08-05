@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Music Analytics & Audience Intelligence — Audiory Distribution</title>
+    <meta name="description" content="Track your music performance in real-time across Spotify, Apple Music, YouTube, and 150+ DSPs with Audiory's advanced analytics suite. Monitor streams, demographics, playlists, and revenue.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            accent: '#00f2fe',
+                            purple: '#7928ca',
+                            pink: '#ff0080',
+                            dark: '#0a0d14',
+                            card: '#121824',
+                            border: '#1f293d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #07090e;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00f2fe 0%, #4f46e5 50%, #ff0080 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0a0d14;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+
+        .glow-box {
+            box-shadow: 0 0 35px -10px rgba(0, 242, 254, 0.15);
+        }
+    </style>
+</head>
+<body class="custom-scrollbar antialiased selection:bg-brand-accent selection:text-brand-dark">
+
+    <!-- ==================== HEADER / NAVIGATION ==================== -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-brand-dark/80 border-b border-brand-border/60 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20 group-hover:scale-105 transition-transform duration-300">
+                        <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
+                            <i class="fa-solid font-bold fa-wave-square text-brand-accent group-hover:rotate-12 transition-transform duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-2">
+                            <span class="font-display font-bold text-2xl tracking-wider text-white">AUDIORY</span>
+                            <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-brand-accent/10 text-brand-accent font-bold uppercase">Analytics</span>
+                        </div>
+                        <span class="text-[9px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">AUDIENCE INTELLIGENCE</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden lg:flex items-center gap-8">
+                    <a href="/#services" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Services</a>
+                    <a href="/smart-links/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Smart Links</a>
+                    <a href="/content-id/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Content ID</a>
+                    <a href="/pricing/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Pricing</a>
+                    <a href="/royalty-guide/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Royalty Guide</a>
+                    <a href="/api-documentation/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">API Docs</a>
+                </nav>
+
+                <!-- Action Buttons (Desktop) -->
+                <div class="hidden sm:flex items-center gap-4">
+                    <a href="/login/" class="text-sm font-semibold text-gray-200 hover:text-white px-4 py-2.5 rounded-xl border border-brand-border hover:border-gray-500 transition-all duration-200">
+                        Sign In
+                    </a>
+                    <a href="/signup/" class="text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:shadow-lg hover:shadow-brand-accent/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+                        Explore Dashboard
+                    </a>
+                </div>
+
+                <!-- Mobile Header Right Actions -->
+                <div class="flex items-center gap-3 sm:hidden">
+                    <a href="/signup/" class="text-xs font-semibold text-white px-3 py-2 rounded-lg bg-gradient-to-r from-brand-accent to-brand-purple">
+                        Get Started
+                    </a>
+                    <button id="mobileMenuBtn" aria-label="Toggle Navigation Menu" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-brand-card focus:outline-none">
+                        <svg id="menuIconSvg" class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                            <path id="hamburgerPath" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobileMenu" class="hidden lg:hidden border-b border-brand-border bg-brand-dark/95 backdrop-blur-2xl transition-all duration-300">
+            <div class="px-4 pt-2 pb-6 space-y-3">
+                <a href="/#services" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Services</a>
+                <a href="/smart-links/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Smart Links</a>
+                <a href="/content-id/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">YouTube Content ID</a>
+                <a href="/pricing/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Pricing</a>
+                <a href="/royalty-guide/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Royalty Guide</a>
+                <a href="/api-documentation/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">API Docs</a>
+                
+                <div class="pt-4 flex flex-col gap-3">
+                    <a href="/login/" class="text-center w-full py-2.5 rounded-xl border border-brand-border text-gray-200 font-semibold">Sign In</a>
+                    <a href="/signup/" class="text-center w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-accent to-brand-purple text-white font-semibold">Explore Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== HERO SECTION ==================== -->
+    <section class="relative pt-16 pb-20 border-b border-brand-border/40 overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,242,254,0.15),rgba(255,255,255,0))]"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-3xl mx-auto space-y-6">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-card border border-brand-border">
+                    <i class="fa-solid fa-chart-line text-brand-accent text-xs"></i>
+                    <span class="text-xs font-mono text-gray-300">Live Global Streaming Data</span>
+                </div>
+
+                <h1 class="text-4xl sm:text-6xl font-extrabold font-display text-white tracking-tight leading-[1.1]">
+                    Real-Time Insights for <span class="gradient-text">Data-Driven Artists</span>
+                </h1>
+
+                <p class="text-gray-400 text-base sm:text-lg leading-relaxed">
+                    Track streams, listener demographics, playlist placements, and estimated revenue down to the second across 150+ Digital Service Providers worldwide.
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+                    <a href="/signup/" class="w-full sm:w-auto text-center px-8 py-4 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple font-semibold text-white shadow-lg shadow-brand-accent/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                        Start Tracking Free
+                    </a>
+                    <a href="#interactive-preview" class="w-full sm:w-auto text-center px-6 py-4 rounded-xl border border-brand-border text-gray-300 hover:text-white hover:bg-brand-card font-medium transition-all">
+                        View Demo Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== DEMO DASHBOARD PREVIEW ==================== -->
+    <section id="interactive-preview" class="py-16 border-b border-brand-border/40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-brand-card border border-brand-border rounded-3xl p-6 sm:p-8 glow-box">
+                
+                <!-- Dashboard Control Bar -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-brand-border pb-6 mb-8">
+                    <div>
+                        <span class="text-xs font-mono text-brand-accent">LIVE ANALYTICS DEMO</span>
+                        <h3 class="text-xl font-bold font-display text-white">Global Performance Overview</h3>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="px-3 py-1.5 rounded-lg bg-brand-dark border border-brand-border text-xs font-mono text-gray-300 hover:text-white">Last 7 Days</button>
+                        <button class="px-3 py-1.5 rounded-lg bg-brand-accent/20 border border-brand-accent text-xs font-mono text-brand-accent font-bold">Last 30 Days</button>
+                        <button class="px-3 py-1.5 rounded-lg bg-brand-dark border border-brand-border text-xs font-mono text-gray-300 hover:text-white">All Time</button>
+                    </div>
+                </div>
+
+                <!-- Metrics Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-brand-dark p-5 rounded-2xl border border-brand-border">
+                        <div class="flex justify-between items-center text-xs font-mono text-gray-400 mb-2">
+                            <span>TOTAL STREAMS</span>
+                            <i class="fa-solid fa-play text-brand-accent"></i>
+                        </div>
+                        <div class="text-2xl sm:text-3xl font-bold font-mono text-white">2,849,120</div>
+                        <div class="text-xs font-mono text-emerald-400 mt-2 flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-trend-up"></i> +18.4% this month
+                        </div>
+                    </div>
+
+                    <div class="bg-brand-dark p-5 rounded-2xl border border-brand-border">
+                        <div class="flex justify-between items-center text-xs font-mono text-gray-400 mb-2">
+                            <span>ESTIMATED ROYALTIES</span>
+                            <i class="fa-solid fa-dollar-sign text-emerald-400"></i>
+                        </div>
+                        <div class="text-2xl sm:text-3xl font-bold font-mono text-emerald-400">$10,482.35</div>
+                        <div class="text-xs font-mono text-emerald-400 mt-2 flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-trend-up"></i> +22.1% this month
+                        </div>
+                    </div>
+
+                    <div class="bg-brand-dark p-5 rounded-2xl border border-brand-border">
+                        <div class="flex justify-between items-center text-xs font-mono text-gray-400 mb-2">
+                            <span>UNIQUE LISTENERS</span>
+                            <i class="fa-solid fa-users text-brand-purple"></i>
+                        </div>
+                        <div class="text-2xl sm:text-3xl font-bold font-mono text-white">640,910</div>
+                        <div class="text-xs font-mono text-emerald-400 mt-2 flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-trend-up"></i> +12.0% this month
+                        </div>
+                    </div>
+
+                    <div class="bg-brand-dark p-5 rounded-2xl border border-brand-border">
+                        <div class="flex justify-between items-center text-xs font-mono text-gray-400 mb-2">
+                            <span>PLAYLIST ADDS</span>
+                            <i class="fa-solid fa-list-check text-brand-pink"></i>
+                        </div>
+                        <div class="text-2xl sm:text-3xl font-bold font-mono text-white">14,302</div>
+                        <div class="text-xs font-mono text-emerald-400 mt-2 flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-trend-up"></i> +8.6% this month
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulated Breakdown Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Platform Share -->
+                    <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
+                        <h4 class="text-sm font-bold font-display text-white mb-4">Stream Distribution by Platform</h4>
+                        <div class="space-y-4 font-mono text-xs">
+                            <div>
+                                <div class="flex justify-between text-gray-400 mb-1">
+                                    <span class="flex items-center gap-2"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify</span>
+                                    <span>54% (1,538,524 streams)</span>
+                                </div>
+                                <div class="w-full h-2.5 bg-brand-card rounded-full overflow-hidden">
+                                    <div class="w-[54%] h-full bg-emerald-400"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-gray-400 mb-1">
+                                    <span class="flex items-center gap-2"><i class="fa-brands fa-apple text-gray-200"></i> Apple Music</span>
+                                    <span>28% (797,753 streams)</span>
+                                </div>
+                                <div class="w-full h-2.5 bg-brand-card rounded-full overflow-hidden">
+                                    <div class="w-[28%] h-full bg-pink-500"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-gray-400 mb-1">
+                                    <span class="flex items-center gap-2"><i class="fa-brands fa-youtube text-red-500"></i> YouTube Content ID</span>
+                                    <span>12% (341,894 streams)</span>
+                                </div>
+                                <div class="w-full h-2.5 bg-brand-card rounded-full overflow-hidden">
+                                    <div class="w-[12%] h-full bg-red-500"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-gray-400 mb-1">
+                                    <span class="flex items-center gap-2"><i class="fa-brands fa-amazon text-amber-400"></i> Amazon & Others</span>
+                                    <span>6% (170,949 streams)</span>
+                                </div>
+                                <div class="w-full h-2.5 bg-brand-card rounded-full overflow-hidden">
+                                    <div class="w-[6%] h-full bg-amber-400"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Geographic Performance -->
+                    <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
+                        <h4 class="text-sm font-bold font-display text-white mb-4">Top Listening Regions</h4>
+                        <div class="space-y-3 font-mono text-xs">
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-brand-card border border-brand-border">
+                                <div class="flex items-center gap-3">
+                                    <span class="font-bold text-white">1. United States</span>
+                                </div>
+                                <span class="text-brand-accent font-bold">1,120,400 streams</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-brand-card border border-brand-border">
+                                <div class="flex items-center gap-3">
+                                    <span class="font-bold text-white">2. United Kingdom</span>
+                                </div>
+                                <span class="text-brand-accent font-bold">482,100 streams</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-brand-card border border-brand-border">
+                                <div class="flex items-center gap-3">
+                                    <span class="font-bold text-white">3. Germany</span>
+                                </div>
+                                <span class="text-brand-accent font-bold">310,850 streams</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-brand-card border border-brand-border">
+                                <div class="flex items-center gap-3">
+                                    <span class="font-bold text-white">4. Japan</span>
+                                </div>
+                                <span class="text-brand-accent font-bold">295,400 streams</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== KEY ANALYTICS FEATURES ==================== -->
+    <section class="py-20 border-b border-brand-border/40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs font-bold font-mono text-brand-accent uppercase tracking-widest mb-3">Complete Transparency</h2>
+                <h3 class="text-3xl sm:text-4xl font-extrabold font-display text-white">Designed for Record Labels & Independent Artists</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Feature 1 -->
+                <div class="bg-brand-card border border-brand-border p-8 rounded-3xl hover:border-brand-accent/50 transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-accent/10 text-brand-accent flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-white font-display mb-3">Live Stream Feeds</h4>
+                    <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                        Don't wait months for earnings reports. Monitor streaming activity live as releases launch across worldwide timezones.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="bg-brand-card border border-brand-border p-8 rounded-3xl hover:border-brand-accent/50 transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-purple/20 text-brand-purple flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-list-ol"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-white font-display mb-3">Playlist Tracking</h4>
+                    <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                        Track editorial, algorithmic, and user-generated playlist inclusions. Receive instant notifications when your tracks are added to major playlists.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="bg-brand-card border border-brand-border p-8 rounded-3xl hover:border-brand-accent/50 transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-pink/20 text-brand-pink flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-file-csv"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-white font-display mb-3">Custom Data Exports</h4>
+                    <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                        Export granular stream data, revenue reports, and ISRC performance records in CSV or JSON formats for easy accounting and label reporting.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== CALL TO ACTION ==================== -->
+    <section class="py-20 relative overflow-hidden">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <div class="bg-gradient-to-r from-brand-card via-brand-dark to-brand-card border border-brand-border rounded-3xl p-10 sm:p-16 glow-box">
+                <h2 class="text-3xl sm:text-5xl font-extrabold font-display text-white mb-4">
+                    Take Control of Your Music Data Today
+                </h2>
+                <p class="text-gray-400 text-sm sm:text-base max-w-xl mx-auto mb-8">
+                    Distribute with Audiory and unlock real-time analytics, automated split payments, and direct DSP delivery.
+                </p>
+                <a href="/signup/" class="inline-block px-8 py-4 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple font-semibold text-white shadow-lg shadow-brand-accent/25 hover:scale-105 transition-all">
+                    Get Started Free
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="bg-brand-dark border-t border-brand-border/60 pt-16 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-16">
+                
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-accent to-brand-purple flex items-center justify-center text-white text-sm font-bold">
+                            <i class="fa-solid fa-wave-square"></i>
+                        </div>
+                        <span class="font-display font-bold text-xl text-white">AUDIORY</span>
+                    </div>
+                    <p class="text-gray-400 text-sm max-w-sm mb-6 leading-relaxed">
+                        Audiory Distribution provides premier global music distribution infrastructure, automated splits, rights protection, and real-time streaming analytics.
+                    </p>
+                </div>
+
+                <!-- Col 2: Navigation -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Solutions</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/music-distribution/" class="hover:text-brand-accent transition-colors">Music Distribution</a></li>
+                        <li><a href="/content-id/" class="hover:text-brand-accent transition-colors">YouTube Content ID</a></li>
+                        <li><a href="/splits/" class="hover:text-brand-accent transition-colors">Automated Splits</a></li>
+                        <li><a href="/analytics/" class="hover:text-brand-accent transition-colors">Analytics Telemetry</a></li>
+                        <li><a href="/smart-links/" class="hover:text-brand-accent transition-colors">Smart Links Engine</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Resources -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Resources</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/knowledge-base/" class="hover:text-brand-accent transition-colors">Knowledge Base</a></li>
+                        <li><a href="/royalty-guide/" class="hover:text-brand-accent transition-colors">Royalty Guide</a></li>
+                        <li><a href="/api-documentation/" class="hover:text-brand-accent transition-colors">API Documentation</a></li>
+                        <li><a href="/platform-status/" class="hover:text-brand-accent transition-colors">Platform Status</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Legal -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Legal & Company</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/privacy/" class="hover:text-brand-accent transition-colors">Privacy Policy</a></li>
+                        <li><a href="/terms/" class="hover:text-brand-accent transition-colors">Terms of Service</a></li>
+                        <li><a href="/dmca/" class="hover:text-brand-accent transition-colors">Copyright / DMCA</a></li>
+                        <li><a href="/support/" class="hover:text-brand-accent transition-colors">Contact Support</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Bottom Copyright Bar -->
+            <div class="pt-8 border-t border-brand-border/40 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+                <p>&copy; 2026 Audiory Distribution Inc. All rights reserved.</p>
+                <div class="flex gap-6">
+                    <a href="/security/" class="hover:text-gray-400">Security</a>
+                    <a href="/privacy/" class="hover:text-gray-400">Privacy</a>
+                    <a href="/cookies/" class="hover:text-gray-400">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const hamburgerPath = document.getElementById('hamburgerPath');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            if (mobileMenu.classList.contains('hidden')) {
+                hamburgerPath.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+            } else {
+                hamburgerPath.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+            }
+        });
+    </script>
+</body>
+</html>
