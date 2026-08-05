@@ -636,19 +636,19 @@ function renderCurrentPage() {
             initStreamsChart();
             break;
         case 'ana_meta':
-            container.innerHTML = renderAnalyticsDetailView('Meta (IG/FB) Analytics', 'Detailed analytics for Instagram Reels, Facebook Stories, and audio library usages.');
+            container.innerHTML = renderMetaAnalyticsView();
             break;
         case 'ana_yt':
-            container.innerHTML = renderAnalyticsDetailView('YouTube UGC Telemetry', 'Monitor user-generated videos, Content ID matches, and YouTube Shorts claims.');
+            container.innerHTML = renderYouTubeTelemetryView();
             break;
         case 'ana_tiktok':
-            container.innerHTML = renderAnalyticsDetailView('TikTok Sound Analytics', 'Track total video creations, viral sound momentum, and demographic reach.');
+            container.innerHTML = renderTikTokAnalyticsView();
             break;
         case 'ana_safe':
-            container.innerHTML = renderAnalyticsDetailView('StreamSafe™ Fraud Check', 'Automated anti-fraud protection scanning for bot streams and artificial inflation flags.');
+            container.innerHTML = renderStreamSafeView();
             break;
         case 'ana_spotify':
-            container.innerHTML = renderAnalyticsDetailView('Discovery Mode Insights', 'Analyze algorithm uplift and radio/autoplay stream breakdown.');
+            container.innerHTML = renderDiscoveryModeView();
             break;
 
         // FINANCE & ROYALTIES
@@ -1189,6 +1189,386 @@ function renderLuminateRegistration() {
                     </button>
                 </div>
             </form>
+        </div>
+    `;
+}
+
+// 1. META (IG/FB) ANALYTICS
+function renderMetaAnalyticsView() {
+    return `
+        <div class="max-w-6xl mx-auto space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
+                <div>
+                    <h1 class="text-2xl font-extrabold font-display text-white">Meta (IG/FB) Analytics</h1>
+                    <p class="text-xs text-gray-400 mt-1">Track Instagram Reels, Facebook Stories, and audio library usage across Meta platforms.</p>
+                </div>
+                <button class="px-4 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs text-gray-300 hover:text-white font-mono">
+                    📥 Export CSV Report
+                </button>
+            </div>
+
+            <!-- Stats Overview Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Total Reel Creations</span>
+                    <div class="text-2xl font-extrabold text-white mt-1">42,850</div>
+                    <span class="text-[10px] text-emerald-400 font-mono mt-1 inline-block">↑ 18.4% this month</span>
+                </div>
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Meta Audio Reach</span>
+                    <div class="text-2xl font-extrabold text-white mt-1">1.85M</div>
+                    <span class="text-[10px] text-emerald-400 font-mono mt-1 inline-block">↑ 12.1% vs last month</span>
+                </div>
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Est. Meta Royalties</span>
+                    <div class="text-2xl font-extrabold text-brand-accent mt-1">$1,240.50</div>
+                    <span class="text-[10px] text-gray-400 font-mono mt-1 inline-block">Pending Next Settlement</span>
+                </div>
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Top Performing Country</span>
+                    <div class="text-2xl font-extrabold text-white mt-1">United States 🇺🇸</div>
+                    <span class="text-[10px] text-gray-400 font-mono mt-1 inline-block">38% Share of Creations</span>
+                </div>
+            </div>
+
+            <!-- Top Used Tracks Table -->
+            <div class="p-6 rounded-2xl bg-brand-card border border-brand-border/80 shadow-xl space-y-4">
+                <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">Top Performing Audio Snippets</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="text-[10px] uppercase font-mono text-gray-400 border-b border-brand-border">
+                            <tr>
+                                <th class="pb-3 font-semibold">Track Title</th>
+                                <th class="pb-3 font-semibold">ISRC</th>
+                                <th class="pb-3 font-semibold">Reels Created</th>
+                                <th class="pb-3 font-semibold">FB Stories</th>
+                                <th class="pb-3 font-semibold">Total Impressions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-brand-border/40 text-gray-200">
+                            <tr>
+                                <td class="py-3 font-medium text-white">Midnight Drive</td>
+                                <td class="py-3 font-mono text-gray-400">US-TL1-26-00101</td>
+                                <td class="py-3 font-semibold">28,400</td>
+                                <td class="py-3">5,120</td>
+                                <td class="py-3 text-brand-accent font-semibold">1,210,000</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 font-medium text-white">Summer Waves (Remix)</td>
+                                <td class="py-3 font-mono text-gray-400">US-TL1-26-00102</td>
+                                <td class="py-3 font-semibold">11,200</td>
+                                <td class="py-3">2,300</td>
+                                <td class="py-3 text-brand-accent font-semibold">490,000</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 font-medium text-white">Neon Pulse</td>
+                                <td class="py-3 font-mono text-gray-400">US-TL1-26-00103</td>
+                                <td class="py-3 font-semibold">3,250</td>
+                                <td class="py-3">880</td>
+                                <td class="py-3 text-brand-accent font-semibold">150,000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// 2. YOUTUBE UGC TELEMETRY
+function renderYouTubeTelemetryView() {
+    return `
+        <div class="max-w-6xl mx-auto space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
+                <div>
+                    <h1 class="text-2xl font-extrabold font-display text-white">YouTube UGC Telemetry</h1>
+                    <p class="text-xs text-gray-400 mt-1">Monitor Content ID video matches, YouTube Shorts usage, and copyright claim monetization.</p>
+                </div>
+                <div class="flex gap-2">
+                    <span class="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-semibold flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Content ID Active
+                    </span>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Active Claimed Videos</span>
+                    <div class="text-2xl font-extrabold text-white mt-1">12,480</div>
+                    <span class="text-[10px] text-emerald-400 font-mono mt-1 inline-block">100% Monetized</span>
+                </div>
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">YouTube Shorts Views</span>
+                    <div class="text-2xl font-extrabold text-white mt-1">8.42M</div>
+                    <span class="text-[10px] text-emerald-400 font-mono mt-1 inline-block">↑ 34% this month</span>
+                </div>
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">UGC Monetized Earnings</span>
+                    <div class="text-2xl font-extrabold text-brand-accent mt-1">$3,840.20</div>
+                    <span class="text-[10px] text-gray-400 font-mono mt-1 inline-block">AdSense + Music Share</span>
+                </div>
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Content ID Conflicts</span>
+                    <div class="text-2xl font-extrabold text-white mt-1">0</div>
+                    <span class="text-[10px] text-emerald-400 font-mono mt-1 inline-block">All Clear</span>
+                </div>
+            </div>
+
+            <!-- UGC Claims Feed -->
+            <div class="p-6 rounded-2xl bg-brand-card border border-brand-border/80 shadow-xl space-y-4">
+                <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">Recent High-Performing Claims</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="text-[10px] uppercase font-mono text-gray-400 border-b border-brand-border">
+                            <tr>
+                                <th class="pb-3 font-semibold">Channel / Video</th>
+                                <th class="pb-3 font-semibold">Matched Asset</th>
+                                <th class="pb-3 font-semibold">Claim Type</th>
+                                <th class="pb-3 font-semibold">Views</th>
+                                <th class="pb-3 font-semibold">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-brand-border/40 text-gray-200">
+                            <tr>
+                                <td class="py-3 font-medium text-white">Gaming Highlights Daily</td>
+                                <td class="py-3 font-mono text-gray-400">Midnight Drive</td>
+                                <td class="py-3">Audio Match (Shorts)</td>
+                                <td class="py-3 font-semibold text-white">1,450,000</td>
+                                <td class="py-3"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-mono">Monetizing</span></td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 font-medium text-white">Chill Vlogs & Travel</td>
+                                <td class="py-3 font-mono text-gray-400">Summer Waves</td>
+                                <td class="py-3">Background Match</td>
+                                <td class="py-3 font-semibold text-white">620,000</td>
+                                <td class="py-3"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-mono">Monetizing</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// 3. TIKTOK SOUND ANALYTICS
+function renderTikTokAnalyticsView() {
+    return `
+        <div class="max-w-6xl mx-auto space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
+                <div>
+                    <h1 class="text-2xl font-extrabold font-display text-white">TikTok Sound Analytics</h1>
+                    <p class="text-xs text-gray-400 mt-1">Track sound page usage, creator video volume, and viral sound charts.</p>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Total TikTok Videos</span>
+                    <div class="text-2xl font-extrabold text-white mt-1">94,300</div>
+                    <span class="text-[10px] text-emerald-400 font-mono mt-1 inline-block">↑ 42% sound growth</span>
+                </div>
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Total Video Views</span>
+                    <div class="text-2xl font-extrabold text-white mt-1">18.9M</div>
+                    <span class="text-[10px] text-emerald-400 font-mono mt-1 inline-block">Viral Momentum High</span>
+                </div>
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Unique Creators</span>
+                    <div class="text-2xl font-extrabold text-white mt-1">31,200</div>
+                    <span class="text-[10px] text-gray-400 font-mono mt-1 inline-block">Incl. 45 Verified Handles</span>
+                </div>
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Est. Sound Royalties</span>
+                    <div class="text-2xl font-extrabold text-brand-accent mt-1">$2,910.80</div>
+                    <span class="text-[10px] text-gray-400 font-mono mt-1 inline-block">Calculated per creation</span>
+                </div>
+            </div>
+
+            <!-- Sound Breakdown -->
+            <div class="p-6 rounded-2xl bg-brand-card border border-brand-border/80 shadow-xl space-y-4">
+                <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">Catalog Sound Performance</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="text-[10px] uppercase font-mono text-gray-400 border-b border-brand-border">
+                            <tr>
+                                <th class="pb-3 font-semibold">Sound Title</th>
+                                <th class="pb-3 font-semibold">Official ID</th>
+                                <th class="pb-3 font-semibold">Video Creations</th>
+                                <th class="pb-3 font-semibold">Shares</th>
+                                <th class="pb-3 font-semibold">Viral Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-brand-border/40 text-gray-200">
+                            <tr>
+                                <td class="py-3 font-medium text-white">Midnight Drive (Sped Up)</td>
+                                <td class="py-3 font-mono text-gray-400">TT-72910391</td>
+                                <td class="py-3 font-semibold text-white">68,400</td>
+                                <td class="py-3">142,000</td>
+                                <td class="py-3"><span class="px-2 py-0.5 rounded bg-cyan-500/20 text-brand-accent text-[10px] font-mono font-bold">🔥 Trending Top 50</span></td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 font-medium text-white">Summer Waves</td>
+                                <td class="py-3 font-mono text-gray-400">TT-61928301</td>
+                                <td class="py-3 font-semibold text-white">25,900</td>
+                                <td class="py-3">48,200</td>
+                                <td class="py-3"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-mono">Steady Growth</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// 4. STREAMSAFE FRAUD CHECK
+function renderStreamSafeView() {
+    return `
+        <div class="max-w-6xl mx-auto space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
+                <div>
+                    <h1 class="text-2xl font-extrabold font-display text-white">StreamSafe™ Fraud Check</h1>
+                    <p class="text-xs text-gray-400 mt-1">Automated AI monitoring tool detecting bot farms, illegal playlisting, and artificial stream spikes.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-semibold flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Catalog Integrity 100% Safe
+                    </span>
+                </div>
+            </div>
+
+            <!-- Risk Overview Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Overall Health Score</span>
+                    <div class="text-3xl font-extrabold text-emerald-400 mt-1">99.8 / 100</div>
+                    <p class="text-[10px] text-gray-400 mt-1">Zero artificial stream strikes</p>
+                </div>
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Scanned Streams (30 Days)</span>
+                    <div class="text-3xl font-extrabold text-white mt-1">1,248,900</div>
+                    <p class="text-[10px] text-gray-400 mt-1">Real human listener verification</p>
+                </div>
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Flagged Playlists</span>
+                    <div class="text-3xl font-extrabold text-white mt-1">0</div>
+                    <p class="text-[10px] text-emerald-400 mt-1">No blacklisted bot lists detected</p>
+                </div>
+            </div>
+
+            <!-- Interactive Audit Section -->
+            <div class="p-6 rounded-2xl bg-brand-card border border-brand-border/80 shadow-xl space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">Automated Catalog Protection Log</h3>
+                    <button onclick="alert('StreamSafe automated audit completed! All tracks cleared.');" class="px-4 py-2 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all">
+                        Run Manual Fraud Audit
+                    </button>
+                </div>
+                
+                <div class="space-y-3 pt-2">
+                    <div class="p-3 rounded-xl bg-brand-dark/80 border border-brand-border/60 flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-3">
+                            <span class="text-emerald-400 font-mono text-sm">✓</span>
+                            <div>
+                                <p class="text-white font-medium">Spotify Monthly Listening Curve Check</p>
+                                <p class="text-[10px] text-gray-400">Verified normal user skip-rate ratio & country distribution.</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-mono text-gray-400">Today, 04:12 AM</span>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-brand-dark/80 border border-brand-border/60 flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-3">
+                            <span class="text-emerald-400 font-mono text-sm">✓</span>
+                            <div>
+                                <p class="text-white font-medium">3rd Party Playlist Security Scan</p>
+                                <p class="text-[10px] text-gray-400">Scanned 14 active user playlists. 0 known bot farm networks found.</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-mono text-gray-400">Yesterday</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// 5. DISCOVERY MODE INSIGHTS
+function renderDiscoveryModeView() {
+    return `
+        <div class="max-w-6xl mx-auto space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
+                <div>
+                    <h1 class="text-2xl font-extrabold font-display text-white">Discovery Mode Insights</h1>
+                    <p class="text-xs text-gray-400 mt-1">Analyze Spotify algorithmic uplift, radio, autoplay, and smart shuffle stream metrics.</p>
+                </div>
+                <div class="flex gap-2">
+                    <span class="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-semibold">
+                        Spotify Discovery Mode Active
+                    </span>
+                </div>
+            </div>
+
+            <!-- Stat Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Algorithmic Stream Lift</span>
+                    <div class="text-2xl font-extrabold text-emerald-400 mt-1">+48.5%</div>
+                    <span class="text-[10px] text-gray-400 font-mono mt-1 inline-block">Compared to pre-activation</span>
+                </div>
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Radio & Autoplay Streams</span>
+                    <div class="text-2xl font-extrabold text-white mt-1">312,400</div>
+                    <span class="text-[10px] text-emerald-400 font-mono mt-1 inline-block">↑ 22% this month</span>
+                </div>
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">New Listener Saves</span>
+                    <div class="text-2xl font-extrabold text-white mt-1">18,200</div>
+                    <span class="text-[10px] text-brand-accent font-mono mt-1 inline-block">5.8% Conversion Rate</span>
+                </div>
+                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Active Enrolled Tracks</span>
+                    <div class="text-2xl font-extrabold text-white mt-1">4 Tracks</div>
+                    <span class="text-[10px] text-gray-400 font-mono mt-1 inline-block">Next opt-in cycle open</span>
+                </div>
+            </div>
+
+            <!-- Track Lift Breakdown Table -->
+            <div class="p-6 rounded-2xl bg-brand-card border border-brand-border/80 shadow-xl space-y-4">
+                <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">Enrolled Track Analytics</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="text-[10px] uppercase font-mono text-gray-400 border-b border-brand-border">
+                            <tr>
+                                <th class="pb-3 font-semibold">Track Title</th>
+                                <th class="pb-3 font-semibold">Radio Streams</th>
+                                <th class="pb-3 font-semibold">Autoplay Streams</th>
+                                <th class="pb-3 font-semibold">Saves / Adds</th>
+                                <th class="pb-3 font-semibold">Stream Uplift</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-brand-border/40 text-gray-200">
+                            <tr>
+                                <td class="py-3 font-medium text-white">Midnight Drive</td>
+                                <td class="py-3 font-semibold">142,000</td>
+                                <td class="py-3">89,100</td>
+                                <td class="py-3 text-white">9,400</td>
+                                <td class="py-3 font-extrabold text-emerald-400">+62.4%</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 font-medium text-white">Summer Waves</td>
+                                <td class="py-3 font-semibold">51,300</td>
+                                <td class="py-3">30,000</td>
+                                <td class="py-3 text-white">5,800</td>
+                                <td class="py-3 font-extrabold text-emerald-400">+34.1%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     `;
 }
