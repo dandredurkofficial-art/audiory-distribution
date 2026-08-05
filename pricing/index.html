@@ -160,29 +160,45 @@
     <!-- Background Ambient Glow -->
     <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-accent/10 rounded-full blur-[140px] pointer-events-none"></div>
 
-    <!-- ==================== HEADER / NAV ==================== -->
-    <header class="w-full py-6 px-4 sm:px-8 relative z-20 border-b border-brand-border/40">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <a href="/" class="flex items-center gap-3 group">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20 group-hover:scale-105 transition-transform duration-300">
+    <!-- ==================== MAIN HEADER / NAV ==================== -->
+    <header class="w-full py-5 px-4 sm:px-8 relative z-20 border-b border-brand-border/40 bg-brand-dark/40 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            
+            <!-- Brand Logo -->
+            <a href="/" class="flex items-center gap-3 shrink-0 group">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20 group-hover:scale-105 transition-transform duration-300">
                     <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
                         <i class="fa-solid fa-wave-square text-brand-accent group-hover:rotate-12 transition-transform duration-300"></i>
                     </div>
                 </div>
                 <div class="flex flex-col">
-                    <span class="font-display font-bold text-xl tracking-wider text-white">AUDIORY</span>
+                    <span class="font-display font-bold text-lg tracking-wider text-white">AUDIORY</span>
                     <span class="text-[8px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">DISTRIBUTION</span>
                 </div>
             </a>
 
-            <div class="flex items-center gap-4">
-                <a href="/login/" class="text-xs sm:text-sm text-gray-300 hover:text-white font-medium transition-colors">Sign In</a>
-                <a href="/signup/" class="py-2 px-4 rounded-xl bg-brand-accent text-brand-dark text-xs sm:text-sm font-bold hover:opacity-90 transition-opacity">
-                    Get Started
+            <!-- Central Navigation Links -->
+            <nav class="hidden lg:flex items-center gap-6 text-xs text-gray-300 font-medium">
+                <a href="/#services" class="hover:text-white transition-colors">Services</a>
+                <a href="/#dsp-network" class="hover:text-white transition-colors">DSP Network</a>
+                <a href="/#features" class="hover:text-white transition-colors">Platform Features</a>
+                <a href="/pricing/" class="text-brand-accent font-semibold">Pricing</a>
+                <a href="/#royalty-calculator" class="hover:text-white transition-colors">Royalty Calculator</a>
+                <a href="/#api-access" class="hover:text-white transition-colors">API Access</a>
+            </nav>
+
+            <!-- Right Action Buttons -->
+            <div class="flex items-center gap-3 shrink-0">
+                <a href="/login/" class="px-4 py-2 text-xs sm:text-sm font-medium text-gray-300 hover:text-white rounded-xl border border-brand-border/80 hover:border-brand-border bg-brand-card/50 transition-all">
+                    Sign In
+                </a>
+                <a href="/signup/" class="px-4 py-2 text-xs sm:text-sm font-bold text-white rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:opacity-90 transition-opacity shadow-md shadow-brand-accent/10">
+                    Start Distributing
                 </a>
             </div>
+
         </div>
-    </header>
+    </nav>
 
     <!-- ==================== MAIN PRICING SECTION ==================== -->
     <main class="py-12 px-4 sm:px-6 lg:px-8 relative z-10 my-auto">
@@ -340,7 +356,7 @@
         </div>
     </main>
 
-    <!-- ==================== HOMEPAGE MATCHING FOOTER ==================== -->
+    <!-- ==================== FOOTER ==================== -->
     <footer class="pt-16 pb-8 px-4 sm:px-8 border-t border-brand-border/40 relative z-10 bg-brand-dark/50 backdrop-blur-md">
         <div class="max-w-7xl mx-auto">
             <div class="grid grid-cols-1 md:grid-cols-5 gap-10 mb-12">
