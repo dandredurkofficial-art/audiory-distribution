@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMCA & Copyright Policy — Audiory Distribution</title>
+    <meta name="description" content="Official DMCA Takedown, Copyright Infringement Policy, Designated Agent Contact, and Counter-Notification Portal for Audiory Distribution platform.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            accent: '#00f2fe',
+                            purple: '#7928ca',
+                            pink: '#ff0080',
+                            dark: '#0a0d14',
+                            card: '#121824',
+                            border: '#1f293d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #07090e;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00f2fe 0%, #4f46e5 50%, #ff0080 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0a0d14;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+
+        .glow-box {
+            box-shadow: 0 0 35px -10px rgba(0, 242, 254, 0.15);
+        }
+    </style>
+</head>
+<body class="custom-scrollbar antialiased selection:bg-brand-accent selection:text-brand-dark">
+
+    <!-- ==================== HEADER / NAVIGATION ==================== -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-brand-dark/80 border-b border-brand-border/60 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20 group-hover:scale-105 transition-transform duration-300">
+                        <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
+                            <i class="fa-solid font-bold fa-wave-square text-brand-accent group-hover:rotate-12 transition-transform duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-display font-bold text-2xl tracking-wider text-white">AUDIORY</span>
+                        <span class="text-[9px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">DISTRIBUTION</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden lg:flex items-center gap-8">
+                    <a href="/#services" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Services</a>
+                    <a href="/#dsp-network" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">DSP Network</a>
+                    <a href="/pricing/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Pricing</a>
+                    <a href="/royalty-guide/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Royalty Guide</a>
+                    <a href="/knowledge-base/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Knowledge Base</a>
+                </nav>
+
+                <!-- Action Buttons (Desktop) -->
+                <div class="hidden sm:flex items-center gap-4">
+                    <a href="/login/" class="text-sm font-semibold text-gray-200 hover:text-white px-4 py-2.5 rounded-xl border border-brand-border hover:border-gray-500 transition-all duration-200">
+                        Sign In
+                    </a>
+                    <a href="/signup/" class="text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:shadow-lg hover:shadow-brand-accent/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+                        Start Distributing
+                    </a>
+                </div>
+
+                <!-- Mobile Header Right Actions -->
+                <div class="flex items-center gap-3 sm:hidden">
+                    <a href="/signup/" class="text-xs font-semibold text-white px-3 py-2 rounded-lg bg-gradient-to-r from-brand-accent to-brand-purple">
+                        Get Started
+                    </a>
+                    <button id="mobileMenuBtn" aria-label="Toggle Navigation Menu" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-brand-card focus:outline-none">
+                        <svg id="menuIconSvg" class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                            <path id="hamburgerPath" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobileMenu" class="hidden lg:hidden border-b border-brand-border bg-brand-dark/95 backdrop-blur-2xl transition-all duration-300">
+            <div class="px-4 pt-2 pb-6 space-y-3">
+                <a href="/#services" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Services</a>
+                <a href="/#dsp-network" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">DSP Network</a>
+                <a href="/pricing/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Pricing</a>
+                <a href="/royalty-guide/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Royalty Guide</a>
+                <a href="/knowledge-base/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Knowledge Base</a>
+                
+                <div class="pt-4 flex flex-col gap-3">
+                    <a href="/login/" class="text-center w-full py-2.5 rounded-xl border border-brand-border text-gray-200 font-semibold">Sign In</a>
+                    <a href="/signup/" class="text-center w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-accent to-brand-purple text-white font-semibold">Start Distributing</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== HERO SECTION ==================== -->
+    <section class="relative pt-16 pb-20 overflow-hidden border-b border-brand-border/40">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,242,254,0.15),rgba(255,255,255,0))]"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col items-center text-center max-w-4xl mx-auto">
+                
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-card border border-brand-border mb-6">
+                    <i class="fa-solid fa-shield-halved text-brand-accent text-xs"></i>
+                    <span class="text-xs font-semibold text-gray-300 uppercase tracking-widest">Legal & Rights Protection</span>
+                </div>
+
+                <h1 class="text-4xl sm:text-6xl font-extrabold font-display text-white tracking-tight leading-tight">
+                    DMCA Notice & <span class="gradient-text">Copyright Protection</span> Policy
+                </h1>
+
+                <p class="text-gray-400 text-base sm:text-lg mt-6 max-w-2xl leading-relaxed">
+                    Audiory Distribution respects creator intellectual property rights and complies strictly with the Digital Millennium Copyright Act (17 U.S.C. § 512).
+                </p>
+
+                <!-- Quick Navigation Pills -->
+                <div class="flex flex-wrap justify-center gap-3 mt-8">
+                    <a href="#takedown-form" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:opacity-90 transition-opacity">
+                        File DMCA Takedown Notice
+                    </a>
+                    <a href="#designated-agent" class="px-5 py-2.5 rounded-xl bg-brand-card border border-brand-border text-gray-300 hover:text-white text-xs font-semibold transition-colors">
+                        Designated Agent Contacts
+                    </a>
+                    <a href="#process-timeline" class="px-5 py-2.5 rounded-xl bg-brand-card border border-brand-border text-gray-300 hover:text-white text-xs font-semibold transition-colors">
+                        Takedown & Counter Process
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== DESIGNATED AGENT CONTACT CARD ==================== -->
+    <section class="py-16 border-b border-brand-border/40" id="designated-agent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-brand-card border border-brand-border rounded-3xl p-8 sm:p-10 glow-box max-w-4xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div>
+                        <div class="inline-block px-3 py-1 rounded-full bg-brand-accent/10 text-brand-accent text-xs font-bold uppercase mb-3">Official Compliance Desk</div>
+                        <h2 class="text-2xl font-bold font-display text-white">Designated DMCA Copyright Agent</h2>
+                        <p class="text-xs text-gray-400 mt-2 max-w-lg">
+                            Notices of claimed copyright infringement on the Audiory network or DSP delivery pipeline must be submitted to our registered copyright agent below:
+                        </p>
+                    </div>
+
+                    <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border text-xs space-y-2 w-full md:w-auto font-mono">
+                        <p class="text-white font-semibold font-sans text-sm"><i class="fa-solid fa-building text-brand-accent mr-2"></i> Audiory Legal Department</p>
+                        <p class="text-gray-400">Attn: DMCA Copyright Compliance Agent</p>
+                        <p class="text-gray-400">100 Music Row Plaza, Suite 400</p>
+                        <p class="text-gray-400">Nashville, TN 37203, USA</p>
+                        <p class="text-brand-accent pt-2 font-bold"><i class="fa-solid fa-envelope mr-1"></i> dmca@audiory.io</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== DMCA PROCESS TIMELINE ==================== -->
+    <section class="py-20 border-b border-brand-border/40" id="process-timeline">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs font-bold text-brand-accent uppercase tracking-widest mb-2">Legal Workflow</h2>
+                <p class="text-3xl sm:text-5xl font-extrabold font-display text-white">How Infringement Claims Are Handled</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                
+                <!-- Step 1 -->
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl relative">
+                    <span class="w-8 h-8 rounded-xl bg-brand-accent/20 text-brand-accent font-mono font-bold text-sm flex items-center justify-center mb-4">01</span>
+                    <h3 class="text-base font-bold text-white mb-2 font-display">Notice Submitted</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        Copyright owner files a formal, signed DMCA notification identifying the infringing master WAV/metadata or ISRC track code.
+                    </p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl relative">
+                    <span class="w-8 h-8 rounded-xl bg-brand-purple/20 text-brand-purple font-mono font-bold text-sm flex items-center justify-center mb-4">02</span>
+                    <h3 class="text-base font-bold text-white mb-2 font-display">Takedown & Lock</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        Audiory promptly removes or disables access to the targeted track across DSP platforms and freezes associated pending royalties.
+                    </p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl relative">
+                    <span class="w-8 h-8 rounded-xl bg-pink-500/20 text-pink-400 font-mono font-bold text-sm flex items-center justify-center mb-4">03</span>
+                    <h3 class="text-base font-bold text-white mb-2 font-display">Uploader Notified</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        The account owner is notified immediately with a copy of the claim and given 10–14 business days to submit a legal Counter-Notice.
+                    </p>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl relative">
+                    <span class="w-8 h-8 rounded-xl bg-yellow-400/20 text-yellow-400 font-mono font-bold text-sm flex items-center justify-center mb-4">04</span>
+                    <h3 class="text-base font-bold text-white mb-2 font-display">Resolution / Court Action</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        If no court lawsuit is filed within 14 days following counter-notice, the content and frozen royalties are restored to the uploader.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== INTERACTIVE FORM SECTION ==================== -->
+    <section class="py-20 border-b border-brand-border/40" id="takedown-form">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="text-xs font-bold text-brand-accent uppercase tracking-widest mb-2">Automated Filing Portal</h2>
+                <p class="text-3xl sm:text-4xl font-extrabold font-display text-white">Digital DMCA Submission Desk</p>
+                <p class="text-gray-400 text-xs mt-2">Submit an official DMCA Takedown Notice or Counter-Notification directly to our legal department.</p>
+            </div>
+
+            <!-- Form Card -->
+            <div class="bg-brand-card border border-brand-border rounded-3xl p-6 sm:p-10 glow-box">
+                
+                <!-- Notice Selector Tabs -->
+                <div class="flex border-b border-brand-border mb-8">
+                    <button id="tabTakedown" class="pb-3 px-6 text-xs sm:text-sm font-bold text-brand-accent border-b-2 border-brand-accent transition-all">
+                        1. Infringement Takedown Notice
+                    </button>
+                    <button id="tabCounter" class="pb-3 px-6 text-xs sm:text-sm font-semibold text-gray-400 hover:text-white transition-all">
+                        2. Uploader Counter-Notification
+                    </button>
+                </div>
+
+                <form id="dmcaNoticeForm" class="space-y-6">
+                    
+                    <input type="hidden" id="formType" value="takedown">
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-2">Full Legal Name *</label>
+                            <input type="text" required id="fullName" placeholder="e.g. Jane Doe" class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-xs text-white focus:outline-none focus:border-brand-accent">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-2">Copyright Owner or Authorized Agent *</label>
+                            <input type="text" required id="copyrightEntity" placeholder="e.g. Acme Music Publishing LLC" class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-xs text-white focus:outline-none focus:border-brand-accent">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-2">Contact Email Address *</label>
+                            <input type="email" required id="contactEmail" placeholder="legal@yourdomain.com" class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-xs text-white focus:outline-none focus:border-brand-accent">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-2">Phone Number *</label>
+                            <input type="tel" required id="contactPhone" placeholder="+1 (555) 000-0000" class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-xs text-white focus:outline-none focus:border-brand-accent">
+                        </div>
+                    </div>
+
+                    <!-- Dynamic URL / Identifiers -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-2" id="identifierLabel">
+                            Target Track ISRC Code(s) or Distribution Links *
+                        </label>
+                        <textarea required id="targetIdentifiers" rows="3" placeholder="Provide direct Audiory release links, Spotify URLs, or ISRC codes (e.g. US-XXX-26-00001)..." class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-xs text-white focus:outline-none focus:border-brand-accent"></textarea>
+                    </div>
+
+                    <!-- Proof of Ownership -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-2">Description of Original Copyrighted Work *</label>
+                        <textarea required id="workDescription" rows="3" placeholder="Identify original sound recording title, composition registration number, or original release details..." class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-xs text-white focus:outline-none focus:border-brand-accent"></textarea>
+                    </div>
+
+                    <!-- Mandatory Legal Statements -->
+                    <div class="space-y-3 pt-2">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" required class="mt-1 rounded bg-brand-dark border-brand-border text-brand-accent focus:ring-0">
+                            <span class="text-[11px] text-gray-400 leading-relaxed">
+                                I state under penalty of perjury that I have a good faith belief that the use of the material in the manner complained of is not authorized by the copyright owner, its agent, or the law.
+                            </span>
+                        </label>
+
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" required class="mt-1 rounded bg-brand-dark border-brand-border text-brand-accent focus:ring-0">
+                            <span class="text-[11px] text-gray-400 leading-relaxed">
+                                I certify that the information in this notification is accurate, and that I am authorized to act on behalf of the owner of the copyright interest.
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Electronic Signature -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-2">Electronic Signature (Type Full Legal Name) *</label>
+                        <input type="text" required id="digitalSignature" placeholder="/Jane Doe/" class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-xs font-mono text-brand-accent focus:outline-none focus:border-brand-accent">
+                    </div>
+
+                    <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple text-white font-bold text-xs uppercase tracking-wider hover:opacity-95 transition-all shadow-lg shadow-brand-accent/20">
+                        Submit Official Legal Notice
+                    </button>
+
+                </form>
+
+                <!-- Confirmation Alert Screen -->
+                <div id="formSuccessAlert" class="hidden text-center py-10 space-y-4">
+                    <div class="w-16 h-16 rounded-2xl bg-brand-accent/20 text-brand-accent flex items-center justify-center text-3xl mx-auto">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold font-display text-white">Legal Request Submitted</h3>
+                    <p class="text-xs text-gray-400 max-w-md mx-auto">
+                        Your submission has been logged into our compliance ticket system. An official confirmation email and reference ticket number have been dispatched to your contact email.
+                    </p>
+                    <button id="resetFormBtn" class="px-5 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-xs font-semibold text-gray-300 hover:text-white">
+                        Submit Another Notice
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ==================== POLICY DETAILED TEXT ==================== -->
+    <section class="py-20">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 text-xs sm:text-sm text-gray-400 leading-relaxed">
+            
+            <div>
+                <h3 class="text-xl font-bold font-display text-white mb-3">Repeat Infringer Policy</h3>
+                <p>
+                    In accordance with the DMCA and other applicable international laws, Audiory Distribution has adopted a strict policy of terminating, in appropriate circumstances and at Audiory's sole discretion, account holders or subscribers who are deemed to be repeat infringers. Audiory may also at its sole discretion limit access to the Service and/or terminate the accounts of any users who infringe any intellectual property rights of others, whether or not there is any repeat infringement.
+                </p>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-bold font-display text-white mb-3">Misrepresentations & False Claims</h3>
+                <p>
+                    Under Section 512(f) of the DMCA, any person who knowingly materially misrepresents that material or activity is infringing, or that material or activity was removed or disabled by mistake or misidentification, may be subject to severe statutory legal liability and monetary damages, including legal costs and attorneys' fees incurred by the alleged infringer or by Audiory Distribution.
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="bg-brand-dark border-t border-brand-border/60 pt-16 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-16">
+                
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-accent to-brand-purple flex items-center justify-center text-white text-sm font-bold">
+                            <i class="fa-solid fa-wave-square"></i>
+                        </div>
+                        <span class="font-display font-bold text-xl text-white">AUDIORY</span>
+                    </div>
+                    <p class="text-gray-400 text-sm max-w-sm mb-6 leading-relaxed">
+                        Audiory Distribution provides premier global music distribution infrastructure, automated splits, rights protection, and API capabilities.
+                    </p>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Solutions</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/music-distribution/" class="hover:text-brand-accent transition-colors">Music Distribution</a></li>
+                        <li><a href="/content-id/" class="hover:text-brand-accent transition-colors">YouTube Content ID</a></li>
+                        <li><a href="/splits/" class="hover:text-brand-accent transition-colors">Automated Splits</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Resources</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/knowledge-base/" class="hover:text-brand-accent transition-colors">Knowledge Base</a></li>
+                        <li><a href="/royalty-guide/" class="hover:text-brand-accent transition-colors">Royalty Guide</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Legal</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/privacy/" class="hover:text-brand-accent transition-colors">Privacy Policy</a></li>
+                        <li><a href="/terms/" class="hover:text-brand-accent transition-colors">Terms of Service</a></li>
+                        <li><a href="/dmca/" class="hover:text-brand-accent transition-colors">Copyright / DMCA</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="pt-8 border-t border-brand-border/40 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+                <p>&copy; 2026 Audiory Distribution Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== JAVASCRIPT ENGINE ==================== -->
+    <script>
+        // 1. Mobile Header Navigation Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const hamburgerPath = document.getElementById('hamburgerPath');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            if (mobileMenu.classList.contains('hidden')) {
+                hamburgerPath.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+            } else {
+                hamburgerPath.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+            }
+        });
+
+        // 2. Tab Switcher Logic for Notice Type
+        const tabTakedown = document.getElementById('tabTakedown');
+        const tabCounter = document.getElementById('tabCounter');
+        const formType = document.getElementById('formType');
+        const identifierLabel = document.getElementById('identifierLabel');
+
+        tabTakedown.addEventListener('click', () => {
+            tabTakedown.className = "pb-3 px-6 text-xs sm:text-sm font-bold text-brand-accent border-b-2 border-brand-accent transition-all";
+            tabCounter.className = "pb-3 px-6 text-xs sm:text-sm font-semibold text-gray-400 hover:text-white transition-all";
+            formType.value = "takedown";
+            identifierLabel.textContent = "Target Track ISRC Code(s) or Infringing DSP URLs *";
+        });
+
+        tabCounter.addEventListener('click', () => {
+            tabCounter.className = "pb-3 px-6 text-xs sm:text-sm font-bold text-brand-accent border-b-2 border-brand-accent transition-all";
+            tabTakedown.className = "pb-3 px-6 text-xs sm:text-sm font-semibold text-gray-400 hover:text-white transition-all";
+            formType.value = "counter";
+            identifierLabel.textContent = "Removed Material Title & Audiory Release ID / ISRC Code *";
+        });
+
+        // 3. Form Submission Handling
+        const dmcaNoticeForm = document.getElementById('dmcaNoticeForm');
+        const formSuccessAlert = document.getElementById('formSuccessAlert');
+        const resetFormBtn = document.getElementById('resetFormBtn');
+
+        dmcaNoticeForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            dmcaNoticeForm.classList.add('hidden');
+            formSuccessAlert.classList.remove('hidden');
+        });
+
+        resetFormBtn.addEventListener('click', () => {
+            dmcaNoticeForm.reset();
+            formSuccessAlert.classList.add('hidden');
+            dmcaNoticeForm.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
