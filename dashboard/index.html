@@ -610,7 +610,7 @@ function renderCurrentPage() {
             container.innerHTML = renderDspPitching();
             break;
         case 'mkt_builder':
-            container.innerHTML = renderGenericFormView('Campaign Builder', 'Set up smart link pre-saves, pixel tracking, and landing pages.');
+            container.innerHTML = renderCampaignBuilder();
             break;
         case 'mkt_playlist':
             container.innerHTML = renderGenericFormView('3rd Party Playlisting', 'Submit catalog entries to vetted independent playlist curators.');
@@ -805,6 +805,152 @@ function renderCurrentPage() {
                     <span class="text-[10px] font-mono text-gray-400">Pitches must be submitted at least 14 days before release date.</span>
                     <button type="submit" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/20">
                         Submit Pitch to Too Lost
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+}
+
+function renderCampaignBuilder() {
+    const hasReleases = window.userReleases && window.userReleases.length > 0;
+
+    return `
+        <div class="max-w-5xl mx-auto space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
+                <div>
+                    <h1 class="text-2xl font-extrabold font-display text-white">Campaign Builder</h1>
+                    <p class="text-xs text-gray-400 mt-1">Build smart pre-save landing pages, configure pixel tracking, and deploy digital ad campaigns.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[11px] font-mono font-semibold flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Smart Link Engine Active
+                    </span>
+                </div>
+            </div>
+
+            <form onsubmit="event.preventDefault(); alert('Smart Campaign & Landing Page successfully deployed!');" class="space-y-8 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
+                
+                <!-- 1. CAMPAIGN BASICS -->
+                <div class="space-y-4">
+                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">1. Campaign & Release Details</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="too-lost-form-label">Select Target Release *</label>
+                            <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                                ${hasReleases 
+                                    ? window.userReleases.map(r => `<option value="${r.id}">${r.title || r.releaseTitle}</option>`).join('')
+                                    : `<option value="" disabled selected>No active releases found in database</option>`
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <label class="too-lost-form-label">Campaign Name *</label>
+                            <input type="text" required placeholder="e.g. Summer Single Pre-Save Launch" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. SMART LINK & PRE-SAVE CONFIG -->
+                <div class="space-y-4 pt-6 border-t border-brand-border">
+                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">2. Smart Link & Pre-Save Landing Page</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="too-lost-form-label">Custom Slug URL *</label>
+                            <div class="flex items-center bg-brand-dark border border-brand-border rounded-xl overflow-hidden focus-within:border-brand-accent">
+                                <span class="px-3 text-xs text-gray-500 font-mono border-r border-brand-border/60">audiory.link/</span>
+                                <input type="text" required placeholder="my-awesome-single" class="bg-transparent w-full p-3 text-xs text-gray-200 focus:outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="too-lost-form-label">Landing Page Template</label>
+                            <select class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                                <option value="modern_dark">Modern Dark (Cyberpunk / Neon)</option>
+                                <option value="minimal_clean">Minimal Clean (Glassmorphism)</option>
+                                <option value="video_hero">Video Background Hero</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="too-lost-form-label mb-2 block">Enabled Pre-Save Destination Stores</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
+                                <input type="checkbox" checked class="accent-brand-accent">
+                                <span class="text-xs text-gray-200 font-medium">Spotify Pre-Save</span>
+                            </label>
+                            <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
+                                <input type="checkbox" checked class="accent-brand-accent">
+                                <span class="text-xs text-gray-200 font-medium">Apple Music Pre-Add</span>
+                            </label>
+                            <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
+                                <input type="checkbox" checked class="accent-brand-accent">
+                                <span class="text-xs text-gray-200 font-medium">Deezer Pre-Save</span>
+                            </label>
+                            <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
+                                <input type="checkbox" checked class="accent-brand-accent">
+                                <span class="text-xs text-gray-200 font-medium">Amazon Music</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. PIXEL & CONVERSION TRACKING -->
+                <div class="space-y-4 pt-6 border-t border-brand-border">
+                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">3. Pixel & Retargeting Integrations</h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="too-lost-form-label">Meta Pixel ID (IG/FB)</label>
+                            <input type="text" placeholder="e.g. 123456789012345" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 font-mono">
+                        </div>
+                        <div>
+                            <label class="too-lost-form-label">TikTok Pixel ID</label>
+                            <input type="text" placeholder="e.g. C1234567890ABC" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 font-mono">
+                        </div>
+                        <div>
+                            <label class="too-lost-form-label">Google Ads / GA4 Measurement ID</label>
+                            <input type="text" placeholder="e.g. G-XXXXXX" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 font-mono">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. AD SPEND & TARGETING (OPTIONAL) -->
+                <div class="space-y-4 pt-6 border-t border-brand-border">
+                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">4. Automated Social Ad Booster (Optional)</h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="too-lost-form-label">Total Campaign Budget ($)</label>
+                            <input type="number" min="0" placeholder="e.g. 250" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                        </div>
+                        <div>
+                            <label class="too-lost-form-label">Target Audience Region</label>
+                            <select class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                                <option value="global">Global (Top Streaming Markets)</option>
+                                <option value="north_america">North America (US & Canada)</option>
+                                <option value="europe">Europe Tier 1</option>
+                                <option value="latam">Latin America</option>
+                                <option value="africa">Africa (East & West Focus)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="too-lost-form-label">Optimization Goal</label>
+                            <select class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                                <option value="conversions">Pre-Save Conversions</option>
+                                <option value="streams">Direct Store Link Clicks</option>
+                                <option value="video_views">Video Ad Views</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBMIT BUTTON -->
+                <div class="pt-6 border-t border-brand-border flex items-center justify-between">
+                    <span class="text-[10px] font-mono text-gray-400">Includes free SSL certificate & automated URL redirection on release day.</span>
+                    <button type="submit" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/20">
+                        Launch Campaign & Generate Link
                     </button>
                 </div>
             </form>
