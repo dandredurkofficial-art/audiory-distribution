@@ -682,6 +682,55 @@
             }
         }
 
+        function renderDspPitching() {
+    const hasReleases = window.userReleases && window.userReleases.length > 0;
+    
+    return `
+        <div class="max-w-3xl mx-auto space-y-6">
+            <div>
+                <h1 class="text-2xl font-bold font-display text-white">DSP Pitching</h1>
+                <p class="text-xs text-gray-400 mt-1">Submit direct pitch forms to Spotify, Apple Music, and Amazon editorial teams.</p>
+            </div>
+
+            <div class="p-6 sm:p-8 rounded-2xl bg-brand-card border border-brand-border/80 shadow-xl space-y-6">
+                <form onsubmit="event.preventDefault(); alert('DSP Pitch submitted to Too Lost Pipeline successfully.');" class="space-y-6">
+                    <div>
+                        <label class="too-lost-form-label uppercase text-[11px] font-mono tracking-wider font-semibold text-gray-300 block mb-2">
+                            Select Active Catalog Item
+                        </label>
+                        <select class="too-lost-input w-full bg-brand-dark/90 border border-brand-border rounded-xl p-3 text-xs text-gray-200 focus:outline-none focus:border-brand-accent">
+                            ${hasReleases 
+                                ? window.userReleases.map(r => `<option value="${r.id}">${r.title || r.releaseTitle || 'Untitled Release'}</option>`).join('')
+                                : `<option value="" disabled selected>No releases available in database</option>`
+                            }
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="too-lost-form-label uppercase text-[11px] font-mono tracking-wider font-semibold text-gray-300 block mb-2">
+                            Submission Notes / Specs
+                        </label>
+                        <textarea 
+                            rows="5" 
+                            placeholder="Type instructions..." 
+                            class="too-lost-input w-full bg-brand-dark/90 border border-brand-border rounded-xl p-3 text-xs text-gray-200 focus:outline-none focus:border-brand-accent resize-y"
+                        ></textarea>
+                    </div>
+
+                    <div class="flex justify-end pt-2">
+                        <button 
+                            type="submit" 
+                            class="px-6 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-md shadow-cyan-500/20"
+                        >
+                            Submit to Too Lost Pipeline
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+}
+
         // ==================== VIEW GENERATORS ====================
 
         function renderDashboardView() {
