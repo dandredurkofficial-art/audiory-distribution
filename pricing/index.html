@@ -1,57 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" class="dark scroll-smooth">
+<html lang="en" class="scroll-smooth dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pricing Plans — Audiory Distribution</title>
-    <meta name="description" content="Simple, transparent music distribution pricing. Distribute unlimited songs to Spotify, Apple Music, and YouTube with 100% royalty retention options.">
-    <link rel="canonical" href="https://distro.audiory.site/pricing/">
-    
-    <!-- Open Graph / Social Meta -->
-    <meta property="og:title" content="Pricing Plans — Audiory Distribution">
-    <meta property="og:description" content="Distribute your music globally with zero hidden fees. Choose from flexible plans tailored for independent artists and record labels.">
-    <meta property="og:url" content="https://distro.audiory.site/pricing/">
-    <meta property="og:type" content="website">
-
-    <!-- Schema.org Structured Data for Google Indexing (JSON-LD) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "Audiory Distribution",
-      "url": "https://distro.audiory.site/",
-      "applicationCategory": "MultimediaApplication",
-      "operatingSystem": "All",
-      "offers": [
-        {
-          "@type": "Offer",
-          "name": "Starter Plan",
-          "price": "0.00",
-          "priceCurrency": "USD",
-          "description": "Distribute tracks to major DSPs with an 85% royalty split.",
-          "url": "https://distro.audiory.site/pricing/"
-        },
-        {
-          "@type": "Offer",
-          "name": "Pro Artist Plan",
-          "price": "19.99",
-          "priceCurrency": "USD",
-          "priceValidUntil": "2027-12-31",
-          "description": "Unlimited distribution for 1 artist with 100% royalty retention.",
-          "url": "https://distro.audiory.site/pricing/"
-        },
-        {
-          "@type": "Offer",
-          "name": "Label Unlimited Plan",
-          "price": "49.99",
-          "priceCurrency": "USD",
-          "priceValidUntil": "2027-12-31",
-          "description": "Unlimited distribution for up to 5 artists with custom ISRCs and priority approval.",
-          "url": "https://distro.audiory.site/pricing/"
-        }
-      ]
-    }
-    </script>
+    <title>Pricing & Plans — Audiory Distribution</title>
+    <meta name="description" content="Transparent pricing for independent artists and record labels. Keep 100% of your rights with no hidden fees.">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -91,382 +44,288 @@
             }
         }
     </script>
-
+    
     <style>
         body {
             background-color: #07090e;
             color: #f3f4f6;
             font-family: 'Plus Jakarta Sans', sans-serif;
-            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .gradient-border-card {
-            position: relative;
-            background: #121824;
-            border-radius: 1.25rem;
+        .gradient-text {
+            background: linear-gradient(135deg, #00f2fe 0%, #4f46e5 50%, #ff0080 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .gradient-border-card::before {
-            content: '';
-            position: absolute;
-            inset: -1px;
-            border-radius: 1.3rem;
-            padding: 1px;
-            background: linear-gradient(135deg, rgba(0,242,254,0.3), rgba(121,40,202,0.3), rgba(255,0,128,0.3));
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            pointer-events: none;
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
         }
-
-        .gradient-border-popular {
-            position: relative;
-            background: #151c2d;
-            border-radius: 1.25rem;
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0a0d14;
         }
-
-        .gradient-border-popular::before {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            border-radius: 1.35rem;
-            padding: 2px;
-            background: linear-gradient(135deg, #00f2fe, #7928ca, #ff0080);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            pointer-events: none;
-        }
-
-        .glow-effect {
-            box-shadow: 0 0 50px -10px rgba(0, 242, 254, 0.15);
-        }
-
-        /* Toast Animation */
-        @keyframes slideIn {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .toast-animate {
-            animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 4px;
         }
     </style>
 </head>
-<body class="flex flex-col justify-between antialiased selection:bg-brand-accent selection:text-brand-dark">
+<body class="custom-scrollbar antialiased">
 
-    <!-- Toast Notification Container -->
-    <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full px-4 pointer-events-none"></div>
-
-    <!-- Background Ambient Glow -->
-    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-accent/10 rounded-full blur-[140px] pointer-events-none"></div>
-
-    <!-- ==================== MAIN HEADER / NAV ==================== -->
-    <header class="w-full py-5 px-4 sm:px-8 relative z-20 border-b border-brand-border/40 bg-brand-dark/40 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            
-            <!-- Brand Logo -->
-            <a href="/" class="flex items-center gap-3 shrink-0 group">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20 group-hover:scale-105 transition-transform duration-300">
-                    <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
-                        <i class="fa-solid fa-wave-square text-brand-accent group-hover:rotate-12 transition-transform duration-300"></i>
+    <!-- ==================== HEADER / NAVIGATION ==================== -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-brand-dark/80 border-b border-brand-border/60 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20 group-hover:scale-105 transition-transform duration-300">
+                        <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
+                            <i class="fa-solid font-bold fa-wave-square text-brand-accent group-hover:rotate-12 transition-transform duration-300"></i>
+                        </div>
                     </div>
-                </div>
-                <div class="flex flex-col">
-                    <span class="font-display font-bold text-lg tracking-wider text-white">AUDIORY</span>
-                    <span class="text-[8px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">DISTRIBUTION</span>
-                </div>
-            </a>
-
-            <!-- Central Navigation Links -->
-            <nav class="hidden lg:flex items-center gap-6 text-xs text-gray-300 font-medium">
-                <a href="/#services" class="hover:text-white transition-colors">Services</a>
-                <a href="/#dsp-network" class="hover:text-white transition-colors">DSP Network</a>
-                <a href="/#features" class="hover:text-white transition-colors">Platform Features</a>
-                <a href="/pricing/" class="text-brand-accent font-semibold">Pricing</a>
-                <a href="/#royalty-calculator" class="hover:text-white transition-colors">Royalty Calculator</a>
-                <a href="/#api-access" class="hover:text-white transition-colors">API Access</a>
-            </nav>
-
-            <!-- Right Action Buttons -->
-            <div class="flex items-center gap-3 shrink-0">
-                <a href="/login/" class="px-4 py-2 text-xs sm:text-sm font-medium text-gray-300 hover:text-white rounded-xl border border-brand-border/80 hover:border-brand-border bg-brand-card/50 transition-all">
-                    Sign In
+                    <div class="flex flex-col">
+                        <span class="font-display font-bold text-2xl tracking-wider text-white">AUDIORY</span>
+                        <span class="text-[9px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">DISTRIBUTION</span>
+                    </div>
                 </a>
-                <a href="/signup/" class="px-4 py-2 text-xs sm:text-sm font-bold text-white rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:opacity-90 transition-opacity shadow-md shadow-brand-accent/10">
-                    Start Distributing
-                </a>
-            </div>
 
-        </div>
-    </nav>
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden lg:flex items-center gap-8">
+                    <a href="/#services" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Services</a>
+                    <a href="/#dsp-network" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">DSP Network</a>
+                    <a href="/#features" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Platform Features</a>
+                    <a href="#pricing" class="text-sm font-medium text-brand-accent font-semibold transition-colors duration-200">Pricing</a>
+                    <a href="/#calculator" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Royalty Calculator</a>
+                    <a href="/#api-section" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">API Access</a>
+                </nav>
 
-    <!-- ==================== MAIN PRICING SECTION ==================== -->
-    <main class="py-12 px-4 sm:px-6 lg:px-8 relative z-10 my-auto">
-        <div class="max-w-6xl mx-auto">
-            
-            <!-- Heading -->
-            <div class="text-center mb-12">
-                <span class="px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase bg-brand-accent/10 text-brand-accent border border-brand-accent/20">
-                    Transparent Pricing
-                </span>
-                <h1 class="text-3xl sm:text-5xl font-extrabold font-display text-white mt-4 mb-3">Simple Plans. Zero Hidden Fees.</h1>
-                <p class="text-xs sm:text-sm text-gray-400 max-w-xl mx-auto">Keep 100% of your rights and choose a plan tailored to your release schedule.</p>
+                <!-- Action Buttons (Desktop) -->
+                <div class="hidden sm:flex items-center gap-4">
+                    <a href="/login/" class="text-sm font-semibold text-gray-200 hover:text-white px-4 py-2.5 rounded-xl border border-brand-border hover:border-gray-500 transition-all duration-200">
+                        Sign In
+                    </a>
+                    <a href="/signup/" class="text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:shadow-lg hover:shadow-brand-accent/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+                        Start Distributing
+                    </a>
+                </div>
 
-                <!-- Billing Cycle Toggle -->
-                <div class="flex items-center justify-center gap-3 mt-8">
-                    <span class="text-xs font-semibold text-gray-400" id="monthlyLabel">Monthly</span>
-                    <button type="button" id="toggleBilling" class="w-14 h-8 rounded-full bg-brand-card border border-brand-border p-1 relative transition-colors focus:outline-none">
-                        <div id="toggleDot" class="w-6 h-6 rounded-full bg-brand-accent transition-transform transform translate-x-0"></div>
+                <!-- Mobile Header Right Actions (Visible on Mobile) -->
+                <div class="flex items-center gap-3 sm:hidden">
+                    <a href="/signup/" class="text-xs font-semibold text-white px-3 py-2 rounded-lg bg-gradient-to-r from-brand-accent to-brand-purple">
+                        Get Started
+                    </a>
+                    <button id="mobileMenuBtn" aria-label="Toggle Navigation Menu" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-brand-card focus:outline-none">
+                        <!-- Inline SVG Hamburger Icon ensures it displays reliably without CDN issues -->
+                        <svg id="menuIconSvg" class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                            <path id="hamburgerPath" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
                     </button>
-                    <span class="text-xs font-semibold text-white flex items-center gap-1.5" id="yearlyLabel">
-                        Yearly <span class="bg-brand-pink/20 text-brand-pink border border-brand-pink/30 text-[9px] font-extrabold px-2 py-0.5 rounded-full">Save 20%</span>
-                    </span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobileMenu" class="hidden lg:hidden border-b border-brand-border bg-brand-dark/95 backdrop-blur-2xl transition-all duration-300">
+            <div class="px-4 pt-2 pb-6 space-y-3">
+                <a href="/#services" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Services</a>
+                <a href="/#dsp-network" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">DSP Network</a>
+                <a href="/#features" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Platform Features</a>
+                <a href="#pricing" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-brand-accent hover:bg-brand-card">Pricing</a>
+                <a href="/#calculator" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Royalty Calculator</a>
+                <a href="/#api-section" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">API Access</a>
+                
+                <div class="pt-4 flex flex-col gap-3">
+                    <a href="/login/" class="text-center w-full py-2.5 rounded-xl border border-brand-border text-gray-200 font-semibold">Sign In</a>
+                    <a href="/signup/" class="text-center w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-accent to-brand-purple text-white font-semibold">Start Distributing</a>
                 </div>
             </div>
+        </div>
+    </header>
 
-            <!-- Pricing Cards Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+    <!-- ==================== PRICING HERO & TIERS ==================== -->
+    <section class="py-16 sm:py-24 relative" id="pricing">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h1 class="text-xs font-bold uppercase tracking-widest text-brand-accent mb-3">Simple & Transparent Pricing</h1>
+                <p class="text-4xl sm:text-6xl font-extrabold font-display text-white">Choose The Plan That Scales With You</p>
+                <p class="text-gray-400 text-base sm:text-lg mt-4">Keep 100% of your rights and earnings across all plans. No sneaky contracts or hidden withdrawal charges.</p>
+            </div>
 
-                <!-- 1. STARTER PLAN -->
-                <div class="gradient-border-card p-8 flex flex-col justify-between">
+            <!-- Pricing Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+                
+                <!-- Plan 1: Artist Starter -->
+                <div class="rounded-2xl bg-brand-card border border-brand-border p-8 flex flex-col justify-between hover:border-gray-600 transition-all duration-300">
                     <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-display font-bold text-xl text-white">Starter</h3>
-                            <span class="text-[10px] font-bold uppercase tracking-wider bg-brand-dark px-2.5 py-1 rounded-md border border-brand-border text-gray-400">Free Tier</span>
-                        </div>
-                        <p class="text-xs text-gray-400 mb-6">Perfect for independent creators getting started.</p>
+                        <div class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-gray-800 text-gray-300 mb-4">Independent Artist</div>
+                        <h2 class="text-2xl font-bold font-display text-white mb-2">Starter Plan</h2>
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-brand-dark px-2.5 py-1 rounded-md border border-brand-border text-gray-400">Free Tier</span>
+                        <p class="text-xs text-gray-400 my-4">Perfect for independent creators taking their first step in music distribution.</p>
                         
-                        <div class="mb-6">
-                            <span class="text-4xl font-extrabold font-display text-white">$0</span>
-                            <span class="text-xs text-gray-500">/ forever</span>
+                        <div class="flex items-baseline gap-2 mb-8">
+                            <span class="text-5xl font-extrabold font-display text-white">$0</span>
+                            <span class="text-gray-400 text-sm">/ year</span>
                         </div>
 
-                        <ul class="space-y-3 text-xs text-gray-300 mb-8">
-                            <li class="flex items-center gap-2">
-                                <i class="fa-solid fa-check text-brand-accent"></i> 85% Royalty Retention
+                        <ul class="space-y-4 text-sm text-gray-300 mb-8">
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-brand-accent"></i>
+                                <span>85% Royalty Retention</span>
                             </li>
-                            <li class="flex items-center gap-2">
-                                <i class="fa-solid fa-check text-brand-accent"></i> Distribution to 50+ DSPs
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-brand-accent"></i>
+                                <span>Distribution to 50+ DSPs</span>
                             </li>
-                            <li class="flex items-center gap-2">
-                                <i class="fa-solid fa-check text-brand-accent"></i> Standard Delivery (7-10 Days)
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-brand-accent"></i>
+                                <span>Standard Delivery (7-10 Days)</span>
                             </li>
-                            <li class="flex items-center gap-2">
-                                <i class="fa-solid fa-check text-brand-accent"></i> Basic Monthly Analytics
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-brand-accent"></i>
+                                <span>Basic Monthly Analytics</span>
                             </li>
-                            <li class="flex items-center gap-2 text-gray-500">
-                                <i class="fa-solid fa-xmark text-gray-600"></i> Free UPC & ISRC Codes
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-brand-accent"></i>
+                                <span>Free UPC & ISRC Codes</span>
                             </li>
                         </ul>
                     </div>
 
-                    <a href="/signup/?plan=starter" class="w-full py-3 rounded-xl bg-brand-dark border border-brand-border text-white text-xs font-bold hover:bg-brand-card text-center transition-colors">
-                        Get Started Free
+                    <a href="/signup/?plan=starter" class="w-full py-3.5 rounded-xl border border-brand-border bg-brand-dark hover:border-gray-500 font-bold text-center text-white transition-colors">
+                        Select Starter Plan
                     </a>
                 </div>
 
-                <!-- 2. PRO ARTIST PLAN (POPULAR) -->
-                <div class="gradient-border-popular p-8 flex flex-col justify-between glow-effect relative">
-                    <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-accent to-brand-purple text-brand-dark text-[10px] font-extrabold uppercase px-3 py-1 rounded-full shadow-lg">
+                <!-- Plan 2: Pro & Collaboration (Featured) -->
+                <div class="rounded-2xl bg-brand-card border-2 border-brand-accent p-8 flex flex-col justify-between relative shadow-2xl shadow-brand-accent/10 hover:scale-[1.02] transition-all duration-300">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-brand-accent to-brand-purple text-white text-xs font-bold tracking-wider uppercase shadow-md">
                         Most Popular
                     </div>
 
                     <div>
-                        <div class="flex justify-between items-center mb-4 mt-1">
-                            <h3 class="font-display font-bold text-xl text-white">Pro Artist</h3>
-                            <span class="text-[10px] font-bold uppercase tracking-wider bg-brand-accent/10 text-brand-accent px-2.5 py-1 rounded-md border border-brand-accent/30">1 Artist</span>
-                        </div>
-                        <p class="text-xs text-gray-400 mb-6">For serious solo musicians releasing regularly.</p>
+                        <div class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-brand-accent/20 text-brand-accent mb-4 mt-2">Bands & Producers</div>
+                        <h2 class="text-2xl font-bold font-display text-white mb-2">Pro Artist Plan</h2>
+                        <p class="text-gray-400 text-sm mb-6">Designed for active creators who need automated splits & express delivery.</p>
                         
-                        <div class="mb-6">
-                            <span class="text-4xl font-extrabold font-display text-white price-value" data-monthly="1.99" data-yearly="19.99">$19.99</span>
-                            <span class="text-xs text-gray-500 price-period">/ year</span>
+                        <div class="flex items-baseline gap-2 mb-8">
+                            <span class="text-5xl font-extrabold font-display text-white">$19.99</span>
+                            <span class="text-gray-400 text-sm">/ year</span>
                         </div>
 
-                        <ul class="space-y-3 text-xs text-gray-300 mb-8">
-                            <li class="flex items-center gap-2">
-                                <i class="fa-solid fa-check text-brand-accent"></i> <strong>100% Royalty Retention</strong>
+                        <ul class="space-y-4 text-sm text-gray-300 mb-8">
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-brand-accent"></i>
+                                <span><strong>100% Royalty Retention</strong></span>
                             </li>
-                            <li class="flex items-center gap-2">
-                                <i class="fa-solid fa-check text-brand-accent"></i> Unlimited Songs & Albums
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-brand-accent"></i>
+                                <span>Automated Royalty Splits for Collaborators</span>
                             </li>
-                            <li class="flex items-center gap-2">
-                                <i class="fa-solid fa-check text-brand-accent"></i> Distribution to 150+ DSPs
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-brand-accent"></i>
+                                <span>Custom Release Dates & Pre-Orders</span>
                             </li>
-                            <li class="flex items-center gap-2">
-                                <i class="fa-solid fa-check text-brand-accent"></i> Express Delivery (48-72 Hours)
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-brand-accent"></i>
+                                <span>YouTube Content ID Registration</span>
                             </li>
-                            <li class="flex items-center gap-2">
-                                <i class="fa-solid fa-check text-brand-accent"></i> Free ISRCs & UPC Barcodes
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <i class="fa-solid fa-check text-brand-accent"></i> Daily Analytics & Streaming Trends
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-brand-accent"></i>
+                                <span>Priority 24-Hour Express Delivery</span>
                             </li>
                         </ul>
                     </div>
 
-                    <a href="/signup/?plan=pro" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple text-white text-xs font-bold text-center hover:shadow-lg hover:shadow-brand-accent/25 transition-all">
-                        Start Pro Free Trial
+                    <a href="/signup/?plan=pro" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:shadow-lg hover:shadow-brand-accent/25 font-bold text-center text-white transition-all">
+                        Get Pro Plan Now
                     </a>
                 </div>
 
-                <!-- 3. LABEL UNLIMITED PLAN -->
-                <div class="gradient-border-card p-8 flex flex-col justify-between">
+                <!-- Plan 3: Label Enterprise -->
+                <div class="rounded-2xl bg-brand-card border border-brand-border p-8 flex flex-col justify-between hover:border-gray-600 transition-all duration-300">
                     <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-display font-bold text-xl text-white">Label Unlimited</h3>
-                            <span class="text-[10px] font-bold uppercase tracking-wider bg-brand-dark px-2.5 py-1 rounded-md border border-brand-border text-gray-400">Up to 5 Artists</span>
-                        </div>
-                        <p class="text-xs text-gray-400 mb-6">Designed for indie labels and management teams.</p>
+                        <div class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-purple-900/40 text-purple-300 mb-4">Record Labels & Managers</div>
+                        <h2 class="text-2xl font-bold font-display text-white mb-2">Label Partner Plan</h2>
+                        <p class="text-gray-400 text-sm mb-6">Full infrastructure suite for managing multiple artists & large catalogs.</p>
                         
-                        <div class="mb-6">
-                            <span class="text-4xl font-extrabold font-display text-white price-value" data-monthly="4.99" data-yearly="49.99">$49.99</span>
-                            <span class="text-xs text-gray-500 price-period">/ year</span>
+                        <div class="flex items-baseline gap-2 mb-8">
+                            <span class="text-5xl font-extrabold font-display text-white">$49.99</span>
+                            <span class="text-gray-400 text-sm">/ year</span>
                         </div>
 
-                        <ul class="space-y-3 text-xs text-gray-300 mb-8">
-                            <li class="flex items-center gap-2">
-                                <i class="fa-solid fa-check text-brand-accent"></i> <strong>100% Royalty Retention</strong>
+                        <ul class="space-y-4 text-sm text-gray-300 mb-8">
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-brand-accent"></i>
+                                <span>Unlimited Artists & Catalog Hosting</span>
                             </li>
-                            <li class="flex items-center gap-2">
-                                <i class="fa-solid fa-check text-brand-accent"></i> 5 Artist Profiles Included
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-brand-accent"></i>
+                                <span>Dedicated Cloud Run Backend Endpoint API</span>
                             </li>
-                            <li class="flex items-center gap-2">
-                                <i class="fa-solid fa-check text-brand-accent"></i> Priority DSP Release Review
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-brand-accent"></i>
+                                <span>Custom Label ISRC & UPC Generator</span>
                             </li>
-                            <li class="flex items-center gap-2">
-                                <i class="fa-solid fa-check text-brand-accent"></i> Custom Label Name & ISRCs
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-brand-accent"></i>
+                                <span>Playlist Pitching & Marketing Support</span>
                             </li>
-                            <li class="flex items-center gap-2">
-                                <i class="fa-solid fa-check text-brand-accent"></i> Automated Royalty Splitting
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <i class="fa-solid fa-check text-brand-accent"></i> Dedicated Account Manager
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-brand-accent"></i>
+                                <span>Dedicated Account Manager</span>
                             </li>
                         </ul>
                     </div>
 
-                    <a href="/signup/?plan=label" class="w-full py-3 rounded-xl bg-brand-dark border border-brand-border text-white text-xs font-bold hover:bg-brand-card text-center transition-colors">
-                        Choose Label Plan
+                    <a href="/signup/?plan=label" class="w-full py-3.5 rounded-xl border border-brand-border bg-brand-dark hover:border-gray-500 font-bold text-center text-white transition-colors">
+                        Apply For Label Plan
                     </a>
                 </div>
 
             </div>
-
         </div>
-    </main>
+    </section>
 
     <!-- ==================== FOOTER ==================== -->
-    <footer class="pt-16 pb-8 px-4 sm:px-8 border-t border-brand-border/40 relative z-10 bg-brand-dark/50 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-10 mb-12">
-                
-                <!-- Col 1: Brand Info -->
-                <div class="md:col-span-2 space-y-4">
-                    <a href="/" class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5">
-                            <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
-                                <i class="fa-solid fa-wave-square text-brand-accent text-sm"></i>
-                            </div>
-                        </div>
-                        <span class="font-display font-bold text-lg tracking-wider text-white">AUDIORY</span>
-                    </a>
-                    <p class="text-xs text-gray-400 leading-relaxed max-w-sm">
-                        Audiory Distribution provides premier global music distribution infrastructure, automated splits, rights protection, and API capabilities for modern artists and record labels.
-                    </p>
-                    <div class="flex items-center gap-3 pt-2">
-                        <a href="https://instagram.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-brand-card border border-brand-border flex items-center justify-center text-gray-400 hover:text-white hover:border-brand-accent transition-colors">
-                            <i class="fa-brands fa-instagram text-xs"></i>
-                        </a>
-                        <a href="https://twitter.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-brand-card border border-brand-border flex items-center justify-center text-gray-400 hover:text-white hover:border-brand-accent transition-colors">
-                            <i class="fa-brands fa-x-twitter text-xs"></i>
-                        </a>
-                        <a href="https://tiktok.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-brand-card border border-brand-border flex items-center justify-center text-gray-400 hover:text-white hover:border-brand-accent transition-colors">
-                            <i class="fa-brands fa-tiktok text-xs"></i>
-                        </a>
-                        <a href="https://youtube.com" target="_blank" rel="noopener" class="w-8 h-8 rounded-lg bg-brand-card border border-brand-border flex items-center justify-center text-gray-400 hover:text-white hover:border-brand-accent transition-colors">
-                            <i class="fa-brands fa-youtube text-xs"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Col 2: Solutions -->
-                <div>
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Solutions</h3>
-                    <ul class="space-y-3 text-sm text-gray-400">
-                        <li><a href="/music-distribution/" class="hover:text-brand-accent transition-colors">Music Distribution</a></li>
-                        <li><a href="/content-id/" class="hover:text-brand-accent transition-colors">YouTube Content ID</a></li>
-                        <li><a href="/splits/" class="hover:text-brand-accent transition-colors">Automated Splits</a></li>
-                        <li><a href="/analytics/" class="hover:text-brand-accent transition-colors">Analytics Telemetry</a></li>
-                        <li><a href="/smart-links/" class="hover:text-brand-accent transition-colors">Smart Links Engine</a></li>
-                    </ul>
-                </div>
-
-                <!-- Col 3: Resources -->
-                <div>
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Resources</h3>
-                    <ul class="space-y-3 text-sm text-gray-400">
-                        <li><a href="/knowledge-base/" class="hover:text-brand-accent transition-colors">Knowledge Base</a></li>
-                        <li><a href="/royalty-guide/" class="hover:text-brand-accent transition-colors">Royalty Guide</a></li>
-                        <li><a href="/api-documentation/" class="hover:text-brand-accent transition-colors">API Documentation</a></li>
-                        <li><a href="/platform-status/" class="hover:text-brand-accent transition-colors">Platform Status</a></li>
-                    </ul>
-                </div>
-
-                <!-- Col 4: Legal & Company -->
-                <div>
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Legal & Company</h3>
-                    <ul class="space-y-3 text-sm text-gray-400">
-                        <li><a href="/privacy/" class="hover:text-brand-accent transition-colors">Privacy Policy</a></li>
-                        <li><a href="/terms/" class="hover:text-brand-accent transition-colors">Terms of Service</a></li>
-                        <li><a href="/dmca/" class="hover:text-brand-accent transition-colors">Copyright / DMCA</a></li>
-                        <li><a href="/support/" class="hover:text-brand-accent transition-colors">Contact Support</a></li>
-                    </ul>
-                </div>
-
-            </div>
-
-            <!-- Bottom Copyright Bar -->
+    <footer class="bg-brand-dark border-t border-brand-border/60 pt-16 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="pt-8 border-t border-brand-border/40 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500">
                 <p>&copy; 2026 Audiory Distribution Inc. All rights reserved.</p>
                 <div class="flex gap-6">
-                    <a href="/security/" class="hover:text-gray-400 transition-colors">Security</a>
-                    <a href="/privacy/" class="hover:text-gray-400 transition-colors">Privacy</a>
-                    <a href="/cookies/" class="hover:text-gray-400 transition-colors">Cookies</a>
+                    <a href="/security/" class="hover:text-gray-400">Security</a>
+                    <a href="/privacy/" class="hover:text-gray-400">Privacy</a>
+                    <a href="/cookies/" class="hover:text-gray-400">Cookies</a>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Interactive Toggle Script -->
+    <!-- ==================== JAVASCRIPT FOR MOBILE MENU ==================== -->
     <script>
-        const toggleBilling = document.getElementById('toggleBilling');
-        const toggleDot = document.getElementById('toggleDot');
-        const priceValues = document.querySelectorAll('.price-value');
-        const pricePeriods = document.querySelectorAll('.price-period');
-        
-        let isYearly = true;
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const hamburgerPath = document.getElementById('hamburgerPath');
 
-        toggleBilling.addEventListener('click', () => {
-            isYearly = !isYearly;
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
             
-            if (isYearly) {
-                toggleDot.classList.remove('translate-x-6');
-                toggleDot.classList.add('translate-x-0');
-                
-                priceValues.forEach(el => {
-                    el.textContent = '$' + el.getAttribute('data-yearly');
-                });
-                pricePeriods.forEach(el => el.textContent = '/ year');
+            // Toggle hamburger icon to an "X" icon when active
+            if (mobileMenu.classList.contains('hidden')) {
+                hamburgerPath.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
             } else {
-                toggleDot.classList.remove('translate-x-0');
-                toggleDot.classList.add('translate-x-6');
-                
-                priceValues.forEach(el => {
-                    el.textContent = '$' + el.getAttribute('data-monthly');
-                });
-                pricePeriods.forEach(el => el.textContent = '/ month');
+                hamburgerPath.setAttribute('d', 'M6 18L18 6M6 6l12 12');
             }
+        });
+
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                hamburgerPath.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+            });
         });
     </script>
 </body>
