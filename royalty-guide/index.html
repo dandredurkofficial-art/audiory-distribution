@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Ultimate Music Royalty & Payout Guide — Audiory Distribution</title>
+    <meta name="description" content="A comprehensive, 2026 industry-grade guide on music royalty calculation, DSP payout metrics, mechanical royalties, performance rights, and revenue splits.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            accent: '#00f2fe',
+                            purple: '#7928ca',
+                            pink: '#ff0080',
+                            dark: '#0a0d14',
+                            card: '#121824',
+                            border: '#1f293d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #07090e;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00f2fe 0%, #4f46e5 50%, #ff0080 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0a0d14;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+
+        .glow-box {
+            box-shadow: 0 0 35px -10px rgba(0, 242, 254, 0.15);
+        }
+    </style>
+</head>
+<body class="custom-scrollbar antialiased selection:bg-brand-accent selection:text-brand-dark">
+
+    <!-- ==================== HEADER / NAVIGATION ==================== -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-brand-dark/80 border-b border-brand-border/60 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20 group-hover:scale-105 transition-transform duration-300">
+                        <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
+                            <i class="fa-solid font-bold fa-wave-square text-brand-accent group-hover:rotate-12 transition-transform duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-display font-bold text-2xl tracking-wider text-white">AUDIORY</span>
+                        <span class="text-[9px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">DISTRIBUTION</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden lg:flex items-center gap-8">
+                    <a href="/#services" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Services</a>
+                    <a href="/#dsp-network" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">DSP Network</a>
+                    <a href="/#features" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Platform Features</a>
+                    <a href="/pricing/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Pricing</a>
+                    <a href="#calculator" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Calculator</a>
+                    <a href="/royalty-guide/" class="text-sm font-medium text-brand-accent font-semibold transition-colors duration-200">Royalty Guide</a>
+                </nav>
+
+                <!-- Action Buttons (Desktop) -->
+                <div class="hidden sm:flex items-center gap-4">
+                    <a href="/login/" class="text-sm font-semibold text-gray-200 hover:text-white px-4 py-2.5 rounded-xl border border-brand-border hover:border-gray-500 transition-all duration-200">
+                        Sign In
+                    </a>
+                    <a href="/signup/" class="text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:shadow-lg hover:shadow-brand-accent/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+                        Start Distributing
+                    </a>
+                </div>
+
+                <!-- Mobile Header Right Actions -->
+                <div class="flex items-center gap-3 sm:hidden">
+                    <a href="/signup/" class="text-xs font-semibold text-white px-3 py-2 rounded-lg bg-gradient-to-r from-brand-accent to-brand-purple">
+                        Get Started
+                    </a>
+                    <button id="mobileMenuBtn" aria-label="Toggle Navigation Menu" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-brand-card focus:outline-none">
+                        <svg id="menuIconSvg" class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                            <path id="hamburgerPath" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobileMenu" class="hidden lg:hidden border-b border-brand-border bg-brand-dark/95 backdrop-blur-2xl transition-all duration-300">
+            <div class="px-4 pt-2 pb-6 space-y-3">
+                <a href="/#services" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Services</a>
+                <a href="/#dsp-network" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">DSP Network</a>
+                <a href="/#features" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Platform Features</a>
+                <a href="/pricing/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Pricing</a>
+                <a href="#calculator" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Calculator</a>
+                <a href="/royalty-guide/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-brand-accent hover:bg-brand-card">Royalty Guide</a>
+                
+                <div class="pt-4 flex flex-col gap-3">
+                    <a href="/login/" class="text-center w-full py-2.5 rounded-xl border border-brand-border text-gray-200 font-semibold">Sign In</a>
+                    <a href="/signup/" class="text-center w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-accent to-brand-purple text-white font-semibold">Start Distributing</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== HERO SECTION ==================== -->
+    <section class="relative pt-16 pb-20 overflow-hidden border-b border-brand-border/40">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,242,254,0.15),rgba(255,255,255,0))]"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col items-center text-center max-w-4xl mx-auto">
+                
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-card border border-brand-border mb-6">
+                    <span class="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
+                    <span class="text-xs font-semibold text-gray-300 uppercase tracking-widest">Industry Knowledge Base — 2026 Edition</span>
+                </div>
+
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold font-display text-white tracking-tight leading-tight">
+                    The Complete Masterclass On <span class="gradient-text">Music Royalty Engineering</span>
+                </h1>
+
+                <p class="text-gray-400 text-base sm:text-xl mt-6 max-w-2xl leading-relaxed">
+                    Unpack how digital service providers (DSPs) pay, master sound recording rights vs. publishing copyrights, mechanical syncs, and how to maximize every penny of stream income.
+                </p>
+
+                <!-- Navigation Quick-Links Bar -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-3xl mt-10">
+                    <a href="#calculator" class="p-3 rounded-xl bg-brand-card border border-brand-border hover:border-brand-accent/50 text-xs font-semibold text-gray-300 hover:text-white transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-calculator text-brand-accent"></i> Live Calculator
+                    </a>
+                    <a href="#royalty-types" class="p-3 rounded-xl bg-brand-card border border-brand-border hover:border-brand-accent/50 text-xs font-semibold text-gray-300 hover:text-white transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-layer-group text-brand-accent"></i> Stream Types
+                    </a>
+                    <a href="#dsp-payouts" class="p-3 rounded-xl bg-brand-card border border-brand-border hover:border-brand-accent/50 text-xs font-semibold text-gray-300 hover:text-white transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-chart-line text-brand-accent"></i> DSP Rates 2026
+                    </a>
+                    <a href="#glossary" class="p-3 rounded-xl bg-brand-card border border-brand-border hover:border-brand-accent/50 text-xs font-semibold text-gray-300 hover:text-white transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-book text-brand-accent"></i> Music Glossary
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 1: LIVE INTERACTIVE CALCULATOR ==================== -->
+    <section class="py-20 border-b border-brand-border/40" id="calculator">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="text-xs font-bold text-brand-accent uppercase tracking-widest mb-2">Simulate Earnings</h2>
+                <p class="text-3xl sm:text-5xl font-extrabold font-display text-white">Interactive Royalty Estimator</p>
+                <p class="text-gray-400 text-sm mt-3">Adjust total stream count and platform breakdown to forecast expected payouts before distribution.</p>
+            </div>
+
+            <div class="bg-brand-card border border-brand-border rounded-3xl p-6 sm:p-10 glow-box max-w-5xl mx-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    
+                    <!-- Controls Side -->
+                    <div class="lg:col-span-7 space-y-6">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label for="streamRange" class="text-sm font-semibold text-gray-200">Estimated Total Streams:</label>
+                                <span class="text-xl font-bold font-mono text-brand-accent" id="streamDisplay">500,000</span>
+                            </div>
+                            <input type="range" id="streamRange" min="10000" max="10000000" step="10000" value="500000" class="w-full h-2 bg-brand-dark rounded-lg appearance-none cursor-pointer accent-brand-accent">
+                            <div class="flex justify-between text-[10px] text-gray-500 mt-1 font-mono">
+                                <span>10K</span>
+                                <span>1M</span>
+                                <span>5M</span>
+                                <span>10M</span>
+                            </div>
+                        </div>
+
+                        <!-- DSP Weight Selectors -->
+                        <div class="grid grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Target Region Share</label>
+                                <select id="regionSelect" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2.5 text-xs text-gray-200 focus:outline-none focus:border-brand-accent">
+                                    <option value="1.0">US & Global Weighted Average</option>
+                                    <option value="1.35">North America Tier 1 (Highest)</option>
+                                    <option value="0.75">Western Europe Tier 2</option>
+                                    <option value="0.35">Latin America / Asia Tier 3</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Subscription Model Tier</label>
+                                <select id="tierSelect" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2.5 text-xs text-gray-200 focus:outline-none focus:border-brand-accent">
+                                    <option value="1.0">Mixed Premium & Free Ad-Tier</option>
+                                    <option value="1.6">100% Premium Subscribers</option>
+                                    <option value="0.3">100% Free Ad-Supported Listeners</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-brand-dark/60 border border-brand-border text-xs text-gray-400 space-y-1">
+                            <p class="font-semibold text-gray-300"><i class="fa-solid fa-circle-info text-brand-accent mr-1"></i> Pro-Rata Math Note:</p>
+                            <p>Actual payout fluctuates based on monthly pool size, user subscription pricing in each territory, and currency conversions.</p>
+                        </div>
+                    </div>
+
+                    <!-- Output Side -->
+                    <div class="lg:col-span-5 bg-brand-dark rounded-2xl p-6 border border-brand-border flex flex-col justify-between h-full">
+                        <div>
+                            <span class="text-xs uppercase tracking-widest text-gray-400 font-semibold">Estimated Gross Revenue</span>
+                            <div class="text-4xl sm:text-5xl font-extrabold font-mono text-white mt-2 mb-4" id="totalPayout">$2,100.00</div>
+                            <div class="h-px bg-brand-border my-4"></div>
+                        </div>
+
+                        <!-- Per Platform Breakdown -->
+                        <div class="space-y-3 text-xs">
+                            <div class="flex justify-between items-center">
+                                <span class="flex items-center gap-2 text-gray-300"><i class="fa-brands fa-spotify text-green-500"></i> Spotify Est.</span>
+                                <span class="font-mono text-white" id="spotifyPay">$1,900</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="flex items-center gap-2 text-gray-300"><i class="fa-brands fa-apple text-gray-200"></i> Apple Music Est.</span>
+                                <span class="font-mono text-white" id="applePay">$3,800</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="flex items-center gap-2 text-gray-300"><i class="fa-brands fa-youtube text-red-500"></i> YouTube Content ID</span>
+                                <span class="font-mono text-white" id="ytPay">$400</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="flex items-center gap-2 text-gray-300"><i class="fa-solid fa-music text-blue-400"></i> Tidal / Amazon Est.</span>
+                                <span class="font-mono text-white" id="tidalPay">$4,200</span>
+                            </div>
+                        </div>
+
+                        <a href="/signup/" class="mt-6 w-full py-3 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs text-center block hover:opacity-90 transition-opacity">
+                            Claim 100% Royalties With Audiory
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 2: THE 2 COPYRIGHT FOUNDATIONS ==================== -->
+    <section class="py-20 border-b border-brand-border/40" id="copyright-foundations">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs font-bold text-brand-accent uppercase tracking-widest mb-2">Legal Architecture</h2>
+                <p class="text-3xl sm:text-5xl font-extrabold font-display text-white">Every Song Has Two Copyrights</p>
+                <p class="text-gray-400 text-sm mt-3">Understanding the legal split between the Master Sound Recording and the Composition Composition Copyright.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- Master Right -->
+                <div class="bg-brand-card border border-brand-border rounded-3xl p-8 hover:border-brand-accent/50 transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-accent/10 flex items-center justify-center text-brand-accent mb-6 text-xl">
+                        <i class="fa-solid fa-compact-disc"></i>
+                    </div>
+                    <div class="inline-block px-3 py-1 rounded-full bg-brand-accent/20 text-brand-accent text-xs font-bold uppercase mb-3">Sound Recording Copyright</div>
+                    <h3 class="text-2xl font-bold font-display text-white mb-3">1. The Master Right (℗)</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                        The Master copyright covers the specific audio recording rendered into WAV or FLAC files. Controlled by recording artists, producers, or record labels.
+                    </p>
+
+                    <div class="space-y-3 border-t border-brand-border pt-4 text-xs text-gray-300">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Primary Payout Channels:</span>
+                            <span class="font-semibold text-white">Spotify, Apple, Digital Retailers</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Collection Agent:</span>
+                            <span class="font-semibold text-white">Digital Music Distributor (Audiory)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Code Identifier:</span>
+                            <span class="font-mono text-brand-accent">ISRC Code</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Composition Right -->
+                <div class="bg-brand-card border border-brand-border rounded-3xl p-8 hover:border-brand-purple/50 transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-purple/10 flex items-center justify-center text-brand-purple mb-6 text-xl">
+                        <i class="fa-solid fa-file-lines"></i>
+                    </div>
+                    <div class="inline-block px-3 py-1 rounded-full bg-brand-purple/20 text-brand-purple text-xs font-bold uppercase mb-3">Composition Copyright</div>
+                    <h3 class="text-2xl font-bold font-display text-white mb-3">2. The Composition Right (©)</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                        The Composition represents the underlying musical composition: sheet music, melody, chord progressions, and lyrics. Controlled by Songwriters and Music Publishers.
+                    </p>
+
+                    <div class="space-y-3 border-t border-brand-border pt-4 text-xs text-gray-300">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Primary Payout Channels:</span>
+                            <span class="font-semibold text-white">Performance Rights Organizations (PROs)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Collection Agent:</span>
+                            <span class="font-semibold text-white">BMI, ASCAP, PRS, Mechanical Licensing Collective</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Code Identifier:</span>
+                            <span class="font-mono text-brand-purple">ISWC Code</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 3: DEEP DIVE INTO ROYALTY TYPES ==================== -->
+    <section class="py-20 border-b border-brand-border/40" id="royalty-types">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs font-bold text-brand-accent uppercase tracking-widest mb-2">Revenue Streams Explored</h2>
+                <p class="text-3xl sm:text-5xl font-extrabold font-display text-white">The 4 Core Music Royalty Streams</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- Card 1 -->
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl space-y-4 hover:border-gray-500 transition-all">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold">01</div>
+                    <h3 class="text-lg font-bold text-white font-display">Master Streaming Royalties</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        Generated whenever an audio master file is streamed on interactive platforms like Spotify, Apple Music, and Amazon Music. Paid directly to distributor.
+                    </p>
+                    <span class="inline-block text-[11px] font-semibold text-brand-accent">Collected by: Audiory</span>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl space-y-4 hover:border-gray-500 transition-all">
+                    <div class="w-10 h-10 rounded-xl bg-green-500/10 text-green-400 flex items-center justify-center font-bold">02</div>
+                    <h3 class="text-lg font-bold text-white font-display">Digital Mechanical Royalties</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        Triggered when music is reproduced digitally (e.g., streaming playback or direct downloads). Covers composition reproduction rights.
+                    </p>
+                    <span class="inline-block text-[11px] font-semibold text-green-400">Collected by: MLC / Publishers</span>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl space-y-4 hover:border-gray-500 transition-all">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center font-bold">03</div>
+                    <h3 class="text-lg font-bold text-white font-display">Performance Royalties</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        Generated when music is performed publicly, broadcasted on terrestrial radio, TV shows, venue speakers, or digital streams.
+                    </p>
+                    <span class="inline-block text-[11px] font-semibold text-purple-400">Collected by: PROs (ASCAP/BMI)</span>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl space-y-4 hover:border-gray-500 transition-all">
+                    <div class="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-400 flex items-center justify-center font-bold">04</div>
+                    <h3 class="text-lg font-bold text-white font-display">Synchronization (Sync) Fees</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        Upfront licensing fees generated when audio is synchronized with visual media like movies, video games, commercials, or TV series.
+                    </p>
+                    <span class="inline-block text-[11px] font-semibold text-pink-400">Collected by: Sync Licensing Agents</span>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 4: 2026 DSP PAYOUT COMPARISON TABLE ==================== -->
+    <section class="py-20 border-b border-brand-border/40" id="dsp-payouts">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs font-bold text-brand-accent uppercase tracking-widest mb-2">Market Intelligence</h2>
+                <p class="text-3xl sm:text-5xl font-extrabold font-display text-white">2026 DSP Payout Rate Metrics</p>
+                <p class="text-gray-400 text-sm mt-3">Average per-stream payout estimates across major Global Digital Service Providers.</p>
+            </div>
+
+            <!-- Table Container -->
+            <div class="overflow-x-auto bg-brand-card border border-brand-border rounded-2xl">
+                <table class="w-full text-left text-xs sm:text-sm text-gray-300">
+                    <thead class="bg-brand-dark/80 uppercase text-[10px] font-mono tracking-wider text-gray-400 border-b border-brand-border">
+                        <tr>
+                            <th scope="col" class="py-4 px-6">Digital Platform</th>
+                            <th scope="col" class="py-4 px-6">Avg. Pay Per Stream</th>
+                            <th scope="col" class="py-4 px-6">Streams For $1,000 USD</th>
+                            <th scope="col" class="py-4 px-6">Payout Model</th>
+                            <th scope="col" class="py-4 px-6">Payment Frequency</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-brand-border/60 font-mono">
+                        <tr class="hover:bg-brand-dark/40 transition-colors">
+                            <td class="py-4 px-6 font-sans font-semibold text-white flex items-center gap-3">
+                                <i class="fa-brands fa-apple text-gray-300 text-lg"></i> Apple Music
+                            </td>
+                            <td class="py-4 px-6 text-brand-accent">$0.0075 - $0.0100</td>
+                            <td class="py-4 px-6 text-gray-300">~ 100,000 - 133,000</td>
+                            <td class="py-4 px-6 text-gray-400 font-sans">Pro-Rata / Spatial Audio Bonus</td>
+                            <td class="py-4 px-6 text-gray-400 font-sans">Monthly (+45 Days)</td>
+                        </tr>
+                        <tr class="hover:bg-brand-dark/40 transition-colors">
+                            <td class="py-4 px-6 font-sans font-semibold text-white flex items-center gap-3">
+                                <i class="fa-solid fa-music text-blue-400 text-lg"></i> Tidal
+                            </td>
+                            <td class="py-4 px-6 text-brand-accent">$0.0125 - $0.0130</td>
+                            <td class="py-4 px-6 text-gray-300">~ 77,000 - 80,000</td>
+                            <td class="py-4 px-6 text-gray-400 font-sans">Direct Artist Payout Tier</td>
+                            <td class="py-4 px-6 text-gray-400 font-sans">Monthly (+30 Days)</td>
+                        </tr>
+                        <tr class="hover:bg-brand-dark/40 transition-colors">
+                            <td class="py-4 px-6 font-sans font-semibold text-white flex items-center gap-3">
+                                <i class="fa-brands fa-spotify text-green-500 text-lg"></i> Spotify
+                            </td>
+                            <td class="py-4 px-6 text-brand-accent">$0.0033 - $0.0045</td>
+                            <td class="py-4 px-6 text-gray-300">~ 220,000 - 300,000</td>
+                            <td class="py-4 px-6 text-gray-400 font-sans">Stream Share Pool (1,000 threshold)</td>
+                            <td class="py-4 px-6 text-gray-400 font-sans">Monthly (+60 Days)</td>
+                        </tr>
+                        <tr class="hover:bg-brand-dark/40 transition-colors">
+                            <td class="py-4 px-6 font-sans font-semibold text-white flex items-center gap-3">
+                                <i class="fa-brands fa-amazon text-yellow-500 text-lg"></i> Amazon Music
+                            </td>
+                            <td class="py-4 px-6 text-brand-accent">$0.0040 - $0.0050</td>
+                            <td class="py-4 px-6 text-gray-300">~ 200,000 - 250,000</td>
+                            <td class="py-4 px-6 text-gray-400 font-sans">Pro-Rata Pool</td>
+                            <td class="py-4 px-6 text-gray-400 font-sans">Monthly (+60 Days)</td>
+                        </tr>
+                        <tr class="hover:bg-brand-dark/40 transition-colors">
+                            <td class="py-4 px-6 font-sans font-semibold text-white flex items-center gap-3">
+                                <i class="fa-brands fa-youtube text-red-500 text-lg"></i> YouTube Content ID
+                            </td>
+                            <td class="py-4 px-6 text-brand-accent">$0.0008 - $0.0015</td>
+                            <td class="py-4 px-6 text-gray-300">~ 666,000 - 1,250,000</td>
+                            <td class="py-4 px-6 text-gray-400 font-sans">Ad Revenue Share / Shorts Pool</td>
+                            <td class="py-4 px-6 text-gray-400 font-sans">Monthly (+60 Days)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 5: SPLITS & CONTRACT MATHEMATICS ==================== -->
+    <section class="py-20 border-b border-brand-border/40" id="splits-math">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs font-bold text-brand-accent uppercase tracking-widest mb-2">Automated Financial Workflows</h2>
+                <p class="text-3xl sm:text-5xl font-extrabold font-display text-white">How Royalty Splits Work</p>
+                <p class="text-gray-400 text-sm mt-3">Audiory eliminates manual split accounting by letting creators set automatic payout rules per collaborator.</p>
+            </div>
+
+            <!-- Visual Split Breakdown Container -->
+            <div class="bg-brand-card border border-brand-border rounded-3xl p-8 max-w-4xl mx-auto">
+                <h3 class="text-xl font-bold font-display text-white mb-6">Real-World Case Study: 4-Way Track Collaboration</h3>
+                
+                <div class="space-y-4 font-mono text-xs">
+                    <!-- Collaborator 1 -->
+                    <div>
+                        <div class="flex justify-between text-gray-300 mb-1">
+                            <span>Primary Recording Artist (45%)</span>
+                            <span class="text-brand-accent">$4,500.00 / $10,000 Gross</span>
+                        </div>
+                        <div class="w-full h-3 bg-brand-dark rounded-full overflow-hidden">
+                            <div class="h-full bg-brand-accent" style="width: 45%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Collaborator 2 -->
+                    <div>
+                        <div class="flex justify-between text-gray-300 mb-1">
+                            <span>Featured Vocalist (25%)</span>
+                            <span class="text-brand-purple">$2,500.00 / $10,000 Gross</span>
+                        </div>
+                        <div class="w-full h-3 bg-brand-dark rounded-full overflow-hidden">
+                            <div class="h-full bg-brand-purple" style="width: 25%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Collaborator 3 -->
+                    <div>
+                        <div class="flex justify-between text-gray-300 mb-1">
+                            <span>Beat Maker / Main Producer (20%)</span>
+                            <span class="text-pink-500">$2,000.00 / $10,000 Gross</span>
+                        </div>
+                        <div class="w-full h-3 bg-brand-dark rounded-full overflow-hidden">
+                            <div class="h-full bg-pink-500" style="width: 20%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Collaborator 4 -->
+                    <div>
+                        <div class="flex justify-between text-gray-300 mb-1">
+                            <span>Mixing & Mastering Engineer (10%)</span>
+                            <span class="text-yellow-400">$1,000.00 / $10,000 Gross</span>
+                        </div>
+                        <div class="w-full h-3 bg-brand-dark rounded-full overflow-hidden">
+                            <div class="h-full bg-yellow-400" style="width: 10%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-brand-border flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-400">
+                    <p><i class="fa-solid fa-bolt text-brand-accent"></i> Automated by Audiory Core System — Zero Manual Transfer Fees.</p>
+                    <a href="/signup/" class="px-4 py-2 rounded-xl bg-brand-dark border border-brand-border hover:border-gray-500 text-white font-semibold">Configure Splits</a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 6: INTERACTIVE GLOSSARY ==================== -->
+    <section class="py-20 border-b border-brand-border/40" id="glossary">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <h2 class="text-xs font-bold text-brand-accent uppercase tracking-widest mb-2">Music Industry Terms</h2>
+                <p class="text-3xl sm:text-5xl font-extrabold font-display text-white">Essential Royalty Glossary</p>
+            </div>
+
+            <!-- Search Field -->
+            <div class="max-w-md mx-auto mb-10">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                    <input type="text" id="glossarySearch" placeholder="Search terms (e.g. ISRC, PRO, Mechanical, Recoupment)..." class="w-full pl-11 pr-4 py-3 rounded-2xl bg-brand-card border border-brand-border text-sm text-white focus:outline-none focus:border-brand-accent">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="glossaryGrid">
+                
+                <!-- Term 1 -->
+                <div class="glossary-card bg-brand-card border border-brand-border p-6 rounded-2xl">
+                    <span class="text-[10px] font-mono uppercase text-brand-accent bg-brand-accent/10 px-2 py-1 rounded">Identification Code</span>
+                    <h3 class="text-lg font-bold text-white font-display mt-2">ISRC Code</h3>
+                    <p class="text-xs text-gray-400 mt-2 leading-relaxed">International Standard Recording Code. A unique 12-character alphanumeric identifier assigned to a specific audio recording master.</p>
+                </div>
+
+                <!-- Term 2 -->
+                <div class="glossary-card bg-brand-card border border-brand-border p-6 rounded-2xl">
+                    <span class="text-[10px] font-mono uppercase text-brand-purple bg-brand-purple/10 px-2 py-1 rounded">Publishing Code</span>
+                    <h3 class="text-lg font-bold text-white font-display mt-2">ISWC Code</h3>
+                    <p class="text-xs text-gray-400 mt-2 leading-relaxed">International Standard Musical Work Code. Unique identifier for musical compositions (lyrics and melodies) distinct from recording masters.</p>
+                </div>
+
+                <!-- Term 3 -->
+                <div class="glossary-card bg-brand-card border border-brand-border p-6 rounded-2xl">
+                    <span class="text-[10px] font-mono uppercase text-pink-500 bg-pink-500/10 px-2 py-1 rounded">Legal Concept</span>
+                    <h3 class="text-lg font-bold text-white font-display mt-2">Recoupment</h3>
+                    <p class="text-xs text-gray-400 mt-2 leading-relaxed">The process where a record label or distributor retains incoming royalties to repay an upfront financial advance or production expense.</p>
+                </div>
+
+                <!-- Term 4 -->
+                <div class="glossary-card bg-brand-card border border-brand-border p-6 rounded-2xl">
+                    <span class="text-[10px] font-mono uppercase text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded">Organization</span>
+                    <h3 class="text-lg font-bold text-white font-display mt-2">PRO (Performance Rights Org)</h3>
+                    <p class="text-xs text-gray-400 mt-2 leading-relaxed">Agencies like BMI, ASCAP, and PRS that collect public performance royalties on behalf of songwriters and publishers.</p>
+                </div>
+
+                <!-- Term 5 -->
+                <div class="glossary-card bg-brand-card border border-brand-border p-6 rounded-2xl">
+                    <span class="text-[10px] font-mono uppercase text-green-400 bg-green-400/10 px-2 py-1 rounded">Rights Admin</span>
+                    <h3 class="text-lg font-bold text-white font-display mt-2">The MLC</h3>
+                    <p class="text-xs text-gray-400 mt-2 leading-relaxed">The Mechanical Licensing Collective. U.S. organization established to collect digital mechanical royalties from interactive DSPs.</p>
+                </div>
+
+                <!-- Term 6 -->
+                <div class="glossary-card bg-brand-card border border-brand-border p-6 rounded-2xl">
+                    <span class="text-[10px] font-mono uppercase text-blue-400 bg-blue-400/10 px-2 py-1 rounded">Fingerprinting</span>
+                    <h3 class="text-lg font-bold text-white font-display mt-2">YouTube Content ID</h3>
+                    <p class="text-xs text-gray-400 mt-2 leading-relaxed">An automated digital fingerprinting system that scans user-uploaded videos for matching audio and monetizes them for copyright holders.</p>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 7: EXPANDABLE FAQ ACCORDION ==================== -->
+    <section class="py-20 border-b border-brand-border/40" id="faq">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center mb-12">
+                <h2 class="text-xs font-bold text-brand-accent uppercase tracking-widest mb-2">Clear Answers</h2>
+                <p class="text-3xl sm:text-4xl font-extrabold font-display text-white">Frequently Asked Royalty Questions</p>
+            </div>
+
+            <div class="space-y-4" id="faqAccordion">
+                
+                <!-- FAQ Item 1 -->
+                <div class="bg-brand-card border border-brand-border rounded-2xl overflow-hidden">
+                    <button class="faq-btn w-full px-6 py-5 text-left font-semibold text-white flex justify-between items-center focus:outline-none">
+                        <span>How often are royalty payouts processed on Audiory?</span>
+                        <i class="fa-solid fa-chevron-down text-brand-accent transition-transform"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5 text-xs text-gray-400 leading-relaxed border-t border-brand-border/40 pt-3">
+                        Audiory updates stream analytics daily and processes monthly royalty statements as soon as DSP reporting files clear (typically on a 45-to-60-day delayed accounting schedule standard across the global music industry).
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="bg-brand-card border border-brand-border rounded-2xl overflow-hidden">
+                    <button class="faq-btn w-full px-6 py-5 text-left font-semibold text-white flex justify-between items-center focus:outline-none">
+                        <span>Do I keep 100% of my royalties on Pro and Label plans?</span>
+                        <i class="fa-solid fa-chevron-down text-brand-accent transition-transform"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5 text-xs text-gray-400 leading-relaxed border-t border-brand-border/40 pt-3">
+                        Yes! On both the Pro Artist Plan and Label Partner Plan, creators keep 100% of their earnings from master distribution. There are zero hidden payout processing fees or revenue takes.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="bg-brand-card border border-brand-border rounded-2xl overflow-hidden">
+                    <button class="faq-btn w-full px-6 py-5 text-left font-semibold text-white flex justify-between items-center focus:outline-none">
+                        <span>Does Audiory collect performance rights royalties for songwriters?</span>
+                        <i class="fa-solid fa-chevron-down text-brand-accent transition-transform"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5 text-xs text-gray-400 leading-relaxed border-t border-brand-border/40 pt-3">
+                        Distribution services handle Sound Recording (Master) royalties. To collect performance and mechanical royalties for compositions, songwriters should register with a PRO (ASCAP/BMI) and publishing administration entity.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="bg-brand-card border border-brand-border rounded-2xl overflow-hidden">
+                    <button class="faq-btn w-full px-6 py-5 text-left font-semibold text-white flex justify-between items-center focus:outline-none">
+                        <span>What is the minimum withdrawal limit for royalty balance?</span>
+                        <i class="fa-solid fa-chevron-down text-brand-accent transition-transform"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5 text-xs text-gray-400 leading-relaxed border-t border-brand-border/40 pt-3">
+                        Our minimum withdrawal threshold is $10.00 USD. Funds can be withdrawn directly via PayPal, Direct ACH Bank Transfer, Wire, or Crypto (USDC) options in supported regions.
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ==================== CALL TO ACTION ==================== -->
+    <section class="py-20 relative overflow-hidden">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <div class="bg-gradient-to-r from-brand-card via-brand-dark to-brand-card border border-brand-border p-10 sm:p-16 rounded-3xl glow-box">
+                <h2 class="text-3xl sm:text-5xl font-extrabold font-display text-white mb-4">Ready To Take Control Of Your Music Earnings?</h2>
+                <p class="text-gray-400 text-sm sm:text-base max-w-xl mx-auto mb-8">
+                    Distribute unlimited tracks to Spotify, Apple Music, TikTok, and 50+ stores while keeping 100% of your rights and earnings.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="/signup/" class="px-8 py-4 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple text-white font-bold text-sm hover:scale-105 transition-transform shadow-lg shadow-brand-accent/20">
+                        Start Distributing Free
+                    </a>
+                    <a href="/pricing/" class="px-8 py-4 rounded-xl border border-brand-border hover:border-gray-500 text-white font-bold text-sm transition-colors">
+                        Explore Pricing Plans
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FULL FOOTER ==================== -->
+    <footer class="bg-brand-dark border-t border-brand-border/60 pt-16 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-16">
+                
+                <!-- Col 1: Brand Info -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-accent to-brand-purple flex items-center justify-center text-white text-sm font-bold">
+                            <i class="fa-solid fa-wave-square"></i>
+                        </div>
+                        <span class="font-display font-bold text-xl text-white">AUDIORY</span>
+                    </div>
+                    <p class="text-gray-400 text-sm max-w-sm mb-6 leading-relaxed">
+                        Audiory Distribution provides premier global music distribution infrastructure, automated splits, rights protection, and API capabilities for modern artists and record labels.
+                    </p>
+                    <div class="flex gap-4 text-gray-400">
+                        <a href="#" aria-label="Instagram" class="w-9 h-9 rounded-lg bg-brand-card flex items-center justify-center hover:text-brand-accent hover:bg-brand-border transition-colors"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter / X" class="w-9 h-9 rounded-lg bg-brand-card flex items-center justify-center hover:text-brand-accent hover:bg-brand-border transition-colors"><i class="fa-brands fa-x-twitter"></i></a>
+                        <a href="#" aria-label="TikTok" class="w-9 h-9 rounded-lg bg-brand-card flex items-center justify-center hover:text-brand-accent hover:bg-brand-border transition-colors"><i class="fa-brands fa-tiktok"></i></a>
+                        <a href="#" aria-label="YouTube" class="w-9 h-9 rounded-lg bg-brand-card flex items-center justify-center hover:text-brand-accent hover:bg-brand-border transition-colors"><i class="fa-brands fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <!-- Col 2: Solutions -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Solutions</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/music-distribution/" class="hover:text-brand-accent transition-colors">Music Distribution</a></li>
+                        <li><a href="/content-id/" class="hover:text-brand-accent transition-colors">YouTube Content ID</a></li>
+                        <li><a href="/splits/" class="hover:text-brand-accent transition-colors">Automated Splits</a></li>
+                        <li><a href="/analytics/" class="hover:text-brand-accent transition-colors">Analytics Telemetry</a></li>
+                        <li><a href="/smart-links/" class="hover:text-brand-accent transition-colors">Smart Links Engine</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Resources -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Resources</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/knowledge-base/" class="hover:text-brand-accent transition-colors">Knowledge Base</a></li>
+                        <li><a href="/royalty-guide/" class="hover:text-brand-accent transition-colors">Royalty Guide</a></li>
+                        <li><a href="/api-documentation/" class="hover:text-brand-accent transition-colors">API Documentation</a></li>
+                        <li><a href="/platform-status/" class="hover:text-brand-accent transition-colors">Platform Status</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Legal -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Legal & Company</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/privacy/" class="hover:text-brand-accent transition-colors">Privacy Policy</a></li>
+                        <li><a href="/terms/" class="hover:text-brand-accent transition-colors">Terms of Service</a></li>
+                        <li><a href="/dmca/" class="hover:text-brand-accent transition-colors">Copyright / DMCA</a></li>
+                        <li><a href="/support/" class="hover:text-brand-accent transition-colors">Contact Support</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Bottom Copyright Bar -->
+            <div class="pt-8 border-t border-brand-border/40 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+                <p>&copy; 2026 Audiory Distribution Inc. All rights reserved.</p>
+                <div class="flex gap-6">
+                    <a href="/security/" class="hover:text-gray-400">Security</a>
+                    <a href="/privacy/" class="hover:text-gray-400">Privacy</a>
+                    <a href="/cookies/" class="hover:text-gray-400">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== JAVASCRIPT ENGINE ==================== -->
+    <script>
+        // 1. Mobile Hamburger Navigation Logic
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const hamburgerPath = document.getElementById('hamburgerPath');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            if (mobileMenu.classList.contains('hidden')) {
+                hamburgerPath.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+            } else {
+                hamburgerPath.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+            }
+        });
+
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                hamburgerPath.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+            });
+        });
+
+        // 2. Interactive Royalty Calculator Logic
+        const streamRange = document.getElementById('streamRange');
+        const streamDisplay = document.getElementById('streamDisplay');
+        const regionSelect = document.getElementById('regionSelect');
+        const tierSelect = document.getElementById('tierSelect');
+        const totalPayout = document.getElementById('totalPayout');
+
+        const spotifyPay = document.getElementById('spotifyPay');
+        const applePay = document.getElementById('applePay');
+        const ytPay = document.getElementById('ytPay');
+        const tidalPay = document.getElementById('tidalPay');
+
+        function calculateRoyalties() {
+            const streams = parseInt(streamRange.value);
+            const regionMultiplier = parseFloat(regionSelect.value);
+            const tierMultiplier = parseFloat(tierSelect.value);
+
+            // Base rate per stream averages
+            const baseSpotifyRate = 0.0038;
+            const baseAppleRate = 0.0080;
+            const baseYtRate = 0.0010;
+            const baseTidalRate = 0.0090;
+
+            const effectiveMultiplier = regionMultiplier * tierMultiplier;
+
+            // Calculate individually
+            const spotifyTotal = streams * baseSpotifyRate * effectiveMultiplier;
+            const appleTotal = streams * baseAppleRate * effectiveMultiplier;
+            const ytTotal = streams * baseYtRate * effectiveMultiplier;
+            const tidalTotal = streams * baseTidalRate * effectiveMultiplier;
+
+            // Total Average Estimate
+            const grossAvg = (spotifyTotal + appleTotal + ytTotal + tidalTotal) / 4;
+
+            // Format UI Outputs
+            streamDisplay.textContent = streams.toLocaleString('en-US');
+            totalPayout.textContent = '$' + grossAvg.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            spotifyPay.textContent = '$' + spotifyTotal.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            applePay.textContent = '$' + appleTotal.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            ytPay.textContent = '$' + ytTotal.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            tidalPay.textContent = '$' + tidalTotal.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        streamRange.addEventListener('input', calculateRoyalties);
+        regionSelect.addEventListener('change', calculateRoyalties);
+        tierSelect.addEventListener('change', calculateRoyalties);
+
+        // Run initial computation
+        calculateRoyalties();
+
+        // 3. Glossary Live Search Engine Filter
+        const glossarySearch = document.getElementById('glossarySearch');
+        const glossaryCards = document.querySelectorAll('.glossary-card');
+
+        glossarySearch.addEventListener('keyup', (e) => {
+            const query = e.target.value.toLowerCase();
+            glossaryCards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                if (text.includes(query)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // 4. FAQ Accordion Toggle Script
+        const faqButtons = document.querySelectorAll('.faq-btn');
+        faqButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const content = btn.nextElementSibling;
+                const icon = btn.querySelector('i');
+
+                content.classList.toggle('hidden');
+                icon.classList.toggle('rotate-180');
+            });
+        });
+    </script>
+</body>
+</html>
