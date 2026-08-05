@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform System Status — Audiory Distribution</title>
+    <meta name="description" content="Real-time operational status, delivery pipeline health, and system performance updates for Audiory Distribution platform and DSP APIs.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            accent: '#00f2fe',
+                            purple: '#7928ca',
+                            pink: '#ff0080',
+                            dark: '#0a0d14',
+                            card: '#121824',
+                            border: '#1f293d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #07090e;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00f2fe 0%, #4f46e5 50%, #ff0080 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0a0d14;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+
+        .glow-box {
+            box-shadow: 0 0 35px -10px rgba(0, 242, 254, 0.15);
+        }
+    </style>
+</head>
+<body class="custom-scrollbar antialiased selection:bg-brand-accent selection:text-brand-dark">
+
+    <!-- ==================== HEADER / NAVIGATION ==================== -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-brand-dark/80 border-b border-brand-border/60 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20 group-hover:scale-105 transition-transform duration-300">
+                        <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
+                            <i class="fa-solid font-bold fa-wave-square text-brand-accent group-hover:rotate-12 transition-transform duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-2">
+                            <span class="font-display font-bold text-2xl tracking-wider text-white">AUDIORY</span>
+                            <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold uppercase tracking-wider">Status</span>
+                        </div>
+                        <span class="text-[9px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">SYSTEM INFRASTRUCTURE</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden lg:flex items-center gap-8">
+                    <a href="/#services" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Services</a>
+                    <a href="/#dsp-network" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">DSP Network</a>
+                    <a href="/pricing/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Pricing</a>
+                    <a href="/royalty-guide/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Royalty Guide</a>
+                    <a href="/api-documentation/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">API Docs</a>
+                </nav>
+
+                <!-- Action Buttons (Desktop) -->
+                <div class="hidden sm:flex items-center gap-4">
+                    <button id="openSubscribeModal" class="text-sm font-semibold text-gray-200 hover:text-white px-4 py-2.5 rounded-xl border border-brand-border hover:border-gray-500 transition-all duration-200 flex items-center gap-2">
+                        <i class="fa-regular fa-bell text-brand-accent"></i> Get Updates
+                    </button>
+                    <a href="/login/" class="text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:shadow-lg hover:shadow-brand-accent/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+                        Sign In
+                    </a>
+                </div>
+
+                <!-- Mobile Header Right Actions -->
+                <div class="flex items-center gap-3 sm:hidden">
+                    <button id="mobileSubscribeBtn" class="text-xs font-semibold text-white px-3 py-2 rounded-lg bg-brand-card border border-brand-border">
+                        <i class="fa-regular fa-bell text-brand-accent"></i>
+                    </button>
+                    <button id="mobileMenuBtn" aria-label="Toggle Navigation Menu" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-brand-card focus:outline-none">
+                        <svg id="menuIconSvg" class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                            <path id="hamburgerPath" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobileMenu" class="hidden lg:hidden border-b border-brand-border bg-brand-dark/95 backdrop-blur-2xl transition-all duration-300">
+            <div class="px-4 pt-2 pb-6 space-y-3">
+                <a href="/#services" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Services</a>
+                <a href="/#dsp-network" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">DSP Network</a>
+                <a href="/pricing/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Pricing</a>
+                <a href="/royalty-guide/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Royalty Guide</a>
+                <a href="/api-documentation/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">API Docs</a>
+                
+                <div class="pt-4 flex flex-col gap-3">
+                    <a href="/login/" class="text-center w-full py-2.5 rounded-xl border border-brand-border text-gray-200 font-semibold">Sign In</a>
+                    <a href="/signup/" class="text-center w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-accent to-brand-purple text-white font-semibold">Start Distributing</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN BANNER STATUS ==================== -->
+    <section class="relative pt-12 pb-10 border-b border-brand-border/40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <!-- Global Operational Banner -->
+            <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 glow-box">
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <span class="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full animate-ping"></span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-bold font-display text-white">All Systems Operational</h1>
+                        <p class="text-xs sm:text-sm text-emerald-400/90 font-mono mt-0.5">Global distribution ingest, ingestion APIs, and royalty processing are operating normally.</p>
+                    </div>
+                </div>
+                <div class="text-xs font-mono text-gray-400 bg-brand-dark/60 px-4 py-2 rounded-xl border border-brand-border w-full sm:w-auto text-center">
+                    Uptime: <span class="text-white font-bold">99.98%</span> (Last 90 Days)
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ==================== CORE SYSTEM SERVICES STATUS ==================== -->
+    <section class="py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-lg font-bold font-display text-white mb-6 uppercase tracking-wider text-gray-400 text-xs">Core Platform Systems</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                <!-- System 1 -->
+                <div class="bg-brand-card border border-brand-border p-5 rounded-2xl flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-cloud-arrow-up text-brand-accent"></i>
+                        <span class="text-sm font-semibold text-gray-200">Catalog Ingestion Engine</span>
+                    </div>
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-mono font-medium border border-emerald-500/20">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Operational
+                    </span>
+                </div>
+
+                <!-- System 2 -->
+                <div class="bg-brand-card border border-brand-border p-5 rounded-2xl flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-code text-brand-purple"></i>
+                        <span class="text-sm font-semibold text-gray-200">Developer REST API (v2)</span>
+                    </div>
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-mono font-medium border border-emerald-500/20">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Operational
+                    </span>
+                </div>
+
+                <!-- System 3 -->
+                <div class="bg-brand-card border border-brand-border p-5 rounded-2xl flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-calculator text-brand-pink"></i>
+                        <span class="text-sm font-semibold text-gray-200">Automated Split Engine & Payouts</span>
+                    </div>
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-mono font-medium border border-emerald-500/20">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Operational
+                    </span>
+                </div>
+
+                <!-- System 4 -->
+                <div class="bg-brand-card border border-brand-border p-5 rounded-2xl flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-shield-halved text-brand-accent"></i>
+                        <span class="text-sm font-semibold text-gray-200">DDEX Metadata Validation</span>
+                    </div>
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-mono font-medium border border-emerald-500/20">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Operational
+                    </span>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== DSP PIPELINE PIPELINES ==================== -->
+    <section class="py-6 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-lg font-bold font-display text-white mb-6 uppercase tracking-wider text-gray-400 text-xs">DSP Direct Feed Delivery Pipelines</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                
+                <!-- Spotify -->
+                <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-brands fa-spotify text-emerald-400 text-xl"></i>
+                            <span class="text-sm font-bold text-white">Spotify Feed</span>
+                        </div>
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-400 font-mono">
+                        <span>Direct DDEX 4.2 API</span>
+                        <span class="text-emerald-400">Normal</span>
+                    </div>
+                </div>
+
+                <!-- Apple Music -->
+                <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-brands fa-apple text-gray-200 text-xl"></i>
+                            <span class="text-sm font-bold text-white">Apple Music / iTunes</span>
+                        </div>
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-400 font-mono">
+                        <span>Transcode Pipeline</span>
+                        <span class="text-emerald-400">Normal</span>
+                    </div>
+                </div>
+
+                <!-- YouTube Content ID -->
+                <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-brands fa-youtube text-red-500 text-xl"></i>
+                            <span class="text-sm font-bold text-white">YouTube Content ID</span>
+                        </div>
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-400 font-mono">
+                        <span>Fingerprint Matching</span>
+                        <span class="text-amber-400 font-semibold">High Queue Volume</span>
+                    </div>
+                </div>
+
+                <!-- Amazon Music -->
+                <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-brands fa-amazon text-amber-400 text-xl"></i>
+                            <span class="text-sm font-bold text-white">Amazon Music</span>
+                        </div>
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-400 font-mono">
+                        <span>Direct Ingest</span>
+                        <span class="text-emerald-400">Normal</span>
+                    </div>
+                </div>
+
+                <!-- Tidal -->
+                <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-gem text-cyan-400 text-xl"></i>
+                            <span class="text-sm font-bold text-white">Tidal FLAC / MQA</span>
+                        </div>
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-400 font-mono">
+                        <span>Hi-Res Ingest</span>
+                        <span class="text-emerald-400">Normal</span>
+                    </div>
+                </div>
+
+                <!-- TikTok / ByteDance -->
+                <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-brands fa-tiktok text-pink-500 text-xl"></i>
+                            <span class="text-sm font-bold text-white">TikTok / Resso</span>
+                        </div>
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-400 font-mono">
+                        <span>Clip Delivery</span>
+                        <span class="text-emerald-400">Normal</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== INCIDENT HISTORY ==================== -->
+    <section class="py-8 mb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-lg font-bold font-display text-white mb-6 uppercase tracking-wider text-gray-400 text-xs">Past Incident History</h2>
+
+            <div class="bg-brand-card border border-brand-border rounded-3xl p-6 sm:p-8 space-y-8">
+                
+                <!-- Incident item -->
+                <div class="border-b border-brand-border/60 pb-6 last:border-0 last:pb-0">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                        <h3 class="text-base font-bold text-white font-display">Scheduled Maintenance: DDEX Ingestion Infrastructure Upgrade</h3>
+                        <span class="text-xs font-mono text-gray-400">August 1, 2026</span>
+                    </div>
+                    <div class="inline-block px-2.5 py-0.5 rounded text-[10px] font-mono bg-blue-500/20 text-blue-400 font-bold mb-3">Completed</div>
+                    <p class="text-xs sm:text-sm text-gray-400 leading-relaxed">
+                        We conducted scheduled database optimization for catalog validation schemas. Delivery to stores during this 45-minute window was queued and resumed automatically.
+                    </p>
+                </div>
+
+                <!-- Incident item -->
+                <div class="border-b border-brand-border/60 pb-6 last:border-0 last:pb-0">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                        <h3 class="text-base font-bold text-white font-display">Minor Delay in YouTube Content ID Fingerprint Registration</h3>
+                        <span class="text-xs font-mono text-gray-400">July 18, 2026</span>
+                    </div>
+                    <div class="inline-block px-2.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-400 font-bold mb-3">Resolved</div>
+                    <p class="text-xs sm:text-sm text-gray-400 leading-relaxed">
+                        A temporary bottleneck on YouTube's ingest endpoint delayed reference creation for approximately 2 hours. All backlogged audio assets were processed successfully.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SUBSCRIBE MODAL ==================== -->
+    <div id="subscribeModal" class="fixed inset-0 z-50 bg-brand-dark/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-brand-card border border-brand-border rounded-3xl p-6 sm:p-8 max-w-md w-full relative glow-box">
+            <button id="closeSubscribeModal" class="absolute top-5 right-5 text-gray-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-xl font-bold font-display text-white mb-2">Subscribe to Status Alerts</h3>
+            <p class="text-xs text-gray-400 mb-6">Receive real-time notifications directly to your email whenever Audiory distribution services experience downtime or maintenance.</p>
+            
+            <form id="statusSubscribeForm" class="space-y-4">
+                <div>
+                    <input type="email" required placeholder="name@domain.com" class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-sm text-white focus:outline-none focus:border-brand-accent">
+                </div>
+                <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-brand-accent to-brand-purple text-white text-xs font-bold uppercase tracking-wider">
+                    Subscribe
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="bg-brand-dark border-t border-brand-border/60 pt-16 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-16">
+                
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-accent to-brand-purple flex items-center justify-center text-white text-sm font-bold">
+                            <i class="fa-solid fa-wave-square"></i>
+                        </div>
+                        <span class="font-display font-bold text-xl text-white">AUDIORY</span>
+                    </div>
+                    <p class="text-gray-400 text-sm max-w-sm mb-6 leading-relaxed">
+                        Audiory Distribution provides premier global music distribution infrastructure, automated splits, rights protection, and API capabilities.
+                    </p>
+                </div>
+
+                <!-- Col 2: Navigation -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Solutions</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/music-distribution/" class="hover:text-brand-accent transition-colors">Music Distribution</a></li>
+                        <li><a href="/content-id/" class="hover:text-brand-accent transition-colors">YouTube Content ID</a></li>
+                        <li><a href="/splits/" class="hover:text-brand-accent transition-colors">Automated Splits</a></li>
+                        <li><a href="/analytics/" class="hover:text-brand-accent transition-colors">Analytics Telemetry</a></li>
+                        <li><a href="/smart-links/" class="hover:text-brand-accent transition-colors">Smart Links Engine</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Resources -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Resources</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/knowledge-base/" class="hover:text-brand-accent transition-colors">Knowledge Base</a></li>
+                        <li><a href="/royalty-guide/" class="hover:text-brand-accent transition-colors">Royalty Guide</a></li>
+                        <li><a href="/api-documentation/" class="hover:text-brand-accent transition-colors">API Documentation</a></li>
+                        <li><a href="/platform-status/" class="hover:text-brand-accent transition-colors">Platform Status</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Legal -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Legal & Company</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/privacy/" class="hover:text-brand-accent transition-colors">Privacy Policy</a></li>
+                        <li><a href="/terms/" class="hover:text-brand-accent transition-colors">Terms of Service</a></li>
+                        <li><a href="/dmca/" class="hover:text-brand-accent transition-colors">Copyright / DMCA</a></li>
+                        <li><a href="/support/" class="hover:text-brand-accent transition-colors">Contact Support</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Bottom Copyright Bar -->
+            <div class="pt-8 border-t border-brand-border/40 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+                <p>&copy; 2026 Audiory Distribution Inc. All rights reserved.</p>
+                <div class="flex gap-6">
+                    <a href="/security/" class="hover:text-gray-400">Security</a>
+                    <a href="/privacy/" class="hover:text-gray-400">Privacy</a>
+                    <a href="/cookies/" class="hover:text-gray-400">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+  
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script>
+        // 1. Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const hamburgerPath = document.getElementById('hamburgerPath');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            if (mobileMenu.classList.contains('hidden')) {
+                hamburgerPath.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+            } else {
+                hamburgerPath.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+            }
+        });
+
+        // 2. Subscribe Modal Logic
+        const subscribeModal = document.getElementById('subscribeModal');
+        const openBtn = document.getElementById('openSubscribeModal');
+        const mobileSubscribeBtn = document.getElementById('mobileSubscribeBtn');
+        const closeBtn = document.getElementById('closeSubscribeModal');
+
+        const openModal = () => subscribeModal.classList.remove('hidden');
+        const closeModal = () => subscribeModal.classList.add('hidden');
+
+        if(openBtn) openBtn.addEventListener('click', openModal);
+        if(mobileSubscribeBtn) mobileSubscribeBtn.addEventListener('click', openModal);
+        if(closeBtn) closeBtn.addEventListener('click', closeModal);
+
+        document.getElementById('statusSubscribeForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Thank you! You have been subscribed to system status updates.');
+            closeModal();
+        });
+    </script>
+</body>
+</html>
