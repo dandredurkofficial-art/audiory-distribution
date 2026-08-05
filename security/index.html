@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security & Data Protection — Audiory Distribution</title>
+    <meta name="description" content="Learn how Audiory protects your intellectual property, financial data, and media assets with bank-grade AES-256 encryption, SOC 2 alignment, and advanced rights management.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            accent: '#00f2fe',
+                            purple: '#7928ca',
+                            pink: '#ff0080',
+                            dark: '#0a0d14',
+                            card: '#121824',
+                            border: '#1f293d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #07090e;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00f2fe 0%, #4f46e5 50%, #7928ca 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0a0d14;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+
+        .glow-box {
+            box-shadow: 0 0 35px -10px rgba(0, 242, 254, 0.15);
+        }
+    </style>
+</head>
+<body class="custom-scrollbar antialiased selection:bg-brand-accent selection:text-brand-dark">
+
+    <!-- ==================== HEADER / NAVIGATION ==================== -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-brand-dark/80 border-b border-brand-border/60 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-purple p-0.5 shadow-lg shadow-brand-accent/20 group-hover:scale-105 transition-transform duration-300">
+                        <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
+                            <i class="fa-solid font-bold fa-wave-square text-brand-accent group-hover:rotate-12 transition-transform duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-2">
+                            <span class="font-display font-bold text-2xl tracking-wider text-white">AUDIORY</span>
+                            <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-brand-accent/10 text-brand-accent font-bold uppercase">Security</span>
+                        </div>
+                        <span class="text-[9px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">TRUST & DATA SHIELD</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden lg:flex items-center gap-8">
+                    <a href="/music-distribution/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Services</a>
+                    <a href="/smart-links/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Smart Links</a>
+                    <a href="/content-id/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Content ID</a>
+                    <a href="/pricing/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Pricing</a>
+                    <a href="/royalty-guide/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Royalty Guide</a>
+                    <a href="/api-documentation/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">API Docs</a>
+                </nav>
+
+                <!-- Action Buttons (Desktop) -->
+                <div class="hidden sm:flex items-center gap-4">
+                    <a href="/login/" class="text-sm font-semibold text-gray-200 hover:text-white px-4 py-2.5 rounded-xl border border-brand-border hover:border-gray-500 transition-all duration-200">
+                        Sign In
+                    </a>
+                    <a href="/signup/" class="text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:shadow-lg hover:shadow-brand-accent/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+                        Protect Tracks
+                    </a>
+                </div>
+
+                <!-- Mobile Header Right Actions -->
+                <div class="flex items-center gap-3 sm:hidden">
+                    <a href="/signup/" class="text-xs font-semibold text-white px-3 py-2 rounded-lg bg-gradient-to-r from-brand-accent to-brand-purple">
+                        Get Started
+                    </a>
+                    <button id="mobileMenuBtn" aria-label="Toggle Navigation Menu" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-brand-card focus:outline-none">
+                        <svg id="menuIconSvg" class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                            <path id="hamburgerPath" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobileMenu" class="hidden lg:hidden border-b border-brand-border bg-brand-dark/95 backdrop-blur-2xl transition-all duration-300">
+            <div class="px-4 pt-2 pb-6 space-y-3">
+                <a href="/music-distribution/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Services</a>
+                <a href="/smart-links/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Smart Links</a>
+                <a href="/content-id/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Content ID</a>
+                <a href="/pricing/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Pricing</a>
+                <a href="/royalty-guide/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Royalty Guide</a>
+                <a href="/api-documentation/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">API Docs</a>
+                
+                <div class="pt-4 flex flex-col gap-3">
+                    <a href="/login/" class="text-center w-full py-2.5 rounded-xl border border-brand-border text-gray-200 font-semibold">Sign In</a>
+                    <a href="/signup/" class="text-center w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-accent to-brand-purple text-white font-semibold">Protect Tracks</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== HERO SECTION ==================== -->
+    <section class="relative pt-16 pb-20 border-b border-brand-border/40 overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,242,254,0.15),rgba(255,255,255,0))]"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-3xl mx-auto space-y-6">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-card border border-brand-border">
+                    <i class="fa-solid fa-shield-halved text-brand-accent text-xs"></i>
+                    <span class="text-xs font-mono text-gray-300">Bank-Grade Infrastructure & Data Protection</span>
+                </div>
+
+                <h1 class="text-4xl sm:text-6xl font-extrabold font-display text-white tracking-tight leading-[1.1]">
+                    Enterprise Security for <span class="gradient-text">Your Catalog</span>
+                </h1>
+
+                <p class="text-gray-400 text-base sm:text-lg leading-relaxed">
+                    Protecting master recordings, metadata, and financial payouts with end-to-end encryption, strict access governance, and zero-trust distribution architecture.
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+                    <a href="/signup/" class="w-full sm:w-auto text-center px-8 py-4 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple font-semibold text-white shadow-lg shadow-brand-accent/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                        Deploy Secure Release
+                    </a>
+                    <a href="#telemetry" class="w-full sm:w-auto text-center px-6 py-4 rounded-xl border border-brand-border text-gray-300 hover:text-white hover:bg-brand-card font-medium transition-all">
+                        View System Telemetry
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== DYNAMIC SECURITY TELEMETRY PANEL ==================== -->
+    <section id="telemetry" class="py-16 border-b border-brand-border/40">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-brand-card border border-brand-border rounded-3xl p-6 sm:p-10 glow-box">
+                
+                <div class="text-center max-w-xl mx-auto mb-8">
+                    <span class="text-xs font-mono text-brand-accent uppercase tracking-widest">Real-Time Telemetry</span>
+                    <h3 class="text-2xl font-bold font-display text-white mt-1">Live Security Protocol Status</h3>
+                    <p class="text-xs text-gray-400 mt-1">Operational verification across Audiory asset vaults and payout ledger servers.</p>
+                </div>
+
+                <!-- Status Cards Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    
+                    <div class="bg-brand-dark p-5 rounded-2xl border border-brand-border">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-mono text-gray-400">REST ENCRYPTION</span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        </div>
+                        <div class="text-lg font-bold font-mono text-white">AES-256-GCM</div>
+                        <span class="text-[10px] font-mono text-gray-500 mt-1 block">Hardware Security Module</span>
+                    </div>
+
+                    <div class="bg-brand-dark p-5 rounded-2xl border border-brand-border">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-mono text-gray-400">IN-TRANSIT TLS</span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        </div>
+                        <div class="text-lg font-bold font-mono text-white">TLS 1.3 / mTLS</div>
+                        <span class="text-[10px] font-mono text-gray-500 mt-1 block">Forward Secrecy Active</span>
+                    </div>
+
+                    <div class="bg-brand-dark p-5 rounded-2xl border border-brand-border">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-mono text-gray-400">LEDGER INTEGRITY</span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        </div>
+                        <div class="text-lg font-bold font-mono text-white">SHA-256 Hash</div>
+                        <span class="text-[10px] font-mono text-gray-500 mt-1 block">Immutable Royalty Logs</span>
+                    </div>
+
+                    <div class="bg-brand-dark p-5 rounded-2xl border border-brand-border">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-mono text-gray-400">UPTIME SLA</span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        </div>
+                        <div class="text-lg font-bold font-mono text-brand-accent">99.99%</div>
+                        <span class="text-[10px] font-mono text-gray-500 mt-1 block">Multi-Region Redundancy</span>
+                    </div>
+
+                </div>
+
+                <div class="p-4 rounded-xl bg-brand-dark/50 border border-brand-border/60 flex items-center justify-between flex-wrap gap-4 text-xs font-mono">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-lock text-brand-accent"></i>
+                        <span class="text-gray-300">System Integrity Hash: <span id="hashDisplay" class="text-brand-accent">f8e32a9b71c...</span></span>
+                    </div>
+                    <span class="text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check"></i> All Vault Systems Operational
+                    </span>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECURITY PILLARS GRID ==================== -->
+    <section class="py-20 border-b border-brand-border/40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs font-bold font-mono text-brand-accent uppercase tracking-widest mb-3">Protection Layers</h2>
+                <h3 class="text-3xl sm:text-4xl font-extrabold font-display text-white">How We Secure Your Music & Money</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Pillar 1 -->
+                <div class="bg-brand-card border border-brand-border p-8 rounded-3xl hover:border-brand-accent/50 transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-accent/10 text-brand-accent flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-white font-display mb-3">Asset Vault Encryption</h4>
+                    <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                        Uncompressed WAV masters and artwork assets are stored in isolated, air-gapped encrypted cloud vaults with strict signed URL authorization for distribution ingestion only.
+                    </p>
+                </div>
+
+                <!-- Pillar 2 -->
+                <div class="bg-brand-card border border-brand-border p-8 rounded-3xl hover:border-brand-accent/50 transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-purple/20 text-brand-purple flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-white font-display mb-3">Role-Based Access (RBAC)</h4>
+                    <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                        Label managers can grant fine-grained permissions to team members and artists—restricting access to sensitive payout details, tax docs, and master audio downloads.
+                    </p>
+                </div>
+
+                <!-- Pillar 3 -->
+                <div class="bg-brand-card border border-brand-border p-8 rounded-3xl hover:border-brand-accent/50 transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-pink/20 text-brand-pink flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-white font-display mb-3">Protected Financial Payouts</h4>
+                    <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                        Withdrawals and royalty split adjustments require mandatory Multi-Factor Authentication (MFA) and hardware token verification to safeguard revenue streams.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== COMPLIANCE & GOVERNANCE ==================== -->
+    <section class="py-20 border-b border-brand-border/40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-brand-card border border-brand-border rounded-3xl p-8 sm:p-12">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    
+                    <div class="space-y-6">
+                        <span class="text-xs font-mono text-brand-accent uppercase tracking-widest">Compliance & Privacy</span>
+                        <h3 class="text-3xl font-extrabold font-display text-white">Global Regulatory Alignment</h3>
+                        <p class="text-gray-400 text-sm sm:text-base leading-relaxed">
+                            Audiory strictly adheres to international data privacy laws and financial compliance standards, keeping your personal metadata and banking information secure.
+                        </p>
+
+                        <div class="space-y-4 pt-2">
+                            <div class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xs mt-0.5">
+                                    <i class="fa-solid fa-check"></i>
+                                </div>
+                                <div>
+                                    <h5 class="text-sm font-bold text-white">GDPR & CCPA Compliant</h5>
+                                    <p class="text-xs text-gray-400">Full control over personal data rights, export capabilities, and privacy protection.</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xs mt-0.5">
+                                    <i class="fa-solid fa-check"></i>
+                                </div>
+                                <div>
+                                    <h5 class="text-sm font-bold text-white">SOC 2 Type II Standards</h5>
+                                    <p class="text-xs text-gray-400">Continuous auditing for availability, security, processing integrity, and confidentiality.</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xs mt-0.5">
+                                    <i class="fa-solid fa-check"></i>
+                                </div>
+                                <div>
+                                    <h5 class="text-sm font-bold text-white">Tax Compliance & 1099/W-8BEN Verification</h5>
+                                    <p class="text-xs text-gray-400">Automated IRS-compliant tax form processing and secure withholding calculations.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Compliance Badges Graphic -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border text-center space-y-3">
+                            <i class="fa-solid fa-shield-cat text-3xl text-brand-accent"></i>
+                            <h6 class="text-sm font-bold text-white">ISO/IEC 27001</h6>
+                            <p class="text-[11px] text-gray-400">Information Security Management System</p>
+                        </div>
+
+                        <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border text-center space-y-3">
+                            <i class="fa-solid fa-file-invoice-dollar text-3xl text-brand-purple"></i>
+                            <h6 class="text-sm font-bold text-white">PCI-DSS Level 1</h6>
+                            <p class="text-[11px] text-gray-400">Highest Payment Processing Security</p>
+                        </div>
+
+                        <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border text-center space-y-3">
+                            <i class="fa-solid fa-network-wired text-3xl text-brand-pink"></i>
+                            <h6 class="text-sm font-bold text-white">DDEX Secure Feed</h6>
+                            <p class="text-[11px] text-gray-400">Encrypted Metadata Delivery Pipeline</p>
+                        </div>
+
+                        <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border text-center space-y-3">
+                            <i class="fa-solid fa-user-lock text-3xl text-emerald-400"></i>
+                            <h6 class="text-sm font-bold text-white">Zero Trust Architecture</h6>
+                            <p class="text-[11px] text-gray-400">Continuous Endpoint Authentication</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== CALL TO ACTION ==================== -->
+    <section class="py-20 relative overflow-hidden">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <div class="bg-gradient-to-r from-brand-card via-brand-dark to-brand-card border border-brand-border rounded-3xl p-10 sm:p-16 glow-box">
+                <h2 class="text-3xl sm:text-5xl font-extrabold font-display text-white mb-4">
+                    Distribute with Total Confidence
+                </h2>
+                <p class="text-gray-400 text-sm sm:text-base max-w-xl mx-auto mb-8">
+                    Your master audio, royalty earnings, and metadata are protected by enterprise-grade infrastructure.
+                </p>
+                <a href="/signup/" class="inline-block px-8 py-4 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple font-semibold text-white shadow-lg shadow-brand-accent/25 hover:scale-105 transition-all">
+                    Start Secure Release
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="bg-brand-dark border-t border-brand-border/60 pt-16 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-16">
+                
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-accent to-brand-purple flex items-center justify-center text-white text-sm font-bold">
+                            <i class="fa-solid fa-wave-square"></i>
+                        </div>
+                        <span class="font-display font-bold text-xl text-white">AUDIORY</span>
+                    </div>
+                    <p class="text-gray-400 text-sm max-w-sm mb-6 leading-relaxed">
+                        Audiory Distribution provides premier global music distribution infrastructure, automated splits, rights protection, and real-time analytics.
+                    </p>
+                </div>
+
+                <!-- Col 2: Navigation -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Solutions</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/music-distribution/" class="hover:text-brand-accent transition-colors">Music Distribution</a></li>
+                        <li><a href="/content-id/" class="hover:text-brand-accent transition-colors">YouTube Content ID</a></li>
+                        <li><a href="/splits/" class="hover:text-brand-accent transition-colors">Automated Splits</a></li>
+                        <li><a href="/analytics/" class="hover:text-brand-accent transition-colors">Analytics Telemetry</a></li>
+                        <li><a href="/smart-links/" class="hover:text-brand-accent transition-colors">Smart Links Engine</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Resources -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Resources</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/knowledge-base/" class="hover:text-brand-accent transition-colors">Knowledge Base</a></li>
+                        <li><a href="/royalty-guide/" class="hover:text-brand-accent transition-colors">Royalty Guide</a></li>
+                        <li><a href="/api-documentation/" class="hover:text-brand-accent transition-colors">API Documentation</a></li>
+                        <li><a href="/platform-status/" class="hover:text-brand-accent transition-colors">Platform Status</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Legal -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Legal & Company</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/privacy/" class="hover:text-brand-accent transition-colors">Privacy Policy</a></li>
+                        <li><a href="/terms/" class="hover:text-brand-accent transition-colors">Terms of Service</a></li>
+                        <li><a href="/dmca/" class="hover:text-brand-accent transition-colors">Copyright / DMCA</a></li>
+                        <li><a href="/support/" class="hover:text-brand-accent transition-colors">Contact Support</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Bottom Copyright Bar -->
+            <div class="pt-8 border-t border-brand-border/40 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+                <p>&copy; 2026 Audiory Distribution Inc. All rights reserved.</p>
+                <div class="flex gap-6">
+                    <a href="/security/" class="hover:text-gray-400">Security</a>
+                    <a href="/privacy/" class="hover:text-gray-400">Privacy</a>
+                    <a href="/cookies/" class="hover:text-gray-400">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+  
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const hamburgerPath = document.getElementById('hamburgerPath');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            if (mobileMenu.classList.contains('hidden')) {
+                hamburgerPath.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+            } else {
+                hamburgerPath.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+            }
+        });
+
+        // Dynamic System Hash Simulation
+        const hashDisplay = document.getElementById('hashDisplay');
+        const generateRandomHash = () => {
+            const chars = '0123456789abcdef';
+            let hash = '0x';
+            for (let i = 0; i < 16; i++) {
+                hash += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return hash + '...';
+        };
+
+        setInterval(() => {
+            hashDisplay.textContent = generateRandomHash();
+        }, 4000);
+    </script>
+</body>
+</html>
