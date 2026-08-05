@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Base & Artist Help Center — Audiory Distribution</title>
+    <meta name="description" content="Explore Audiory Distribution's Knowledge Base. Comprehensive guides, release tutorials, metadata rules, royalty explanations, and API documentation for independent artists and labels.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            accent: '#00f2fe',
+                            purple: '#7928ca',
+                            pink: '#ff0080',
+                            dark: '#0a0d14',
+                            card: '#121824',
+                            border: '#1f293d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #07090e;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00f2fe 0%, #4f46e5 50%, #ff0080 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0a0d14;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+
+        .glow-box {
+            box-shadow: 0 0 35px -10px rgba(0, 242, 254, 0.15);
+        }
+    </style>
+</head>
+<body class="custom-scrollbar antialiased selection:bg-brand-accent selection:text-brand-dark">
+
+    <!-- ==================== HEADER / NAVIGATION ==================== -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-brand-dark/80 border-b border-brand-border/60 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20 group-hover:scale-105 transition-transform duration-300">
+                        <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
+                            <i class="fa-solid font-bold fa-wave-square text-brand-accent group-hover:rotate-12 transition-transform duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-display font-bold text-2xl tracking-wider text-white">AUDIORY</span>
+                        <span class="text-[9px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">DISTRIBUTION</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden lg:flex items-center gap-8">
+                    <a href="/#services" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Services</a>
+                    <a href="/#dsp-network" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">DSP Network</a>
+                    <a href="/pricing/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Pricing</a>
+                    <a href="/royalty-guide/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Royalty Guide</a>
+                    <a href="/knowledge-base/" class="text-sm font-medium text-brand-accent font-semibold transition-colors duration-200">Knowledge Base</a>
+                </nav>
+
+                <!-- Action Buttons (Desktop) -->
+                <div class="hidden sm:flex items-center gap-4">
+                    <a href="/login/" class="text-sm font-semibold text-gray-200 hover:text-white px-4 py-2.5 rounded-xl border border-brand-border hover:border-gray-500 transition-all duration-200">
+                        Sign In
+                    </a>
+                    <a href="/signup/" class="text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:shadow-lg hover:shadow-brand-accent/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+                        Start Distributing
+                    </a>
+                </div>
+
+                <!-- Mobile Header Right Actions -->
+                <div class="flex items-center gap-3 sm:hidden">
+                    <a href="/signup/" class="text-xs font-semibold text-white px-3 py-2 rounded-lg bg-gradient-to-r from-brand-accent to-brand-purple">
+                        Get Started
+                    </a>
+                    <button id="mobileMenuBtn" aria-label="Toggle Navigation Menu" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-brand-card focus:outline-none">
+                        <svg id="menuIconSvg" class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                            <path id="hamburgerPath" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobileMenu" class="hidden lg:hidden border-b border-brand-border bg-brand-dark/95 backdrop-blur-2xl transition-all duration-300">
+            <div class="px-4 pt-2 pb-6 space-y-3">
+                <a href="/#services" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Services</a>
+                <a href="/#dsp-network" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">DSP Network</a>
+                <a href="/pricing/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Pricing</a>
+                <a href="/royalty-guide/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Royalty Guide</a>
+                <a href="/knowledge-base/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-brand-accent hover:bg-brand-card">Knowledge Base</a>
+                
+                <div class="pt-4 flex flex-col gap-3">
+                    <a href="/login/" class="text-center w-full py-2.5 rounded-xl border border-brand-border text-gray-200 font-semibold">Sign In</a>
+                    <a href="/signup/" class="text-center w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-accent to-brand-purple text-white font-semibold">Start Distributing</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== HERO SECTION WITH SEARCH ENGINE ==================== -->
+    <section class="relative pt-16 pb-20 overflow-hidden border-b border-brand-border/40">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,242,254,0.15),rgba(255,255,255,0))]"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col items-center text-center max-w-3xl mx-auto">
+                
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-card border border-brand-border mb-6">
+                    <i class="fa-solid fa-book-open text-brand-accent text-xs"></i>
+                    <span class="text-xs font-semibold text-gray-300 uppercase tracking-widest">Audiory Creator Support Hub</span>
+                </div>
+
+                <h1 class="text-4xl sm:text-6xl font-extrabold font-display text-white tracking-tight leading-tight">
+                    How Can We <span class="gradient-text">Help You Today?</span>
+                </h1>
+
+                <p class="text-gray-400 text-base sm:text-lg mt-4 max-w-xl">
+                    Search our official database for release requirements, audio specs, copyright clearance, payout timelines, and platform tools.
+                </p>
+
+                <!-- Search Input Box -->
+                <div class="w-full mt-8 max-w-2xl relative">
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-magnifying-glass absolute left-5 text-gray-400 text-lg"></i>
+                        <input type="text" id="kbSearchInput" placeholder="Search keywords (e.g. ISRC, Spotify Canvas, WAV format, Splits, Withdrawal)..." class="w-full pl-14 pr-12 py-4 rounded-2xl bg-brand-card border border-brand-border text-sm sm:text-base text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition-all glow-box">
+                        <button id="clearSearch" class="hidden absolute right-4 text-gray-400 hover:text-white p-1">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <!-- Quick Tag Filter Pills -->
+                    <div class="flex flex-wrap items-center justify-center gap-2 mt-4 text-xs">
+                        <span class="text-gray-500">Popular:</span>
+                        <button class="tag-pill px-3 py-1 rounded-full bg-brand-dark border border-brand-border text-gray-300 hover:border-brand-accent hover:text-white transition-all">ISRC Codes</button>
+                        <button class="tag-pill px-3 py-1 rounded-full bg-brand-dark border border-brand-border text-gray-300 hover:border-brand-accent hover:text-white transition-all">Cover Songs</button>
+                        <button class="tag-pill px-3 py-1 rounded-full bg-brand-dark border border-brand-border text-gray-300 hover:border-brand-accent hover:text-white transition-all">Payout Schedule</button>
+                        <button class="tag-pill px-3 py-1 rounded-full bg-brand-dark border border-brand-border text-gray-300 hover:border-brand-accent hover:text-white transition-all">Spotify For Artists</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== CATEGORY TABS FILTER ==================== -->
+    <section class="py-8 bg-brand-dark/50 border-b border-brand-border/40 sticky top-20 z-40 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-start sm:justify-center gap-3 overflow-x-auto pb-2 sm:pb-0 scrollbar-none" id="categoryTabs">
+                <button data-category="all" class="cat-btn px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-brand-accent text-brand-dark">
+                    All Articles
+                </button>
+                <button data-category="distribution" class="cat-btn px-5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 bg-brand-card border border-brand-border hover:text-white transition-all">
+                    <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i> Release & Delivery
+                </button>
+                <button data-category="metadata" class="cat-btn px-5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 bg-brand-card border border-brand-border hover:text-white transition-all">
+                    <i class="fa-solid fa-tags mr-1.5"></i> Audio & Metadata Specs
+                </button>
+                <button data-category="payouts" class="cat-btn px-5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 bg-brand-card border border-brand-border hover:text-white transition-all">
+                    <i class="fa-solid fa-wallet mr-1.5"></i> Royalties & Finance
+                </button>
+                <button data-category="copyright" class="cat-btn px-5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 bg-brand-card border border-brand-border hover:text-white transition-all">
+                    <i class="fa-solid fa-shield-halved mr-1.5"></i> Rights & Content ID
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== MAIN KNOWLEDGE ARTICLES GRID ==================== -->
+    <section class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="articlesGrid">
+                
+                <!-- Article 1 -->
+                <article class="article-card bg-brand-card border border-brand-border rounded-2xl p-6 hover:border-brand-accent/50 transition-all flex flex-col justify-between" data-category="distribution" data-keywords="audio specs wav flac sample rate bit depth master distribution">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-[10px] font-mono uppercase px-2.5 py-1 rounded bg-brand-accent/10 text-brand-accent font-bold">Release & Delivery</span>
+                            <span class="text-[11px] text-gray-500 font-mono">4 min read</span>
+                        </div>
+                        <h3 class="text-lg font-bold font-display text-white mb-2 article-title">Audio File Requirements: WAV, FLAC, and Sample Rates</h3>
+                        <p class="text-xs text-gray-400 leading-relaxed mb-6 article-desc">
+                            Discover the mandatory audio specs required by Apple Music, Spotify, and Tidal including 16-bit/24-bit depth and 44.1kHz vs 48kHz standards.
+                        </p>
+                    </div>
+                    <button class="open-modal-btn w-full py-2.5 rounded-xl bg-brand-dark border border-brand-border text-xs font-semibold text-gray-300 hover:text-white hover:border-brand-accent transition-colors flex items-center justify-center gap-2" data-article="1">
+                        Read Guide <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </button>
+                </article>
+
+                <!-- Article 2 -->
+                <article class="article-card bg-brand-card border border-brand-border rounded-2xl p-6 hover:border-brand-accent/50 transition-all flex flex-col justify-between" data-category="metadata" data-keywords="isrc iswc barcode upc code track metadata release specs">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-[10px] font-mono uppercase px-2.5 py-1 rounded bg-brand-purple/10 text-brand-purple font-bold">Metadata Specs</span>
+                            <span class="text-[11px] text-gray-500 font-mono">5 min read</span>
+                        </div>
+                        <h3 class="text-lg font-bold font-display text-white mb-2 article-title">Understanding ISRC, ISWC, and UPC Barcode Standards</h3>
+                        <p class="text-xs text-gray-400 leading-relaxed mb-6 article-desc">
+                            How unique identifiers link your master recordings to streaming royalties, radio play tracking, and global publishing databases.
+                        </p>
+                    </div>
+                    <button class="open-modal-btn w-full py-2.5 rounded-xl bg-brand-dark border border-brand-border text-xs font-semibold text-gray-300 hover:text-white hover:border-brand-accent transition-colors flex items-center justify-center gap-2" data-article="2">
+                        Read Guide <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </button>
+                </article>
+
+                <!-- Article 3 -->
+                <article class="article-card bg-brand-card border border-brand-border rounded-2xl p-6 hover:border-brand-accent/50 transition-all flex flex-col justify-between" data-category="payouts" data-keywords="royalty schedule payout threshold payment method paypal ach wire withdraw">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-[10px] font-mono uppercase px-2.5 py-1 rounded bg-green-500/10 text-green-400 font-bold">Royalties & Finance</span>
+                            <span class="text-[11px] text-gray-500 font-mono">3 min read</span>
+                        </div>
+                        <h3 class="text-lg font-bold font-display text-white mb-2 article-title">Royalty Payment Schedules & How To Withdraw Earnings</h3>
+                        <p class="text-xs text-gray-400 leading-relaxed mb-6 article-desc">
+                            Learn about the 45-60 day DSP accounting latency, minimum balance requirements, and automated split routing to collaborators.
+                        </p>
+                    </div>
+                    <button class="open-modal-btn w-full py-2.5 rounded-xl bg-brand-dark border border-brand-border text-xs font-semibold text-gray-300 hover:text-white hover:border-brand-accent transition-colors flex items-center justify-center gap-2" data-article="3">
+                        Read Guide <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </button>
+                </article>
+
+                <!-- Article 4 -->
+                <article class="article-card bg-brand-card border border-brand-border rounded-2xl p-6 hover:border-brand-accent/50 transition-all flex flex-col justify-between" data-category="copyright" data-keywords="youtube content id fingerprinting copyright claim strike sync monetization">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-[10px] font-mono uppercase px-2.5 py-1 rounded bg-pink-500/10 text-pink-400 font-bold">Rights & Content ID</span>
+                            <span class="text-[11px] text-gray-500 font-mono">6 min read</span>
+                        </div>
+                        <h3 class="text-lg font-bold font-display text-white mb-2 article-title">YouTube Content ID Guidelines & Copyright Protection</h3>
+                        <p class="text-xs text-gray-400 leading-relaxed mb-6 article-desc">
+                            Requirements for enrolling tracks into YouTube fingerprinting without causing copyright strikes on non-exclusive beat samples.
+                        </p>
+                    </div>
+                    <button class="open-modal-btn w-full py-2.5 rounded-xl bg-brand-dark border border-brand-border text-xs font-semibold text-gray-300 hover:text-white hover:border-brand-accent transition-colors flex items-center justify-center gap-2" data-article="4">
+                        Read Guide <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </button>
+                </article>
+
+                <!-- Article 5 -->
+                <article class="article-card bg-brand-card border border-brand-border rounded-2xl p-6 hover:border-brand-accent/50 transition-all flex flex-col justify-between" data-category="distribution" data-keywords="spotify canvas video loop dimensions duration mp4 animation">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-[10px] font-mono uppercase px-2.5 py-1 rounded bg-brand-accent/10 text-brand-accent font-bold">Release & Delivery</span>
+                            <span class="text-[11px] text-gray-500 font-mono">3 min read</span>
+                        </div>
+                        <h3 class="text-lg font-bold font-display text-white mb-2 article-title">Spotify Canvas Setup & Technical Artwork Guidelines</h3>
+                        <p class="text-xs text-gray-400 leading-relaxed mb-6 article-desc">
+                            Specifications for 9:16 vertical video visualizers on Spotify, cover art resolution rules (3000x3000px), and RGB color space.
+                        </p>
+                    </div>
+                    <button class="open-modal-btn w-full py-2.5 rounded-xl bg-brand-dark border border-brand-border text-xs font-semibold text-gray-300 hover:text-white hover:border-brand-accent transition-colors flex items-center justify-center gap-2" data-article="5">
+                        Read Guide <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </button>
+                </article>
+
+                <!-- Article 6 -->
+                <article class="article-card bg-brand-card border border-brand-border rounded-2xl p-6 hover:border-brand-accent/50 transition-all flex flex-col justify-between" data-category="copyright" data-keywords="cover song licensing mechanical license publishing mechanical royalty mechanicals">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-[10px] font-mono uppercase px-2.5 py-1 rounded bg-pink-500/10 text-pink-400 font-bold">Rights & Content ID</span>
+                            <span class="text-[11px] text-gray-500 font-mono">5 min read</span>
+                        </div>
+                        <h3 class="text-lg font-bold font-display text-white mb-2 article-title">How To Distribute Cover Songs Legally Without Takedowns</h3>
+                        <p class="text-xs text-gray-400 leading-relaxed mb-6 article-desc">
+                            Everything you need to know about compulsory mechanical licensing, publishing split clearance, and global streaming rules for covers.
+                        </p>
+                    </div>
+                    <button class="open-modal-btn w-full py-2.5 rounded-xl bg-brand-dark border border-brand-border text-xs font-semibold text-gray-300 hover:text-white hover:border-brand-accent transition-colors flex items-center justify-center gap-2" data-article="6">
+                        Read Guide <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </button>
+                </article>
+
+            </div>
+
+            <!-- No Search Results State -->
+            <div id="noResults" class="hidden text-center py-20 bg-brand-card border border-brand-border rounded-3xl mt-6">
+                <div class="w-16 h-16 rounded-2xl bg-brand-dark flex items-center justify-center text-brand-accent text-2xl mx-auto mb-4 border border-brand-border">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">No Matching Support Articles Found</h3>
+                <p class="text-xs text-gray-400 max-w-sm mx-auto mb-6">We couldn't find any guide matching your exact search terms. Try searching for broader terms like "ISRC", "Royalties", or "WAV".</p>
+                <button id="resetSearchBtn" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:opacity-90 transition-opacity">
+                    Clear Search Filters
+                </button>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ==================== ARTICLE READ MODAL ==================== -->
+    <div id="articleModal" class="fixed inset-0 z-50 bg-brand-dark/80 backdrop-blur-xl hidden flex items-center justify-center p-4">
+        <div class="bg-brand-card border border-brand-border rounded-3xl max-w-2xl w-full p-6 sm:p-8 relative max-h-[85vh] overflow-y-auto custom-scrollbar shadow-2xl">
+            <button id="closeModalBtn" class="absolute top-6 right-6 text-gray-400 hover:text-white text-lg w-8 h-8 rounded-full bg-brand-dark border border-brand-border flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div id="modalContent">
+                <!-- Injected dynamic article preview data -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== DIRECT CONTACT SUPPORT CTA ==================== -->
+    <section class="py-20 border-t border-brand-border/40">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="bg-brand-card border border-brand-border p-10 rounded-3xl glow-box">
+                <div class="w-12 h-12 rounded-2xl bg-brand-accent/10 text-brand-accent flex items-center justify-center text-xl mx-auto mb-4">
+                    <i class="fa-solid fa-headset"></i>
+                </div>
+                <h2 class="text-2xl sm:text-4xl font-bold font-display text-white mb-3">Still Need Assistance With A Release?</h2>
+                <p class="text-gray-400 text-xs sm:text-sm max-w-lg mx-auto mb-6">
+                    Our artist support team is available 24/7 to help clear metadata flags, resolve YouTube copyright claims, and review pending releases.
+                </p>
+                <a href="/support/" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-brand-accent to-brand-purple text-white text-xs font-bold hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-envelope"></i> Contact Priority Support
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="bg-brand-dark border-t border-brand-border/60 pt-16 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-16">
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-accent to-brand-purple flex items-center justify-center text-white text-sm font-bold">
+                            <i class="fa-solid fa-wave-square"></i>
+                        </div>
+                        <span class="font-display font-bold text-xl text-white">AUDIORY</span>
+                    </div>
+                    <p class="text-gray-400 text-sm max-w-sm mb-6 leading-relaxed">
+                        Audiory Distribution provides premier global music distribution infrastructure, automated splits, rights protection, and API capabilities.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Solutions</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/music-distribution/" class="hover:text-brand-accent transition-colors">Music Distribution</a></li>
+                        <li><a href="/content-id/" class="hover:text-brand-accent transition-colors">YouTube Content ID</a></li>
+                        <li><a href="/splits/" class="hover:text-brand-accent transition-colors">Automated Splits</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Resources</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/knowledge-base/" class="hover:text-brand-accent transition-colors">Knowledge Base</a></li>
+                        <li><a href="/royalty-guide/" class="hover:text-brand-accent transition-colors">Royalty Guide</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Legal</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/privacy/" class="hover:text-brand-accent transition-colors">Privacy Policy</a></li>
+                        <li><a href="/terms/" class="hover:text-brand-accent transition-colors">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-brand-border/40 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+                <p>&copy; 2026 Audiory Distribution Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== JAVASCRIPT ENGINE ==================== -->
+    <script>
+        // 1. Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const hamburgerPath = document.getElementById('hamburgerPath');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            if (mobileMenu.classList.contains('hidden')) {
+                hamburgerPath.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+            } else {
+                hamburgerPath.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+            }
+        });
+
+        // 2. Interactive Search & Category Filter Logic
+        const kbSearchInput = document.getElementById('kbSearchInput');
+        const clearSearch = document.getElementById('clearSearch');
+        const articleCards = document.querySelectorAll('.article-card');
+        const noResults = document.getElementById('noResults');
+        const resetSearchBtn = document.getElementById('resetSearchBtn');
+        const catBtns = document.querySelectorAll('.cat-btn');
+        const tagPills = document.querySelectorAll('.tag-pill');
+
+        let activeCategory = 'all';
+
+        function filterArticles() {
+            const query = kbSearchInput.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            if (query.length > 0) {
+                clearSearch.classList.remove('hidden');
+            } else {
+                clearSearch.classList.add('hidden');
+            }
+
+            articleCards.forEach(card => {
+                const categoryMatch = (activeCategory === 'all' || card.dataset.category === activeCategory);
+                const titleText = card.querySelector('.article-title').textContent.toLowerCase();
+                const descText = card.querySelector('.article-desc').textContent.toLowerCase();
+                const keywordsText = card.dataset.keywords.toLowerCase();
+
+                const searchMatch = query === '' || titleText.includes(query) || descText.includes(query) || keywordsText.includes(query);
+
+                if (categoryMatch && searchMatch) {
+                    card.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            if (visibleCount === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
+        }
+
+        // Category Tab Handler
+        catBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                catBtns.forEach(b => {
+                    b.classList.remove('bg-brand-accent', 'text-brand-dark');
+                    b.classList.add('bg-brand-card', 'text-gray-400', 'border', 'border-brand-border');
+                });
+
+                btn.classList.remove('bg-brand-card', 'text-gray-400', 'border', 'border-brand-border');
+                btn.classList.add('bg-brand-accent', 'text-brand-dark');
+
+                activeCategory = btn.dataset.category;
+                filterArticles();
+            });
+        });
+
+        // Search Events
+        kbSearchInput.addEventListener('keyup', filterArticles);
+        
+        clearSearch.addEventListener('click', () => {
+            kbSearchInput.value = '';
+            filterArticles();
+        });
+
+        resetSearchBtn.addEventListener('click', () => {
+            kbSearchInput.value = '';
+            activeCategory = 'all';
+            catBtns[0].click();
+        });
+
+        tagPills.forEach(pill => {
+            pill.addEventListener('click', () => {
+                kbSearchInput.value = pill.textContent.trim();
+                filterArticles();
+            });
+        });
+
+        // 3. Modal Read Preview Logic
+        const articleData = {
+            "1": {
+                title: "Audio File Requirements: WAV, FLAC, and Sample Rates",
+                category: "Release & Delivery",
+                content: `
+                    <p class="text-xs text-gray-300 leading-relaxed mb-4">To deliver your music seamlessly to Spotify, Apple Music, and Amazon Music without metadata encoding failures, audio files must adhere strictly to lossless digital standards.</p>
+                    <h4 class="text-sm font-bold text-white mb-2 font-display">Required Specs:</h4>
+                    <ul class="list-disc pl-5 text-xs text-gray-400 space-y-2 mb-4">
+                        <li><strong>File Format:</strong> 16-bit or 24-bit Stereo WAV / FLAC files.</li>
+                        <li><strong>Sample Rate:</strong> Minimum 44.1 kHz (48 kHz or 96 kHz for HD formats).</li>
+                        <li><strong>Compression:</strong> Uncompressed or lossless audio only. MP3s are strictly rejected by DSPs.</li>
+                    </ul>
+                    <p class="text-xs text-gray-400">Note: Ensure your master track is bounced without clipping (+0 dB threshold) to prevent digital distortion after transcoding.</p>
+                `
+            },
+            "2": {
+                title: "Understanding ISRC, ISWC, and UPC Barcode Standards",
+                category: "Metadata Specs",
+                content: `
+                    <p class="text-xs text-gray-300 leading-relaxed mb-4">Digital identifiers ensure that every stream, performance, and mechanical playback generates proper royalty accounting for rights holders.</p>
+                    <h4 class="text-sm font-bold text-white mb-2 font-display">Code Breakdown:</h4>
+                    <ul class="list-disc pl-5 text-xs text-gray-400 space-y-2 mb-4">
+                        <li><strong>ISRC (International Standard Recording Code):</strong> Uniquely identifies a specific sound recording track. Provided free by Audiory or custom-assigned by label users.</li>
+                        <li><strong>UPC (Universal Product Code):</strong> Assigned to the overall album, EP, or single release bundle as a barcode product identifier.</li>
+                        <li><strong>ISWC:</strong> Assigned by publishing administrators to protect underlying compositions.</li>
+                    </ul>
+                `
+            },
+            "3": {
+                title: "Royalty Payment Schedules & How To Withdraw Earnings",
+                category: "Royalties & Finance",
+                content: `
+                    <p class="text-xs text-gray-300 leading-relaxed mb-4">Streaming revenues are processed on a delayed global accounting cycle standard across all major music distributors.</p>
+                    <h4 class="text-sm font-bold text-white mb-2 font-display">Timeline & Rules:</h4>
+                    <ul class="list-disc pl-5 text-xs text-gray-400 space-y-2 mb-4">
+                        <li><strong>Payout Delay:</strong> DSPs report revenue 45 to 60 days following the streaming month (e.g., January streams are paid in late March).</li>
+                        <li><strong>Minimum Balance:</strong> $10.00 USD required for payout request.</li>
+                        <li><strong>Payment Gateways:</strong> PayPal, direct bank ACH, wire transfer, or USDC crypto wallet.</li>
+                    </ul>
+                `
+            },
+            "4": {
+                title: "YouTube Content ID Guidelines & Copyright Protection",
+                category: "Rights & Content ID",
+                content: `
+                    <p class="text-xs text-gray-300 leading-relaxed mb-4">Content ID scans YouTube videos to automatically monetize videos that feature your sound recordings.</p>
+                    <h4 class="text-sm font-bold text-white mb-2 font-display">Eligibility Requirements:</h4>
+                    <ul class="list-disc pl-5 text-xs text-gray-400 space-y-2 mb-4">
+                        <li>Must contain 100% exclusive audio content (no royalty-free loops, public domain samples, or non-exclusive beats).</li>
+                        <li>Non-exclusive beats will trigger automated false claims on other artists, leading to Content ID suspension.</li>
+                    </ul>
+                `
+            },
+            "5": {
+                title: "Spotify Canvas Setup & Technical Artwork Guidelines",
+                category: "Release & Delivery",
+                content: `
+                    <p class="text-xs text-gray-300 leading-relaxed mb-4">Spotify Canvas increases track shares and playlist adds by displaying an engaging looping visualizer.</p>
+                    <h4 class="text-sm font-bold text-white mb-2 font-display">Video Specs:</h4>
+                    <ul class="list-disc pl-5 text-xs text-gray-400 space-y-2 mb-4">
+                        <li><strong>Ratio:</strong> 9:16 Vertical format.</li>
+                        <li><strong>Length:</strong> 3 to 8 seconds continuous loop.</li>
+                        <li><strong>Format:</strong> MP4 or MOV format (no audio required in file).</li>
+                    </ul>
+                `
+            },
+            "6": {
+                title: "How To Distribute Cover Songs Legally Without Takedowns",
+                category: "Rights & Content ID",
+                content: `
+                    <p class="text-xs text-gray-300 leading-relaxed mb-4">A cover song is your recording of a song written by someone else, retaining the original lyrics and melody.</p>
+                    <h4 class="text-sm font-bold text-white mb-2 font-display">Key Rules:</h4>
+                    <ul class="list-disc pl-5 text-xs text-gray-400 space-y-2 mb-4">
+                        <li>You must credit the original songwriter and publisher in track metadata.</li>
+                        <li>Do not sample or use the original artist's audio master background track.</li>
+                        <li>Compulsory mechanical streaming licenses apply in territories like the USA through The MLC.</li>
+                    </ul>
+                `
+            }
+        };
+
+        const articleModal = document.getElementById('articleModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const modalContent = document.getElementById('modalContent');
+
+        document.querySelectorAll('.open-modal-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.article;
+                const data = articleData[id];
+                if (data) {
+                    modalContent.innerHTML = `
+                        <span class="text-[10px] font-mono uppercase px-2.5 py-1 rounded bg-brand-accent/10 text-brand-accent font-bold">${data.category}</span>
+                        <h3 class="text-2xl font-bold font-display text-white mt-3 mb-4">${data.title}</h3>
+                        ${data.content}
+                        <div class="mt-6 pt-4 border-t border-brand-border flex justify-end">
+                            <button onclick="document.getElementById('articleModal').classList.add('hidden')" class="px-5 py-2 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs">Close Article</button>
+                        </div>
+                    `;
+                    articleModal.classList.remove('hidden');
+                }
+            });
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            articleModal.classList.add('hidden');
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === articleModal) {
+                articleModal.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
