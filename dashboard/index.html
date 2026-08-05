@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audiory Distribution — Artist & Label Enterprise Dashboard</title>
+    <title>Audiory Enterprise — Music Distribution & Management</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,7 @@
     <!-- FontAwesome 6 Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
     
-    <!-- Chart.js for High Performance Telemetry -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Tailwind CSS CDN -->
@@ -78,26 +78,28 @@
             background: #4f46e5;
         }
 
-        /* Modal Overlay Animations */
         .modal-blur {
             backdrop-filter: blur(12px);
             background-color: rgba(7, 9, 14, 0.85);
         }
 
-        .sub-tab-btn.active {
-            background-color: rgba(0, 242, 254, 0.1);
+        .nav-link.active {
+            background-color: #182030;
             color: #00f2fe;
-            border-color: rgba(0, 242, 254, 0.3);
+            border-left: 3px solid #00f2fe;
         }
     </style>
 </head>
 <body class="custom-scrollbar antialiased h-screen flex overflow-hidden">
 
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div id="sidebarBackdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden"></div>
+
     <!-- ==================== LEFT NAVIGATION SIDEBAR ==================== -->
-    <aside id="sidebar" class="w-72 bg-brand-sidebar border-r border-brand-border flex flex-col justify-between shrink-0 transition-all duration-300 z-30">
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 w-72 bg-brand-sidebar border-r border-brand-border flex flex-col justify-between shrink-0 transition-transform duration-300 z-50 -translate-x-full lg:translate-x-0">
         <div class="flex flex-col h-full overflow-y-auto custom-scrollbar">
             
-            <!-- Sidebar Header / Brand Logo -->
+            <!-- Logo Header -->
             <div class="h-20 flex items-center justify-between px-6 border-b border-brand-border/60 shrink-0">
                 <a href="#" class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20">
@@ -107,182 +109,183 @@
                     </div>
                     <div class="flex flex-col">
                         <span class="font-display font-bold text-xl tracking-wider text-white">AUDIORY</span>
-                        <span class="text-[8px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">ARTIST CONSOLE</span>
+                        <span class="text-[8px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">ARTIST PORTAL</span>
                     </div>
                 </a>
+                <button onclick="toggleMobileSidebar()" class="lg:hidden text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
 
-            <!-- User Quick Profile Snippet -->
+            <!-- Profile Widget -->
             <div class="p-4 mx-4 my-4 rounded-xl bg-brand-card/70 border border-brand-border/80 flex items-center gap-3">
-                <div id="userAvatar" class="w-10 h-10 rounded-lg bg-gradient-to-tr from-brand-accent to-brand-purple flex items-center justify-center text-white font-bold font-display text-sm">
+                <div id="userAvatar" class="w-10 h-10 rounded-lg bg-gradient-to-tr from-brand-accent to-brand-purple flex items-center justify-center text-white font-bold font-display text-sm shrink-0">
                     --
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p id="userName" class="text-xs font-bold text-white truncate">Loading User...</p>
-                    <p id="userAccId" class="text-[10px] text-gray-400 font-mono truncate">ACC #---------</p>
+                    <p id="userName" class="text-xs font-bold text-white truncate">Authenticating...</p>
+                    <p id="userEmail" class="text-[10px] text-gray-400 font-mono truncate">----</p>
                 </div>
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             </div>
 
-            <!-- Main Navigation Menus -->
-            <nav class="px-4 space-y-6 flex-1 pb-6">
+            <!-- Sidebar Navigation Links -->
+            <nav class="px-3 space-y-6 flex-1 pb-6 text-xs">
                 
-                <!-- Overview -->
+                <!-- Main Dashboard -->
                 <div>
-                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-gray-300 hover:text-white hover:bg-brand-hover transition-all group active-nav">
-                        <div class="flex items-center gap-3">
-                            <i class="fa-solid fa-chart-pie text-brand-accent group-hover:scale-110 transition-transform"></i>
-                            <span>Dashboard</span>
-                        </div>
+                    <button onclick="navigateTo('dashboard')" id="nav-dashboard" class="nav-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold text-gray-300 hover:text-white hover:bg-brand-hover transition-all active">
+                        <i class="fa-solid fa-chart-pie text-brand-accent w-4"></i>
+                        <span>Dashboard Home</span>
                     </button>
                 </div>
 
-                <!-- Catalog Management -->
+                <!-- Catalog -->
                 <div>
-                    <div class="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Catalog</div>
+                    <div class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Catalog</div>
                     <div class="space-y-1">
-                        <button onclick="switchSubTab('cat_releases')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-compact-disc text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('cat_releases')" id="nav-cat_releases" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-compact-disc w-4"></i>
                             <span>Releases Catalog</span>
                         </button>
-                        <button onclick="switchSubTab('cat_artists')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-users text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('cat_artists')" id="nav-cat_artists" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-users w-4"></i>
                             <span>Roster & Artists</span>
                         </button>
-                        <button onclick="switchSubTab('cat_create')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-brand-accent hover:bg-brand-accent/10 transition-all border border-brand-accent/20 mt-1">
-                            <i class="fa-solid fa-circle-plus text-brand-accent w-4"></i>
+                        <button onclick="navigateTo('cat_create')" id="nav-cat_create" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-brand-accent hover:bg-brand-accent/10 transition-all border border-brand-accent/20 my-1 font-semibold">
+                            <i class="fa-solid fa-circle-plus w-4"></i>
                             <span>Create New Release</span>
                         </button>
-                        <button onclick="switchSubTab('cat_ringtone')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-mobile-retro text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('cat_ringtone')" id="nav-cat_ringtone" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-mobile-retro w-4"></i>
                             <span>Create Ringtone</span>
                         </button>
-                        <button onclick="switchSubTab('cat_transfer')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-arrow-right-arrow-left text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('cat_transfer')" id="nav-cat_transfer" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-arrow-right-arrow-left w-4"></i>
                             <span>Transfer Track</span>
                         </button>
-                        <button onclick="switchSubTab('cat_master')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-wand-magic-sparkles text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('cat_master')" id="nav-cat_master" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-wand-magic-sparkles w-4"></i>
                             <span>Master Your Track</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Marketing & Growth -->
+                <!-- Marketing -->
                 <div>
-                    <div class="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Marketing</div>
+                    <div class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Marketing</div>
                     <div class="space-y-1">
-                        <button onclick="switchSubTab('mkt_dsp')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-bullhorn text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('mkt_dsp')" id="nav-mkt_dsp" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-bullhorn w-4"></i>
                             <span>DSP Pitching</span>
                         </button>
-                        <button onclick="switchSubTab('mkt_builder')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-layer-group text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('mkt_builder')" id="nav-mkt_builder" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-layer-group w-4"></i>
                             <span>Campaign Builder</span>
                         </button>
-                        <button onclick="switchSubTab('mkt_playlist')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-list-check text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('mkt_playlist')" id="nav-mkt_playlist" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-list-check w-4"></i>
                             <span>3rd Party Playlisting</span>
                         </button>
-                        <button onclick="switchSubTab('mkt_adbox')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-rectangle-ad text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('mkt_adbox')" id="nav-mkt_adbox" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-rectangle-ad w-4"></i>
                             <span>Audiory Ad Box</span>
                         </button>
-                        <button onclick="switchSubTab('mkt_influencers')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-people-group text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('mkt_influencers')" id="nav-mkt_influencers" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-people-group w-4"></i>
                             <span>Influencer Campaigns</span>
                         </button>
-                        <button onclick="switchSubTab('mkt_luminate')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-chart-simple text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('mkt_luminate')" id="nav-mkt_luminate" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-chart-simple w-4"></i>
                             <span>Luminate Registration</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Analytics Telemetry -->
+                <!-- Analytics -->
                 <div>
-                    <div class="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Analytics</div>
+                    <div class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Analytics</div>
                     <div class="space-y-1">
-                        <button onclick="switchSubTab('ana_streams')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-chart-line text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('ana_streams')" id="nav-ana_streams" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-chart-line w-4"></i>
                             <span>Streams Overview</span>
                         </button>
-                        <button onclick="switchSubTab('ana_meta')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-brands fa-instagram text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('ana_meta')" id="nav-ana_meta" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-brands fa-instagram w-4"></i>
                             <span>Meta (IG/FB) Analytics</span>
                         </button>
-                        <button onclick="switchSubTab('ana_yt')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-brands fa-youtube text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('ana_yt')" id="nav-ana_yt" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-brands fa-youtube w-4"></i>
                             <span>YouTube UGC Telemetry</span>
                         </button>
-                        <button onclick="switchSubTab('ana_tiktok')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-brands fa-tiktok text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('ana_tiktok')" id="nav-ana_tiktok" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-brands fa-tiktok w-4"></i>
                             <span>TikTok Sound Analytics</span>
                         </button>
-                        <button onclick="switchSubTab('ana_safe')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-shield-heart text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('ana_safe')" id="nav-ana_safe" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-shield-heart w-4"></i>
                             <span>StreamSafe™ Fraud Check</span>
                         </button>
-                        <button onclick="switchSubTab('ana_spotify')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-brands fa-spotify text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('ana_spotify')" id="nav-ana_spotify" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-brands fa-spotify w-4"></i>
                             <span>Discovery Mode Insights</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Financial & Splits -->
+                <!-- Finance & Royalties -->
                 <div>
-                    <div class="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Finance & Royalties</div>
+                    <div class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Finance & Royalties</div>
                     <div class="space-y-1">
-                        <button onclick="switchSubTab('roy_summary')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-wallet text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('roy_summary')" id="nav-roy_summary" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-wallet w-4"></i>
                             <span>Royalty Summary</span>
                         </button>
-                        <button onclick="switchSubTab('roy_payout')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-money-bill-transfer text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('roy_payout')" id="nav-roy_payout" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-money-bill-transfer w-4"></i>
                             <span>Request Payment</span>
                         </button>
-                        <button onclick="switchSubTab('roy_tracks')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-sliders text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('roy_tracks')" id="nav-roy_tracks" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-sliders w-4"></i>
                             <span>Track Performance</span>
                         </button>
-                        <button onclick="switchSubTab('spl_collabs')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-handshake text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('spl_collabs')" id="nav-spl_collabs" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-handshake w-4"></i>
                             <span>SplitShare Collaborators</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Rights & Protection -->
+                <!-- Rights Protection -->
                 <div>
-                    <div class="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Rights Protection</div>
+                    <div class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Rights Protection</div>
                     <div class="space-y-1">
-                        <button onclick="switchSubTab('rgt_yt_allow')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-brands fa-youtube text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('rgt_yt_allow')" id="nav-rgt_yt_allow" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-brands fa-youtube w-4"></i>
                             <span>YouTube Allowlist</span>
                         </button>
-                        <button onclick="switchSubTab('rgt_yt_claim')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-copyright text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('rgt_yt_claim')" id="nav-rgt_yt_claim" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-copyright w-4"></i>
                             <span>YouTube Manual Claim</span>
                         </button>
-                        <button onclick="switchSubTab('rgt_yt_oac')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-music text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('rgt_yt_oac')" id="nav-rgt_yt_oac" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-music w-4"></i>
                             <span>YouTube OAC Request</span>
                         </button>
-                        <button onclick="switchSubTab('rgt_tiktok')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-brands fa-tiktok text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('rgt_tiktok')" id="nav-rgt_tiktok" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-brands fa-tiktok w-4"></i>
                             <span>TikTok Manual Claim</span>
                         </button>
-                        <button onclick="switchSubTab('rgt_sc')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-brands fa-soundcloud text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('rgt_sc')" id="nav-rgt_sc" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-brands fa-soundcloud w-4"></i>
                             <span>SoundCloud Allowlist</span>
                         </button>
-                        <button onclick="switchSubTab('rgt_meta')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-brands fa-meta text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('rgt_meta')" id="nav-rgt_meta" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-brands fa-meta w-4"></i>
                             <span>Meta Allowlist</span>
                         </button>
-                        <button onclick="switchSubTab('rgt_cover')" class="nav-sub-item w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-file-signature text-gray-500 w-4"></i>
+                        <button onclick="navigateTo('rgt_cover')" id="nav-rgt_cover" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-file-signature w-4"></i>
                             <span>Cover Song Licensing</span>
                         </button>
                     </div>
@@ -291,548 +294,815 @@
             </nav>
         </div>
 
-        <!-- Sidebar Footer Status -->
-        <div class="p-4 border-t border-brand-border bg-brand-dark/50 flex items-center justify-between text-xs text-gray-500 font-mono shrink-0">
+        <div class="p-4 border-t border-brand-border bg-brand-dark/50 flex items-center justify-between text-[11px] text-gray-500 font-mono shrink-0">
             <span class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span>Firestore API Direct Sync</span>
+                <span id="dbStatusDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span id="dbStatusText">Database Online</span>
             </span>
-            <span>v4.2.0</span>
+            <span>v4.3.0</span>
         </div>
     </aside>
 
-    <!-- ==================== MAIN DASHBOARD CONTAINER ==================== -->
+    <!-- ==================== MAIN CONTENT AREA ==================== -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
         
         <!-- TOP HEADER BAR -->
-        <header class="h-20 bg-brand-sidebar border-b border-brand-border px-6 flex items-center justify-between shrink-0 z-20">
+        <header class="h-20 bg-brand-sidebar border-b border-brand-border px-4 lg:px-8 flex items-center justify-between shrink-0 z-20">
             
-            <!-- Global Breadcrumbs / Search -->
-            <div class="flex items-center gap-4 flex-1 max-w-xl">
-                <div class="relative w-full">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
-                    <input type="text" placeholder="Search catalog, UPCs, ISRCs, collaborators or analytics..." class="w-full bg-brand-dark border border-brand-border rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition-colors">
+            <div class="flex items-center gap-3 flex-1">
+                <!-- Mobile Hamburger Button -->
+                <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 text-gray-400 hover:text-white rounded-lg border border-brand-border bg-brand-dark">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+
+                <div class="relative w-full max-w-md hidden sm:block">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                    <input type="text" placeholder="Search tracks, catalog, UPCs, or analytics..." class="w-full bg-brand-dark border border-brand-border rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition-colors">
                 </div>
             </div>
 
-            <!-- Top Action Controls -->
-            <div class="flex items-center gap-4">
-                <button onclick="openModal('createReleaseModal')" class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-brand-accent to-brand-600 text-brand-dark font-bold text-xs hover:shadow-lg hover:shadow-brand-accent/20 transition-all">
+            <div class="flex items-center gap-3">
+                <button onclick="navigateTo('cat_create')" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-brand-accent to-brand-600 text-brand-dark font-bold text-xs hover:shadow-lg hover:shadow-brand-accent/20 transition-all">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
-                    <span>Submit New Release</span>
+                    <span class="hidden sm:inline">New Release</span>
                 </button>
 
-                <div class="h-6 w-px bg-brand-border"></div>
+                <div class="h-6 w-px bg-brand-border hidden sm:block"></div>
 
-                <button class="relative p-2 rounded-xl border border-brand-border bg-brand-dark text-gray-400 hover:text-white transition-colors">
-                    <i class="fa-solid fa-bell"></i>
-                    <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-brand-pink"></span>
-                </button>
-
-                <!-- Profile Dropdown Button -->
-                <div class="flex items-center gap-3 pl-2">
-                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-purple to-brand-pink flex items-center justify-center font-bold text-xs text-white shadow-md">
-                        MJ
+                <div class="flex items-center gap-3 pl-1">
+                    <div id="topAvatar" class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-purple to-brand-pink flex items-center justify-center font-bold text-xs text-white shadow-md shrink-0">
+                        --
                     </div>
                     <div class="hidden md:flex flex-col text-left">
-                        <span id="topBarUser" class="text-xs font-bold text-white">Mac Justin</span>
-                        <span class="text-[10px] text-emerald-400 font-mono">Verified Artist</span>
+                        <span id="topUserName" class="text-xs font-bold text-white truncate">----</span>
+                        <span class="text-[10px] text-emerald-400 font-mono">Artist Account</span>
                     </div>
                 </div>
             </div>
         </header>
 
-        <!-- DASHBOARD BODY CONTAINER (Scrollable) -->
-        <main class="flex-1 overflow-y-auto custom-scrollbar p-6 lg:p-10 space-y-8 bg-brand-dark" id="mainDashboardView">
-            
-            <!-- Welcome Header Banner -->
-            <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
-                <div>
-                    <h1 class="text-2xl sm:text-3xl font-extrabold font-display text-white">Welcome, <span id="welcomeUserName" class="gradient-text">Mac Justin</span></h1>
-                    <p class="text-xs sm:text-sm text-gray-400 mt-1">Manage your catalog, analyze real-time DSP performance telemetry, and process royalty splits.</p>
-                </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="switchSubTab('cat_create')" class="px-4 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-colors flex items-center gap-2 shadow-lg shadow-brand-accent/10">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>Create Release</span>
-                    </button>
-                    <button onclick="fetchFirestoreCatalog()" class="px-4 py-2.5 rounded-xl border border-brand-border bg-brand-card text-gray-300 hover:text-white font-semibold text-xs transition-colors flex items-center gap-2">
-                        <i class="fa-solid fa-rotate text-brand-accent"></i>
-                        <span>Sync Firestore</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- LIVE STATS SUMMARY OVERVIEW (4-CARDS) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                
-                <!-- Card 1: Total Streams -->
-                <div class="p-6 rounded-2xl bg-brand-card border border-brand-border hover:border-brand-accent/40 transition-all">
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Streams</span>
-                        <div class="w-8 h-8 rounded-lg bg-brand-accent/10 flex items-center justify-center text-brand-accent text-sm">
-                            <i class="fa-solid fa-chart-simple"></i>
-                        </div>
-                    </div>
-                    <div class="text-3xl font-extrabold font-display text-white mb-1" id="statStreams">--</div>
-                    <div class="flex items-center gap-2 text-xs text-emerald-400 font-medium">
-                        <i class="fa-solid fa-arrow-trend-up"></i>
-                        <span>+18.4% from last month</span>
-                    </div>
-                </div>
-
-                <!-- Card 2: Royalty Balance -->
-                <div class="p-6 rounded-2xl bg-brand-card border border-brand-border hover:border-brand-accent/40 transition-all">
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Available Royalties</span>
-                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-sm">
-                            <i class="fa-solid fa-dollar-sign"></i>
-                        </div>
-                    </div>
-                    <div class="text-3xl font-extrabold font-display text-emerald-400 mb-1" id="statEarnings">$0.00</div>
-                    <div class="flex items-center gap-2 text-xs text-gray-400 font-medium">
-                        <button onclick="switchSubTab('roy_payout')" class="text-brand-accent hover:underline font-bold text-[11px]">Request Immediate Withdrawal &rarr;</button>
-                    </div>
-                </div>
-
-                <!-- Card 3: Active Releases -->
-                <div class="p-6 rounded-2xl bg-brand-card border border-brand-border hover:border-brand-accent/40 transition-all">
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Active Catalog</span>
-                        <div class="w-8 h-8 rounded-lg bg-brand-purple/10 flex items-center justify-center text-brand-purple text-sm">
-                            <i class="fa-solid fa-compact-disc"></i>
-                        </div>
-                    </div>
-                    <div class="text-3xl font-extrabold font-display text-white mb-1" id="statReleases">0</div>
-                    <div class="flex items-center gap-2 text-xs text-gray-400 font-medium">
-                        <span>Distributed across 200+ DSPs</span>
-                    </div>
-                </div>
-
-                <!-- Card 4: Global DSP Reach -->
-                <div class="p-6 rounded-2xl bg-brand-card border border-brand-border hover:border-brand-accent/40 transition-all">
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Connected DSPs</span>
-                        <div class="w-8 h-8 rounded-lg bg-brand-pink/10 flex items-center justify-center text-brand-pink text-sm">
-                            <i class="fa-solid fa-globe"></i>
-                        </div>
-                    </div>
-                    <div class="text-3xl font-extrabold font-display text-white mb-1">214</div>
-                    <div class="flex items-center gap-2 text-xs text-emerald-400 font-medium">
-                        <i class="fa-solid fa-circle-check"></i>
-                        <span>Too Lost API Pipeline Active</span>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- STREAMING TELEMETRY & GRAPH SECTION -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
-                <!-- Streaming Telemetry Chart (2 Cols) -->
-                <div class="lg:col-span-2 p-6 rounded-2xl bg-brand-card border border-brand-border flex flex-col justify-between">
-                    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-                        <div>
-                            <h3 class="text-lg font-bold font-display text-white">Daily Stream Analytics Telemetry</h3>
-                            <p class="text-xs text-gray-400">Aggregated real-time listening data across Spotify, Apple Music & TikTok</p>
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="px-3 py-1 rounded-lg text-xs font-semibold bg-brand-accent/20 text-brand-accent border border-brand-accent/30">7 Days</button>
-                            <button class="px-3 py-1 rounded-lg text-xs font-semibold bg-brand-dark text-gray-400 hover:text-white">30 Days</button>
-                            <button class="px-3 py-1 rounded-lg text-xs font-semibold bg-brand-dark text-gray-400 hover:text-white">Year</button>
-                        </div>
-                    </div>
-                    <div class="h-64 relative w-full">
-                        <canvas id="telemetryChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Quick Action Hub (1 Col) -->
-                <div class="p-6 rounded-2xl bg-brand-card border border-brand-border flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-lg font-bold font-display text-white mb-1">Catalog Quick Actions</h3>
-                        <p class="text-xs text-gray-400 mb-6">Direct access to core Audiory operations</p>
-                        
-                        <div class="space-y-3">
-                            <button onclick="switchSubTab('cat_create')" class="w-full p-3 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-accent/50 flex items-center justify-between transition-colors group">
-                                <div class="flex items-center gap-3">
-                                    <i class="fa-solid fa-plus text-brand-accent"></i>
-                                    <span class="text-xs font-bold text-gray-200 group-hover:text-white">Submit New Single/EP</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:translate-x-1 transition-transform"></i>
-                            </button>
-
-                            <button onclick="switchSubTab('spl_collabs')" class="w-full p-3 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-accent/50 flex items-center justify-between transition-colors group">
-                                <div class="flex items-center gap-3">
-                                    <i class="fa-solid fa-sliders text-brand-purple"></i>
-                                    <span class="text-xs font-bold text-gray-200 group-hover:text-white">Manage Royalty Splits</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:translate-x-1 transition-transform"></i>
-                            </button>
-
-                            <button onclick="switchSubTab('rgt_yt_allow')" class="w-full p-3 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-accent/50 flex items-center justify-between transition-colors group">
-                                <div class="flex items-center gap-3">
-                                    <i class="fa-brands fa-youtube text-red-500"></i>
-                                    <span class="text-xs font-bold text-gray-200 group-hover:text-white">YouTube Channel Allowlist</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:translate-x-1 transition-transform"></i>
-                            </button>
-
-                            <button onclick="switchSubTab('mkt_dsp')" class="w-full p-3 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-accent/50 flex items-center justify-between transition-colors group">
-                                <div class="flex items-center gap-3">
-                                    <i class="fa-solid fa-bullhorn text-amber-400"></i>
-                                    <span class="text-xs font-bold text-gray-200 group-hover:text-white">Submit DSP Editorial Pitch</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:translate-x-1 transition-transform"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 pt-4 border-t border-brand-border/60 flex items-center justify-between text-[11px] text-gray-400">
-                        <span>Backend Status:</span>
-                        <span class="font-mono text-emerald-400 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                            Production Ready
-                        </span>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- LIVE RELEASES TABLE (FIRESTORE SYNCED) -->
-            <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
-                <div class="flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                        <h3 class="text-lg font-bold font-display text-white">Active Releases & Catalog</h3>
-                        <p class="text-xs text-gray-400">Check delivery status across 200+ DSPs</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <button onclick="fetchFirestoreCatalog()" class="px-3 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-xs text-gray-300 hover:text-white transition-colors">
-                            <i class="fa-solid fa-arrows-rotate mr-1"></i> Refresh Catalog
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Table Container -->
-                <div class="overflow-x-auto custom-scrollbar">
-                    <table class="w-full text-left text-xs text-gray-300">
-                        <thead class="bg-brand-dark text-gray-400 font-mono uppercase text-[10px] tracking-wider border-b border-brand-border">
-                            <tr>
-                                <th class="p-3">Cover / Title</th>
-                                <th class="p-3">Primary Artist</th>
-                                <th class="p-3">Type</th>
-                                <th class="p-3">UPC Code</th>
-                                <th class="p-3">Status</th>
-                                <th class="p-3 text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="catalogTableBody" class="divide-y divide-brand-border/40">
-                            <!-- Rows injected dynamically via JS / Firestore -->
-                            <tr>
-                                <td colspan="6" class="p-8 text-center text-gray-500 font-mono">
-                                    <i class="fa-solid fa-spinner fa-spin text-brand-accent text-lg mb-2"></i>
-                                    <p>Loading catalog from Firestore...</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
+        <!-- MAIN SCROLLABLE DASHBOARD BODY -->
+        <main class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 space-y-6 bg-brand-dark" id="mainContentView">
+            <!-- Dynamic view injected here by JS -->
         </main>
     </div>
 
-    <!-- ==================== CREATE RELEASE PRODUCTION MODAL ==================== -->
-    <div id="createReleaseModal" class="fixed inset-0 modal-blur z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-brand-card border border-brand-border rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
-            
-            <div class="flex justify-between items-center pb-4 mb-6 border-b border-brand-border">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-brand-accent/10 border border-brand-accent/20 flex items-center justify-center text-brand-accent font-bold">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold font-display text-white">Create New Release</h3>
-                        <p class="text-xs text-gray-400">Submit metadata to Spotify, Apple Music & TikTok via Too Lost API</p>
-                    </div>
-                </div>
-                <button onclick="closeModal('createReleaseModal')" class="text-gray-400 hover:text-white text-lg">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <form id="newReleaseForm" onsubmit="handleCreateRelease(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 mb-1">Release Title</label>
-                    <input type="text" id="relTitle" required placeholder="e.g. Midnight Synths (Deluxe Edition)" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-300 mb-1">Primary Artist Name</label>
-                        <input type="text" id="relArtist" required placeholder="e.g. Moose" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-300 mb-1">Release Type</label>
-                        <select id="relType" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
-                            <option value="Single">Single</option>
-                            <option value="EP">EP</option>
-                            <option value="Album">Album</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-300 mb-1">UPC Barcode (Leave blank for auto-gen)</label>
-                        <input type="text" id="relUpc" placeholder="Auto-generated if blank" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-brand-accent">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-300 mb-1">Genre</label>
-                        <input type="text" id="relGenre" placeholder="e.g. Synthwave / Electronic" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 mb-1">Cover Artwork URL</label>
-                    <input type="url" id="relCover" placeholder="https://..." class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
-                </div>
-
-                <div class="p-4 rounded-xl bg-brand-dark/50 border border-brand-border/60 text-xs text-gray-400 space-y-2">
-                    <p class="font-bold text-gray-300"><i class="fa-solid fa-circle-info text-brand-accent mr-1"></i> Audio File Upload (Lossless WAV/FLAC)</p>
-                    <p class="text-[11px]">Once metadata is submitted, high-res audio tracks are streamed directly to Too Lost distribution processing queues.</p>
-                </div>
-
-                <div class="pt-4 flex justify-end gap-3 border-t border-brand-border">
-                    <button type="button" onclick="closeModal('createReleaseModal')" class="px-5 py-2.5 rounded-xl border border-brand-border bg-brand-dark text-gray-300 text-xs font-semibold hover:text-white">Cancel</button>
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-colors">Dispatch Release</button>
-                </div>
-            </form>
-
-        </div>
-    </div>
-
-    <!-- ==================== PRODUCTION JAVASCRIPT & FIRESTORE INTEGRATION ==================== -->
+    <!-- ==================== LOGIC & FIRESTORE SCRIPT ==================== -->
     <script type="module">
-        // Import Firebase v10 SDK Modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged,
+            signInAnonymously
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            query, 
+            where, 
+            onSnapshot, 
+            addDoc, 
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Placeholder Firebase Config - Replace with your live Audiory Firebase Project Keys
+        // Firebase Setup
         const firebaseConfig = {
-          apiKey: "AIzaSyBtii4iYkm7ummyi5SHiQMOMUPrOpwhdrk",
-          authDomain: "audiory-distribution.firebaseapp.com",
-          databaseURL: "https://audiory-distribution-default-rtdb.firebaseio.com",
-          projectId: "audiory-distribution",
-          storageBucket: "audiory-distribution.firebasestorage.app",
-          messagingSenderId: "944053428828",
-          appId: "1:944053428828:web:30277072355728f9c8fc99",
-          measurementId: "G-MXDJH52XX4"
+            apiKey: "AIzaSyAudioryProductionApiKeyPlaceholder",
+            authDomain: "audiory-distro.firebaseapp.com",
+            projectId: "audiory-distro",
+            storageBucket: "audiory-distro.appspot.com",
+            messagingSenderId: "892496899076",
+            appId: "1:892496899076:web:audioryproductionkey"
         };
 
-        // Initialize Firebase
-        let app, db;
-        let isFirebaseAvailable = false;
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            isFirebaseAvailable = true;
-        } catch (e) {
-            console.warn("Firestore running in production fallback mode:", e);
-        }
+        // State
+        window.userState = { uid: null, displayName: 'Artist', email: '' };
+        window.userReleases = [];
+        window.userTelemetry = [];
+        let chartInstance = null;
 
-        // Global User State
-        window.currentUser = {
-            uid: "usr_audiory_101",
-            name: "Mac Justin",
-            accountId: "AUD-61387"
-        };
-
-        // Default Mock Data for catalog standby
-        window.catalogState = [
-            { id: 'rel_001', title: '2.A.M', artist: 'Moose', type: 'Single', upc: '824296899076', status: 'Distributed', cover: 'https://picsum.photos/seed/music1/150/150' },
-            { id: 'rel_002', title: 'Cyber City Horizon', artist: 'Moose', type: 'EP', upc: '889012390998', status: 'Processing', cover: 'https://picsum.photos/seed/music2/150/150' },
-            { id: 'rel_003', title: 'Neon Midnight', artist: 'Mac Justin', type: 'Album', upc: '889012390123', status: 'Distributed', cover: 'https://picsum.photos/seed/music3/150/150' }
-        ];
-
-        window.analyticsState = { streams: 148920, earnings: 4250.80 };
-
-        // DOM Initialization
-        document.addEventListener('DOMContentLoaded', () => {
-            initUserData();
-            initChart();
-            renderCatalogTable(window.catalogState);
-            
-            if (isFirebaseAvailable) {
-                fetchFirestoreCatalog();
+        // Auto Authentication
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.userState.uid = user.uid;
+                window.userState.displayName = user.displayName || user.email?.split('@')[0] || "Artist Account";
+                window.userState.email = user.email || `${user.uid.substring(0, 8)}@audiory.io`;
+                updateUserUI();
+                listenToUserData();
+            } else {
+                signInAnonymously(auth).catch(err => console.error("Auth error:", err));
             }
         });
 
-        // Initialize User Info
-        function initUserData() {
-            document.getElementById('userName').textContent = window.currentUser.name;
-            document.getElementById('welcomeUserName').textContent = window.currentUser.name;
-            document.getElementById('topBarUser').textContent = window.currentUser.name;
-            document.getElementById('userAccId').textContent = `ACC #${window.currentUser.accountId}`;
-            document.getElementById('userAvatar').textContent = window.currentUser.name.charAt(0);
-            document.getElementById('statStreams').textContent = window.analyticsState.streams.toLocaleString();
-            document.getElementById('statEarnings').textContent = `$${window.analyticsState.earnings.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-            document.getElementById('statReleases').textContent = window.catalogState.length;
+        function updateUserUI() {
+            const name = window.userState.displayName;
+            const initials = name.substring(0, 2).toUpperCase();
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userEmail').textContent = window.userState.email;
+            document.getElementById('userAvatar').textContent = initials;
+            document.getElementById('topAvatar').textContent = initials;
+            document.getElementById('topUserName').textContent = name;
         }
 
-        // Render Catalog Data Table
-        window.renderCatalogTable = function(items) {
-            const tbody = document.getElementById('catalogTableBody');
-            if(!items || items.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-500 font-mono">No releases found in your catalog.</td></tr>`;
-                return;
-            }
+        // Realtime User Data Subscription
+        function listenToUserData() {
+            if (!window.userState.uid) return;
 
-            tbody.innerHTML = items.map(item => `
-                <tr class="hover:bg-brand-hover/50 transition-colors">
-                    <td class="p-3 flex items-center gap-3">
-                        <img src="${item.cover || 'https://via.placeholder.com/40'}" class="w-10 h-10 rounded-lg object-cover border border-brand-border">
-                        <div>
-                            <p class="font-bold text-white">${item.title}</p>
-                            <p class="text-[10px] text-gray-400">ISRC: ${item.id}</p>
-                        </div>
-                    </td>
-                    <td class="p-3 font-medium text-gray-300">${item.artist}</td>
-                    <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-dark border border-brand-border text-gray-300">${item.type}</span></td>
-                    <td class="p-3 font-mono text-gray-400">${item.upc}</td>
-                    <td class="p-3">
-                        ${item.status === 'Distributed' 
-                            ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>Distributed</span>`
-                            : `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20"><span class="w-1.5 h-1.5 rounded-full bg-blue-400 mr-1.5 animate-pulse"></span>Processing</span>`
-                        }
-                    </td>
-                    <td class="p-3 text-right">
-                        <button class="px-2.5 py-1 rounded bg-brand-dark border border-brand-border text-[11px] text-gray-300 hover:text-white hover:border-brand-accent transition-colors">Inspect</button>
-                    </td>
-                </tr>
-            `).join('');
-
-            document.getElementById('statReleases').textContent = items.length;
-        };
-
-        // Realtime Firestore Fetcher
-        window.fetchFirestoreCatalog = function() {
-            if (!isFirebaseAvailable) {
-                console.log("Using internal production store state.");
-                return;
-            }
-            try {
-                onSnapshot(collection(db, "releases"), (snapshot) => {
-                    const firestoreCatalog = [];
-                    snapshot.forEach((doc) => {
-                        firestoreCatalog.push({ id: doc.id, ...doc.data() });
-                    });
-                    if(firestoreCatalog.length > 0) {
-                        window.catalogState = firestoreCatalog;
-                        renderCatalogTable(window.catalogState);
-                    }
+            // Releases Listener
+            const relQuery = query(collection(db, "releases"), where("userId", "==", window.userState.uid));
+            onSnapshot(relQuery, (snapshot) => {
+                window.userReleases = [];
+                snapshot.forEach(doc => {
+                    window.userReleases.push({ id: doc.id, ...doc.data() });
                 });
-            } catch(e) {
-                console.error("Firestore real-time listener error:", e);
-            }
-        };
+                renderCurrentPage();
+            }, (error) => {
+                console.error("Releases snapshot error:", error);
+            });
 
-        // Create Release Form Handler
-        window.handleCreateRelease = async function(e) {
-            e.preventDefault();
-            const title = document.getElementById('relTitle').value;
-            const artist = document.getElementById('relArtist').value;
-            const type = document.getElementById('relType').value;
-            const upc = document.getElementById('relUpc').value || Math.floor(100000000000 + Math.random() * 900000000000).toString();
-            const cover = document.getElementById('relCover').value || 'https://picsum.photos/seed/' + Math.random() + '/150/150';
-
-            const newRelease = {
-                title, artist, type, upc, cover,
-                status: 'Processing',
-                createdAt: new Date().toISOString()
-            };
-
-            if (isFirebaseAvailable) {
-                try {
-                    await addDoc(collection(db, "releases"), newRelease);
-                } catch(err) {
-                    console.error("Error writing to Firestore:", err);
+            // Telemetry Listener
+            const telemQuery = query(collection(db, "telemetry"), where("userId", "==", window.userState.uid));
+            onSnapshot(telemQuery, (snapshot) => {
+                window.userTelemetry = [];
+                snapshot.forEach(doc => {
+                    window.userTelemetry.push({ id: doc.id, ...doc.data() });
+                });
+                if (window.currentPage === 'dashboard' || window.currentPage === 'ana_streams') {
+                    renderCurrentPage();
                 }
-            }
+            }, (error) => {
+                console.error("Telemetry snapshot error:", error);
+            });
+        }
 
-            // Local State Update
-            window.catalogState.unshift({ id: 'rel_' + Date.now(), ...newRelease });
-            renderCatalogTable(window.catalogState);
-            closeModal('createReleaseModal');
-            document.getElementById('newReleaseForm').reset();
+        // Global Navigation & Page Switching
+        window.currentPage = 'dashboard';
+
+        window.navigateTo = function(pageId) {
+            window.currentPage = pageId;
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            const activeBtn = document.getElementById(`nav-${pageId}`);
+            if (activeBtn) activeBtn.classList.add('active');
+            
+            // Close mobile menu if open
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            sidebar.classList.add('-translate-x-full');
+            backdrop.classList.add('hidden');
+
+            renderCurrentPage();
         };
 
-        // Chart.js Telemetry Config
-        function initChart() {
-            const ctx = document.getElementById('telemetryChart').getContext('2d');
-            
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, 'rgba(0, 242, 254, 0.4)');
-            gradient.addColorStop(1, 'rgba(0, 242, 254, 0.0)');
+        window.toggleMobileSidebar = function() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            sidebar.classList.toggle('-translate-x-full');
+            backdrop.classList.toggle('hidden');
+        };
 
-            new Chart(ctx, {
+        // Render Active View
+        function renderCurrentPage() {
+            const container = document.getElementById('mainContentView');
+            if (chartInstance) {
+                chartInstance.destroy();
+                chartInstance = null;
+            }
+
+            switch(window.currentPage) {
+                case 'dashboard':
+                    container.innerHTML = renderDashboardView();
+                    initDashboardChart();
+                    break;
+                case 'cat_releases':
+                    container.innerHTML = renderReleasesView();
+                    break;
+                case 'cat_artists':
+                    container.innerHTML = renderArtistsView();
+                    break;
+                case 'cat_create':
+                    container.innerHTML = renderCreateReleaseView();
+                    break;
+                case 'cat_ringtone':
+                    container.innerHTML = renderGenericFormView('Create Ringtone', 'Convert your active tracks into mobile ringtones for global distribution.');
+                    break;
+                case 'cat_transfer':
+                    container.innerHTML = renderGenericFormView('Transfer Track', 'Import metadata and audio from another distributor seamlessly.');
+                    break;
+                case 'cat_master':
+                    container.innerHTML = renderGenericFormView('Master Your Track', 'Apply instant AI mastering to your WAV files before submission.');
+                    break;
+                case 'mkt_dsp':
+                    container.innerHTML = renderGenericFormView('DSP Pitching', 'Submit release details directly to playlist curators at Spotify & Apple Music.');
+                    break;
+                case 'mkt_builder':
+                    container.innerHTML = renderGenericFormView('Campaign Builder', 'Set up pre-save links and ad landing pages.');
+                    break;
+                case 'mkt_playlist':
+                    container.innerHTML = renderGenericFormView('3rd Party Playlisting', 'Connect with verified independent playlist curators.');
+                    break;
+                case 'mkt_adbox':
+                    container.innerHTML = renderGenericFormView('Audiory Ad Box', 'Launch high-converting social ads for your releases.');
+                    break;
+                case 'mkt_influencers':
+                    container.innerHTML = renderGenericFormView('Influencer Campaigns', 'Promote your sound via top TikTok & Instagram creators.');
+                    break;
+                case 'mkt_luminate':
+                    container.innerHTML = renderGenericFormView('Luminate Registration', 'Register your titles for official Billboard chart tracking.');
+                    break;
+                case 'ana_streams':
+                    container.innerHTML = renderStreamsView();
+                    initStreamsChart();
+                    break;
+                case 'ana_meta':
+                    container.innerHTML = renderAnalyticsDetailView('Meta (IG/FB) Analytics', 'Track audio usages in Instagram Reels and Facebook Stories.');
+                    break;
+                case 'ana_yt':
+                    container.innerHTML = renderAnalyticsDetailView('YouTube UGC Telemetry', 'Monitor user-generated videos containing your copyright.');
+                    break;
+                case 'ana_tiktok':
+                    container.innerHTML = renderAnalyticsDetailView('TikTok Sound Analytics', 'Analyze sound trends, video counts, and global creations.');
+                    break;
+                case 'ana_safe':
+                    container.innerHTML = renderAnalyticsDetailView('StreamSafe™ Fraud Check', 'Scan catalog for artificial streaming flags and safeguard earnings.');
+                    break;
+                case 'ana_spotify':
+                    container.innerHTML = renderAnalyticsDetailView('Discovery Mode Insights', 'Review streaming uplift generated via Spotify Discovery algorithm.');
+                    break;
+                case 'roy_summary':
+                    container.innerHTML = renderRoyaltySummaryView();
+                    break;
+                case 'roy_payout':
+                    container.innerHTML = renderPayoutView();
+                    break;
+                case 'roy_tracks':
+                    container.innerHTML = renderTrackPerformanceView();
+                    break;
+                case 'spl_collabs':
+                    container.innerHTML = renderSplitsView();
+                    break;
+                case 'rgt_yt_allow':
+                    container.innerHTML = renderRightsView('YouTube Allowlist', 'Add YouTube channels to allowlist to prevent automated claims.');
+                    break;
+                case 'rgt_yt_claim':
+                    container.innerHTML = renderRightsView('YouTube Manual Claim', 'Request manual copyright enforcement on specific YouTube videos.');
+                    break;
+                case 'rgt_yt_oac':
+                    container.innerHTML = renderRightsView('YouTube OAC Request', 'Merge your topic channel into an Official Artist Channel.');
+                    break;
+                case 'rgt_tiktok':
+                    container.innerHTML = renderRightsView('TikTok Manual Claim', 'Submit copyright infringement notices for TikTok audio.');
+                    break;
+                case 'rgt_sc':
+                    container.innerHTML = renderRightsView('SoundCloud Allowlist', 'Whitelist your SoundCloud profile to prevent copyright strikes.');
+                    break;
+                case 'rgt_meta':
+                    container.innerHTML = renderRightsView('Meta Allowlist', 'Authorize specific Facebook and Instagram accounts for audio monetization.');
+                    break;
+                case 'rgt_cover':
+                    container.innerHTML = renderRightsView('Cover Song Licensing', 'Acquire mechanical licenses for releasing cover songs legally.');
+                    break;
+                default:
+                    container.innerHTML = renderDashboardView();
+                    initDashboardChart();
+            }
+        }
+
+        // ==================== VIEW GENERATORS ====================
+
+        function renderDashboardView() {
+            const totalStreams = window.userTelemetry.reduce((acc, curr) => acc + (curr.count || 0), 0);
+            const activeCount = window.userReleases.length;
+
+            return `
+                <div class="space-y-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
+                        <div>
+                            <h1 class="text-2xl font-extrabold font-display text-white">Welcome back, <span class="gradient-text">${window.userState.displayName}</span></h1>
+                            <p class="text-xs text-gray-400 mt-1">Real-time stats and distribution management.</p>
+                        </div>
+                        <button onclick="navigateTo('cat_create')" class="px-4 py-2 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-colors flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>New Release</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="p-5 rounded-xl bg-brand-card border border-brand-border">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Streams</span>
+                            <div class="text-2xl font-extrabold font-display text-white mt-2">${totalStreams.toLocaleString()}</div>
+                        </div>
+                        <div class="p-5 rounded-xl bg-brand-card border border-brand-border">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Available Royalties</span>
+                            <div class="text-2xl font-extrabold font-display text-emerald-400 mt-2">$${(totalStreams * 0.0035).toFixed(2)}</div>
+                        </div>
+                        <div class="p-5 rounded-xl bg-brand-card border border-brand-border">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Active Releases</span>
+                            <div class="text-2xl font-extrabold font-display text-white mt-2">${activeCount}</div>
+                        </div>
+                        <div class="p-5 rounded-xl bg-brand-card border border-brand-border">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Account Status</span>
+                            <div class="text-sm font-bold text-emerald-400 mt-3 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                Verified & Active
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6 rounded-xl bg-brand-card border border-brand-border">
+                        <h3 class="text-sm font-bold font-display text-white mb-4">Stream Analytics Telemetry</h3>
+                        <div class="h-64">
+                            <canvas id="dashboardChart"></canvas>
+                        </div>
+                    </div>
+
+                    ${renderReleasesTableMarkup()}
+                </div>
+            `;
+        }
+
+        function renderReleasesView() {
+            return `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center pb-4 border-b border-brand-border/60">
+                        <div>
+                            <h1 class="text-2xl font-bold font-display text-white">Releases Catalog</h1>
+                            <p class="text-xs text-gray-400">View and manage all releases delivered to streaming services.</p>
+                        </div>
+                        <button onclick="navigateTo('cat_create')" class="px-4 py-2 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">
+                            Create Release
+                        </button>
+                    </div>
+                    ${renderReleasesTableMarkup()}
+                </div>
+            `;
+        }
+
+        function renderReleasesTableMarkup() {
+            if (window.userReleases.length === 0) {
+                return `
+                    <div class="p-12 text-center rounded-xl bg-brand-card border border-brand-border space-y-3">
+                        <i class="fa-solid fa-compact-disc text-3xl text-gray-600"></i>
+                        <h4 class="text-sm font-bold text-gray-300">No Releases Found</h4>
+                        <p class="text-xs text-gray-500 max-w-sm mx-auto">You haven't submitted any music yet. Click below to start your first submission.</p>
+                        <button onclick="navigateTo('cat_create')" class="px-4 py-2 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs inline-block">Create Release Now</button>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="p-6 rounded-xl bg-brand-card border border-brand-border space-y-4">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left text-xs text-gray-300">
+                            <thead class="bg-brand-dark text-gray-400 font-mono uppercase text-[10px] tracking-wider border-b border-brand-border">
+                                <tr>
+                                    <th class="p-3">Cover / Title</th>
+                                    <th class="p-3">Primary Artist</th>
+                                    <th class="p-3">Type</th>
+                                    <th class="p-3">UPC Code</th>
+                                    <th class="p-3">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-brand-border/40">
+                                ${window.userReleases.map(item => `
+                                    <tr class="hover:bg-brand-hover/50 transition-colors">
+                                        <td class="p-3 flex items-center gap-3">
+                                            <img src="${item.coverUrl || 'https://via.placeholder.com/40'}" class="w-10 h-10 rounded-lg object-cover border border-brand-border">
+                                            <div>
+                                                <p class="font-bold text-white">${item.title || 'Untitled'}</p>
+                                                <p class="text-[10px] text-gray-400">ISRC: ${item.isrc || 'Pending'}</p>
+                                            </div>
+                                        </td>
+                                        <td class="p-3 font-medium text-gray-300">${item.artist || 'N/A'}</td>
+                                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-dark border border-brand-border text-gray-300">${item.type || 'Single'}</span></td>
+                                        <td class="p-3 font-mono text-gray-400">${item.upc || 'N/A'}</td>
+                                        <td class="p-3">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>${item.status || 'Active'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCreateReleaseView() {
+            return `
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="pb-4 border-b border-brand-border/60">
+                        <h1 class="text-2xl font-bold font-display text-white">Create New Release</h1>
+                        <p class="text-xs text-gray-400">Fill in metadata details to distribute your music globally.</p>
+                    </div>
+
+                    <form id="createReleaseForm" onsubmit="handleFormSubmit(event)" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border">
+                        
+                        <div class="space-y-4">
+                            <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">1. Metadata</h3>
+                            
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1">Release Title *</label>
+                                <input type="text" id="formTitle" required placeholder="e.g. Midnight Waves" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-300 mb-1">Primary Artist *</label>
+                                    <input type="text" id="formArtist" required placeholder="Artist Name" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-300 mb-1">Release Type *</label>
+                                    <select id="formType" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                                        <option value="Single">Single</option>
+                                        <option value="EP">EP</option>
+                                        <option value="Album">Album</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-300 mb-1">Genre *</label>
+                                    <input type="text" id="formGenre" required placeholder="e.g. Pop / Electronic" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-300 mb-1">Release Date *</label>
+                                    <input type="date" id="formDate" required class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4 pt-4 border-t border-brand-border">
+                            <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">2. Assets & Files</h3>
+                            
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1">Cover Image URL *</label>
+                                <input type="url" id="formCoverUrl" required placeholder="https://images.unsplash.com/photo-..." class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-300 mb-1">Explicit Content</label>
+                                    <select id="formExplicit" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                                        <option value="No">No Clean / Non-explicit</option>
+                                        <option value="Yes">Yes Explicit Content</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-300 mb-1">UPC (Auto-generated if empty)</label>
+                                    <input type="text" id="formUpc" placeholder="Leave blank to auto-generate" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-brand-accent">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 border-t border-brand-border flex justify-end gap-3">
+                            <button type="button" onclick="navigateTo('cat_releases')" class="px-5 py-2.5 rounded-xl border border-brand-border bg-brand-dark text-xs text-gray-300 font-semibold">Cancel</button>
+                            <button type="submit" id="submitReleaseBtn" class="px-6 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-colors">
+                                Save & Distribute Release
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        window.handleFormSubmit = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitReleaseBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Saving...`;
+
+            const title = document.getElementById('formTitle').value;
+            const artist = document.getElementById('formArtist').value;
+            const type = document.getElementById('formType').value;
+            const genre = document.getElementById('formGenre').value;
+            const releaseDate = document.getElementById('formDate').value;
+            const coverUrl = document.getElementById('formCoverUrl').value;
+            const explicit = document.getElementById('formExplicit').value;
+            let upc = document.getElementById('formUpc').value;
+
+            if (!upc) {
+                upc = Math.floor(100000000000 + Math.random() * 900000000000).toString();
+            }
+
+            const isrc = "US-AUD-" + Math.floor(10000 + Math.random() * 90000);
+
+            try {
+                await addDoc(collection(db, "releases"), {
+                    userId: window.userState.uid,
+                    title,
+                    artist,
+                    type,
+                    genre,
+                    releaseDate,
+                    coverUrl,
+                    explicit,
+                    upc,
+                    isrc,
+                    status: 'Active',
+                    createdAt: serverTimestamp()
+                });
+
+                navigateTo('cat_releases');
+            } catch (err) {
+                console.error("Error submitting release:", err);
+                alert("Could not save release. Check console.");
+                btn.disabled = false;
+                btn.textContent = "Save & Distribute Release";
+            }
+        };
+
+        function renderArtistsView() {
+            return `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center pb-4 border-b border-brand-border/60">
+                        <div>
+                            <h1 class="text-2xl font-bold font-display text-white">Roster & Artists</h1>
+                            <p class="text-xs text-gray-400">Manage profile details and links for registered artists.</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="p-5 rounded-2xl bg-brand-card border border-brand-border flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-brand-accent to-brand-purple flex items-center justify-center font-bold text-lg text-white">
+                                ${window.userState.displayName.substring(0, 2).toUpperCase()}
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-white">${window.userState.displayName}</h4>
+                                <p class="text-xs text-gray-400">Primary Artist</p>
+                                <span class="inline-block mt-2 text-[10px] px-2 py-0.5 rounded bg-brand-accent/10 text-brand-accent border border-brand-accent/20">Verified Roster</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderGenericFormView(title, subtitle) {
+            return `
+                <div class="max-w-2xl mx-auto space-y-6">
+                    <div class="pb-4 border-b border-brand-border/60">
+                        <h1 class="text-2xl font-bold font-display text-white">${title}</h1>
+                        <p class="text-xs text-gray-400">${subtitle}</p>
+                    </div>
+
+                    <form onsubmit="handleGenericSubmit(event, '${title}')" class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Select Track / Release</label>
+                            <select class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                                ${window.userReleases.length > 0 
+                                    ? window.userReleases.map(r => `<option value="${r.id}">${r.title} (${r.type})</option>`).join('')
+                                    : `<option value="">No releases available</option>`
+                                }
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Additional Details / Notes</label>
+                            <textarea required rows="4" placeholder="Provide details for this request..." class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent"></textarea>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">Submit Request</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        window.handleGenericSubmit = function(e, title) {
+            e.preventDefault();
+            alert(`Your request for "${title}" has been submitted successfully.`);
+            e.target.reset();
+        };
+
+        function renderStreamsView() {
+            return `
+                <div class="space-y-6">
+                    <div class="pb-4 border-b border-brand-border/60">
+                        <h1 class="text-2xl font-bold font-display text-white">Streams Overview</h1>
+                        <p class="text-xs text-gray-400">Detailed analytics and listening metrics.</p>
+                    </div>
+                    <div class="p-6 rounded-2xl bg-brand-card border border-brand-border">
+                        <div class="h-72">
+                            <canvas id="streamsDetailChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAnalyticsDetailView(title, description) {
+            return `
+                <div class="space-y-6">
+                    <div class="pb-4 border-b border-brand-border/60">
+                        <h1 class="text-2xl font-bold font-display text-white">${title}</h1>
+                        <p class="text-xs text-gray-400">${description}</p>
+                    </div>
+                    <div class="p-8 rounded-2xl bg-brand-card border border-brand-border text-center space-y-3">
+                        <i class="fa-solid fa-chart-pie text-3xl text-brand-accent"></i>
+                        <h4 class="text-sm font-bold text-white">Active Monitoring Enabled</h4>
+                        <p class="text-xs text-gray-400 max-w-md mx-auto">Analytics are being recorded for your account. Detailed stream updates refresh every 24 hours.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderRoyaltySummaryView() {
+            const totalStreams = window.userTelemetry.reduce((acc, curr) => acc + (curr.count || 0), 0);
+            const earnings = (totalStreams * 0.0035).toFixed(2);
+
+            return `
+                <div class="space-y-6">
+                    <div class="pb-4 border-b border-brand-border/60">
+                        <h1 class="text-2xl font-bold font-display text-white">Royalty Summary</h1>
+                        <p class="text-xs text-gray-400">Earnings breakdown across DSP platforms.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="p-6 rounded-2xl bg-brand-card border border-brand-border">
+                            <span class="text-xs text-gray-400 font-semibold">Total Net Royalties</span>
+                            <div class="text-3xl font-extrabold font-display text-emerald-400 mt-2">$${earnings}</div>
+                        </div>
+                        <div class="p-6 rounded-2xl bg-brand-card border border-brand-border">
+                            <span class="text-xs text-gray-400 font-semibold">Pending Statements</span>
+                            <div class="text-3xl font-extrabold font-display text-white mt-2">$0.00</div>
+                        </div>
+                        <div class="p-6 rounded-2xl bg-brand-card border border-brand-border">
+                            <span class="text-xs text-gray-400 font-semibold">Total Paid Out</span>
+                            <div class="text-3xl font-extrabold font-display text-white mt-2">$0.00</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPayoutView() {
+            const totalStreams = window.userTelemetry.reduce((acc, curr) => acc + (curr.count || 0), 0);
+            const earnings = (totalStreams * 0.0035).toFixed(2);
+
+            return `
+                <div class="max-w-xl mx-auto space-y-6">
+                    <div class="pb-4 border-b border-brand-border/60">
+                        <h1 class="text-2xl font-bold font-display text-white">Request Payment</h1>
+                        <p class="text-xs text-gray-400">Withdraw earned royalties directly to your bank account or PayPal.</p>
+                    </div>
+
+                    <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+                        <div class="flex justify-between items-center pb-4 border-b border-brand-border">
+                            <span class="text-xs text-gray-400">Available Balance:</span>
+                            <span class="text-lg font-bold text-emerald-400">$${earnings}</span>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Withdrawal Amount ($)</label>
+                            <input type="number" max="${earnings}" min="10" placeholder="0.00" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Payment Method</label>
+                            <select class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                                <option>Bank Wire / ACH</option>
+                                <option>PayPal</option>
+                            </select>
+                        </div>
+
+                        <button onclick="alert('Payment request submitted for processing.')" class="w-full py-3 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">
+                            Process Payout
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTrackPerformanceView() {
+            return `
+                <div class="space-y-6">
+                    <div class="pb-4 border-b border-brand-border/60">
+                        <h1 class="text-2xl font-bold font-display text-white">Track Performance</h1>
+                        <p class="text-xs text-gray-400">Detailed performance metrics per track.</p>
+                    </div>
+                    ${renderReleasesTableMarkup()}
+                </div>
+            `;
+        }
+
+        function renderSplitsView() {
+            return `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center pb-4 border-b border-brand-border/60">
+                        <div>
+                            <h1 class="text-2xl font-bold font-display text-white">SplitShare Collaborators</h1>
+                            <p class="text-xs text-gray-400">Configure automated royalty splits with producers and co-writers.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+                        <h4 class="text-sm font-bold text-white">Active Split Contracts</h4>
+                        <p class="text-xs text-gray-400">Select a release in your catalog to configure revenue share percentages.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderRightsView(title, description) {
+            return `
+                <div class="max-w-2xl mx-auto space-y-6">
+                    <div class="pb-4 border-b border-brand-border/60">
+                        <h1 class="text-2xl font-bold font-display text-white">${title}</h1>
+                        <p class="text-xs text-gray-400">${description}</p>
+                    </div>
+
+                    <form onsubmit="handleGenericSubmit(event, '${title}')" class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Target Channel / Video / Account URL</label>
+                            <input type="url" required placeholder="https://..." class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Associated Release</label>
+                            <select class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                                ${window.userReleases.length > 0 
+                                    ? window.userReleases.map(r => `<option value="${r.id}">${r.title}</option>`).join('')
+                                    : `<option value="">No releases registered</option>`
+                                }
+                            </select>
+                        </div>
+
+                        <button type="submit" class="w-full py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">Submit Enforcement Request</button>
+                    </form>
+                </div>
+            `;
+        }
+
+        // ==================== CHART INITIALIZERS ====================
+
+        function initDashboardChart() {
+            const canvas = document.getElementById('dashboardChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            const labels = window.userTelemetry.length > 0 ? window.userTelemetry.map(t => t.date || 'Day') : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const dataPoints = window.userTelemetry.length > 0 ? window.userTelemetry.map(t => t.count || 0) : [0, 0, 0, 0, 0, 0, 0];
+
+            chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    labels: labels,
                     datasets: [{
-                        label: 'Daily Streams Telemetry',
-                        data: [12400, 18200, 15900, 24100, 28500, 34800, 41200],
+                        label: 'Streams',
+                        data: dataPoints,
                         borderColor: '#00f2fe',
-                        borderWidth: 3,
+                        backgroundColor: 'rgba(0, 242, 254, 0.1)',
                         fill: true,
-                        backgroundColor: gradient,
-                        tension: 0.4,
-                        pointBackgroundColor: '#00f2fe',
-                        pointHoverRadius: 6
+                        tension: 0.3
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
-                        x: {
-                            grid: { color: 'rgba(27, 36, 54, 0.5)' },
-                            ticks: { color: '#9ca3af', font: { family: 'Plus Jakarta Sans', size: 10 } }
-                        },
-                        y: {
-                            grid: { color: 'rgba(27, 36, 54, 0.5)' },
-                            ticks: { color: '#9ca3af', font: { family: 'Plus Jakarta Sans', size: 10 } }
-                        }
+                        x: { grid: { color: '#1b2436' }, ticks: { color: '#9ca3af', font: { size: 10 } } },
+                        y: { grid: { color: '#1b2436' }, ticks: { color: '#9ca3af', font: { size: 10 } } }
                     }
                 }
             });
         }
-    </script>
 
-    <script>
-        // Modal Handlers
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
+        function initStreamsChart() {
+            const canvas = document.getElementById('streamsDetailChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Spotify', 'Apple Music', 'YouTube', 'TikTok', 'Amazon', 'Deezer'],
+                    datasets: [{
+                        label: 'Streams by Platform',
+                        data: [12000, 8500, 14200, 22000, 4100, 1800],
+                        backgroundColor: '#6366f1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: '#1b2436' }, ticks: { color: '#9ca3af' } },
+                        y: { grid: { color: '#1b2436' }, ticks: { color: '#9ca3af' } }
+                    }
+                }
+            });
         }
 
-        // Sub-Tab Switcher for Full Audiory Dashboard Navigation
-        function switchSubTab(tabId) {
-            const allSubBtns = document.querySelectorAll('.nav-sub-item');
-            allSubBtns.forEach(btn => btn.classList.remove('text-brand-accent', 'bg-brand-accent/10'));
-            
-            console.log("Navigated to sub-module:", tabId);
-        }
-
-        function switchTab(tabId) {
-            console.log("Navigated to module:", tabId);
-        }
+        // Initialize First View
+        renderCurrentPage();
     </script>
 </body>
 </html>
