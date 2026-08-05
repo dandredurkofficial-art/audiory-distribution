@@ -99,7 +99,7 @@
 
             <div class="text-sm text-gray-400">
                 Already have an account? 
-                <a href="login.html" class="font-bold text-brand-accent hover:underline ml-1">Sign In</a>
+                <a href="/login/" class="font-bold text-brand-accent hover:underline ml-1">Sign In</a>
             </div>
         </div>
     </header>
@@ -193,7 +193,7 @@
                     <div class="flex items-start gap-3 pt-2">
                         <input type="checkbox" id="termsCheck" required class="mt-1 w-4 h-4 rounded bg-brand-dark border-brand-border text-brand-accent focus:ring-0 cursor-pointer">
                         <label for="termsCheck" class="text-xs text-gray-400 leading-relaxed cursor-pointer">
-                            I agree to Audiory Distribution's <a href="#" class="text-brand-accent hover:underline">Terms of Service</a> and <a href="#" class="text-brand-accent hover:underline">Privacy Policy</a>.
+                            I agree to Audiory Distribution's <a href="/terms/" class="text-brand-accent hover:underline">Terms of Service</a> and <a href="/privacy/" class="text-brand-accent hover:underline">Privacy Policy</a>.
                         </label>
                     </div>
 
@@ -350,7 +350,7 @@
                 
                 // Redirect to dashboard after brief delay
                 setTimeout(() => {
-                    window.location.href = "dashboard.html";
+                    window.location.href = "/dashboard/";
                 }, 1500);
 
             } catch (error) {
@@ -380,7 +380,7 @@
 
                 showAlert("Google Sign-In successful! Redirecting...", false);
                 setTimeout(() => {
-                    window.location.href = "dashboard.html";
+                    window.location.href = "/dashboard/";
                 }, 1500);
 
             } catch (error) {
