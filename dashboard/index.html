@@ -530,20 +530,18 @@ function listenToUserData(user) {
     );
 }
 
-// AUTH STATE OBSERVER SETUP
-firebase.auth().onAuthStateChanged((user) => {
+// Auth Observer
+onAuthStateChanged(auth, (user) => {
     if (user) {
-        console.log("Authenticated as:", user.uid);
-        listenToUserData(user);
-        if (typeof renderCurrentPage === 'function') {
-            renderCurrentPage();
-        }
+        window.userState.uid = user.uid;
+        window.userState.displayName = user.displayName || "Juice the Mac";
+        window.userState.email = user.email || "juicethemacboy@gmail.com";
+        updateUserUI();
+        listenToUserData();
     } else {
-        console.log("User signed out");
-        // Redirect to login or reset state
+        signInAnonymously(auth).catch(err => console.error("Auth Exception:", err));
     }
 });
-
 // Navigation Controller
 window.navigateTo = function(pageId) {
     window.currentPage = pageId;
