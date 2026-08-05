@@ -574,114 +574,113 @@
         };
 
         // Render Page Views
-        function renderCurrentPage() {
-            const container = document.getElementById('mainContentView');
-            if (!container) return;
+function renderCurrentPage() {
+    const container = document.getElementById('mainContentView');
+    if (!container) return;
 
-            if (chartInstance) {
-                chartInstance.destroy();
-                chartInstance = null;
-            }
+    if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+    }
 
-            switch(window.currentPage) {
-                case 'dashboard':
-                    container.innerHTML = renderDashboardView();
-                    initDashboardChart();
-                    break;
-                case 'cat_releases':
-                    container.innerHTML = renderReleasesView();
-                    break;
-                case 'cat_artists':
-                    container.innerHTML = renderArtistsView();
-                    break;
-                case 'cat_create':
-                    container.innerHTML = renderCreateReleaseView();
-                    break;
-                case 'cat_ringtone':
-                    container.innerHTML = renderGenericFormView('Create Ringtone', 'Convert active audio recordings into mobile ringtone products for worldwide store distribution.');
-                    break;
-                case 'cat_transfer':
-                    container.innerHTML = renderGenericFormView('Transfer Track', 'Import existing ISRC metadata and master files directly from your previous distributor.');
-                    break;
-                case 'cat_master':
-                    container.innerHTML = renderGenericFormView('Master Your Track', 'Run automated AI audio mastering on uncompressed WAV files before submission.');
-                    break;
-                case 'mkt_dsp':
-                    container.innerHTML = renderGenericFormView('DSP Pitching', 'Submit direct pitch forms to Spotify, Apple Music, and Amazon editorial teams.');
-                    break;
-                case 'mkt_builder':
-                    container.innerHTML = renderGenericFormView('Campaign Builder', 'Set up smart link pre-saves, pixel tracking, and landing pages.');
-                    break;
-                case 'mkt_playlist':
-                    container.innerHTML = renderGenericFormView('3rd Party Playlisting', 'Submit catalog entries to vetted independent playlist curators.');
-                    break;
-                case 'mkt_adbox':
-                    container.innerHTML = renderGenericFormView('Audiory Ad Box', 'Launch targeted social ad campaigns directly from your balance.');
-                    break;
-                case 'mkt_influencers':
-                    container.innerHTML = renderGenericFormView('Influencer Campaigns', 'Send audio snippets to TikTok and Instagram creators for viral marketing.');
-                    break;
-                case 'mkt_luminate':
-                    container.innerHTML = renderGenericFormView('Luminate Registration', 'Register ISRCs and UPCs with Luminate for official Billboard chart inclusion.');
-                    break;
-                case 'ana_streams':
-                    container.innerHTML = renderStreamsView();
-                    initStreamsChart();
-                    break;
-                case 'ana_meta':
-                    container.innerHTML = renderAnalyticsDetailView('Meta (IG/FB) Analytics', 'Detailed analytics for Instagram Reels, Facebook Stories, and audio library usages.');
-                    break;
-                case 'ana_yt':
-                    container.innerHTML = renderAnalyticsDetailView('YouTube UGC Telemetry', 'Monitor user-generated videos, Content ID matches, and YouTube Shorts claims.');
-                    break;
-                case 'ana_tiktok':
-                    container.innerHTML = renderAnalyticsDetailView('TikTok Sound Analytics', 'Track total video creations, viral sound momentum, and demographic reach.');
-                    break;
-                case 'ana_safe':
-                    container.innerHTML = renderAnalyticsDetailView('StreamSafe™ Fraud Check', 'Automated anti-fraud protection scanning for bot streams and artificial inflation flags.');
-                    break;
-                case 'ana_spotify':
-                    container.innerHTML = renderAnalyticsDetailView('Discovery Mode Insights', 'Analyze algorithm uplift and radio/autoplay stream breakdown.');
-                    break;
-                case 'roy_summary':
-                    container.innerHTML = renderRoyaltySummaryView();
-                    break;
-                case 'roy_payout':
-                    container.innerHTML = renderPayoutView();
-                    break;
-                case 'roy_tracks':
-                    container.innerHTML = renderTrackPerformanceView();
-                    break;
-                case 'spl_collabs':
-                    container.innerHTML = renderSplitsView();
-                    break;
-                case 'rgt_yt_allow':
-                    container.innerHTML = renderRightsView('YouTube Allowlist', 'Add YouTube channel URLs to your allowlist to prevent Content ID claims.');
-                    break;
-                case 'rgt_yt_claim':
-                    container.innerHTML = renderRightsView('YouTube Manual Claim', 'Submit manual copyright claims against infringing YouTube videos.');
-                    break;
-                case 'rgt_yt_oac':
-                    container.innerHTML = renderRightsView('YouTube OAC Request', 'Submit request to merge your topic channel into an Official Artist Channel.');
-                    break;
-                case 'rgt_tiktok':
-                    container.innerHTML = renderRightsView('TikTok Manual Claim', 'Request takedown or monetization enforcement for unauthorized TikTok uploads.');
-                    break;
-                case 'rgt_sc':
-                    container.innerHTML = renderRightsView('SoundCloud Allowlist', 'Whitelist SoundCloud profiles to bypass automatic copyright strikes.');
-                    break;
-                case 'rgt_meta':
-                    container.innerHTML = renderRightsView('Meta Allowlist', 'Authorize specific Facebook pages or Instagram accounts for full monetization.');
-                    break;
-                case 'rgt_cover':
-                    container.innerHTML = renderRightsView('Cover Song Licensing', 'Acquire automated mechanical licenses for releasing cover songs worldwide.');
-                    break;
-                default:
-                    container.innerHTML = renderDashboardView();
-                    initDashboardChart();
-            }
-        }
-
+    switch(window.currentPage) {
+        case 'dashboard':
+            container.innerHTML = renderDashboardView();
+            initDashboardChart();
+            break;
+        case 'cat_releases':
+            container.innerHTML = renderReleasesView();
+            break;
+        case 'cat_artists':
+            container.innerHTML = renderArtistsView();
+            break;
+        case 'cat_create':
+            container.innerHTML = renderCreateReleaseView();
+            break;
+        case 'cat_ringtone':
+            container.innerHTML = renderGenericFormView('Create Ringtone', 'Convert active audio recordings into mobile ringtone products for worldwide store distribution.');
+            break;
+        case 'cat_transfer':
+            container.innerHTML = renderGenericFormView('Transfer Track', 'Import existing ISRC metadata and master files directly from your previous distributor.');
+            break;
+        case 'cat_master':
+            container.innerHTML = renderGenericFormView('Master Your Track', 'Run automated AI audio mastering on uncompressed WAV files before submission.');
+            break;
+        case 'mkt_dsp':
+            container.innerHTML = renderDspPitching();
+            break;
+        case 'mkt_builder':
+            container.innerHTML = renderGenericFormView('Campaign Builder', 'Set up smart link pre-saves, pixel tracking, and landing pages.');
+            break;
+        case 'mkt_playlist':
+            container.innerHTML = renderGenericFormView('3rd Party Playlisting', 'Submit catalog entries to vetted independent playlist curators.');
+            break;
+        case 'mkt_adbox':
+            container.innerHTML = renderGenericFormView('Audiory Ad Box', 'Launch targeted social ad campaigns directly from your balance.');
+            break;
+        case 'mkt_influencers':
+            container.innerHTML = renderGenericFormView('Influencer Campaigns', 'Send audio snippets to TikTok and Instagram creators for viral marketing.');
+            break;
+        case 'mkt_luminate':
+            container.innerHTML = renderGenericFormView('Luminate Registration', 'Register ISRCs and UPCs with Luminate for official Billboard chart inclusion.');
+            break;
+        case 'ana_streams':
+            container.innerHTML = renderStreamsView();
+            initStreamsChart();
+            break;
+        case 'ana_meta':
+            container.innerHTML = renderAnalyticsDetailView('Meta (IG/FB) Analytics', 'Detailed analytics for Instagram Reels, Facebook Stories, and audio library usages.');
+            break;
+        case 'ana_yt':
+            container.innerHTML = renderAnalyticsDetailView('YouTube UGC Telemetry', 'Monitor user-generated videos, Content ID matches, and YouTube Shorts claims.');
+            break;
+        case 'ana_tiktok':
+            container.innerHTML = renderAnalyticsDetailView('TikTok Sound Analytics', 'Track total video creations, viral sound momentum, and demographic reach.');
+            break;
+        case 'ana_safe':
+            container.innerHTML = renderAnalyticsDetailView('StreamSafe™ Fraud Check', 'Automated anti-fraud protection scanning for bot streams and artificial inflation flags.');
+            break;
+        case 'ana_spotify':
+            container.innerHTML = renderAnalyticsDetailView('Discovery Mode Insights', 'Analyze algorithm uplift and radio/autoplay stream breakdown.');
+            break;
+        case 'roy_summary':
+            container.innerHTML = renderRoyaltySummaryView();
+            break;
+        case 'roy_payout':
+            container.innerHTML = renderPayoutView();
+            break;
+        case 'roy_tracks':
+            container.innerHTML = renderTrackPerformanceView();
+            break;
+        case 'spl_collabs':
+            container.innerHTML = renderSplitsView();
+            break;
+        case 'rgt_yt_allow':
+            container.innerHTML = renderRightsView('YouTube Allowlist', 'Add YouTube channel URLs to your allowlist to prevent Content ID claims.');
+            break;
+        case 'rgt_yt_claim':
+            container.innerHTML = renderRightsView('YouTube Manual Claim', 'Submit manual copyright claims against infringing YouTube videos.');
+            break;
+        case 'rgt_yt_oac':
+            container.innerHTML = renderRightsView('YouTube OAC Request', 'Submit request to merge your topic channel into an Official Artist Channel.');
+            break;
+        case 'rgt_tiktok':
+            container.innerHTML = renderRightsView('TikTok Manual Claim', 'Request takedown or monetization enforcement for unauthorized TikTok uploads.');
+            break;
+        case 'rgt_sc':
+            container.innerHTML = renderRightsView('SoundCloud Allowlist', 'Whitelist SoundCloud profiles to bypass automatic copyright strikes.');
+            break;
+        case 'rgt_meta':
+            container.innerHTML = renderRightsView('Meta Allowlist', 'Authorize specific Facebook pages or Instagram accounts for full monetization.');
+            break;
+        case 'rgt_cover':
+            container.innerHTML = renderRightsView('Cover Song Licensing', 'Acquire automated mechanical licenses for releasing cover songs worldwide.');
+            break;
+        default:
+            container.innerHTML = renderDashboardView();
+            initDashboardChart();
+    }
+}
         function renderDspPitching() {
     const hasReleases = window.userReleases && window.userReleases.length > 0;
 
