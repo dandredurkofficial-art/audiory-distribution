@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Content ID & Digital Rights Management — Audiory Distribution</title>
+    <meta name="description" content="Monetize and protect your music on YouTube automatically. Detect UGC videos using your audio fingerprint, collect ad revenue, and control licensing with Audiory Content ID.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            accent: '#00f2fe',
+                            purple: '#7928ca',
+                            pink: '#ff0080',
+                            dark: '#0a0d14',
+                            card: '#121824',
+                            border: '#1f293d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #07090e;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #ff0080 0%, #4f46e5 50%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0a0d14;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+
+        .glow-box {
+            box-shadow: 0 0 35px -10px rgba(255, 0, 128, 0.15);
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            background: #ff0080;
+        }
+    </style>
+</head>
+<body class="custom-scrollbar antialiased selection:bg-brand-pink selection:text-white">
+
+    <!-- ==================== HEADER / NAVIGATION ==================== -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-brand-dark/80 border-b border-brand-border/60 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-pink via-brand-600 to-brand-accent p-0.5 shadow-lg shadow-brand-pink/20 group-hover:scale-105 transition-transform duration-300">
+                        <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
+                            <i class="fa-solid font-bold fa-wave-square text-brand-pink group-hover:rotate-12 transition-transform duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-2">
+                            <span class="font-display font-bold text-2xl tracking-wider text-white">AUDIORY</span>
+                            <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-brand-pink/10 text-brand-pink font-bold uppercase">Content ID</span>
+                        </div>
+                        <span class="text-[9px] tracking-[0.25em] text-brand-pink uppercase font-semibold -mt-1">RIGHTS MANAGEMENT</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden lg:flex items-center gap-8">
+                    <a href="/services/" class="text-sm font-medium text-gray-300 hover:text-brand-pink transition-colors duration-200">Services</a>
+                    <a href="/smart-links/" class="text-sm font-medium text-gray-300 hover:text-brand-pink transition-colors duration-200">Smart Links</a>
+                    <a href="/analytics/" class="text-sm font-medium text-gray-300 hover:text-brand-pink transition-colors duration-200">Analytics</a>
+                    <a href="/splits/" class="text-sm font-medium text-gray-300 hover:text-brand-pink transition-colors duration-200">Splits</a>
+                    <a href="/pricing/" class="text-sm font-medium text-gray-300 hover:text-brand-pink transition-colors duration-200">Pricing</a>
+                    <a href="/royalty-guide/" class="text-sm font-medium text-gray-300 hover:text-brand-pink transition-colors duration-200">Royalty Guide</a>
+                </nav>
+
+                <!-- Action Buttons (Desktop) -->
+                <div class="hidden sm:flex items-center gap-4">
+                    <a href="/login/" class="text-sm font-semibold text-gray-200 hover:text-white px-4 py-2.5 rounded-xl border border-brand-border hover:border-gray-500 transition-all duration-200">
+                        Sign In
+                    </a>
+                    <a href="/signup/" class="text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-pink via-brand-600 to-brand-accent hover:shadow-lg hover:shadow-brand-pink/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+                        Protect Tracks
+                    </a>
+                </div>
+
+                <!-- Mobile Header Right Actions -->
+                <div class="flex items-center gap-3 sm:hidden">
+                    <a href="/signup/" class="text-xs font-semibold text-white px-3 py-2 rounded-lg bg-gradient-to-r from-brand-pink to-brand-accent">
+                        Get Started
+                    </a>
+                    <button id="mobileMenuBtn" aria-label="Toggle Navigation Menu" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-brand-card focus:outline-none">
+                        <svg id="menuIconSvg" class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                            <path id="hamburgerPath" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobileMenu" class="hidden lg:hidden border-b border-brand-border bg-brand-dark/95 backdrop-blur-2xl transition-all duration-300">
+            <div class="px-4 pt-2 pb-6 space-y-3">
+                <a href="/services/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-pink hover:bg-brand-card">Services</a>
+                <a href="/smart-links/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-pink hover:bg-brand-card">Smart Links</a>
+                <a href="/analytics/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-pink hover:bg-brand-card">Analytics</a>
+                <a href="/splits/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-pink hover:bg-brand-card">Splits</a>
+                <a href="/pricing/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-pink hover:bg-brand-card">Pricing</a>
+                <a href="/royalty-guide/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-pink hover:bg-brand-card">Royalty Guide</a>
+                
+                <div class="pt-4 flex flex-col gap-3">
+                    <a href="/login/" class="text-center w-full py-2.5 rounded-xl border border-brand-border text-gray-200 font-semibold">Sign In</a>
+                    <a href="/signup/" class="text-center w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-pink to-brand-accent text-white font-semibold">Protect Tracks</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== HERO SECTION ==================== -->
+    <section class="relative pt-16 pb-20 border-b border-brand-border/40 overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(255,0,128,0.15),rgba(255,255,255,0))]"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-3xl mx-auto space-y-6">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-card border border-brand-border">
+                    <i class="fa-brands fa-youtube text-red-500 text-xs"></i>
+                    <span class="text-xs font-mono text-gray-300">Official YouTube Content ID Partner</span>
+                </div>
+
+                <h1 class="text-4xl sm:text-6xl font-extrabold font-display text-white tracking-tight leading-[1.1]">
+                    Monetize Every Video Using <span class="gradient-text">Your Sound</span>
+                </h1>
+
+                <p class="text-gray-400 text-base sm:text-lg leading-relaxed">
+                    Automatically claim ad revenue whenever your music is used in videos and YouTube Shorts across millions of user channels worldwide.
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+                    <a href="/signup/" class="w-full sm:w-auto text-center px-8 py-4 rounded-xl bg-gradient-to-r from-brand-pink via-brand-600 to-brand-accent font-semibold text-white shadow-lg shadow-brand-pink/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                        Enroll Tracks in Content ID
+                    </a>
+                    <a href="#content-id-calc" class="w-full sm:w-auto text-center px-6 py-4 rounded-xl border border-brand-border text-gray-300 hover:text-white hover:bg-brand-card font-medium transition-all">
+                        Calculate Estimated Earnings
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== INTERACTIVE MONETIZATION CALCULATOR ==================== -->
+    <section id="content-id-calc" class="py-16 border-b border-brand-border/40">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-brand-card border border-brand-border rounded-3xl p-6 sm:p-10 glow-box">
+                
+                <div class="text-center max-w-xl mx-auto mb-8">
+                    <span class="text-xs font-mono text-brand-pink uppercase tracking-widest">Revenue Estimator</span>
+                    <h3 class="text-2xl font-bold font-display text-white mt-1">YouTube UGC Earnings Simulator</h3>
+                    <p class="text-xs text-gray-400 mt-1">Estimate potential ad revenue generated from videos matching your audio fingerprint.</p>
+                </div>
+
+                <!-- Monthly Views Input Slider -->
+                <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border mb-8">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                        <div>
+                            <label class="text-xs font-mono text-gray-400 block mb-1">ACCUMULATED MONTHLY YOUTUBE UGC VIEWS</label>
+                            <span class="text-3xl font-extrabold font-mono text-white" id="viewsDisplay">5,000,000</span>
+                        </div>
+                        <div class="w-full sm:w-1/2">
+                            <input type="range" id="viewsRange" min="100000" max="50000000" step="100000" value="5000000" class="w-full h-2 bg-brand-card rounded-lg appearance-none cursor-pointer accent-brand-pink">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculated Output Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    
+                    <div class="bg-brand-dark p-5 rounded-2xl border border-brand-border text-center">
+                        <span class="text-xs font-mono text-gray-400 uppercase">Est. Claimed Videos</span>
+                        <div class="text-xl sm:text-2xl font-bold font-mono text-white mt-2" id="claimedVideos">1,250</div>
+                        <span class="text-[10px] font-mono text-gray-500 mt-1 block">Based on average UGC engagement</span>
+                    </div>
+
+                    <div class="bg-brand-dark p-5 rounded-2xl border border-brand-border text-center">
+                        <span class="text-xs font-mono text-gray-400 uppercase">Est. Gross Ad Revenue</span>
+                        <div class="text-xl sm:text-2xl font-bold font-mono text-emerald-400 mt-2" id="grossRevenue">$7,500.00</div>
+                        <span class="text-[10px] font-mono text-gray-500 mt-1 block">Est. $1.50 RPM on claimed views</span>
+                    </div>
+
+                    <div class="bg-brand-dark p-5 rounded-2xl border border-brand-border text-center">
+                        <span class="text-xs font-mono text-gray-400 uppercase">Your Net Payout (85%)</span>
+                        <div class="text-xl sm:text-2xl font-bold font-mono text-brand-pink mt-2" id="netPayout">$6,375.00</div>
+                        <span class="text-[10px] font-mono text-gray-500 mt-1 block">Directly credited to your balance</span>
+                    </div>
+
+                </div>
+
+                <div class="mt-6 p-4 rounded-xl bg-brand-dark/50 border border-brand-border/60 flex items-center gap-3 text-xs text-gray-400">
+                    <i class="fa-solid fa-circle-info text-brand-accent text-base"></i>
+                    <span>Estimates vary based on audience geography, video length, ad formats, and YouTube's dynamic CPM rates.</span>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== KEY DRM FEATURES ==================== -->
+    <section class="py-20 border-b border-brand-border/40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs font-bold font-mono text-brand-pink uppercase tracking-widest mb-3">Total Asset Control</h2>
+                <h3 class="text-3xl sm:text-4xl font-extrabold font-display text-white">Complete Rights Management Pipeline</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Feature 1 -->
+                <div class="bg-brand-card border border-brand-border p-8 rounded-3xl hover:border-brand-pink/50 transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-pink/10 text-brand-pink flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-fingerprint"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-white font-display mb-3">Audio Fingerprinting</h4>
+                    <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                        Every track submitted is registered into YouTube's reference database to create a unique acoustic signature for instantaneous global matching.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="bg-brand-card border border-brand-border p-8 rounded-3xl hover:border-brand-pink/50 transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-purple/20 text-brand-purple flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-sliders"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-white font-display mb-3">Custom Match Policies</h4>
+                    <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                        Choose how YouTube handles matches: **Monetize** to place ads and generate revenue, **Block** to prevent unauthorized usage, or **Track** to collect analytics.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="bg-brand-card border border-brand-border p-8 rounded-3xl hover:border-brand-pink/50 transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-accent/20 text-brand-accent flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-shield-check"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-white font-display mb-3">Channel Whitelisting</h4>
+                    <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                        Easily whitelist your own YouTube channels or promotional partners to prevent copyright claims on authorized content uploads.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== CALL TO ACTION ==================== -->
+    <section class="py-20 relative overflow-hidden">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <div class="bg-gradient-to-r from-brand-card via-brand-dark to-brand-card border border-brand-border rounded-3xl p-10 sm:p-16 glow-box">
+                <h2 class="text-3xl sm:text-5xl font-extrabold font-display text-white mb-4">
+                    Protect Your Music Across YouTube
+                </h2>
+                <p class="text-gray-400 text-sm sm:text-base max-w-xl mx-auto mb-8">
+                    Start identifying user-generated content and claiming your audio royalties today with Audiory Content ID.
+                </p>
+                <a href="/signup/" class="inline-block px-8 py-4 rounded-xl bg-gradient-to-r from-brand-pink via-brand-600 to-brand-accent font-semibold text-white shadow-lg shadow-brand-pink/25 hover:scale-105 transition-all">
+                    Get Started Free
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="bg-brand-dark border-t border-brand-border/60 pt-16 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-16">
+                
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-pink to-brand-accent flex items-center justify-center text-white text-sm font-bold">
+                            <i class="fa-solid fa-wave-square"></i>
+                        </div>
+                        <span class="font-display font-bold text-xl text-white">AUDIORY</span>
+                    </div>
+                    <p class="text-gray-400 text-sm max-w-sm mb-6 leading-relaxed">
+                        Audiory Distribution provides premier global music distribution infrastructure, automated splits, rights protection, and real-time analytics.
+                    </p>
+                </div>
+
+                <!-- Col 2: Navigation -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Solutions</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/music-distribution/" class="hover:text-brand-accent transition-colors">Music Distribution</a></li>
+                        <li><a href="/content-id/" class="hover:text-brand-accent transition-colors">YouTube Content ID</a></li>
+                        <li><a href="/splits/" class="hover:text-brand-accent transition-colors">Automated Splits</a></li>
+                        <li><a href="/analytics/" class="hover:text-brand-accent transition-colors">Analytics Telemetry</a></li>
+                        <li><a href="/smart-links/" class="hover:text-brand-accent transition-colors">Smart Links Engine</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Resources -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Resources</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/knowledge-base/" class="hover:text-brand-accent transition-colors">Knowledge Base</a></li>
+                        <li><a href="/royalty-guide/" class="hover:text-brand-accent transition-colors">Royalty Guide</a></li>
+                        <li><a href="/api-documentation/" class="hover:text-brand-accent transition-colors">API Documentation</a></li>
+                        <li><a href="/platform-status/" class="hover:text-brand-accent transition-colors">Platform Status</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Legal -->
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Legal & Company</h3>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="/privacy/" class="hover:text-brand-accent transition-colors">Privacy Policy</a></li>
+                        <li><a href="/terms/" class="hover:text-brand-accent transition-colors">Terms of Service</a></li>
+                        <li><a href="/dmca/" class="hover:text-brand-accent transition-colors">Copyright / DMCA</a></li>
+                        <li><a href="/support/" class="hover:text-brand-accent transition-colors">Contact Support</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Bottom Copyright Bar -->
+            <div class="pt-8 border-t border-brand-border/40 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+                <p>&copy; 2026 Audiory Distribution Inc. All rights reserved.</p>
+                <div class="flex gap-6">
+                    <a href="/security/" class="hover:text-gray-400">Security</a>
+                    <a href="/privacy/" class="hover:text-gray-400">Privacy</a>
+                    <a href="/cookies/" class="hover:text-gray-400">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+  
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const hamburgerPath = document.getElementById('hamburgerPath');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            if (mobileMenu.classList.contains('hidden')) {
+                hamburgerPath.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+            } else {
+                hamburgerPath.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+            }
+        });
+
+        // Interactive Content ID Calculator Logic
+        const viewsRange = document.getElementById('viewsRange');
+        const viewsDisplay = document.getElementById('viewsDisplay');
+        const claimedVideos = document.getElementById('claimedVideos');
+        const grossRevenue = document.getElementById('grossRevenue');
+        const netPayout = document.getElementById('netPayout');
+
+        const updateCalculator = () => {
+            const views = parseFloat(viewsRange.value);
+            viewsDisplay.textContent = views.toLocaleString('en-US');
+
+            // Estimated metric calculations
+            const estimatedClaimedVids = Math.round(views / 4000);
+            const gross = (views / 1000) * 1.50; // $1.50 RPM assumption
+            const net = gross * 0.85; // 85% payout share
+
+            claimedVideos.textContent = estimatedClaimedVids.toLocaleString('en-US');
+            grossRevenue.textContent = '$' + gross.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            netPayout.textContent = '$' + net.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        };
+
+        viewsRange.addEventListener('input', updateCalculator);
+    </script>
+</body>
+</html>
