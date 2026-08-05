@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — Audiory Distribution</title>
+    <meta name="description" content="Learn how Audiory Distribution collects, uses, protects, and handles your personal information and copyright metadata.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            accent: '#00f2fe',
+                            purple: '#7928ca',
+                            pink: '#ff0080',
+                            dark: '#0a0d14',
+                            card: '#121824',
+                            border: '#1f293d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #07090e;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+        }
+
+        .gradient-border-card {
+            position: relative;
+            background: #121824;
+            border-radius: 1.25rem;
+        }
+
+        .gradient-border-card::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 1.3rem;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(0,242,254,0.3), rgba(121,40,202,0.3), rgba(255,0,128,0.3));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .glow-effect {
+            box-shadow: 0 0 50px -10px rgba(0, 242, 254, 0.15);
+        }
+
+        /* Toast Animation */
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-animate {
+            animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between antialiased selection:bg-brand-accent selection:text-brand-dark">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full px-4 pointer-events-none"></div>
+
+    <!-- Background Ambient Glow -->
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-accent/10 rounded-full blur-[140px] pointer-events-none"></div>
+
+    <!-- ==================== HEADER / NAV ==================== -->
+    <header class="w-full py-6 px-4 sm:px-8 relative z-20 border-b border-brand-border/40">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="/" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20 group-hover:scale-105 transition-transform duration-300">
+                    <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
+                        <i class="fa-solid fa-wave-square text-brand-accent group-hover:rotate-12 transition-transform duration-300"></i>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-display font-bold text-xl tracking-wider text-white">AUDIORY</span>
+                    <span class="text-[8px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">DISTRIBUTION</span>
+                </div>
+            </a>
+
+            <div class="flex items-center gap-4">
+                <a href="/login/" class="text-xs sm:text-sm text-gray-300 hover:text-white font-medium transition-colors">Sign In</a>
+                <a href="/signup/" class="py-2 px-4 rounded-xl bg-brand-accent text-brand-dark text-xs sm:text-sm font-bold hover:opacity-90 transition-opacity">
+                    Get Started
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN PRIVACY CONTENT ==================== -->
+    <main class="py-12 px-4 sm:px-6 lg:px-8 relative z-10 my-auto">
+        <div class="max-w-4xl mx-auto">
+            
+            <!-- Page Heading -->
+            <div class="text-center mb-10">
+                <span class="px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase bg-brand-accent/10 text-brand-accent border border-brand-accent/20">
+                    Data Protection
+                </span>
+                <h1 class="text-3xl sm:text-5xl font-extrabold font-display text-white mt-4 mb-3">Privacy Policy</h1>
+                <p class="text-xs sm:text-sm text-gray-400">Effective Date: August 5, 2026 — Applicable to https://distro.audiory.site/</p>
+            </div>
+
+            <!-- Content Card -->
+            <div class="gradient-border-card p-6 sm:p-12 glow-effect space-y-8 text-gray-300 text-sm leading-relaxed">
+
+                <!-- Section 1 -->
+                <section class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-shield-halved text-brand-accent text-lg"></i>
+                        <h2 class="text-lg sm:text-xl font-bold font-display text-white">1. Information We Collect</h2>
+                    </div>
+                    <p class="text-gray-400">
+                        When you use our portal at <strong class="text-white">distro.audiory.site</strong>, we collect personal and music metadata essential for delivering your catalog to streaming services and processing royalty payouts:
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 text-gray-400 pl-2">
+                        <li><strong>Account Details:</strong> Name, email address, password hash, and profile details provided via manual signup or Google Sign-In.</li>
+                        <li><strong>Music Metadata:</strong> Track titles, ISRC/UPC codes, songwriter/composer credits, cover art files, and audio assets.</li>
+                        <li><strong>Financial & Payout Data:</strong> Payment details (PayPal email, direct deposit bank info) and tax declaration forms required for processing royalty payouts.</li>
+                        <li><strong>Technical Data:</strong> IP addresses, browser types, device information, and session logs logged automatically for fraud prevention.</li>
+                    </ul>
+                </section>
+
+                <hr class="border-brand-border/60">
+
+                <!-- Section 2 -->
+                <section class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-gears text-brand-accent text-lg"></i>
+                        <h2 class="text-lg sm:text-xl font-bold font-display text-white">2. How We Use Your Data</h2>
+                    </div>
+                    <p class="text-gray-400">
+                        Your information is strictly processed for legitimate music distribution operations:
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 text-gray-400 pl-2">
+                        <li>Delivering and encoding your music for Digital Service Providers (Spotify, Apple Music, YouTube, etc.).</li>
+                        <li>Calculating, processing, and remitting monthly royalty earnings to your account balance.</li>
+                        <li>Verifying account ownership, preventing copyright infringements, and curbing artificial streaming behavior.</li>
+                        <li>Sending system updates, payout notices, and technical security alerts.</li>
+                    </ul>
+                </section>
+
+                <hr class="border-brand-border/60">
+
+                <!-- Section 3 -->
+                <section class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-share-nodes text-brand-accent text-lg"></i>
+                        <h2 class="text-lg sm:text-xl font-bold font-display text-white">3. Third-Party Data Sharing</h2>
+                    </div>
+                    <p class="text-gray-400">
+                        We never sell your personal data. We share necessary data only with authorized service partners required to operate our service:
+                    </p>
+                    <div class="bg-brand-dark p-4 rounded-xl border border-brand-border text-xs space-y-2 text-gray-400">
+                        <p><strong class="text-white">DSPs & Streaming Partners:</strong> Track metadata and audio files are transmitted directly to store endpoints (Spotify, Apple, YouTube, etc.).</p>
+                        <p><strong class="text-white">Payment Processors:</strong> Payout details are routed securely through compliant financial networks (e.g., PayPal, Stripe, ACH banks).</p>
+                        <p><strong class="text-white">Firebase Infrastructure:</strong> Authentication data and user records are hosted securely within Google Cloud Platform infrastructure.</p>
+                    </div>
+                </section>
+
+                <hr class="border-brand-border/60">
+
+                <!-- Section 4 -->
+                <section class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-lock text-brand-accent text-lg"></i>
+                        <h2 class="text-lg sm:text-xl font-bold font-display text-white">4. Data Security & Storage</h2>
+                    </div>
+                    <p class="text-gray-400">
+                        We enforce strict security safeguards to protect your personal information and media files. All transactions across <span class="text-brand-accent">distro.audiory.site</span> are encrypted using HTTPS (TLS 1.3). Database rules restrict unauthorized access so that users can only read or modify their own catalog and payout accounts.
+                    </p>
+                </section>
+
+                <hr class="border-brand-border/60">
+
+                <!-- Section 5 -->
+                <section class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-user-shield text-brand-accent text-lg"></i>
+                        <h2 class="text-lg sm:text-xl font-bold font-display text-white">5. Your Privacy Rights</h2>
+                    </div>
+                    <p class="text-gray-400">
+                        Depending on your region (including GDPR and CCPA regulations), you possess rights regarding your data:
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 text-gray-400 pl-2">
+                        <li><strong>Access & Portability:</strong> Request a copy of the personal data and release metadata we hold.</li>
+                        <li><strong>Correction:</strong> Modify outdated profile or payout details directly through your dashboard.</li>
+                        <li><strong>Deletion ("Right to be Forgotten"):</strong> Request full deletion of your user profile and catalog takedown (subject to royalty audit retention requirements).</li>
+                    </ul>
+                </section>
+
+                <hr class="border-brand-border/60">
+
+                <!-- Section 6 -->
+                <section class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-circle-info text-brand-accent text-lg"></i>
+                        <h2 class="text-lg sm:text-xl font-bold font-display text-white">6. Contact Our Privacy Team</h2>
+                    </div>
+                    <p class="text-gray-400">
+                        If you have questions, data deletion requests, or concerns regarding your privacy at <strong>distro.audiory.site</strong>, please reach out to us:
+                    </p>
+                    <a href="mailto:privacy@audiory.site" class="inline-flex items-center gap-2 text-brand-accent hover:underline font-semibold">
+                        <i class="fa-solid fa-envelope"></i> privacy@audiory.site
+                    </a>
+                </section>
+
+                <!-- Quick Action Button -->
+                <div class="pt-4 text-center">
+                    <button id="acknowledgePrivacyBtn" type="button" class="py-3 px-8 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:shadow-lg hover:shadow-brand-accent/25 text-white font-bold text-sm tracking-wide transition-all">
+                        I Acknowledge
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="py-6 px-4 text-center text-xs text-gray-500 border-t border-brand-border/40 relative z-10">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p>&copy; 2026 Audiory Distribution Inc. All rights reserved.</p>
+            <div class="flex items-center gap-6">
+                <a href="/terms/" class="hover:text-gray-300 transition-colors">Terms of Service</a>
+                <a href="/privacy/" class="text-brand-accent underline">Privacy Policy</a>
+                <a href="/login/" class="hover:text-gray-300 transition-colors">Sign In</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script for Interactive Toast -->
+    <script>
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            const isSuccess = type === 'success';
+            const bgClass = isSuccess ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-red-500/10 border-red-500/30 text-red-400';
+            const iconClass = isSuccess ? 'fa-circle-check' : 'fa-circle-exclamation';
+
+            toast.className = `toast-animate pointer-events-auto p-4 rounded-xl text-xs font-semibold border flex items-center gap-3 backdrop-blur-md shadow-2xl ${bgClass}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} text-base"></i>
+                <span class="flex-1 leading-relaxed">${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-white text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        document.getElementById('acknowledgePrivacyBtn').addEventListener('click', () => {
+            showToast("Privacy policy acknowledged.", "success");
+        });
+    </script>
+</body>
+</html>
