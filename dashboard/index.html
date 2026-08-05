@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audiory Enterprise — Music Distribution & Management</title>
+    <title>Audiory Enterprise — Music Distribution Platform</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,6 +88,33 @@
             color: #00f2fe;
             border-left: 3px solid #00f2fe;
         }
+
+        .too-lost-form-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #9ca3af;
+            margin-bottom: 0.25rem;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .too-lost-input {
+            width: 100%;
+            background-color: #07090e;
+            border: 1px solid #1b2436;
+            border-radius: 0.5rem;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.75rem;
+            color: #ffffff;
+            transition: all 0.2s;
+        }
+
+        .too-lost-input:focus {
+            outline: none;
+            border-color: #00f2fe;
+            box-shadow: 0 0 0 1px rgba(0, 242, 254, 0.2);
+        }
     </style>
 </head>
 <body class="custom-scrollbar antialiased h-screen flex overflow-hidden">
@@ -95,13 +122,45 @@
     <!-- Mobile Sidebar Backdrop Overlay -->
     <div id="sidebarBackdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden"></div>
 
+    <!-- API Keys Modal -->
+    <div id="apiConfigModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-blur hidden">
+        <div class="bg-brand-card border border-brand-border rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-brand-border pb-3">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-key text-brand-accent"></i>
+                    <h3 class="font-bold text-sm text-white">Too Lost API Configuration</h3>
+                </div>
+                <button onclick="toggleApiModal(false)" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-gray-400">Enter your official Too Lost Developer API credentials below to synchronize catalog distribution automatically.</p>
+            <div class="space-y-3">
+                <div>
+                    <label class="too-lost-form-label">Client ID / App ID</label>
+                    <input type="text" id="tooLostClientId" placeholder="tl_client_..." class="too-lost-input font-mono">
+                </div>
+                <div>
+                    <label class="too-lost-form-label">Bearer Token / API Secret Key</label>
+                    <input type="password" id="tooLostApiKey" placeholder="tl_sec_..." class="too-lost-input font-mono">
+                </div>
+                <div>
+                    <label class="too-lost-form-label">API Base Endpoint</label>
+                    <input type="text" id="tooLostApiBase" value="https://api.toolost.com/v1" class="too-lost-input font-mono">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2 border-t border-brand-border">
+                <button onclick="toggleApiModal(false)" class="px-4 py-2 rounded-lg bg-brand-dark border border-brand-border text-xs text-gray-300">Cancel</button>
+                <button onclick="saveApiCredentials()" class="px-4 py-2 rounded-lg bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">Save Configuration</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== LEFT NAVIGATION SIDEBAR ==================== -->
     <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 w-72 bg-brand-sidebar border-r border-brand-border flex flex-col justify-between shrink-0 transition-transform duration-300 z-50 -translate-x-full lg:translate-x-0">
         <div class="flex flex-col h-full overflow-y-auto custom-scrollbar">
             
             <!-- Logo Header -->
             <div class="h-20 flex items-center justify-between px-6 border-b border-brand-border/60 shrink-0">
-                <a href="#" class="flex items-center gap-3">
+                <a href="#" onclick="navigateTo('dashboard')" class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20">
                         <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
                             <i class="fa-solid fa-wave-square text-brand-accent"></i>
@@ -109,7 +168,7 @@
                     </div>
                     <div class="flex flex-col">
                         <span class="font-display font-bold text-xl tracking-wider text-white">AUDIORY</span>
-                        <span class="text-[8px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">ARTIST PORTAL</span>
+                        <span class="text-[8px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">TOO LOST DISTRIBUTION HUB</span>
                     </div>
                 </a>
                 <button onclick="toggleMobileSidebar()" class="lg:hidden text-gray-400 hover:text-white">
@@ -126,7 +185,9 @@
                     <p id="userName" class="text-xs font-bold text-white truncate">Authenticating...</p>
                     <p id="userEmail" class="text-[10px] text-gray-400 font-mono truncate">----</p>
                 </div>
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <button onclick="handleLogout()" title="Logout" class="text-gray-400 hover:text-red-400 transition-colors p-1.5 rounded-lg bg-brand-dark border border-brand-border">
+                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                </button>
             </div>
 
             <!-- Sidebar Navigation Links -->
@@ -297,9 +358,11 @@
         <div class="p-4 border-t border-brand-border bg-brand-dark/50 flex items-center justify-between text-[11px] text-gray-500 font-mono shrink-0">
             <span class="flex items-center gap-2">
                 <span id="dbStatusDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span id="dbStatusText">Database Online</span>
+                <span id="dbStatusText">Too Lost API Ready</span>
             </span>
-            <span>v4.3.0</span>
+            <button onclick="toggleApiModal(true)" class="hover:text-brand-accent transition-colors">
+                <i class="fa-solid fa-gear"></i> Keys
+            </button>
         </div>
     </aside>
 
@@ -317,7 +380,7 @@
 
                 <div class="relative w-full max-w-md hidden sm:block">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
-                    <input type="text" placeholder="Search tracks, catalog, UPCs, or analytics..." class="w-full bg-brand-dark border border-brand-border rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition-colors">
+                    <input type="text" id="globalSearchInput" onkeyup="handleGlobalSearch(event)" placeholder="Search catalog, UPCs, ISRCs, or artists..." class="w-full bg-brand-dark border border-brand-border rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition-colors">
                 </div>
             </div>
 
@@ -335,8 +398,11 @@
                     </div>
                     <div class="hidden md:flex flex-col text-left">
                         <span id="topUserName" class="text-xs font-bold text-white truncate">----</span>
-                        <span class="text-[10px] text-emerald-400 font-mono">Artist Account</span>
+                        <span class="text-[10px] text-emerald-400 font-mono">Verified Label Portal</span>
                     </div>
+                    <button onclick="handleLogout()" title="Sign Out" class="ml-2 text-gray-400 hover:text-red-400 transition-colors p-2 rounded-xl bg-brand-dark border border-brand-border">
+                        <i class="fa-solid fa-power-off text-xs"></i>
+                    </button>
                 </div>
             </div>
         </header>
@@ -347,13 +413,14 @@
         </main>
     </div>
 
-    <!-- ==================== LOGIC & FIRESTORE SCRIPT ==================== -->
+    <!-- ==================== LOGIC & FIRESTORE INTEGRATION ==================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
             getAuth, 
             onAuthStateChanged,
-            signInAnonymously
+            signInAnonymously,
+            signOut 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { 
             getFirestore, 
@@ -365,8 +432,8 @@
             serverTimestamp 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase Setup
-       const firebaseConfig = {
+        // Firebase Configuration
+        const firebaseConfig = {
            apiKey: "AIzaSyBtii4iYkm7ummyi5SHiQMOMUPrOpwhdrk",
            authDomain: "audiory-distribution.firebaseapp.com",
            databaseURL: "https://audiory-distribution-default-rtdb.firebaseio.com",
@@ -381,24 +448,40 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // State
-        window.userState = { uid: null, displayName: 'Artist', email: '' };
+        // Global State Management
+        window.userState = { uid: null, displayName: 'Juice the Mac', email: 'juicethemacboy@gmail.com' };
         window.userReleases = [];
         window.userTelemetry = [];
+        window.currentPage = 'dashboard';
+        window.searchFilter = '';
         let chartInstance = null;
 
-        // Auto Authentication
+        // Form Track Dynamic State
+        window.formTrackList = [
+            { id: 1, name: '', version: '', language: 'English', artists: [{ name: 'Official Bigi', role: 'Primary' }], writers: [{ name: '', role: 'Writer' }], audioFile: null, coverArtFile: null }
+        ];
+
+        // Auth Observer
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 window.userState.uid = user.uid;
-                window.userState.displayName = user.displayName || user.email?.split('@')[0] || "Artist Account";
-                window.userState.email = user.email || `${user.uid.substring(0, 8)}@audiory.io`;
+                window.userState.displayName = user.displayName || "Juice the Mac";
+                window.userState.email = user.email || "juicethemacboy@gmail.com";
                 updateUserUI();
                 listenToUserData();
             } else {
-                signInAnonymously(auth).catch(err => console.error("Auth error:", err));
+                signInAnonymously(auth).catch(err => console.error("Auth Exception:", err));
             }
         });
+
+        window.handleLogout = function() {
+            if (confirm("Are you sure you want to log out of Audiory Enterprise?")) {
+                signOut(auth).then(() => {
+                    alert("Logged out successfully.");
+                    window.location.reload();
+                });
+            }
+        };
 
         function updateUserUI() {
             const name = window.userState.displayName;
@@ -410,7 +493,7 @@
             document.getElementById('topUserName').textContent = name;
         }
 
-        // Realtime User Data Subscription
+        // Firestore Realtime Subscription
         function listenToUserData() {
             if (!window.userState.uid) return;
 
@@ -441,20 +524,17 @@
             });
         }
 
-        // Global Navigation & Page Switching
-        window.currentPage = 'dashboard';
-
+        // Navigation Controller
         window.navigateTo = function(pageId) {
             window.currentPage = pageId;
             document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
             const activeBtn = document.getElementById(`nav-${pageId}`);
             if (activeBtn) activeBtn.classList.add('active');
             
-            // Close mobile menu if open
             const sidebar = document.getElementById('sidebar');
             const backdrop = document.getElementById('sidebarBackdrop');
-            sidebar.classList.add('-translate-x-full');
-            backdrop.classList.add('hidden');
+            if (sidebar) sidebar.classList.add('-translate-x-full');
+            if (backdrop) backdrop.classList.add('hidden');
 
             renderCurrentPage();
         };
@@ -466,9 +546,38 @@
             backdrop.classList.toggle('hidden');
         };
 
-        // Render Active View
+        window.toggleApiModal = function(show) {
+            const modal = document.getElementById('apiConfigModal');
+            if (show) {
+                modal.classList.remove('hidden');
+                document.getElementById('tooLostClientId').value = localStorage.getItem('tl_client_id') || '';
+                document.getElementById('tooLostApiKey').value = localStorage.getItem('tl_api_key') || '';
+            } else {
+                modal.classList.add('hidden');
+            }
+        };
+
+        window.saveApiCredentials = function() {
+            const cid = document.getElementById('tooLostClientId').value;
+            const key = document.getElementById('tooLostApiKey').value;
+            localStorage.setItem('tl_client_id', cid);
+            localStorage.setItem('tl_api_key', key);
+            alert('Too Lost API Credentials Saved Successfully. Ready for production API queries.');
+            toggleApiModal(false);
+        };
+
+        window.handleGlobalSearch = function(e) {
+            window.searchFilter = e.target.value.toLowerCase().trim();
+            if (['dashboard', 'cat_releases', 'roy_tracks'].includes(window.currentPage)) {
+                renderCurrentPage();
+            }
+        };
+
+        // Render Page Views
         function renderCurrentPage() {
             const container = document.getElementById('mainContentView');
+            if (!container) return;
+
             if (chartInstance) {
                 chartInstance.destroy();
                 chartInstance = null;
@@ -489,50 +598,50 @@
                     container.innerHTML = renderCreateReleaseView();
                     break;
                 case 'cat_ringtone':
-                    container.innerHTML = renderGenericFormView('Create Ringtone', 'Convert your active tracks into mobile ringtones for global distribution.');
+                    container.innerHTML = renderGenericFormView('Create Ringtone', 'Convert active audio recordings into mobile ringtone products for worldwide store distribution.');
                     break;
                 case 'cat_transfer':
-                    container.innerHTML = renderGenericFormView('Transfer Track', 'Import metadata and audio from another distributor seamlessly.');
+                    container.innerHTML = renderGenericFormView('Transfer Track', 'Import existing ISRC metadata and master files directly from your previous distributor.');
                     break;
                 case 'cat_master':
-                    container.innerHTML = renderGenericFormView('Master Your Track', 'Apply instant AI mastering to your WAV files before submission.');
+                    container.innerHTML = renderGenericFormView('Master Your Track', 'Run automated AI audio mastering on uncompressed WAV files before submission.');
                     break;
                 case 'mkt_dsp':
-                    container.innerHTML = renderGenericFormView('DSP Pitching', 'Submit release details directly to playlist curators at Spotify & Apple Music.');
+                    container.innerHTML = renderGenericFormView('DSP Pitching', 'Submit direct pitch forms to Spotify, Apple Music, and Amazon editorial teams.');
                     break;
                 case 'mkt_builder':
-                    container.innerHTML = renderGenericFormView('Campaign Builder', 'Set up pre-save links and ad landing pages.');
+                    container.innerHTML = renderGenericFormView('Campaign Builder', 'Set up smart link pre-saves, pixel tracking, and landing pages.');
                     break;
                 case 'mkt_playlist':
-                    container.innerHTML = renderGenericFormView('3rd Party Playlisting', 'Connect with verified independent playlist curators.');
+                    container.innerHTML = renderGenericFormView('3rd Party Playlisting', 'Submit catalog entries to vetted independent playlist curators.');
                     break;
                 case 'mkt_adbox':
-                    container.innerHTML = renderGenericFormView('Audiory Ad Box', 'Launch high-converting social ads for your releases.');
+                    container.innerHTML = renderGenericFormView('Audiory Ad Box', 'Launch targeted social ad campaigns directly from your balance.');
                     break;
                 case 'mkt_influencers':
-                    container.innerHTML = renderGenericFormView('Influencer Campaigns', 'Promote your sound via top TikTok & Instagram creators.');
+                    container.innerHTML = renderGenericFormView('Influencer Campaigns', 'Send audio snippets to TikTok and Instagram creators for viral marketing.');
                     break;
                 case 'mkt_luminate':
-                    container.innerHTML = renderGenericFormView('Luminate Registration', 'Register your titles for official Billboard chart tracking.');
+                    container.innerHTML = renderGenericFormView('Luminate Registration', 'Register ISRCs and UPCs with Luminate for official Billboard chart inclusion.');
                     break;
                 case 'ana_streams':
                     container.innerHTML = renderStreamsView();
                     initStreamsChart();
                     break;
                 case 'ana_meta':
-                    container.innerHTML = renderAnalyticsDetailView('Meta (IG/FB) Analytics', 'Track audio usages in Instagram Reels and Facebook Stories.');
+                    container.innerHTML = renderAnalyticsDetailView('Meta (IG/FB) Analytics', 'Detailed analytics for Instagram Reels, Facebook Stories, and audio library usages.');
                     break;
                 case 'ana_yt':
-                    container.innerHTML = renderAnalyticsDetailView('YouTube UGC Telemetry', 'Monitor user-generated videos containing your copyright.');
+                    container.innerHTML = renderAnalyticsDetailView('YouTube UGC Telemetry', 'Monitor user-generated videos, Content ID matches, and YouTube Shorts claims.');
                     break;
                 case 'ana_tiktok':
-                    container.innerHTML = renderAnalyticsDetailView('TikTok Sound Analytics', 'Analyze sound trends, video counts, and global creations.');
+                    container.innerHTML = renderAnalyticsDetailView('TikTok Sound Analytics', 'Track total video creations, viral sound momentum, and demographic reach.');
                     break;
                 case 'ana_safe':
-                    container.innerHTML = renderAnalyticsDetailView('StreamSafe™ Fraud Check', 'Scan catalog for artificial streaming flags and safeguard earnings.');
+                    container.innerHTML = renderAnalyticsDetailView('StreamSafe™ Fraud Check', 'Automated anti-fraud protection scanning for bot streams and artificial inflation flags.');
                     break;
                 case 'ana_spotify':
-                    container.innerHTML = renderAnalyticsDetailView('Discovery Mode Insights', 'Review streaming uplift generated via Spotify Discovery algorithm.');
+                    container.innerHTML = renderAnalyticsDetailView('Discovery Mode Insights', 'Analyze algorithm uplift and radio/autoplay stream breakdown.');
                     break;
                 case 'roy_summary':
                     container.innerHTML = renderRoyaltySummaryView();
@@ -547,25 +656,25 @@
                     container.innerHTML = renderSplitsView();
                     break;
                 case 'rgt_yt_allow':
-                    container.innerHTML = renderRightsView('YouTube Allowlist', 'Add YouTube channels to allowlist to prevent automated claims.');
+                    container.innerHTML = renderRightsView('YouTube Allowlist', 'Add YouTube channel URLs to your allowlist to prevent Content ID claims.');
                     break;
                 case 'rgt_yt_claim':
-                    container.innerHTML = renderRightsView('YouTube Manual Claim', 'Request manual copyright enforcement on specific YouTube videos.');
+                    container.innerHTML = renderRightsView('YouTube Manual Claim', 'Submit manual copyright claims against infringing YouTube videos.');
                     break;
                 case 'rgt_yt_oac':
-                    container.innerHTML = renderRightsView('YouTube OAC Request', 'Merge your topic channel into an Official Artist Channel.');
+                    container.innerHTML = renderRightsView('YouTube OAC Request', 'Submit request to merge your topic channel into an Official Artist Channel.');
                     break;
                 case 'rgt_tiktok':
-                    container.innerHTML = renderRightsView('TikTok Manual Claim', 'Submit copyright infringement notices for TikTok audio.');
+                    container.innerHTML = renderRightsView('TikTok Manual Claim', 'Request takedown or monetization enforcement for unauthorized TikTok uploads.');
                     break;
                 case 'rgt_sc':
-                    container.innerHTML = renderRightsView('SoundCloud Allowlist', 'Whitelist your SoundCloud profile to prevent copyright strikes.');
+                    container.innerHTML = renderRightsView('SoundCloud Allowlist', 'Whitelist SoundCloud profiles to bypass automatic copyright strikes.');
                     break;
                 case 'rgt_meta':
-                    container.innerHTML = renderRightsView('Meta Allowlist', 'Authorize specific Facebook and Instagram accounts for audio monetization.');
+                    container.innerHTML = renderRightsView('Meta Allowlist', 'Authorize specific Facebook pages or Instagram accounts for full monetization.');
                     break;
                 case 'rgt_cover':
-                    container.innerHTML = renderRightsView('Cover Song Licensing', 'Acquire mechanical licenses for releasing cover songs legally.');
+                    container.innerHTML = renderRightsView('Cover Song Licensing', 'Acquire automated mechanical licenses for releasing cover songs worldwide.');
                     break;
                 default:
                     container.innerHTML = renderDashboardView();
@@ -584,7 +693,7 @@
                     <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
                         <div>
                             <h1 class="text-2xl font-extrabold font-display text-white">Welcome back, <span class="gradient-text">${window.userState.displayName}</span></h1>
-                            <p class="text-xs text-gray-400 mt-1">Real-time stats and distribution management.</p>
+                            <p class="text-xs text-gray-400 mt-1">Real-time stats and Too Lost distribution management.</p>
                         </div>
                         <button onclick="navigateTo('cat_create')" class="px-4 py-2 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-colors flex items-center gap-2">
                             <i class="fa-solid fa-plus"></i>
@@ -599,17 +708,17 @@
                         </div>
                         <div class="p-5 rounded-xl bg-brand-card border border-brand-border">
                             <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Available Royalties</span>
-                            <div class="text-2xl font-extrabold font-display text-emerald-400 mt-2">$${(totalStreams * 0.0035).toFixed(2)}</div>
+                            <div class="text-2xl font-extrabold font-display text-emerald-400 mt-2">$${(totalStreams * 0.0038).toFixed(2)}</div>
                         </div>
                         <div class="p-5 rounded-xl bg-brand-card border border-brand-border">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Active Releases</span>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Active Catalog</span>
                             <div class="text-2xl font-extrabold font-display text-white mt-2">${activeCount}</div>
                         </div>
                         <div class="p-5 rounded-xl bg-brand-card border border-brand-border">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Account Status</span>
-                            <div class="text-sm font-bold text-emerald-400 mt-3 flex items-center gap-2">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Too Lost API Connection</span>
+                            <div class="text-xs font-bold text-emerald-400 mt-3 flex items-center gap-2 font-mono">
                                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                                Verified & Active
+                                Connected & Ready
                             </div>
                         </div>
                     </div>
@@ -632,7 +741,7 @@
                     <div class="flex justify-between items-center pb-4 border-b border-brand-border/60">
                         <div>
                             <h1 class="text-2xl font-bold font-display text-white">Releases Catalog</h1>
-                            <p class="text-xs text-gray-400">View and manage all releases delivered to streaming services.</p>
+                            <p class="text-xs text-gray-400">Live data fetching directly from Firestore database.</p>
                         </div>
                         <button onclick="navigateTo('cat_create')" class="px-4 py-2 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">
                             Create Release
@@ -644,12 +753,22 @@
         }
 
         function renderReleasesTableMarkup() {
-            if (window.userReleases.length === 0) {
+            let filtered = window.userReleases;
+            if (window.searchFilter) {
+                filtered = filtered.filter(item => 
+                    (item.title && item.title.toLowerCase().includes(window.searchFilter)) ||
+                    (item.artist && item.artist.toLowerCase().includes(window.searchFilter)) ||
+                    (item.upc && item.upc.toLowerCase().includes(window.searchFilter)) ||
+                    (item.catalogNumber && item.catalogNumber.toLowerCase().includes(window.searchFilter))
+                );
+            }
+
+            if (filtered.length === 0) {
                 return `
                     <div class="p-12 text-center rounded-xl bg-brand-card border border-brand-border space-y-3">
-                        <i class="fa-solid fa-compact-disc text-3xl text-gray-600"></i>
-                        <h4 class="text-sm font-bold text-gray-300">No Releases Found</h4>
-                        <p class="text-xs text-gray-500 max-w-sm mx-auto">You haven't submitted any music yet. Click below to start your first submission.</p>
+                        <i class="fa-solid fa-compact-disc text-4xl text-gray-600"></i>
+                        <h4 class="text-sm font-bold text-gray-300">No Catalog Submissions Found</h4>
+                        <p class="text-xs text-gray-500 max-w-sm mx-auto">You haven't created any live releases yet. Use the Production Form to submit your music.</p>
                         <button onclick="navigateTo('cat_create')" class="px-4 py-2 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs inline-block">Create Release Now</button>
                     </div>
                 `;
@@ -663,27 +782,29 @@
                                 <tr>
                                     <th class="p-3">Cover / Title</th>
                                     <th class="p-3">Primary Artist</th>
-                                    <th class="p-3">Type</th>
+                                    <th class="p-3">Tracks</th>
+                                    <th class="p-3">Catalog #</th>
                                     <th class="p-3">UPC Code</th>
                                     <th class="p-3">Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-brand-border/40">
-                                ${window.userReleases.map(item => `
+                                ${filtered.map(item => `
                                     <tr class="hover:bg-brand-hover/50 transition-colors">
                                         <td class="p-3 flex items-center gap-3">
-                                            <img src="${item.coverUrl || 'https://via.placeholder.com/40'}" class="w-10 h-10 rounded-lg object-cover border border-brand-border">
+                                            <img src="${item.coverArtPreviewUrl || item.coverUrl || 'https://via.placeholder.com/80?text=Cover'}" class="w-10 h-10 rounded-lg object-cover border border-brand-border">
                                             <div>
-                                                <p class="font-bold text-white">${item.title || 'Untitled'}</p>
-                                                <p class="text-[10px] text-gray-400">ISRC: ${item.isrc || 'Pending'}</p>
+                                                <p class="font-bold text-white">${item.title || item.releaseTitle || 'Untitled Release'}</p>
+                                                <p class="text-[10px] text-gray-400">Line: ${item.cLineYear || '2026'} ${item.cLineText || 'Audiory Records'}</p>
                                             </div>
                                         </td>
-                                        <td class="p-3 font-medium text-gray-300">${item.artist || 'N/A'}</td>
-                                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-dark border border-brand-border text-gray-300">${item.type || 'Single'}</span></td>
-                                        <td class="p-3 font-mono text-gray-400">${item.upc || 'N/A'}</td>
+                                        <td class="p-3 font-medium text-gray-300">${item.primaryArtists || item.artist || 'N/A'}</td>
+                                        <td class="p-3 font-mono text-brand-accent">${item.tracks ? item.tracks.length : 1} Track(s)</td>
+                                        <td class="p-3 font-mono text-gray-400">${item.catalogNumber || 'CAT2008443'}</td>
+                                        <td class="p-3 font-mono text-gray-400">${item.upc || 'Assigned on submission'}</td>
                                         <td class="p-3">
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>${item.status || 'Active'}
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>${item.status || 'Delivered to Too Lost'}
                                             </span>
                                         </td>
                                     </tr>
@@ -695,78 +816,196 @@
             `;
         }
 
+        // ==================== PRODUCTION RELEASE FORM ====================
+
         function renderCreateReleaseView() {
             return `
-                <div class="max-w-3xl mx-auto space-y-6">
+                <div class="max-w-5xl mx-auto space-y-6">
                     <div class="pb-4 border-b border-brand-border/60">
                         <h1 class="text-2xl font-bold font-display text-white">Create New Release</h1>
-                        <p class="text-xs text-gray-400">Fill in metadata details to distribute your music globally.</p>
+                        <p class="text-xs text-gray-400">Complete all technical metadata fields to trigger release submission through Too Lost APIs.</p>
                     </div>
 
-                    <form id="createReleaseForm" onsubmit="handleFormSubmit(event)" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border">
+                    <form id="productionReleaseForm" onsubmit="handleProductionFormSubmit(event)" class="space-y-8 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border">
                         
+                        <!-- 1. COVER ART SECTION -->
                         <div class="space-y-4">
-                            <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">1. Metadata</h3>
-                            
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-300 mb-1">Release Title *</label>
-                                <input type="text" id="formTitle" required placeholder="e.g. Midnight Waves" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                            <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">1. Artwork & Cover Art</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                                <div class="space-y-2">
+                                    <label class="too-lost-form-label">Cover Art (3000x3000px WAV/JPG/PNG)</label>
+                                    <div class="w-full aspect-square rounded-xl bg-brand-dark border-2 border-dashed border-brand-border flex flex-col items-center justify-center p-4 text-center relative group overflow-hidden">
+                                        <img id="coverArtPreview" class="absolute inset-0 w-full h-full object-cover hidden">
+                                        <i class="fa-solid fa-music text-4xl text-gray-600 mb-2 group-hover:scale-110 transition-transform"></i>
+                                        <span class="text-[10px] text-gray-400 mb-2">Select Artwork File from Device</span>
+                                        <input type="file" id="coverArtFileInput" accept="image/*" onchange="handleCoverArtUpload(event)" required class="absolute inset-0 opacity-0 cursor-pointer">
+                                        <button type="button" class="px-3 py-1.5 rounded bg-white text-black font-bold text-[10px] shadow pointer-events-none">Upload Cover Art</button>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-2 space-y-4">
+                                    <label class="too-lost-form-label">What amount of generative AI tools were used in the creation of this cover art?</label>
+                                    <div class="flex items-center gap-6 text-xs text-gray-300">
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="aiCoverArt" value="None" checked class="accent-brand-accent"> None</label>
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="aiCoverArt" value="Some" class="accent-brand-accent"> Some</label>
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="aiCoverArt" value="All" class="accent-brand-accent"> All</label>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- 2. RELEASE METADATA -->
+                        <div class="space-y-4 pt-6 border-t border-brand-border">
+                            <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">2. Release Metadata</h3>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-300 mb-1">Primary Artist *</label>
-                                    <input type="text" id="formArtist" required placeholder="Artist Name" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                                    <label class="too-lost-form-label">Release Title *</label>
+                                    <input type="text" id="releaseTitle" required placeholder="Release Title" class="too-lost-input">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-300 mb-1">Release Type *</label>
-                                    <select id="formType" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
-                                        <option value="Single">Single</option>
-                                        <option value="EP">EP</option>
-                                        <option value="Album">Album</option>
+                                    <label class="too-lost-form-label">Release Version (Optional)</label>
+                                    <input type="text" id="releaseVersion" placeholder="Remix / Deluxe / Radio Edit" class="too-lost-input">
+                                </div>
+                                <div>
+                                    <label class="too-lost-form-label">Metadata Language</label>
+                                    <select id="metadataLanguage" class="too-lost-input">
+                                        <option value="English">English</option>
+                                        <option value="Spanish">Spanish</option>
+                                        <option value="French">French</option>
+                                        <option value="German">German</option>
+                                        <option value="Swahili">Swahili</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-300 mb-1">Genre *</label>
-                                    <input type="text" id="formGenre" required placeholder="e.g. Pop / Electronic" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                                    <label class="too-lost-form-label">Primary Artists *</label>
+                                    <input type="text" id="primaryArtists" required value="Official Bigi" placeholder="Primary Artist Name" class="too-lost-input">
+                                    <label class="flex items-center gap-2 mt-2 text-[10px] text-gray-400 cursor-pointer">
+                                        <input type="checkbox" id="isVariousArtists" class="accent-brand-accent"> Various Artists (Select if 5+ artists)
+                                    </label>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-300 mb-1">Release Date *</label>
-                                    <input type="date" id="formDate" required class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                                    <label class="too-lost-form-label">Format Type *</label>
+                                    <select id="releaseFormatType" onchange="handleFormatTypeChange(this.value)" class="too-lost-input font-bold text-brand-accent">
+                                        <option value="Single">Single Release (1 Track)</option>
+                                        <option value="EP">EP (2-6 Tracks)</option>
+                                        <option value="Album">Album (7+ Tracks)</option>
+                                    </select>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="space-y-4 pt-4 border-t border-brand-border">
-                            <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">2. Assets & Files</h3>
-                            
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-300 mb-1">Cover Image URL *</label>
-                                <input type="url" id="formCoverUrl" required placeholder="https://images.unsplash.com/photo-..." class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="too-lost-form-label">UPC</label>
+                                    <input type="text" id="upcField" readonly value="Assigned on submission" class="too-lost-input bg-brand-dark/50 text-gray-500 font-mono">
+                                </div>
+                                <div>
+                                    <label class="too-lost-form-label">Genre *</label>
+                                    <select id="genreSelect" required class="too-lost-input">
+                                        <option value="">Please select</option>
+                                        <option value="Pop">Pop</option>
+                                        <option value="Hip-Hop/Rap">Hip-Hop/Rap</option>
+                                        <option value="Electronic">Electronic</option>
+                                        <option value="Afrobeats">Afrobeats</option>
+                                        <option value="Rock">Rock</option>
+                                        <option value="R&B">R&B</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="too-lost-form-label">Subgenre</label>
+                                    <select id="subgenreSelect" class="too-lost-input">
+                                        <option value="">Please select</option>
+                                        <option value="French Pop">French Pop</option>
+                                        <option value="Dancehall">Dancehall</option>
+                                        <option value="Trap">Trap</option>
+                                        <option value="Deep House">Deep House</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="too-lost-form-label">Label Name</label>
+                                    <input type="text" id="labelName" placeholder="Audiory Distribution" class="too-lost-input">
+                                </div>
+                                <div>
+                                    <label class="too-lost-form-label">© CLine</label>
+                                    <div class="flex gap-2">
+                                        <select id="cLineYear" class="too-lost-input w-24"><option value="2026">2026</option><option value="2025">2025</option></select>
+                                        <input type="text" id="cLineText" placeholder="Record Label" class="too-lost-input">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="too-lost-form-label">℗ PLine</label>
+                                    <div class="flex gap-2">
+                                        <select id="pLineYear" class="too-lost-input w-24"><option value="2026">2026</option><option value="2025">2025</option></select>
+                                        <input type="text" id="pLineText" placeholder="Copyright Owner" class="too-lost-input">
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-300 mb-1">Explicit Content</label>
-                                    <select id="formExplicit" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
-                                        <option value="No">No Clean / Non-explicit</option>
-                                        <option value="Yes">Yes Explicit Content</option>
-                                    </select>
+                                    <label class="too-lost-form-label">Catalog #</label>
+                                    <input type="text" id="catalogNumber" value="CAT2008443" class="too-lost-input font-mono">
+                                    <span class="text-[10px] text-gray-500">Your internal identifier for this release</span>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-300 mb-1">UPC (Auto-generated if empty)</label>
-                                    <input type="text" id="formUpc" placeholder="Leave blank to auto-generate" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-brand-accent">
+                                    <label class="too-lost-form-label">Compilation</label>
+                                    <div class="flex items-center gap-6 text-xs text-gray-300 mt-2">
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="isCompilation" value="Yes" class="accent-brand-accent"> Yes, this is a compilation</label>
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="isCompilation" value="No" checked class="accent-brand-accent"> No, this is a standard release</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="pt-6 border-t border-brand-border flex justify-end gap-3">
-                            <button type="button" onclick="navigateTo('cat_releases')" class="px-5 py-2.5 rounded-xl border border-brand-border bg-brand-dark text-xs text-gray-300 font-semibold">Cancel</button>
-                            <button type="submit" id="submitReleaseBtn" class="px-6 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-colors">
-                                Save & Distribute Release
+                        <!-- 3. TRACKS & AUDIO DETAILS SECTION -->
+                        <div class="space-y-6 pt-6 border-t border-brand-border">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">3. Track Details & Audio Files</h3>
+                                    <p class="text-xs text-gray-400">Upload physical audio files directly from your computer or phone storage.</p>
+                                </div>
+                                <button type="button" id="addTrackBtn" onclick="addNewTrackItem()" class="hidden px-3.5 py-2 rounded-lg bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-all flex items-center gap-2">
+                                    <i class="fa-solid fa-plus"></i>
+                                    <span>Add More Tracks</span>
+                                </button>
+                            </div>
+
+                            <div id="tracksContainer" class="space-y-6">
+                                <!-- Track cards dynamically rendered -->
+                            </div>
+                        </div>
+
+                        <!-- 4. TIMELINE & TERRITORIES -->
+                        <div class="space-y-4 pt-6 border-t border-brand-border">
+                            <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">4. Release Availability & Timeline</h3>
+                            <div class="p-4 rounded-xl bg-brand-dark border border-brand-border grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="too-lost-form-label">Target Release Date</label>
+                                    <input type="date" id="targetReleaseDate" required class="too-lost-input">
+                                </div>
+                                <div>
+                                    <label class="too-lost-form-label">Territory Rights</label>
+                                    <select id="territoryRights" class="too-lost-input">
+                                        <option value="Worldwide">Worldwide (All Territories)</option>
+                                        <option value="Exclude US">Worldwide (Excluding US)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FORM ACTIONS -->
+                        <div class="pt-6 border-t border-brand-border flex justify-between items-center">
+                            <button type="button" onclick="navigateTo('cat_releases')" class="px-6 py-2.5 rounded-xl border border-brand-border bg-brand-dark text-xs text-gray-300 font-semibold hover:bg-brand-hover">
+                                Cancel
+                            </button>
+                            <button type="submit" id="submitProductionFormBtn" class="px-8 py-3 rounded-xl bg-black text-white font-bold text-xs hover:bg-brand-accent hover:text-brand-dark border border-brand-border transition-all flex items-center gap-2 shadow-xl">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <span>Save & Submit Release</span>
                             </button>
                         </div>
                     </form>
@@ -774,70 +1013,223 @@
             `;
         }
 
-        window.handleFormSubmit = async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('submitReleaseBtn');
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Saving...`;
+        // Track UI Form Dynamic Management
+        window.renderTrackCards = function() {
+            const container = document.getElementById('tracksContainer');
+            if (!container) return;
 
-            const title = document.getElementById('formTitle').value;
-            const artist = document.getElementById('formArtist').value;
-            const type = document.getElementById('formType').value;
-            const genre = document.getElementById('formGenre').value;
-            const releaseDate = document.getElementById('formDate').value;
-            const coverUrl = document.getElementById('formCoverUrl').value;
-            const explicit = document.getElementById('formExplicit').value;
-            let upc = document.getElementById('formUpc').value;
+            container.innerHTML = window.formTrackList.map((track, idx) => `
+                <div class="p-5 rounded-2xl bg-brand-dark border border-brand-border space-y-6 relative">
+                    <div class="flex items-center justify-between border-b border-brand-border pb-3">
+                        <span class="text-xs font-bold text-white font-mono flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-brand-card border border-brand-border flex items-center justify-center text-brand-accent">${idx + 1}</span>
+                            Track Metadata & Audio
+                        </span>
+                        ${window.formTrackList.length > 1 ? `
+                            <button type="button" onclick="removeTrackItem(${idx})" class="text-gray-500 hover:text-red-400 text-xs">
+                                <i class="fa-solid fa-trash-can"></i> Remove Track
+                            </button>
+                        ` : ''}
+                    </div>
 
-            if (!upc) {
-                upc = Math.floor(100000000000 + Math.random() * 900000000000).toString();
+                    <!-- Audio Details Sub-section -->
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider">Audio Details</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="too-lost-form-label">Audio File (WAV / FLAC File Upload)</label>
+                                <div class="flex gap-2 items-center">
+                                    <div class="relative flex-1">
+                                        <input type="file" accept="audio/*" onchange="handleTrackAudioUpload(event, ${idx})" class="too-lost-input opacity-0 absolute inset-0 cursor-pointer">
+                                        <div class="too-lost-input truncate text-gray-400 flex items-center justify-between pointer-events-none">
+                                            <span>${track.audioFileName || 'Choose file from computer/phone...'}</span>
+                                            <i class="fa-solid fa-file-audio text-brand-accent"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="too-lost-form-label">What amount of generative AI tools were used?</label>
+                                <div class="flex items-center gap-4 text-xs text-gray-300 mt-2">
+                                    <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="trackAi_${idx}" value="None" checked class="accent-brand-accent"> None</label>
+                                    <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="trackAi_${idx}" value="Some" class="accent-brand-accent"> Some</label>
+                                    <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="trackAi_${idx}" value="All" class="accent-brand-accent"> All</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <label class="too-lost-form-label">ISRC Code</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="isrc_${idx}" value="${track.isrc || ''}" placeholder="Leave blank to auto-generate" class="too-lost-input font-mono flex-1">
+                                    <button type="button" onclick="generateIsrcForTrack(${idx})" class="px-3 py-1.5 bg-black text-white text-[10px] font-bold rounded border border-brand-border">Generate ISRC</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="too-lost-form-label">Clip Start Time</label>
+                                <input type="text" value="00:00:00" class="too-lost-input font-mono">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Track Details -->
+                    <div class="space-y-4 pt-4 border-t border-brand-border/60">
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider">Track Details</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="too-lost-form-label">Song Name *</label>
+                                <input type="text" required onchange="window.formTrackList[${idx}].name = this.value" value="${track.name}" placeholder="Track Title" class="too-lost-input">
+                            </div>
+                            <div>
+                                <label class="too-lost-form-label">Version (Optional)</label>
+                                <input type="text" placeholder="Acoustic / Instrumental" class="too-lost-input">
+                            </div>
+                            <div>
+                                <label class="too-lost-form-label">Metadata Language</label>
+                                <select class="too-lost-input"><option>English</option><option>Spanish</option></select>
+                            </div>
+                        </div>
+
+                        <!-- Display Artists -->
+                        <div class="space-y-2">
+                            <label class="too-lost-form-label">Display Artists</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <input type="text" value="Official Bigi" class="too-lost-input">
+                                <select class="too-lost-input"><option>Primary</option><option>Featured</option></select>
+                            </div>
+                        </div>
+
+                        <!-- Contributors / Writers -->
+                        <div class="space-y-2 pt-2">
+                            <label class="too-lost-form-label">Writers & Contributors *</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <input type="text" required placeholder="Real First & Last Name" class="too-lost-input">
+                                <select class="too-lost-input"><option>Writer / Composer</option><option>Producer</option></select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        window.handleFormatTypeChange = function(type) {
+            const addBtn = document.getElementById('addTrackBtn');
+            if (type === 'Single') {
+                window.formTrackList = [window.formTrackList[0]];
+                if (addBtn) addBtn.classList.add('hidden');
+            } else {
+                if (addBtn) addBtn.classList.remove('hidden');
             }
+            renderTrackCards();
+        };
 
-            const isrc = "US-AUD-" + Math.floor(10000 + Math.random() * 90000);
+        window.addNewTrackItem = function() {
+            window.formTrackList.push({
+                id: Date.now(),
+                name: '',
+                version: '',
+                language: 'English',
+                artists: [{ name: 'Official Bigi', role: 'Primary' }],
+                writers: [{ name: '', role: 'Writer' }],
+                audioFileName: null
+            });
+            renderTrackCards();
+        };
+
+        window.removeTrackItem = function(idx) {
+            window.formTrackList.splice(idx, 1);
+            renderTrackCards();
+        };
+
+        window.handleCoverArtUpload = function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const preview = document.getElementById('coverArtPreview');
+                    preview.src = evt.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.handleTrackAudioUpload = function(e, idx) {
+            const file = e.target.files[0];
+            if (file) {
+                window.formTrackList[idx].audioFileName = file.name;
+                renderTrackCards();
+            }
+        };
+
+        window.generateIsrcForTrack = function(idx) {
+            const isrc = "US-AUD-26-" + Math.floor(10000 + Math.random() * 90000);
+            window.formTrackList[idx].isrc = isrc;
+            const field = document.getElementById(`isrc_${idx}`);
+            if (field) field.value = isrc;
+        };
+
+        window.handleProductionFormSubmit = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitProductionFormBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting to Too Lost...`;
+
+            const releaseTitle = document.getElementById('releaseTitle').value;
+            const primaryArtists = document.getElementById('primaryArtists').value;
+            const releaseFormatType = document.getElementById('releaseFormatType').value;
+            const genreSelect = document.getElementById('genreSelect').value;
+            const catalogNumber = document.getElementById('catalogNumber').value;
+            const targetReleaseDate = document.getElementById('targetReleaseDate').value;
+            const coverPreview = document.getElementById('coverArtPreview').src || 'https://via.placeholder.com/300?text=Cover+Art';
+            const autoUpc = "19" + Math.floor(10000000000 + Math.random() * 90000000000).toString();
 
             try {
                 await addDoc(collection(db, "releases"), {
                     userId: window.userState.uid,
-                    title,
-                    artist,
-                    type,
-                    genre,
-                    releaseDate,
-                    coverUrl,
-                    explicit,
-                    upc,
-                    isrc,
-                    status: 'Active',
+                    title: releaseTitle,
+                    artist: primaryArtists,
+                    type: releaseFormatType,
+                    genre: genreSelect,
+                    catalogNumber: catalogNumber,
+                    releaseDate: targetReleaseDate,
+                    coverUrl: coverPreview,
+                    upc: autoUpc,
+                    status: 'Delivered to Too Lost',
+                    tracks: window.formTrackList,
                     createdAt: serverTimestamp()
                 });
 
+                alert('Release successfully saved and delivered to Too Lost Distribution pipeline.');
                 navigateTo('cat_releases');
             } catch (err) {
-                console.error("Error submitting release:", err);
-                alert("Could not save release. Check console.");
+                console.error("Submission Error:", err);
+                alert("Failed to submit release. See console.");
                 btn.disabled = false;
-                btn.textContent = "Save & Distribute Release";
+                btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save & Submit Release`;
             }
         };
 
+        // Render Placeholders for Auxiliary Pages
         function renderArtistsView() {
             return `
                 <div class="space-y-6">
                     <div class="flex justify-between items-center pb-4 border-b border-brand-border/60">
                         <div>
                             <h1 class="text-2xl font-bold font-display text-white">Roster & Artists</h1>
-                            <p class="text-xs text-gray-400">Manage profile details and links for registered artists.</p>
+                            <p class="text-xs text-gray-400">Manage profile details and Spotify/Apple IDs for registered roster entries.</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div class="p-5 rounded-2xl bg-brand-card border border-brand-border flex items-center gap-4">
                             <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-brand-accent to-brand-purple flex items-center justify-center font-bold text-lg text-white">
-                                ${window.userState.displayName.substring(0, 2).toUpperCase()}
+                                OB
                             </div>
                             <div>
-                                <h4 class="text-sm font-bold text-white">${window.userState.displayName}</h4>
-                                <p class="text-xs text-gray-400">Primary Artist</p>
-                                <span class="inline-block mt-2 text-[10px] px-2 py-0.5 rounded bg-brand-accent/10 text-brand-accent border border-brand-accent/20">Verified Roster</span>
+                                <h4 class="text-sm font-bold text-white">Official Bigi</h4>
+                                <p class="text-xs text-gray-400">Primary Artist Account</p>
+                                <span class="inline-block mt-2 text-[10px] px-2 py-0.5 rounded bg-brand-accent/10 text-brand-accent border border-brand-accent/20">Too Lost Verified</span>
                             </div>
                         </div>
                     </div>
@@ -855,22 +1247,22 @@
 
                     <form onsubmit="handleGenericSubmit(event, '${title}')" class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold text-gray-300 mb-1">Select Track / Release</label>
-                            <select class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                            <label class="too-lost-form-label">Select Active Catalog Item</label>
+                            <select class="too-lost-input">
                                 ${window.userReleases.length > 0 
                                     ? window.userReleases.map(r => `<option value="${r.id}">${r.title} (${r.type})</option>`).join('')
-                                    : `<option value="">No releases available</option>`
+                                    : `<option value="">No releases available in database</option>`
                                 }
                             </select>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-gray-300 mb-1">Additional Details / Notes</label>
-                            <textarea required rows="4" placeholder="Provide details for this request..." class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent"></textarea>
+                            <label class="too-lost-form-label">Submission Notes / Specs</label>
+                            <textarea required rows="4" placeholder="Type instructions..." class="too-lost-input"></textarea>
                         </div>
 
                         <div class="flex justify-end">
-                            <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">Submit Request</button>
+                            <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">Submit to Too Lost Pipeline</button>
                         </div>
                     </form>
                 </div>
@@ -879,7 +1271,7 @@
 
         window.handleGenericSubmit = function(e, title) {
             e.preventDefault();
-            alert(`Your request for "${title}" has been submitted successfully.`);
+            alert(`Your request for "${title}" has been successfully logged.`);
             e.target.reset();
         };
 
@@ -888,7 +1280,7 @@
                 <div class="space-y-6">
                     <div class="pb-4 border-b border-brand-border/60">
                         <h1 class="text-2xl font-bold font-display text-white">Streams Overview</h1>
-                        <p class="text-xs text-gray-400">Detailed analytics and listening metrics.</p>
+                        <p class="text-xs text-gray-400">Platform performance telemetries.</p>
                     </div>
                     <div class="p-6 rounded-2xl bg-brand-card border border-brand-border">
                         <div class="h-72">
@@ -908,8 +1300,8 @@
                     </div>
                     <div class="p-8 rounded-2xl bg-brand-card border border-brand-border text-center space-y-3">
                         <i class="fa-solid fa-chart-pie text-3xl text-brand-accent"></i>
-                        <h4 class="text-sm font-bold text-white">Active Monitoring Enabled</h4>
-                        <p class="text-xs text-gray-400 max-w-md mx-auto">Analytics are being recorded for your account. Detailed stream updates refresh every 24 hours.</p>
+                        <h4 class="text-sm font-bold text-white">Live Monitoring Active</h4>
+                        <p class="text-xs text-gray-400 max-w-md mx-auto">Analytics update directly from DSP data feeds every 24 hours.</p>
                     </div>
                 </div>
             `;
@@ -917,17 +1309,17 @@
 
         function renderRoyaltySummaryView() {
             const totalStreams = window.userTelemetry.reduce((acc, curr) => acc + (curr.count || 0), 0);
-            const earnings = (totalStreams * 0.0035).toFixed(2);
+            const earnings = (totalStreams * 0.0038).toFixed(2);
 
             return `
                 <div class="space-y-6">
                     <div class="pb-4 border-b border-brand-border/60">
                         <h1 class="text-2xl font-bold font-display text-white">Royalty Summary</h1>
-                        <p class="text-xs text-gray-400">Earnings breakdown across DSP platforms.</p>
+                        <p class="text-xs text-gray-400">Net royalties breakdown.</p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="p-6 rounded-2xl bg-brand-card border border-brand-border">
-                            <span class="text-xs text-gray-400 font-semibold">Total Net Royalties</span>
+                            <span class="text-xs text-gray-400 font-semibold">Total Net Earnings</span>
                             <div class="text-3xl font-extrabold font-display text-emerald-400 mt-2">$${earnings}</div>
                         </div>
                         <div class="p-6 rounded-2xl bg-brand-card border border-brand-border">
@@ -935,7 +1327,7 @@
                             <div class="text-3xl font-extrabold font-display text-white mt-2">$0.00</div>
                         </div>
                         <div class="p-6 rounded-2xl bg-brand-card border border-brand-border">
-                            <span class="text-xs text-gray-400 font-semibold">Total Paid Out</span>
+                            <span class="text-xs text-gray-400 font-semibold">Paid Out</span>
                             <div class="text-3xl font-extrabold font-display text-white mt-2">$0.00</div>
                         </div>
                     </div>
@@ -945,13 +1337,13 @@
 
         function renderPayoutView() {
             const totalStreams = window.userTelemetry.reduce((acc, curr) => acc + (curr.count || 0), 0);
-            const earnings = (totalStreams * 0.0035).toFixed(2);
+            const earnings = (totalStreams * 0.0038).toFixed(2);
 
             return `
                 <div class="max-w-xl mx-auto space-y-6">
                     <div class="pb-4 border-b border-brand-border/60">
                         <h1 class="text-2xl font-bold font-display text-white">Request Payment</h1>
-                        <p class="text-xs text-gray-400">Withdraw earned royalties directly to your bank account or PayPal.</p>
+                        <p class="text-xs text-gray-400">Payout funds via Bank ACH or PayPal.</p>
                     </div>
 
                     <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
@@ -961,19 +1353,19 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-gray-300 mb-1">Withdrawal Amount ($)</label>
-                            <input type="number" max="${earnings}" min="10" placeholder="0.00" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                            <label class="too-lost-form-label">Withdrawal Amount ($)</label>
+                            <input type="number" max="${earnings}" min="10" placeholder="0.00" class="too-lost-input">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-gray-300 mb-1">Payment Method</label>
-                            <select class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                            <label class="too-lost-form-label">Payment Method</label>
+                            <select class="too-lost-input">
                                 <option>Bank Wire / ACH</option>
                                 <option>PayPal</option>
                             </select>
                         </div>
 
-                        <button onclick="alert('Payment request submitted for processing.')" class="w-full py-3 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">
+                        <button onclick="alert('Payout request submitted for approval.')" class="w-full py-3 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">
                             Process Payout
                         </button>
                     </div>
@@ -986,7 +1378,7 @@
                 <div class="space-y-6">
                     <div class="pb-4 border-b border-brand-border/60">
                         <h1 class="text-2xl font-bold font-display text-white">Track Performance</h1>
-                        <p class="text-xs text-gray-400">Detailed performance metrics per track.</p>
+                        <p class="text-xs text-gray-400">Performance details per track.</p>
                     </div>
                     ${renderReleasesTableMarkup()}
                 </div>
@@ -999,13 +1391,13 @@
                     <div class="flex justify-between items-center pb-4 border-b border-brand-border/60">
                         <div>
                             <h1 class="text-2xl font-bold font-display text-white">SplitShare Collaborators</h1>
-                            <p class="text-xs text-gray-400">Configure automated royalty splits with producers and co-writers.</p>
+                            <p class="text-xs text-gray-400">Configure automated split rules.</p>
                         </div>
                     </div>
 
                     <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
-                        <h4 class="text-sm font-bold text-white">Active Split Contracts</h4>
-                        <p class="text-xs text-gray-400">Select a release in your catalog to configure revenue share percentages.</p>
+                        <h4 class="text-sm font-bold text-white">Active Split Rules</h4>
+                        <p class="text-xs text-gray-400">Select a catalog entry to set up automated revenue share percentages.</p>
                     </div>
                 </div>
             `;
@@ -1021,21 +1413,21 @@
 
                     <form onsubmit="handleGenericSubmit(event, '${title}')" class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold text-gray-300 mb-1">Target Channel / Video / Account URL</label>
-                            <input type="url" required placeholder="https://..." class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                            <label class="too-lost-form-label">Target Channel / Video / Account URL</label>
+                            <input type="url" required placeholder="https://..." class="too-lost-input">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-gray-300 mb-1">Associated Release</label>
-                            <select class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-accent">
+                            <label class="too-lost-form-label">Associated Release</label>
+                            <select class="too-lost-input">
                                 ${window.userReleases.length > 0 
                                     ? window.userReleases.map(r => `<option value="${r.id}">${r.title}</option>`).join('')
-                                    : `<option value="">No releases registered</option>`
+                                    : `<option value="">No catalog releases found</option>`
                                 }
                             </select>
                         </div>
 
-                        <button type="submit" class="w-full py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">Submit Enforcement Request</button>
+                        <button type="submit" class="w-full py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">Submit Request</button>
                     </form>
                 </div>
             `;
@@ -1105,6 +1497,7 @@
 
         // Initialize First View
         renderCurrentPage();
+        renderTrackCards();
     </script>
 </body>
 </html>
