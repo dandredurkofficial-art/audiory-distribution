@@ -55,7 +55,7 @@
         }
 
         .gradient-text {
-            background: linear-gradient(135deg, #ff0080 0%, #4f46e5 50%, #00f2fe 100%);
+            background: linear-gradient(135deg, #00f2fe 0%, #4f46e5 50%, #7928ca 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -76,45 +76,45 @@
         }
 
         .glow-box {
-            box-shadow: 0 0 35px -10px rgba(255, 0, 128, 0.15);
+            box-shadow: 0 0 35px -10px rgba(0, 242, 254, 0.15);
         }
 
         input[type=range]::-webkit-slider-thumb {
-            background: #ff0080;
+            background: #00f2fe;
         }
     </style>
 </head>
-<body class="custom-scrollbar antialiased selection:bg-brand-pink selection:text-white">
+<body class="custom-scrollbar antialiased selection:bg-brand-accent selection:text-brand-dark">
 
     <!-- ==================== HEADER / NAVIGATION ==================== -->
     <header class="sticky top-0 z-50 backdrop-blur-xl bg-brand-dark/80 border-b border-brand-border/60 transition-all duration-300" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 
-                <!-- Logo -->
+                <!-- Logo (Standardized Cyan Theme) -->
                 <a href="/" class="flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-pink via-brand-600 to-brand-accent p-0.5 shadow-lg shadow-brand-pink/20 group-hover:scale-105 transition-transform duration-300">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-purple p-0.5 shadow-lg shadow-brand-accent/20 group-hover:scale-105 transition-transform duration-300">
                         <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
-                            <i class="fa-solid font-bold fa-wave-square text-brand-pink group-hover:rotate-12 transition-transform duration-300"></i>
+                            <i class="fa-solid font-bold fa-wave-square text-brand-accent group-hover:rotate-12 transition-transform duration-300"></i>
                         </div>
                     </div>
                     <div class="flex flex-col">
                         <div class="flex items-center gap-2">
                             <span class="font-display font-bold text-2xl tracking-wider text-white">AUDIORY</span>
-                            <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-brand-pink/10 text-brand-pink font-bold uppercase">Content ID</span>
+                            <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-brand-accent/10 text-brand-accent font-bold uppercase">Content ID</span>
                         </div>
-                        <span class="text-[9px] tracking-[0.25em] text-brand-pink uppercase font-semibold -mt-1">RIGHTS MANAGEMENT</span>
+                        <span class="text-[9px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">RIGHTS MANAGEMENT</span>
                     </div>
                 </a>
 
                 <!-- Desktop Navigation Menu -->
                 <nav class="hidden lg:flex items-center gap-8">
-                    <a href="/services/" class="text-sm font-medium text-gray-300 hover:text-brand-pink transition-colors duration-200">Services</a>
-                    <a href="/smart-links/" class="text-sm font-medium text-gray-300 hover:text-brand-pink transition-colors duration-200">Smart Links</a>
-                    <a href="/analytics/" class="text-sm font-medium text-gray-300 hover:text-brand-pink transition-colors duration-200">Analytics</a>
-                    <a href="/splits/" class="text-sm font-medium text-gray-300 hover:text-brand-pink transition-colors duration-200">Splits</a>
-                    <a href="/pricing/" class="text-sm font-medium text-gray-300 hover:text-brand-pink transition-colors duration-200">Pricing</a>
-                    <a href="/royalty-guide/" class="text-sm font-medium text-gray-300 hover:text-brand-pink transition-colors duration-200">Royalty Guide</a>
+                    <a href="/services/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Services</a>
+                    <a href="/smart-links/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Smart Links</a>
+                    <a href="/analytics/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Analytics</a>
+                    <a href="/splits/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Splits</a>
+                    <a href="/pricing/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Pricing</a>
+                    <a href="/royalty-guide/" class="text-sm font-medium text-gray-300 hover:text-brand-accent transition-colors duration-200">Royalty Guide</a>
                 </nav>
 
                 <!-- Action Buttons (Desktop) -->
@@ -122,14 +122,14 @@
                     <a href="/login/" class="text-sm font-semibold text-gray-200 hover:text-white px-4 py-2.5 rounded-xl border border-brand-border hover:border-gray-500 transition-all duration-200">
                         Sign In
                     </a>
-                    <a href="/signup/" class="text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-pink via-brand-600 to-brand-accent hover:shadow-lg hover:shadow-brand-pink/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+                    <a href="/signup/" class="text-sm font-semibold text-white px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:shadow-lg hover:shadow-brand-accent/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
                         Protect Tracks
                     </a>
                 </div>
 
                 <!-- Mobile Header Right Actions -->
                 <div class="flex items-center gap-3 sm:hidden">
-                    <a href="/signup/" class="text-xs font-semibold text-white px-3 py-2 rounded-lg bg-gradient-to-r from-brand-pink to-brand-accent">
+                    <a href="/signup/" class="text-xs font-semibold text-white px-3 py-2 rounded-lg bg-gradient-to-r from-brand-accent to-brand-purple">
                         Get Started
                     </a>
                     <button id="mobileMenuBtn" aria-label="Toggle Navigation Menu" class="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-brand-card focus:outline-none">
@@ -145,16 +145,16 @@
         <!-- Mobile Drawer Menu -->
         <div id="mobileMenu" class="hidden lg:hidden border-b border-brand-border bg-brand-dark/95 backdrop-blur-2xl transition-all duration-300">
             <div class="px-4 pt-2 pb-6 space-y-3">
-                <a href="/services/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-pink hover:bg-brand-card">Services</a>
-                <a href="/smart-links/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-pink hover:bg-brand-card">Smart Links</a>
-                <a href="/analytics/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-pink hover:bg-brand-card">Analytics</a>
-                <a href="/splits/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-pink hover:bg-brand-card">Splits</a>
-                <a href="/pricing/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-pink hover:bg-brand-card">Pricing</a>
-                <a href="/royalty-guide/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-pink hover:bg-brand-card">Royalty Guide</a>
+                <a href="/services/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Services</a>
+                <a href="/smart-links/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Smart Links</a>
+                <a href="/analytics/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Analytics</a>
+                <a href="/splits/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Splits</a>
+                <a href="/pricing/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Pricing</a>
+                <a href="/royalty-guide/" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-brand-accent hover:bg-brand-card">Royalty Guide</a>
                 
                 <div class="pt-4 flex flex-col gap-3">
                     <a href="/login/" class="text-center w-full py-2.5 rounded-xl border border-brand-border text-gray-200 font-semibold">Sign In</a>
-                    <a href="/signup/" class="text-center w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-pink to-brand-accent text-white font-semibold">Protect Tracks</a>
+                    <a href="/signup/" class="text-center w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-accent to-brand-purple text-white font-semibold">Protect Tracks</a>
                 </div>
             </div>
         </div>
@@ -162,7 +162,7 @@
 
     <!-- ==================== HERO SECTION ==================== -->
     <section class="relative pt-16 pb-20 border-b border-brand-border/40 overflow-hidden">
-        <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(255,0,128,0.15),rgba(255,255,255,0))]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,242,254,0.15),rgba(255,255,255,0))]"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center max-w-3xl mx-auto space-y-6">
@@ -180,7 +180,7 @@
                 </p>
 
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-                    <a href="/signup/" class="w-full sm:w-auto text-center px-8 py-4 rounded-xl bg-gradient-to-r from-brand-pink via-brand-600 to-brand-accent font-semibold text-white shadow-lg shadow-brand-pink/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    <a href="/signup/" class="w-full sm:w-auto text-center px-8 py-4 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple font-semibold text-white shadow-lg shadow-brand-accent/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
                         Enroll Tracks in Content ID
                     </a>
                     <a href="#content-id-calc" class="w-full sm:w-auto text-center px-6 py-4 rounded-xl border border-brand-border text-gray-300 hover:text-white hover:bg-brand-card font-medium transition-all">
@@ -197,7 +197,7 @@
             <div class="bg-brand-card border border-brand-border rounded-3xl p-6 sm:p-10 glow-box">
                 
                 <div class="text-center max-w-xl mx-auto mb-8">
-                    <span class="text-xs font-mono text-brand-pink uppercase tracking-widest">Revenue Estimator</span>
+                    <span class="text-xs font-mono text-brand-accent uppercase tracking-widest">Revenue Estimator</span>
                     <h3 class="text-2xl font-bold font-display text-white mt-1">YouTube UGC Earnings Simulator</h3>
                     <p class="text-xs text-gray-400 mt-1">Estimate potential ad revenue generated from videos matching your audio fingerprint.</p>
                 </div>
@@ -210,7 +210,7 @@
                             <span class="text-3xl font-extrabold font-mono text-white" id="viewsDisplay">5,000,000</span>
                         </div>
                         <div class="w-full sm:w-1/2">
-                            <input type="range" id="viewsRange" min="100000" max="50000000" step="100000" value="5000000" class="w-full h-2 bg-brand-card rounded-lg appearance-none cursor-pointer accent-brand-pink">
+                            <input type="range" id="viewsRange" min="100000" max="50000000" step="100000" value="5000000" class="w-full h-2 bg-brand-card rounded-lg appearance-none cursor-pointer accent-brand-accent">
                         </div>
                     </div>
                 </div>
@@ -232,7 +232,7 @@
 
                     <div class="bg-brand-dark p-5 rounded-2xl border border-brand-border text-center">
                         <span class="text-xs font-mono text-gray-400 uppercase">Your Net Payout (85%)</span>
-                        <div class="text-xl sm:text-2xl font-bold font-mono text-brand-pink mt-2" id="netPayout">$6,375.00</div>
+                        <div class="text-xl sm:text-2xl font-bold font-mono text-brand-accent mt-2" id="netPayout">$6,375.00</div>
                         <span class="text-[10px] font-mono text-gray-500 mt-1 block">Directly credited to your balance</span>
                     </div>
 
@@ -251,15 +251,15 @@
     <section class="py-20 border-b border-brand-border/40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-xs font-bold font-mono text-brand-pink uppercase tracking-widest mb-3">Total Asset Control</h2>
+                <h2 class="text-xs font-bold font-mono text-brand-accent uppercase tracking-widest mb-3">Total Asset Control</h2>
                 <h3 class="text-3xl sm:text-4xl font-extrabold font-display text-white">Complete Rights Management Pipeline</h3>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 
                 <!-- Feature 1 -->
-                <div class="bg-brand-card border border-brand-border p-8 rounded-3xl hover:border-brand-pink/50 transition-all">
-                    <div class="w-12 h-12 rounded-2xl bg-brand-pink/10 text-brand-pink flex items-center justify-center text-xl mb-6">
+                <div class="bg-brand-card border border-brand-border p-8 rounded-3xl hover:border-brand-accent/50 transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-accent/10 text-brand-accent flex items-center justify-center text-xl mb-6">
                         <i class="fa-solid fa-fingerprint"></i>
                     </div>
                     <h4 class="text-lg font-bold text-white font-display mb-3">Audio Fingerprinting</h4>
@@ -269,7 +269,7 @@
                 </div>
 
                 <!-- Feature 2 -->
-                <div class="bg-brand-card border border-brand-border p-8 rounded-3xl hover:border-brand-pink/50 transition-all">
+                <div class="bg-brand-card border border-brand-border p-8 rounded-3xl hover:border-brand-accent/50 transition-all">
                     <div class="w-12 h-12 rounded-2xl bg-brand-purple/20 text-brand-purple flex items-center justify-center text-xl mb-6">
                         <i class="fa-solid fa-sliders"></i>
                     </div>
@@ -280,7 +280,7 @@
                 </div>
 
                 <!-- Feature 3 -->
-                <div class="bg-brand-card border border-brand-border p-8 rounded-3xl hover:border-brand-pink/50 transition-all">
+                <div class="bg-brand-card border border-brand-border p-8 rounded-3xl hover:border-brand-accent/50 transition-all">
                     <div class="w-12 h-12 rounded-2xl bg-brand-accent/20 text-brand-accent flex items-center justify-center text-xl mb-6">
                         <i class="fa-solid fa-shield-check"></i>
                     </div>
@@ -304,7 +304,7 @@
                 <p class="text-gray-400 text-sm sm:text-base max-w-xl mx-auto mb-8">
                     Start identifying user-generated content and claiming your audio royalties today with Audiory Content ID.
                 </p>
-                <a href="/signup/" class="inline-block px-8 py-4 rounded-xl bg-gradient-to-r from-brand-pink via-brand-600 to-brand-accent font-semibold text-white shadow-lg shadow-brand-pink/25 hover:scale-105 transition-all">
+                <a href="/signup/" class="inline-block px-8 py-4 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple font-semibold text-white shadow-lg shadow-brand-accent/25 hover:scale-105 transition-all">
                     Get Started Free
                 </a>
             </div>
@@ -318,7 +318,7 @@
                 
                 <div class="lg:col-span-2">
                     <div class="flex items-center gap-3 mb-4">
-                        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-pink to-brand-accent flex items-center justify-center text-white text-sm font-bold">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-accent to-brand-purple flex items-center justify-center text-white text-sm font-bold">
                             <i class="fa-solid fa-wave-square"></i>
                         </div>
                         <span class="font-display font-bold text-xl text-white">AUDIORY</span>
@@ -375,7 +375,7 @@
             </div>
         </div>
     </footer>
-  
+
     <!-- ==================== JAVASCRIPT ==================== -->
     <script>
         // Mobile Menu Toggle
