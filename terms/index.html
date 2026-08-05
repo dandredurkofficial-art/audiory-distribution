@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service — Audiory Distribution</title>
+    <meta name="description" content="Read the Terms of Service for Audiory Distribution regarding music distribution, royalty payouts, content rights, and platform usage.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            accent: '#00f2fe',
+                            purple: '#7928ca',
+                            pink: '#ff0080',
+                            dark: '#0a0d14',
+                            card: '#121824',
+                            border: '#1f293d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #07090e;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+        }
+
+        .gradient-border-card {
+            position: relative;
+            background: #121824;
+            border-radius: 1.25rem;
+        }
+
+        .gradient-border-card::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 1.3rem;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(0,242,254,0.3), rgba(121,40,202,0.3), rgba(255,0,128,0.3));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .glow-effect {
+            box-shadow: 0 0 50px -10px rgba(0, 242, 254, 0.15);
+        }
+
+        /* Toast Animation */
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-animate {
+            animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between antialiased selection:bg-brand-accent selection:text-brand-dark">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full px-4 pointer-events-none"></div>
+
+    <!-- Background Ambient Glow -->
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-accent/10 rounded-full blur-[140px] pointer-events-none"></div>
+
+    <!-- ==================== HEADER / NAV ==================== -->
+    <header class="w-full py-6 px-4 sm:px-8 relative z-20 border-b border-brand-border/40">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="/" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20 group-hover:scale-105 transition-transform duration-300">
+                    <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
+                        <i class="fa-solid fa-wave-square text-brand-accent group-hover:rotate-12 transition-transform duration-300"></i>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-display font-bold text-xl tracking-wider text-white">AUDIORY</span>
+                    <span class="text-[8px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">DISTRIBUTION</span>
+                </div>
+            </a>
+
+            <div class="flex items-center gap-4">
+                <a href="/login/" class="text-xs sm:text-sm text-gray-300 hover:text-white font-medium transition-colors">Sign In</a>
+                <a href="/signup/" class="py-2 px-4 rounded-xl bg-brand-accent text-brand-dark text-xs sm:text-sm font-bold hover:opacity-90 transition-opacity">
+                    Get Started
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN TERMS CONTENT ==================== -->
+    <main class="py-12 px-4 sm:px-6 lg:px-8 relative z-10 my-auto">
+        <div class="max-w-4xl mx-auto">
+            
+            <!-- Page Heading -->
+            <div class="text-center mb-10">
+                <span class="px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase bg-brand-accent/10 text-brand-accent border border-brand-accent/20">
+                    Legal Agreement
+                </span>
+                <h1 class="text-3xl sm:text-5xl font-extrabold font-display text-white mt-4 mb-3">Terms of Service</h1>
+                <p class="text-xs sm:text-sm text-gray-400">Effective Date: August 5, 2026</p>
+            </div>
+
+            <!-- Content Card -->
+            <div class="gradient-border-card p-6 sm:p-12 glow-effect space-y-8 text-gray-300 text-sm leading-relaxed">
+
+                <!-- Section 1 -->
+                <section class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-handshake text-brand-accent text-lg"></i>
+                        <h2 class="text-lg sm:text-xl font-bold font-display text-white">1. Agreement to Terms</h2>
+                    </div>
+                    <p class="text-gray-400">
+                        By registering an account with Audiory Distribution ("Audiory," "we," "us," or "our"), accessing our digital platforms, or using our music distribution services, you agree to be bound by these Terms of Service. If you do not agree to these terms, you must discontinue using our services immediately.
+                    </p>
+                </section>
+
+                <hr class="border-brand-border/60">
+
+                <!-- Section 2 -->
+                <section class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-compact-disc text-brand-accent text-lg"></i>
+                        <h2 class="text-lg sm:text-xl font-bold font-display text-white">2. Music Distribution Services</h2>
+                    </div>
+                    <p class="text-gray-400">
+                        Audiory distributes user-submitted audio recordings, artwork, metadata, and video content to third-party Digital Service Providers (DSPs) including Spotify, Apple Music, YouTube, Amazon Music, and social media platforms.
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 text-gray-400 pl-2">
+                        <li>You retain <strong>100% ownership</strong> of your underlying master recordings and copyrights.</li>
+                        <li>You grant Audiory a non-exclusive, worldwide license to host, encode, store, transmit, and monetize your content across our DSP network.</li>
+                        <li>We reserve the right to decline or take down any submission that fails to meet DSP quality guidelines or copyright compliance standards.</li>
+                    </ul>
+                </section>
+
+                <hr class="border-brand-border/60">
+
+                <!-- Section 3 -->
+                <section class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-file-shield text-brand-accent text-lg"></i>
+                        <h2 class="text-lg sm:text-xl font-bold font-display text-white">3. Content Warranties & Copyright Policy</h2>
+                    </div>
+                    <p class="text-gray-400">
+                        By uploading content to Audiory Distribution, you represent and warrant that:
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 text-gray-400 pl-2">
+                        <li>You own or hold all required rights, licenses, and permissions for all audio, samples, lyrics, cover art, and metadata uploaded.</li>
+                        <li>Your content does not infringe upon any third-party intellectual property, trademark, or privacy rights.</li>
+                        <li>You have cleared all uncleared samples, beat leases, guest features, and cover song mechanical licenses.</li>
+                    </ul>
+                    <p class="text-gray-400 mt-2">
+                        <strong>Fraud & Artificial Streaming:</strong> Streams generated through bots, click farms, or artificial manipulation will result in immediate catalog removal, account suspension, and forfeiture of accrued royalties.
+                    </p>
+                </section>
+
+                <hr class="border-brand-border/60">
+
+                <!-- Section 4 -->
+                <section class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-sack-dollar text-brand-accent text-lg"></i>
+                        <h2 class="text-lg sm:text-xl font-bold font-display text-white">4. Royalties & Payouts</h2>
+                    </div>
+                    <p class="text-gray-400">
+                        Audiory accounts for royalties as reported and remitted by DSPs. Payout reports are usually generated 45–90 days following the reporting calendar month depending on DSP settlement cycles.
+                    </p>
+                    <div class="bg-brand-dark p-4 rounded-xl border border-brand-border text-xs space-y-2 text-gray-400">
+                        <p><strong class="text-white">Payout Method:</strong> Withdrawals are processed via PayPal, Direct Bank Transfer (ACH/SWIFT), or supported digital wallets.</p>
+                        <p><strong class="text-white">Minimum Threshold:</strong> The minimum payout request threshold is $20.00 USD.</p>
+                        <p><strong class="text-white">Tax Reporting:</strong> Users are responsible for providing valid tax information (W-9 / W-8BEN) before requesting payouts exceeding legal limits.</p>
+                    </div>
+                </section>
+
+                <hr class="border-brand-border/60">
+
+                <!-- Section 5 -->
+                <section class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-user-gear text-brand-accent text-lg"></i>
+                        <h2 class="text-lg sm:text-xl font-bold font-display text-white">5. Account Management & Termination</h2>
+                    </div>
+                    <p class="text-gray-400">
+                        You are responsible for maintaining the confidentiality of your credentials. You may request account closure and catalog takedown at any time by contacting support. Audiory reserves the right to terminate accounts that violate copyright policies or engage in abusive platform behavior.
+                    </p>
+                </section>
+
+                <hr class="border-brand-border/60">
+
+                <!-- Section 6 -->
+                <section class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-envelope-open-text text-brand-accent text-lg"></i>
+                        <h2 class="text-lg sm:text-xl font-bold font-display text-white">6. Contact & Support</h2>
+                    </div>
+                    <p class="text-gray-400">
+                        If you have questions regarding these Terms of Service or copyright inquiries, reach out to our legal team at:
+                    </p>
+                    <a href="mailto:support@audiory.com" class="inline-flex items-center gap-2 text-brand-accent hover:underline font-semibold">
+                        <i class="fa-solid fa-at"></i> support@audiory.com
+                    </a>
+                </section>
+
+                <!-- Quick Action Button -->
+                <div class="pt-4 text-center">
+                    <button id="acceptTermsBtn" type="button" class="py-3 px-8 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:shadow-lg hover:shadow-brand-accent/25 text-white font-bold text-sm tracking-wide transition-all">
+                        I Understand & Agree
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="py-6 px-4 text-center text-xs text-gray-500 border-t border-brand-border/40 relative z-10">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p>&copy; 2026 Audiory Distribution Inc. All rights reserved.</p>
+            <div class="flex items-center gap-6">
+                <a href="/terms/" class="text-brand-accent underline">Terms of Service</a>
+                <a href="/privacy/" class="hover:text-gray-300 transition-colors">Privacy Policy</a>
+                <a href="/login/" class="hover:text-gray-300 transition-colors">Sign In</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script for Interactive Toast -->
+    <script>
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            const isSuccess = type === 'success';
+            const bgClass = isSuccess ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-red-500/10 border-red-500/30 text-red-400';
+            const iconClass = isSuccess ? 'fa-circle-check' : 'fa-circle-exclamation';
+
+            toast.className = `toast-animate pointer-events-auto p-4 rounded-xl text-xs font-semibold border flex items-center gap-3 backdrop-blur-md shadow-2xl ${bgClass}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} text-base"></i>
+                <span class="flex-1 leading-relaxed">${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-white text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        document.getElementById('acceptTermsBtn').addEventListener('click', () => {
+            showToast("Terms acknowledged. Redirecting to signup...", "success");
+            setTimeout(() => {
+                window.location.href = "/signup/";
+            }, 1200);
+        });
+    </script>
+</body>
+</html>
