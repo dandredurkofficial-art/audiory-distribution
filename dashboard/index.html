@@ -574,13 +574,19 @@
         };
 
         // Render Page Views
-function renderCurrentPage() {
+async function renderCurrentPage() {
     const container = document.getElementById('mainContentView');
     if (!container) return;
 
     if (chartInstance) {
         chartInstance.destroy();
         chartInstance = null;
+    }
+
+    // Temporary loading indicator for async page loads
+    const asyncPages = ['mkt_dsp', 'mkt_builder', 'mkt_playlist', 'mkt_adbox', 'mkt_influencers', 'mkt_luminate', 'ana_meta', 'ana_yt', 'ana_tiktok', 'ana_safe', 'ana_spotify'];
+    if (asyncPages.includes(window.currentPage)) {
+        container.innerHTML = `<div class="py-20 text-center text-xs font-mono text-brand-accent">Loading Firestore Data...</div>`;
     }
 
     switch(window.currentPage) {
@@ -612,22 +618,22 @@ function renderCurrentPage() {
 
         // MARKETING
         case 'mkt_dsp':
-            container.innerHTML = renderDspPitching();
+            container.innerHTML = await renderDspPitching();
             break;
         case 'mkt_builder':
-            container.innerHTML = renderCampaignBuilder();
+            container.innerHTML = await renderCampaignBuilder();
             break;
         case 'mkt_playlist':
-            container.innerHTML = render3rdPartyPlaylisting();
+            container.innerHTML = await render3rdPartyPlaylisting();
             break;
         case 'mkt_adbox':
-            container.innerHTML = renderAudioryAdBox();
+            container.innerHTML = await renderAudioryAdBox();
             break;
         case 'mkt_influencers':
-            container.innerHTML = renderInfluencerCampaigns();
+            container.innerHTML = await renderInfluencerCampaigns();
             break;
         case 'mkt_luminate':
-            container.innerHTML = renderLuminateRegistration();
+            container.innerHTML = await renderLuminateRegistration();
             break;
 
         // ANALYTICS
@@ -636,19 +642,19 @@ function renderCurrentPage() {
             initStreamsChart();
             break;
         case 'ana_meta':
-            container.innerHTML = renderMetaAnalyticsView();
+            container.innerHTML = await renderMetaAnalyticsView();
             break;
         case 'ana_yt':
-            container.innerHTML = renderYouTubeTelemetryView();
+            container.innerHTML = await renderYouTubeTelemetryView();
             break;
         case 'ana_tiktok':
-            container.innerHTML = renderTikTokAnalyticsView();
+            container.innerHTML = await renderTikTokAnalyticsView();
             break;
         case 'ana_safe':
-            container.innerHTML = renderStreamSafeView();
+            container.innerHTML = await renderStreamSafeView();
             break;
         case 'ana_spotify':
-            container.innerHTML = renderDiscoveryModeView();
+            container.innerHTML = await renderDiscoveryModeView();
             break;
 
         // FINANCE & ROYALTIES
@@ -694,287 +700,215 @@ function renderCurrentPage() {
             initDashboardChart();
     }
 }
+
+// Generic Firestore Submission Handler for Marketing Forms
+async function handleMarketingSubmission(event, type) {
+    event.preventDefault();
+    const uid = firebase.auth().currentUser?.uid;
+    if (!uid) return alert('User authentication required.');
+
+    const form = event.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerText;
+
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'Submitting...';
+
+    const formData = new FormData(form);
+    const payload = {
+        type: type,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        status: 'Pending Review'
+    };
+
+    formData.forEach((value, key) => {
+        if (payload[key]) {
+            if (!Array.isArray(payload[key])) payload[key] = [payload[key]];
+            payload[key].push(value);
+        } else {
+            payload[key] = value;
+        }
+    });
+
+    try {
+        await firebase.firestore()
+            .collection('users')
+            .doc(uid)
+            .collection('marketing_requests')
+            .add(payload);
+
+        alert('Request submitted successfully!');
+        form.reset();
+        if (typeof renderCurrentPage === 'function') renderCurrentPage();
+    } catch (err) {
+        console.error('Submission failed:', err);
+        alert('Submission failed: ' + err.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = originalBtnText;
+    }
+}
+
+// Fetch user releases helper
+async function getUserReleasesOptions() {
+    const uid = firebase.auth().currentUser?.uid;
+    if (!uid) return '<option value="" disabled selected>Please log in</option>';
+
+    try {
+        const snap = await firebase.firestore().collection('users').doc(uid).collection('releases').get();
+        if (snap.empty) return '<option value="" disabled selected>No active releases found</option>';
         
-        function renderDspPitching() {
-    const hasReleases = window.userReleases && window.userReleases.length > 0;
+        return snap.docs.map(doc => {
+            const data = doc.data();
+            return `<option value="${doc.id}">${data.title || data.releaseTitle || 'Untitled Release'}</option>`;
+        }).join('');
+    } catch (err) {
+        console.error('Error loading releases:', err);
+        return '<option value="" disabled selected>Error loading catalog</option>';
+    }
+}
+
+// Render active requests history table
+async function renderMarketingHistoryTable(type) {
+    const uid = firebase.auth().currentUser?.uid;
+    if (!uid) return '';
+
+    try {
+        const snap = await firebase.firestore()
+            .collection('users').doc(uid)
+            .collection('marketing_requests')
+            .where('type', '==', type)
+            .orderBy('createdAt', 'desc')
+            .get();
+
+        if (snap.empty) return '';
+
+        return `
+            <div class="p-6 rounded-2xl bg-brand-card border border-brand-border/80 shadow-xl space-y-4 mt-6">
+                <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">Submitted ${type} Requests</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="text-[10px] uppercase font-mono text-gray-400 border-b border-brand-border">
+                            <tr>
+                                <th class="pb-3 font-semibold">Date</th>
+                                <th class="pb-3 font-semibold">Details</th>
+                                <th class="pb-3 font-semibold">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-brand-border/40 text-gray-200">
+                            ${snap.docs.map(doc => {
+                                const d = doc.data();
+                                const dateStr = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleDateString() : 'Just now';
+                                return `
+                                    <tr>
+                                        <td class="py-3 font-mono text-gray-400">${dateStr}</td>
+                                        <td class="py-3 font-medium text-white">${d.releaseId || d.campaignName || d.targetGenre || 'Submission'}</td>
+                                        <td class="py-3"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 text-[10px] font-mono">${d.status}</span></td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    } catch (err) {
+        return '';
+    }
+}
+        
+async function renderDspPitching() {
+    const releaseOptions = await getUserReleasesOptions();
+    const historyTable = await renderMarketingHistoryTable('DSP Pitching');
 
     return `
         <div class="max-w-5xl mx-auto space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
                 <div>
-                    <h1 class="text-2xl font-extrabold font-display text-white">DSP Pitching Portal</h1>
-                    <p class="text-xs text-gray-400 mt-1">Submit direct pitch forms to Spotify, Apple Music, and Amazon editorial teams via Too Lost pipeline.</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-mono font-semibold flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Pitch Deadline Window Open
-                    </span>
+                    <h1 class="text-2xl font-extrabold font-display text-white">DSP Pitching</h1>
+                    <p class="text-xs text-gray-400 mt-1">Direct submission to Spotify, Apple Music, and Amazon Music editorial playlist editors.</p>
                 </div>
             </div>
 
-            <form onsubmit="event.preventDefault(); alert('Editorial Pitch successfully routed to Too Lost API pipeline!');" class="space-y-8 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
-                
-                <!-- 1. TARGET RELEASE & TRACK -->
-                <div class="space-y-4">
-                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">1. Select Target Catalog Item</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="too-lost-form-label">Release Title *</label>
-                            <select id="dspReleaseSelect" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                                ${hasReleases 
-                                    ? window.userReleases.map(r => `<option value="${r.id}">${r.title || r.releaseTitle}</option>`).join('')
-                                    : `<option value="" disabled selected>No active releases found in database</option>`
-                                }
-                            </select>
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Focus Track Title / ISRC *</label>
-                            <input type="text" required placeholder="e.g. Track 1 - Main Single (ISRC: US-XXX-26-00001)" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. TARGET STORES -->
-                <div class="space-y-4 pt-6 border-t border-brand-border">
-                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">2. Target Platforms</h3>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
-                            <input type="checkbox" checked class="accent-brand-accent">
-                            <span class="text-xs text-gray-200 font-medium">Spotify Editorial</span>
-                        </label>
-                        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
-                            <input type="checkbox" checked class="accent-brand-accent">
-                            <span class="text-xs text-gray-200 font-medium">Apple Music</span>
-                        </label>
-                        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
-                            <input type="checkbox" checked class="accent-brand-accent">
-                            <span class="text-xs text-gray-200 font-medium">Amazon Music</span>
-                        </label>
-                        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
-                            <input type="checkbox" class="accent-brand-accent">
-                            <span class="text-xs text-gray-200 font-medium">Deezer Editors</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- 3. SOUND & MOOD METADATA -->
-                <div class="space-y-4 pt-6 border-t border-brand-border">
-                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">3. Editorial Categorization</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="too-lost-form-label">Primary Genre *</label>
-                            <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                                <option value="">Select Genre</option>
-                                <option value="Hip-Hop/Rap">Hip-Hop/Rap</option>
-                                <option value="Pop">Pop</option>
-                                <option value="Afrobeats">Afrobeats</option>
-                                <option value="Electronic/Dance">Electronic/Dance</option>
-                                <option value="R&B">R&B</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Primary Mood *</label>
-                            <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                                <option value="Energetic">Energetic / Hype</option>
-                                <option value="Chill">Chill / Relaxed</option>
-                                <option value="Melancholy">Sad / Melancholy</option>
-                                <option value="Party">Party / Club</option>
-                                <option value="Focus">Focus / Work</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Instrumental vs Vocal</label>
-                            <select class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                                <option value="Vocal">Contains Vocals</option>
-                                <option value="Instrumental">Pure Instrumental</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 4. MARKETING & PROMOTION PLAN -->
-                <div class="space-y-4 pt-6 border-t border-brand-border">
-                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">4. Marketing & Promotion Campaign</h3>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="too-lost-form-label">Ad Spend Allocation ($)</label>
-                            <input type="number" placeholder="e.g. 500" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Key Focus Territories</label>
-                            <input type="text" placeholder="e.g. US, UK, Kenya, Nigeria" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                        </div>
-                    </div>
-
+            <form onsubmit="handleMarketingSubmission(event, 'DSP Pitching')" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="too-lost-form-label">Pitch Description & Editorial Angle *</label>
-                        <p class="text-[10px] text-gray-400 mb-2">Tell curators the story behind the song, press highlights, upcoming music video plans, and social media momentum.</p>
-                        <textarea rows="4" required placeholder="Describe the release story, key radio support, TikTok traction, and playlist placement goals..." class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 focus:outline-none focus:border-brand-accent resize-y"></textarea>
+                        <label class="too-lost-form-label">Select Release *</label>
+                        <select name="releaseId" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                            ${releaseOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="too-lost-form-label">Primary Genre *</label>
+                        <input type="text" name="genre" required placeholder="e.g. Alternative Hip-Hop / Lo-Fi" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
                     </div>
                 </div>
 
-                <!-- SUBMIT BUTTON -->
-                <div class="pt-6 border-t border-brand-border flex items-center justify-between">
-                    <span class="text-[10px] font-mono text-gray-400">Pitches must be submitted at least 14 days before release date.</span>
+                <div>
+                    <label class="too-lost-form-label">Editorial Pitch & Track Story *</label>
+                    <textarea name="pitchNote" rows="4" required placeholder="Detail marketing plan, radio support, high-profile features, and track vibe..." class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 focus:outline-none focus:border-brand-accent resize-y"></textarea>
+                </div>
+
+                <div class="pt-4 border-t border-brand-border flex justify-end">
                     <button type="submit" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/20">
-                        Submit Pitch to Too Lost
+                        Submit Pitch to Editors
                     </button>
                 </div>
             </form>
+            ${historyTable}
         </div>
     `;
 }
 
-function renderCampaignBuilder() {
-    const hasReleases = window.userReleases && window.userReleases.length > 0;
+// CAMPAIGN BUILDER
+async function renderCampaignBuilder() {
+    const releaseOptions = await getUserReleasesOptions();
+    const historyTable = await renderMarketingHistoryTable('Campaign Builder');
 
     return `
         <div class="max-w-5xl mx-auto space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
                 <div>
                     <h1 class="text-2xl font-extrabold font-display text-white">Campaign Builder</h1>
-                    <p class="text-xs text-gray-400 mt-1">Build smart pre-save landing pages, configure pixel tracking, and deploy digital ad campaigns.</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[11px] font-mono font-semibold flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Smart Link Engine Active
-                    </span>
+                    <p class="text-xs text-gray-400 mt-1">Build automated SmartLinks, pre-save campaigns, and landing pages for upcoming releases.</p>
                 </div>
             </div>
 
-            <form onsubmit="event.preventDefault(); alert('Smart Campaign & Landing Page successfully deployed!');" class="space-y-8 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
-                
-                <!-- 1. CAMPAIGN BASICS -->
-                <div class="space-y-4">
-                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">1. Campaign & Release Details</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="too-lost-form-label">Select Target Release *</label>
-                            <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                                ${hasReleases 
-                                    ? window.userReleases.map(r => `<option value="${r.id}">${r.title || r.releaseTitle}</option>`).join('')
-                                    : `<option value="" disabled selected>No active releases found in database</option>`
-                                }
-                            </select>
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Campaign Name *</label>
-                            <input type="text" required placeholder="e.g. Summer Single Pre-Save Launch" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. SMART LINK & PRE-SAVE CONFIG -->
-                <div class="space-y-4 pt-6 border-t border-brand-border">
-                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">2. Smart Link & Pre-Save Landing Page</h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="too-lost-form-label">Custom Slug URL *</label>
-                            <div class="flex items-center bg-brand-dark border border-brand-border rounded-xl overflow-hidden focus-within:border-brand-accent">
-                                <span class="px-3 text-xs text-gray-500 font-mono border-r border-brand-border/60">audiory.link/</span>
-                                <input type="text" required placeholder="my-awesome-single" class="bg-transparent w-full p-3 text-xs text-gray-200 focus:outline-none">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Landing Page Template</label>
-                            <select class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                                <option value="modern_dark">Modern Dark (Cyberpunk / Neon)</option>
-                                <option value="minimal_clean">Minimal Clean (Glassmorphism)</option>
-                                <option value="video_hero">Video Background Hero</option>
-                            </select>
-                        </div>
-                    </div>
-
+            <form onsubmit="handleMarketingSubmission(event, 'Campaign Builder')" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="too-lost-form-label mb-2 block">Enabled Pre-Save Destination Stores</label>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
-                                <input type="checkbox" checked class="accent-brand-accent">
-                                <span class="text-xs text-gray-200 font-medium">Spotify Pre-Save</span>
-                            </label>
-                            <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
-                                <input type="checkbox" checked class="accent-brand-accent">
-                                <span class="text-xs text-gray-200 font-medium">Apple Music Pre-Add</span>
-                            </label>
-                            <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
-                                <input type="checkbox" checked class="accent-brand-accent">
-                                <span class="text-xs text-gray-200 font-medium">Deezer Pre-Save</span>
-                            </label>
-                            <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
-                                <input type="checkbox" checked class="accent-brand-accent">
-                                <span class="text-xs text-gray-200 font-medium">Amazon Music</span>
-                            </label>
-                        </div>
+                        <label class="too-lost-form-label">Campaign Name *</label>
+                        <input type="text" name="campaignName" required placeholder="e.g. Summer Single Pre-Save" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                    </div>
+                    <div>
+                        <label class="too-lost-form-label">Target Release *</label>
+                        <select name="releaseId" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                            ${releaseOptions}
+                        </select>
                     </div>
                 </div>
 
-                <!-- 3. PIXEL & CONVERSION TRACKING -->
-                <div class="space-y-4 pt-6 border-t border-brand-border">
-                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">3. Pixel & Retargeting Integrations</h3>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="too-lost-form-label">Meta Pixel ID (IG/FB)</label>
-                            <input type="text" placeholder="e.g. 123456789012345" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 font-mono">
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">TikTok Pixel ID</label>
-                            <input type="text" placeholder="e.g. C1234567890ABC" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 font-mono">
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Google Ads / GA4 Measurement ID</label>
-                            <input type="text" placeholder="e.g. G-XXXXXX" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 font-mono">
-                        </div>
-                    </div>
+                <div>
+                    <label class="too-lost-form-label">Custom Slug (audiory.link/...) *</label>
+                    <input type="text" name="customSlug" required placeholder="my-awesome-release" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
                 </div>
 
-                <!-- 4. AD SPEND & TARGETING (OPTIONAL) -->
-                <div class="space-y-4 pt-6 border-t border-brand-border">
-                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">4. Automated Social Ad Booster (Optional)</h3>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="too-lost-form-label">Total Campaign Budget ($)</label>
-                            <input type="number" min="0" placeholder="e.g. 250" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Target Audience Region</label>
-                            <select class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                                <option value="global">Global (Top Streaming Markets)</option>
-                                <option value="north_america">North America (US & Canada)</option>
-                                <option value="europe">Europe Tier 1</option>
-                                <option value="latam">Latin America</option>
-                                <option value="africa">Africa (East & West Focus)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Optimization Goal</label>
-                            <select class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                                <option value="conversions">Pre-Save Conversions</option>
-                                <option value="streams">Direct Store Link Clicks</option>
-                                <option value="video_views">Video Ad Views</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SUBMIT BUTTON -->
-                <div class="pt-6 border-t border-brand-border flex items-center justify-between">
-                    <span class="text-[10px] font-mono text-gray-400">Includes free SSL certificate & automated URL redirection on release day.</span>
+                <div class="pt-4 border-t border-brand-border flex justify-end">
                     <button type="submit" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/20">
-                        Launch Campaign & Generate Link
+                        Create SmartLink Campaign
                     </button>
                 </div>
             </form>
+            ${historyTable}
         </div>
     `;
 }
 
-// 1. 3RD PARTY PLAYLISTING
-function render3rdPartyPlaylisting() {
-    const hasReleases = window.userReleases && window.userReleases.length > 0;
+// 3RD PARTY PLAYLISTING
+async function render3rdPartyPlaylisting() {
+    const releaseOptions = await getUserReleasesOptions();
+    const historyTable = await renderMarketingHistoryTable('3rd Party Playlisting');
+
     return `
         <div class="max-w-5xl mx-auto space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
@@ -984,20 +918,17 @@ function render3rdPartyPlaylisting() {
                 </div>
             </div>
 
-            <form onsubmit="event.preventDefault(); alert('Playlisting submission sent to curator network!');" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
+            <form onsubmit="handleMarketingSubmission(event, '3rd Party Playlisting')" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="too-lost-form-label">Select Release / Track *</label>
-                        <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                            ${hasReleases 
-                                ? window.userReleases.map(r => `<option value="${r.id}">${r.title || r.releaseTitle}</option>`).join('')
-                                : `<option value="" disabled selected>No active releases found</option>`
-                            }
+                        <select name="releaseId" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                            ${releaseOptions}
                         </select>
                     </div>
                     <div>
                         <label class="too-lost-form-label">Genre Network *</label>
-                        <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                        <select name="targetGenre" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
                             <option value="hiphop">Hip-Hop & Trap Curators</option>
                             <option value="edm">EDM & Dance Network</option>
                             <option value="pop">Pop & Mainstream Hits</option>
@@ -1008,26 +939,8 @@ function render3rdPartyPlaylisting() {
                 </div>
 
                 <div>
-                    <label class="too-lost-form-label mb-2 block">Target Curator Networks</label>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
-                            <input type="checkbox" checked class="accent-brand-accent">
-                            <span class="text-xs text-gray-200 font-medium">Verified Spotify Curators</span>
-                        </label>
-                        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
-                            <input type="checkbox" checked class="accent-brand-accent">
-                            <span class="text-xs text-gray-200 font-medium">Apple Music Tastemakers</span>
-                        </label>
-                        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
-                            <input type="checkbox" class="accent-brand-accent">
-                            <span class="text-xs text-gray-200 font-medium">YouTube Music Channels</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="too-lost-form-label">Pitch Pitch Note for Curators *</label>
-                    <textarea rows="3" required placeholder="Highlight similar artists, sound style, and key streaming momentum..." class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 focus:outline-none focus:border-brand-accent resize-y"></textarea>
+                    <label class="too-lost-form-label">Curator Pitch Note *</label>
+                    <textarea name="curatorNote" rows="3" required placeholder="Highlight similar artists, sound style, and key streaming momentum..." class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 focus:outline-none focus:border-brand-accent resize-y"></textarea>
                 </div>
 
                 <div class="pt-4 border-t border-brand-border flex justify-end">
@@ -1036,12 +949,15 @@ function render3rdPartyPlaylisting() {
                     </button>
                 </div>
             </form>
+            ${historyTable}
         </div>
     `;
 }
 
-// 2. AUDIORY AD BOX
-function renderAudioryAdBox() {
+// AUDIORY AD BOX
+async function renderAudioryAdBox() {
+    const historyTable = await renderMarketingHistoryTable('Audiory Ad Box');
+
     return `
         <div class="max-w-5xl mx-auto space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
@@ -1051,11 +967,11 @@ function renderAudioryAdBox() {
                 </div>
             </div>
 
-            <form onsubmit="event.preventDefault(); alert('Ad Box campaign submitted for review!');" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
+            <form onsubmit="handleMarketingSubmission(event, 'Audiory Ad Box')" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                         <label class="too-lost-form-label">Ad Network *</label>
-                        <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                        <select name="adNetwork" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
                             <option value="meta">Meta Ads (Instagram Stories/Reels)</option>
                             <option value="tiktok">TikTok In-Feed Ads</option>
                             <option value="youtube">YouTube Audio & Bumper Ads</option>
@@ -1063,11 +979,11 @@ function renderAudioryAdBox() {
                     </div>
                     <div>
                         <label class="too-lost-form-label">Total Budget ($USD) *</label>
-                        <input type="number" min="50" required placeholder="e.g. 200" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                        <input type="number" name="budget" min="50" required placeholder="e.g. 200" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
                     </div>
                     <div>
                         <label class="too-lost-form-label">Campaign Duration</label>
-                        <select class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                        <select name="duration" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
                             <option value="7">7 Days Boost</option>
                             <option value="14">14 Days Run</option>
                             <option value="30">30 Days Ongoing</option>
@@ -1076,13 +992,8 @@ function renderAudioryAdBox() {
                 </div>
 
                 <div>
-                    <label class="too-lost-form-label">Ad Video Asset URL or Upload *</label>
-                    <input type="text" required placeholder="https://drive.google.com/file/d/your-ad-creative-link" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                </div>
-
-                <div>
-                    <label class="too-lost-form-label">Destination Link (SmartLink / Spotify / Apple Music)</label>
-                    <input type="url" placeholder="https://audiory.link/your-track" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                    <label class="too-lost-form-label">Ad Creative Link / URL *</label>
+                    <input type="url" name="assetUrl" required placeholder="https://drive.google.com/file/d/your-ad-creative-link" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
                 </div>
 
                 <div class="pt-4 border-t border-brand-border flex justify-end">
@@ -1091,13 +1002,16 @@ function renderAudioryAdBox() {
                     </button>
                 </div>
             </form>
+            ${historyTable}
         </div>
     `;
 }
 
-// 3. INFLUENCER CAMPAIGNS
-function renderInfluencerCampaigns() {
-    const hasReleases = window.userReleases && window.userReleases.length > 0;
+// INFLUENCER CAMPAIGNS
+async function renderInfluencerCampaigns() {
+    const releaseOptions = await getUserReleasesOptions();
+    const historyTable = await renderMarketingHistoryTable('Influencer Campaigns');
+
     return `
         <div class="max-w-5xl mx-auto space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
@@ -1107,20 +1021,17 @@ function renderInfluencerCampaigns() {
                 </div>
             </div>
 
-            <form onsubmit="event.preventDefault(); alert('Influencer campaign brief submitted!');" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
+            <form onsubmit="handleMarketingSubmission(event, 'Influencer Campaigns')" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="too-lost-form-label">Target Release / Sound *</label>
-                        <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                            ${hasReleases 
-                                ? window.userReleases.map(r => `<option value="${r.id}">${r.title || r.releaseTitle}</option>`).join('')
-                                : `<option value="" disabled selected>No active releases found</option>`
-                            }
+                        <select name="releaseId" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                            ${releaseOptions}
                         </select>
                     </div>
                     <div>
                         <label class="too-lost-form-label">Platform Tier *</label>
-                        <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                        <select name="platformTier" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
                             <option value="tiktok_micro">TikTok Micro Creators (10k-50k followers)</option>
                             <option value="tiktok_macro">TikTok Macro Creators (100k+ followers)</option>
                             <option value="reels">Instagram Reels Influencers</option>
@@ -1128,15 +1039,9 @@ function renderInfluencerCampaigns() {
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="too-lost-form-label">Number of Creators Target</label>
-                        <input type="number" min="5" placeholder="e.g. 15" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                    </div>
-                    <div>
-                        <label class="too-lost-form-label">Content Concept / Trend Prompt *</label>
-                        <input type="text" required placeholder="e.g. Dance challenge / Outfit transition / Travel vlog" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                    </div>
+                <div>
+                    <label class="too-lost-form-label">Content Concept / Trend Prompt *</label>
+                    <input type="text" name="concept" required placeholder="e.g. Dance challenge / Outfit transition / Travel vlog" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
                 </div>
 
                 <div class="pt-4 border-t border-brand-border flex justify-end">
@@ -1145,13 +1050,16 @@ function renderInfluencerCampaigns() {
                     </button>
                 </div>
             </form>
+            ${historyTable}
         </div>
     `;
 }
 
-// 4. LUMINATE REGISTRATION
-function renderLuminateRegistration() {
-    const hasReleases = window.userReleases && window.userReleases.length > 0;
+// LUMINATE REGISTRATION
+async function renderLuminateRegistration() {
+    const releaseOptions = await getUserReleasesOptions();
+    const historyTable = await renderMarketingHistoryTable('Luminate Registration');
+
     return `
         <div class="max-w-5xl mx-auto space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
@@ -1161,26 +1069,18 @@ function renderLuminateRegistration() {
                 </div>
             </div>
 
-            <form onsubmit="event.preventDefault(); alert('Luminate registration request submitted!');" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
+            <form onsubmit="handleMarketingSubmission(event, 'Luminate Registration')" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="too-lost-form-label">Select Catalog Release *</label>
-                        <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                            ${hasReleases 
-                                ? window.userReleases.map(r => `<option value="${r.id}">${r.title || r.releaseTitle}</option>`).join('')
-                                : `<option value="" disabled selected>No active releases found</option>`
-                            }
+                        <select name="releaseId" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                            ${releaseOptions}
                         </select>
                     </div>
                     <div>
                         <label class="too-lost-form-label">UPC / EAN Code *</label>
-                        <input type="text" required placeholder="e.g. 889000123456" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 font-mono">
+                        <input type="text" name="upcCode" required placeholder="e.g. 889000123456" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 font-mono">
                     </div>
-                </div>
-
-                <div>
-                    <label class="too-lost-form-label">Primary Artist / Label Entity *</label>
-                    <input type="text" required placeholder="e.g. Juice the Mac / Audiory Records" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
                 </div>
 
                 <div class="pt-4 border-t border-brand-border flex justify-end">
@@ -1189,10 +1089,11 @@ function renderLuminateRegistration() {
                     </button>
                 </div>
             </form>
+            ${historyTable}
         </div>
     `;
 }
-
+        
 // HELPER: Fetch document or collection safely from Firestore
 async function fetchAnalyticsDoc(collectionName, fallbackData = {}) {
     try {
