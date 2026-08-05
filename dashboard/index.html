@@ -465,19 +465,6 @@
             { id: 1, name: '', version: '', language: 'English', artists: [{ name: 'Official Bigi', role: 'Primary' }], writers: [{ name: '', role: 'Writer' }], audioFile: null, coverArtFile: null }
         ];
 
-        // Auth Observer
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                window.userState.uid = user.uid;
-                window.userState.displayName = user.displayName || "Juice the Mac";
-                window.userState.email = user.email || "juicethemacboy@gmail.com";
-                updateUserUI();
-                listenToUserData();
-            } else {
-                signInAnonymously(auth).catch(err => console.error("Auth Exception:", err));
-            }
-        });
-
         window.handleLogout = function() {
             if (confirm("Are you sure you want to log out of Audiory Enterprise?")) {
                 signOut(auth).then(() => {
@@ -497,87 +484,116 @@
             document.getElementById('topUserName').textContent = name;
         }
 
-        // Firestore Realtime Subscription
-        function listenToUserData() {
-            if (!window.userState.uid) return;
+        // REAL-TIME DATA LISTENERS FOR LOGGED-IN USER
+function listenToUserData(user) {
+    if (!user || !user.uid) return;
+    const uid = user.uid;
+    const db = firebase.firestore();
+    const userRef = db.collection('users').doc(uid);
 
-            // Releases Listener
-            const relQuery = query(collection(db, "releases"), where("userId", "==", window.userState.uid));
-            onSnapshot(relQuery, (snapshot) => {
-                window.userReleases = [];
-                snapshot.forEach(doc => {
-                    window.userReleases.push({ id: doc.id, ...doc.data() });
-                });
-                renderCurrentPage();
-            }, (error) => {
-                console.error("Releases snapshot error:", error);
-            });
-
-            // Telemetry Listener
-            const telemQuery = query(collection(db, "telemetry"), where("userId", "==", window.userState.uid));
-            onSnapshot(telemQuery, (snapshot) => {
-                window.userTelemetry = [];
-                snapshot.forEach(doc => {
-                    window.userTelemetry.push({ id: doc.id, ...doc.data() });
-                });
-                if (window.currentPage === 'dashboard' || window.currentPage === 'ana_streams') {
-                    renderCurrentPage();
-                }
-            }, (error) => {
-                console.error("Telemetry snapshot error:", error);
-            });
+    // 1. Listen to Primary User Profile Document
+    userRef.onSnapshot(
+        (doc) => {
+            if (doc.exists) {
+                const userData = doc.data();
+                console.log("User Profile Loaded:", userData);
+                // Update UI header/avatar if applicable
+            }
+        },
+        (error) => {
+            console.error("Telemetry snapshot error:", error);
         }
+    );
 
-        // Navigation Controller
-        window.navigateTo = function(pageId) {
-            window.currentPage = pageId;
-            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-            const activeBtn = document.getElementById(`nav-${pageId}`);
-            if (activeBtn) activeBtn.classList.add('active');
-            
-            const sidebar = document.getElementById('sidebar');
-            const backdrop = document.getElementById('sidebarBackdrop');
-            if (sidebar) sidebar.classList.add('-translate-x-full');
-            if (backdrop) backdrop.classList.add('hidden');
+    // 2. Listen to Releases Subcollection
+    userRef.collection('releases').onSnapshot(
+        (snapshot) => {
+            const releases = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            console.log("Releases Snapshot Updated:", releases);
+            window.userReleasesCache = releases; // Cache for dropdowns
+        },
+        (error) => {
+            console.error("Releases snapshot error:", error);
+        }
+    );
 
+    // 3. Listen to YouTube UGC Telemetry Subcollection
+    userRef.collection('youtube_ugc').doc('summary').onSnapshot(
+        (doc) => {
+            if (doc.exists) {
+                window.youtubeTelemetryCache = doc.data();
+            }
+        },
+        (error) => {
+            console.error("YouTube Telemetry snapshot error:", error);
+        }
+    );
+}
+
+// AUTH STATE OBSERVER SETUP
+firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        console.log("Authenticated as:", user.uid);
+        listenToUserData(user);
+        if (typeof renderCurrentPage === 'function') {
             renderCurrentPage();
-        };
+        }
+    } else {
+        console.log("User signed out");
+        // Redirect to login or reset state
+    }
+});
 
-        window.toggleMobileSidebar = function() {
-            const sidebar = document.getElementById('sidebar');
-            const backdrop = document.getElementById('sidebarBackdrop');
-            sidebar.classList.toggle('-translate-x-full');
-            backdrop.classList.toggle('hidden');
-        };
+// Navigation Controller
+window.navigateTo = function(pageId) {
+    window.currentPage = pageId;
+    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+    const activeBtn = document.getElementById(`nav-${pageId}`);
+    if (activeBtn) activeBtn.classList.add('active');
+            
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (sidebar) sidebar.classList.add('-translate-x-full');
+    if (backdrop) backdrop.classList.add('hidden');
 
-        window.toggleApiModal = function(show) {
-            const modal = document.getElementById('apiConfigModal');
-            if (show) {
-                modal.classList.remove('hidden');
-                document.getElementById('tooLostClientId').value = localStorage.getItem('tl_client_id') || '';
-                document.getElementById('tooLostApiKey').value = localStorage.getItem('tl_api_key') || '';
-            } else {
-                modal.classList.add('hidden');
-            }
-        };
+    renderCurrentPage();
+};
 
-        window.saveApiCredentials = function() {
-            const cid = document.getElementById('tooLostClientId').value;
-            const key = document.getElementById('tooLostApiKey').value;
-            localStorage.setItem('tl_client_id', cid);
-            localStorage.setItem('tl_api_key', key);
-            alert('Too Lost API Credentials Saved Successfully. Ready for production API queries.');
-            toggleApiModal(false);
-        };
+window.toggleMobileSidebar = function() {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    sidebar.classList.toggle('-translate-x-full');
+    backdrop.classList.toggle('hidden');
+};
 
-        window.handleGlobalSearch = function(e) {
-            window.searchFilter = e.target.value.toLowerCase().trim();
-            if (['dashboard', 'cat_releases', 'roy_tracks'].includes(window.currentPage)) {
-                renderCurrentPage();
-            }
-        };
+window.toggleApiModal = function(show) {
+    const modal = document.getElementById('apiConfigModal');
+    if (show) {
+        modal.classList.remove('hidden');
+        document.getElementById('tooLostClientId').value = localStorage.getItem('tl_client_id') || '';
+        document.getElementById('tooLostApiKey').value = localStorage.getItem('tl_api_key') || '';
+    } else {
+        modal.classList.add('hidden');
+    }
+};
 
-        // Render Page Views
+window.saveApiCredentials = function() {
+    const cid = document.getElementById('tooLostClientId').value;
+    const key = document.getElementById('tooLostApiKey').value;
+    localStorage.setItem('tl_client_id', cid);
+    localStorage.setItem('tl_api_key', key);
+    alert('Too Lost API Credentials Saved Successfully. Ready for production API queries.');
+    toggleApiModal(false);
+};
+
+window.handleGlobalSearch = function(e) {
+    window.searchFilter = e.target.value.toLowerCase().trim();
+    if (['dashboard', 'cat_releases', 'roy_tracks'].includes(window.currentPage)) {
+        renderCurrentPage();
+    }
+};
+
+// Render Page Views
 async function renderCurrentPage() {
     const container = document.getElementById('mainContentView');
     if (!container) return;
