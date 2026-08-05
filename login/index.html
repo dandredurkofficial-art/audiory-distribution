@@ -1,33 +1,480 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark scroll-smooth">
 <head>
-  <meta charset="UTF-8">
-  <title>Sign In | Audiory</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — Audiory Distribution</title>
+    <meta name="description" content="Sign in to your Audiory Distribution account to access your music catalog, analytics, and royalty earnings.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            accent: '#00f2fe',
+                            purple: '#7928ca',
+                            pink: '#ff0080',
+                            dark: '#0a0d14',
+                            card: '#121824',
+                            border: '#1f293d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #07090e;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+        }
+
+        .gradient-border-card {
+            position: relative;
+            background: #121824;
+            border-radius: 1.25rem;
+        }
+
+        .gradient-border-card::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 1.3rem;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(0,242,254,0.3), rgba(121,40,202,0.3), rgba(255,0,128,0.3));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .glow-effect {
+            box-shadow: 0 0 50px -10px rgba(0, 242, 254, 0.15);
+        }
+
+        /* Toast Animation */
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-animate {
+            animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
 </head>
-<body class="bg-zinc-950 text-zinc-100 flex items-center justify-center min-h-screen p-4 font-sans">
-  <div class="bg-zinc-900/80 border border-zinc-800/80 rounded-2xl p-8 max-w-sm w-full space-y-6 shadow-2xl backdrop-blur">
-    <div class="text-center">
-      <div class="h-10 w-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black text-white text-lg mx-auto mb-3">A</div>
-      <h1 class="text-xl font-bold text-white">Welcome Back</h1>
-      <p class="text-xs text-zinc-400 mt-1">Sign in to manage your music and royalties</p>
+<body class="flex flex-col justify-between antialiased selection:bg-brand-accent selection:text-brand-dark">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full px-4 pointer-events-none"></div>
+
+    <!-- Background Ambient Glow -->
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-accent/10 rounded-full blur-[140px] pointer-events-none"></div>
+
+    <!-- ==================== HEADER / NAV ==================== -->
+    <header class="w-full py-6 px-4 sm:px-8 relative z-20">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20 group-hover:scale-105 transition-transform duration-300">
+                    <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
+                        <i class="fa-solid fa-wave-square text-brand-accent group-hover:rotate-12 transition-transform duration-300"></i>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-display font-bold text-xl tracking-wider text-white">AUDIORY</span>
+                    <span class="text-[8px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">DISTRIBUTION</span>
+                </div>
+            </a>
+
+            <div class="text-sm text-gray-400">
+                Don't have an account? 
+                <a href="/signup/" class="font-bold text-brand-accent hover:underline ml-1">Create One</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN LOGIN CARD ==================== -->
+    <main class="my-auto py-8 px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="max-w-md mx-auto">
+            
+            <div class="gradient-border-card p-6 sm:p-10 glow-effect">
+                
+                <div class="text-center mb-8">
+                    <h1 class="text-2xl sm:text-3xl font-extrabold font-display text-white mb-2">Welcome Back</h1>
+                    <p class="text-xs sm:text-sm text-gray-400">Sign in to manage your music and earnings</p>
+                </div>
+
+                <!-- Alert Notification Banner -->
+                <div id="alertBox" class="hidden mb-6 p-4 rounded-xl text-xs font-semibold border flex items-start gap-3 transition-all">
+                    <i id="alertIcon" class="fa-solid text-base mt-0.5"></i>
+                    <span id="alertMessage" class="flex-1 leading-relaxed"></span>
+                </div>
+
+                <!-- Google Sign-In Quick Action -->
+                <button type="button" id="googleBtn" class="w-full py-3 px-4 rounded-xl bg-brand-dark border border-brand-border hover:border-gray-500 hover:bg-brand-card text-white text-sm font-semibold flex items-center justify-center gap-3 transition-all group mb-6">
+                    <i class="fa-brands fa-google text-lg text-brand-accent group-hover:scale-110 transition-transform"></i>
+                    <span>Sign in with Google</span>
+                </button>
+
+                <!-- Divider -->
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="flex-1 h-px bg-brand-border"></div>
+                    <span class="text-xs text-gray-500 uppercase font-semibold">Or with email</span>
+                    <div class="flex-1 h-px bg-brand-border"></div>
+                </div>
+
+                <!-- Sign-In Form -->
+                <form id="loginForm" class="space-y-4">
+
+                    <!-- Email Address -->
+                    <div>
+                        <label for="email" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                            Email Address
+                        </label>
+                        <div class="relative">
+                            <i class="fa-solid fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                            <input type="email" id="email" required placeholder="name@domain.com" class="w-full pl-11 pr-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-white text-sm focus:outline-none focus:border-brand-accent transition-colors">
+                        </div>
+                    </div>
+
+                    <!-- Password Input -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="password" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                                Password
+                            </label>
+                            <button type="button" id="openResetModalBtn" class="text-xs text-brand-accent hover:underline">
+                                Forgot password?
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                            <input type="password" id="password" required placeholder="Enter your password" class="w-full pl-11 pr-12 py-3 rounded-xl bg-brand-dark border border-brand-border text-white text-sm focus:outline-none focus:border-brand-accent transition-colors">
+                            <button type="button" id="togglePasswordBtn" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
+                                <i class="fa-solid fa-eye" id="passwordIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Remember Me -->
+                    <div class="flex items-center gap-2 pt-1">
+                        <input type="checkbox" id="rememberMe" class="w-4 h-4 rounded bg-brand-dark border-brand-border text-brand-accent focus:ring-0 cursor-pointer">
+                        <label for="rememberMe" class="text-xs text-gray-400 cursor-pointer select-none">
+                            Keep me logged in
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="submitBtn" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:shadow-lg hover:shadow-brand-accent/25 text-white font-bold text-sm tracking-wide transition-all mt-4 flex items-center justify-center gap-2">
+                        <span id="btnText">Sign In</span>
+                        <i class="fa-solid fa-right-to-bracket text-xs" id="btnIcon"></i>
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ==================== FORGOT PASSWORD MODAL ==================== -->
+    <div id="resetModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="gradient-border-card max-w-sm w-full p-6 relative">
+            <button type="button" id="closeResetModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 rounded-full bg-brand-accent/10 border border-brand-accent/30 text-brand-accent flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-key text-xl"></i>
+                </div>
+                <h3 class="text-lg font-bold font-display text-white">Reset Password</h3>
+                <p class="text-xs text-gray-400 mt-1">Enter your email and we'll send you a password reset link.</p>
+            </div>
+
+            <!-- Modal Inline Alert -->
+            <div id="modalAlert" class="hidden mb-4 p-3 rounded-xl text-xs font-semibold border flex items-center gap-2">
+                <i id="modalAlertIcon" class="fa-solid text-sm"></i>
+                <span id="modalAlertMessage" class="flex-1"></span>
+            </div>
+
+            <form id="resetForm" class="space-y-4">
+                <div>
+                    <label for="resetEmail" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                        Email Address
+                    </label>
+                    <input type="email" id="resetEmail" required placeholder="name@domain.com" class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-white text-sm focus:outline-none focus:border-brand-accent transition-colors">
+                </div>
+
+                <button type="submit" id="sendResetBtn" class="w-full py-3 rounded-xl bg-brand-accent text-brand-dark font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+                    <span id="resetBtnText">Send Reset Link</span>
+                    <i class="fa-solid fa-paper-plane text-xs" id="resetBtnIcon"></i>
+                </button>
+            </form>
+        </div>
     </div>
 
-    <form id="auth-form" class="space-y-4">
-      <div>
-        <label class="text-[11px] font-semibold text-zinc-400 block mb-1">Email Address</label>
-        <input type="email" id="email" required placeholder="artist@label.com" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-indigo-500">
-      </div>
-      <div>
-        <label class="text-[11px] font-semibold text-zinc-400 block mb-1">Password</label>
-        <input type="password" id="password" required placeholder="••••••••" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-indigo-500">
-      </div>
-      <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 font-bold py-3 rounded-lg text-xs text-white transition shadow-lg shadow-indigo-600/20">
-        Sign In to Portal
-      </button>
-    </form>
-    
-    <p class="text-[11px] text-center text-zinc-500">Need an account? <a href="/signup/index.html" class="text-indigo-400 font-semibold hover:underline">Apply for Distribution</a></p>
-  </div>
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="py-6 px-4 text-center text-xs text-gray-500 border-t border-brand-border/40 relative z-10">
+        <p>&copy; 2026 Audiory Distribution Inc. All rights reserved.</p>
+    </footer>
+
+    <!-- ==================== FIREBASE SDK IMPLEMENTATION ==================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            GoogleAuthProvider, 
+            signInWithPopup,
+            sendPasswordResetEmail,
+            setPersistence,
+            browserLocalPersistence,
+            browserSessionPersistence
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc,
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // Replace with your Firebase credentials
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtii4iYkm7ummyi5SHiQMOMUPrOpwhdrk",
+            authDomain: "audiory-distribution.firebaseapp.com",
+            projectId: "audiory-distribution",
+            storageBucket: "audiory-distribution.firebasestorage.app",
+            messagingSenderId: "944053428828",
+            appId: "1:944053428828:web:30277072355728f9c8fc99",
+            measurementId: "G-MXDJH52XX4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // UI DOM Elements
+        const loginForm = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnIcon = document.getElementById('btnIcon');
+        const googleBtn = document.getElementById('googleBtn');
+        const alertBox = document.getElementById('alertBox');
+        const alertIcon = document.getElementById('alertIcon');
+        const alertMessage = document.getElementById('alertMessage');
+        const passwordInput = document.getElementById('password');
+        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+        const passwordIcon = document.getElementById('passwordIcon');
+        
+        // Modal Elements
+        const resetModal = document.getElementById('resetModal');
+        const openResetModalBtn = document.getElementById('openResetModalBtn');
+        const closeResetModalBtn = document.getElementById('closeResetModalBtn');
+        const resetForm = document.getElementById('resetForm');
+        const modalAlert = document.getElementById('modalAlert');
+        const modalAlertIcon = document.getElementById('modalAlertIcon');
+        const modalAlertMessage = document.getElementById('modalAlertMessage');
+
+        // Custom Toast Notification Function
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            const isSuccess = type === 'success';
+            const bgClass = isSuccess ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-red-500/10 border-red-500/30 text-red-400';
+            const iconClass = isSuccess ? 'fa-circle-check' : 'fa-circle-exclamation';
+
+            toast.className = `toast-animate pointer-events-auto p-4 rounded-xl text-xs font-semibold border flex items-center gap-3 backdrop-blur-md shadow-2xl ${bgClass}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} text-base"></i>
+                <span class="flex-1 leading-relaxed">${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-white text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Toggle Password Visibility
+        togglePasswordBtn.addEventListener('click', () => {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.classList.remove('fa-eye');
+                passwordIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.classList.remove('fa-eye-slash');
+                passwordIcon.classList.add('fa-eye');
+            }
+        });
+
+        // Display Alert Banner
+        function showAlert(message, isError = true) {
+            alertBox.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/30', 'text-red-400', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+            
+            if (isError) {
+                alertBox.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-400');
+                alertIcon.className = 'fa-solid fa-circle-exclamation text-base mt-0.5';
+            } else {
+                alertBox.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+                alertIcon.className = 'fa-solid fa-circle-check text-base mt-0.5';
+            }
+            
+            alertMessage.textContent = message;
+        }
+
+        // Set Loading State
+        function setLoading(isLoading) {
+            submitBtn.disabled = isLoading;
+            googleBtn.disabled = isLoading;
+            if (isLoading) {
+                btnText.textContent = "Authenticating...";
+                btnIcon.className = "fa-solid fa-circle-notch fa-spin text-xs";
+            } else {
+                btnText.textContent = "Sign In";
+                btnIcon.className = "fa-solid fa-right-to-bracket text-xs";
+            }
+        }
+
+        // Firestore Update
+        async function updateLastLogin(uid) {
+            try {
+                const userRef = doc(db, "users", uid);
+                await setDoc(userRef, { lastLoginAt: serverTimestamp() }, { merge: true });
+            } catch (err) {
+                console.warn("Could not update last login timestamp:", err);
+            }
+        }
+
+        // Email/Password Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = passwordInput.value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+
+            setLoading(true);
+
+            try {
+                const persistence = rememberMe ? browserLocalPersistence : browserSessionPersistence;
+                await setPersistence(auth, persistence);
+
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                await updateLastLogin(userCredential.user.uid);
+
+                showToast("Welcome back! Redirecting to your dashboard...", "success");
+                
+                setTimeout(() => {
+                    window.location.href = "/dashboard/";
+                }, 1200);
+
+            } catch (error) {
+                console.error("Login Error:", error);
+                let errorMsg = "Failed to sign in. Please check your credentials.";
+                if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    errorMsg = "Invalid email or password address.";
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMsg = "Access temporarily disabled due to many failed attempts.";
+                }
+                showAlert(errorMsg, true);
+                setLoading(false);
+            }
+        });
+
+        // Google Sign-In
+        googleBtn.addEventListener('click', async () => {
+            setLoading(true);
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                await updateLastLogin(result.user.uid);
+
+                showToast("Authenticated with Google! Redirecting...", "success");
+                setTimeout(() => {
+                    window.location.href = "/dashboard/";
+                }, 1200);
+
+            } catch (error) {
+                console.error("Google Auth Error:", error);
+                showAlert("Google authentication was canceled or failed.", true);
+                setLoading(false);
+            }
+        });
+
+        // Password Reset Handlers
+        openResetModalBtn.addEventListener('click', () => {
+            modalAlert.classList.add('hidden');
+            resetModal.classList.remove('hidden');
+        });
+
+        closeResetModalBtn.addEventListener('click', () => {
+            resetModal.classList.add('hidden');
+        });
+
+        resetForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resetEmail = document.getElementById('resetEmail').value.trim();
+            const sendResetBtn = document.getElementById('sendResetBtn');
+            const resetBtnText = document.getElementById('resetBtnText');
+            const resetBtnIcon = document.getElementById('resetBtnIcon');
+
+            sendResetBtn.disabled = true;
+            resetBtnText.textContent = "Sending...";
+            resetBtnIcon.className = "fa-solid fa-circle-notch fa-spin text-xs";
+
+            try {
+                await sendPasswordResetEmail(auth, resetEmail);
+                
+                // Show custom toast notification
+                showToast(`Password reset link sent to ${resetEmail}! Check your inbox.`, "success");
+                
+                resetModal.classList.add('hidden');
+                resetForm.reset();
+            } catch (error) {
+                console.error("Password Reset Error:", error);
+                
+                modalAlert.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+                modalAlert.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-400');
+                modalAlertIcon.className = "fa-solid fa-circle-exclamation text-sm";
+                modalAlertMessage.textContent = "Email not found or invalid format.";
+            } finally {
+                sendResetBtn.disabled = false;
+                resetBtnText.textContent = "Send Reset Link";
+                resetBtnIcon.className = "fa-solid fa-paper-plane text-xs";
+            }
+        });
+    </script>
 </body>
 </html>
