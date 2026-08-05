@@ -753,13 +753,23 @@ async function handleMarketingSubmission(event, type) {
     }
 }
 
-// Fetch user releases helper
+// SAFELY FETCH USER RELEASES
 async function getUserReleasesOptions() {
-    const uid = firebase.auth().currentUser?.uid;
+    if (typeof firebase === 'undefined' || !firebase.apps.length) {
+        console.warn('Firebase SDK not initialized yet.');
+        return '<option value="" disabled selected>Firebase SDK loading...</option>';
+    }
+
+    const uid = firebase.auth()?.currentUser?.uid;
     if (!uid) return '<option value="" disabled selected>Please log in</option>';
 
     try {
-        const snap = await firebase.firestore().collection('users').doc(uid).collection('releases').get();
+        const snap = await firebase.firestore()
+            .collection('users')
+            .doc(uid)
+            .collection('releases')
+            .get();
+
         if (snap.empty) return '<option value="" disabled selected>No active releases found</option>';
         
         return snap.docs.map(doc => {
@@ -772,9 +782,11 @@ async function getUserReleasesOptions() {
     }
 }
 
-// Render active requests history table
+// SAFELY FETCH MARKETING HISTORY
 async function renderMarketingHistoryTable(type) {
-    const uid = firebase.auth().currentUser?.uid;
+    if (typeof firebase === 'undefined' || !firebase.apps.length) return '';
+    
+    const uid = firebase.auth()?.currentUser?.uid;
     if (!uid) return '';
 
     try {
@@ -782,7 +794,6 @@ async function renderMarketingHistoryTable(type) {
             .collection('users').doc(uid)
             .collection('marketing_requests')
             .where('type', '==', type)
-            .orderBy('createdAt', 'desc')
             .get();
 
         if (snap.empty) return '';
@@ -802,7 +813,7 @@ async function renderMarketingHistoryTable(type) {
                         <tbody class="divide-y divide-brand-border/40 text-gray-200">
                             ${snap.docs.map(doc => {
                                 const d = doc.data();
-                                const dateStr = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleDateString() : 'Just now';
+                                const dateStr = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleDateString() : 'Pending';
                                 return `
                                     <tr>
                                         <td class="py-3 font-mono text-gray-400">${dateStr}</td>
@@ -817,6 +828,7 @@ async function renderMarketingHistoryTable(type) {
             </div>
         `;
     } catch (err) {
+        console.error('History fetch error:', err);
         return '';
     }
 }
