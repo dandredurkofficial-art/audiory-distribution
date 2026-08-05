@@ -684,49 +684,131 @@
 
         function renderDspPitching() {
     const hasReleases = window.userReleases && window.userReleases.length > 0;
-    
+
     return `
-        <div class="max-w-3xl mx-auto space-y-6">
-            <div>
-                <h1 class="text-2xl font-bold font-display text-white">DSP Pitching</h1>
-                <p class="text-xs text-gray-400 mt-1">Submit direct pitch forms to Spotify, Apple Music, and Amazon editorial teams.</p>
+        <div class="max-w-5xl mx-auto space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
+                <div>
+                    <h1 class="text-2xl font-extrabold font-display text-white">DSP Pitching Portal</h1>
+                    <p class="text-xs text-gray-400 mt-1">Submit direct pitch forms to Spotify, Apple Music, and Amazon editorial teams via Too Lost pipeline.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-mono font-semibold flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Pitch Deadline Window Open
+                    </span>
+                </div>
             </div>
 
-            <div class="p-6 sm:p-8 rounded-2xl bg-brand-card border border-brand-border/80 shadow-xl space-y-6">
-                <form onsubmit="event.preventDefault(); alert('DSP Pitch submitted to Too Lost Pipeline successfully.');" class="space-y-6">
-                    <div>
-                        <label class="too-lost-form-label uppercase text-[11px] font-mono tracking-wider font-semibold text-gray-300 block mb-2">
-                            Select Active Catalog Item
+            <form onsubmit="event.preventDefault(); alert('Editorial Pitch successfully routed to Too Lost API pipeline!');" class="space-y-8 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
+                
+                <!-- 1. TARGET RELEASE & TRACK -->
+                <div class="space-y-4">
+                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">1. Select Target Catalog Item</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="too-lost-form-label">Release Title *</label>
+                            <select id="dspReleaseSelect" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                                ${hasReleases 
+                                    ? window.userReleases.map(r => `<option value="${r.id}">${r.title || r.releaseTitle}</option>`).join('')
+                                    : `<option value="" disabled selected>No active releases found in database</option>`
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <label class="too-lost-form-label">Focus Track Title / ISRC *</label>
+                            <input type="text" required placeholder="e.g. Track 1 - Main Single (ISRC: US-XXX-26-00001)" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. TARGET STORES -->
+                <div class="space-y-4 pt-6 border-t border-brand-border">
+                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">2. Target Platforms</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
+                            <input type="checkbox" checked class="accent-brand-accent">
+                            <span class="text-xs text-gray-200 font-medium">Spotify Editorial</span>
                         </label>
-                        <select class="too-lost-input w-full bg-brand-dark/90 border border-brand-border rounded-xl p-3 text-xs text-gray-200 focus:outline-none focus:border-brand-accent">
-                            ${hasReleases 
-                                ? window.userReleases.map(r => `<option value="${r.id}">${r.title || r.releaseTitle || 'Untitled Release'}</option>`).join('')
-                                : `<option value="" disabled selected>No releases available in database</option>`
-                            }
-                        </select>
+                        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
+                            <input type="checkbox" checked class="accent-brand-accent">
+                            <span class="text-xs text-gray-200 font-medium">Apple Music</span>
+                        </label>
+                        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
+                            <input type="checkbox" checked class="accent-brand-accent">
+                            <span class="text-xs text-gray-200 font-medium">Amazon Music</span>
+                        </label>
+                        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors">
+                            <input type="checkbox" class="accent-brand-accent">
+                            <span class="text-xs text-gray-200 font-medium">Deezer Editors</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 3. SOUND & MOOD METADATA -->
+                <div class="space-y-4 pt-6 border-t border-brand-border">
+                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">3. Editorial Categorization</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="too-lost-form-label">Primary Genre *</label>
+                            <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                                <option value="">Select Genre</option>
+                                <option value="Hip-Hop/Rap">Hip-Hop/Rap</option>
+                                <option value="Pop">Pop</option>
+                                <option value="Afrobeats">Afrobeats</option>
+                                <option value="Electronic/Dance">Electronic/Dance</option>
+                                <option value="R&B">R&B</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="too-lost-form-label">Primary Mood *</label>
+                            <select required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                                <option value="Energetic">Energetic / Hype</option>
+                                <option value="Chill">Chill / Relaxed</option>
+                                <option value="Melancholy">Sad / Melancholy</option>
+                                <option value="Party">Party / Club</option>
+                                <option value="Focus">Focus / Work</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="too-lost-form-label">Instrumental vs Vocal</label>
+                            <select class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                                <option value="Vocal">Contains Vocals</option>
+                                <option value="Instrumental">Pure Instrumental</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. MARKETING & PROMOTION PLAN -->
+                <div class="space-y-4 pt-6 border-t border-brand-border">
+                    <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">4. Marketing & Promotion Campaign</h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="too-lost-form-label">Ad Spend Allocation ($)</label>
+                            <input type="number" placeholder="e.g. 500" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                        </div>
+                        <div>
+                            <label class="too-lost-form-label">Key Focus Territories</label>
+                            <input type="text" placeholder="e.g. US, UK, Kenya, Nigeria" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
+                        </div>
                     </div>
 
                     <div>
-                        <label class="too-lost-form-label uppercase text-[11px] font-mono tracking-wider font-semibold text-gray-300 block mb-2">
-                            Submission Notes / Specs
-                        </label>
-                        <textarea 
-                            rows="5" 
-                            placeholder="Type instructions..." 
-                            class="too-lost-input w-full bg-brand-dark/90 border border-brand-border rounded-xl p-3 text-xs text-gray-200 focus:outline-none focus:border-brand-accent resize-y"
-                        ></textarea>
+                        <label class="too-lost-form-label">Pitch Description & Editorial Angle *</label>
+                        <p class="text-[10px] text-gray-400 mb-2">Tell curators the story behind the song, press highlights, upcoming music video plans, and social media momentum.</p>
+                        <textarea rows="4" required placeholder="Describe the release story, key radio support, TikTok traction, and playlist placement goals..." class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 focus:outline-none focus:border-brand-accent resize-y"></textarea>
                     </div>
+                </div>
 
-                    <div class="flex justify-end pt-2">
-                        <button 
-                            type="submit" 
-                            class="px-6 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-md shadow-cyan-500/20"
-                        >
-                            Submit to Too Lost Pipeline
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <!-- SUBMIT BUTTON -->
+                <div class="pt-6 border-t border-brand-border flex items-center justify-between">
+                    <span class="text-[10px] font-mono text-gray-400">Pitches must be submitted at least 14 days before release date.</span>
+                    <button type="submit" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/20">
+                        Submit Pitch to Too Lost
+                    </button>
+                </div>
+            </form>
         </div>
     `;
 }
