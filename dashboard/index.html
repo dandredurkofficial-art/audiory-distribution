@@ -767,35 +767,6 @@ async function handleMarketingSubmission(event, type) {
     }
 }
 
-// SAFELY FETCH USER RELEASES
-async function getUserReleasesOptions() {
-    if (typeof firebase === 'undefined' || !firebase.apps.length) {
-        console.warn('Firebase SDK not initialized yet.');
-        return '<option value="" disabled selected>Firebase SDK loading...</option>';
-    }
-
-    const uid = firebase.auth()?.currentUser?.uid;
-    if (!uid) return '<option value="" disabled selected>Please log in</option>';
-
-    try {
-        const snap = await firebase.firestore()
-            .collection('users')
-            .doc(uid)
-            .collection('releases')
-            .get();
-
-        if (snap.empty) return '<option value="" disabled selected>No active releases found</option>';
-        
-        return snap.docs.map(doc => {
-            const data = doc.data();
-            return `<option value="${doc.id}">${data.title || data.releaseTitle || 'Untitled Release'}</option>`;
-        }).join('');
-    } catch (err) {
-        console.error('Error loading releases:', err);
-        return '<option value="" disabled selected>Error loading catalog</option>';
-    }
-}
-
 // Helper to wait until Firebase SDK is fully initialized
 async function ensureFirebaseReady() {
     let attempts = 0;
