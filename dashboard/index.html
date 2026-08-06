@@ -2314,17 +2314,7 @@ async function renderDiscoveryModeView() {
             });
         }
         renderTrackCards();
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // Wait for auth state to be established before rendering initial views
-            firebase.auth().onAuthStateChanged((user) => {
-                if (user) {
-                    renderCurrentPage();
-                } else {
-                    console.warn("User signed out or session expired.");
-                }
-            });
-        });
+        renderCurrentPage();
     </script>
 </body>
 </html>
