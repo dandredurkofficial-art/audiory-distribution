@@ -2037,7 +2037,7 @@ async function renderDiscoveryModeView() {
         };
 
         // 4. Send Metadata Payload to Cloudflare Worker Endpoint
-        const workerRes = await fetch('https://your-worker.your-subdomain.workers.dev/api/releases/submit', {
+        const workerRes = await fetch('https://audiorydistribution.dandredurkofficial.workers.dev/api/releases/submit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
