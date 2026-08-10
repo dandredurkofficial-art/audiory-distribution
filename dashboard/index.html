@@ -147,12 +147,14 @@
 
         // Firebase Client Configuration
         const firebaseConfig = {
-            apiKey: "YOUR_FIREBASE_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyBtii4iYkm7ummyi5SHiQMOMUPrOpwhdrk",
+            authDomain: "audiory-distribution.firebaseapp.com",
+            databaseURL: "https://audiory-distribution-default-rtdb.firebaseio.com",
+            projectId: "audiory-distribution",
+            storageBucket: "audiory-distribution.firebasestorage.app",
+            messagingSenderId: "944053428828",
+            appId: "1:944053428828:web:30277072355728f9c8fc99",
+            measurementId: "G-MXDJH52XX4"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -160,7 +162,7 @@
         const db = getFirestore(app);
 
         // Production Configuration Endpoints
-        const WORKER_BASE_URL = "https://your-worker.your-subdomain.workers.dev";
+        const WORKER_BASE_URL = "https://audiorydistribution.dandredurkofficial.workers.dev";
 
         // Global State Variables
         window.currentUser = null;
@@ -181,11 +183,11 @@
                 switchView('home');
             } else {
                 // Redirect unauthenticated user to login view
-                window.location.href = '/login.html';
+                window.location.href = '/login/';
             }
         });
 
-        window.handleSignOut = () => signOut(auth).then(() => window.location.href = '/login.html');
+        window.handleSignOut = () => signOut(auth).then(() => window.location.href = '/login/');
 
         // Fetch Live Releases from Firestore
         async function loadLiveCatalog() {
