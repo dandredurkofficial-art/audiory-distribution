@@ -1,253 +1,488 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark scroll-smooth">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Artist Portal | Audiory Distribution</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: { 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audiory Enterprise — Music Distribution Platform</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            accent: '#00f2fe',
+                            purple: '#7928ca',
+                            pink: '#ff0080',
+                            dark: '#07090e',
+                            card: '#0f141f',
+                            sidebar: '#0a0d14',
+                            border: '#1b2436',
+                            hover: '#182030'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
         }
-      }
-    }
-  </script>
+    </script>
+    
+    <style>
+        body {
+            background-color: #07090e;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00f2fe 0%, #4f46e5 50%, #ff0080 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0a0d14;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1b2436;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #4f46e5;
+        }
+
+        .modal-blur {
+            backdrop-filter: blur(12px);
+            background-color: rgba(7, 9, 14, 0.85);
+        }
+
+        .nav-link.active {
+            background-color: #182030;
+            color: #00f2fe;
+            border-left: 3px solid #00f2fe;
+        }
+
+        .too-lost-form-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #9ca3af;
+            margin-bottom: 0.25rem;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .too-lost-input {
+            width: 100%;
+            background-color: #07090e;
+            border: 1px solid #1b2436;
+            border-radius: 0.5rem;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.75rem;
+            color: #ffffff;
+            transition: all 0.2s;
+        }
+
+        .too-lost-input:focus {
+            outline: none;
+            border-color: #00f2fe;
+            box-shadow: 0 0 0 1px rgba(0, 242, 254, 0.2);
+        }
+    </style>
 </head>
-<body class="bg-zinc-950 text-zinc-100 min-h-screen flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
+<body class="custom-scrollbar antialiased h-screen flex overflow-hidden">
 
-  <!-- Top Navigation Bar -->
-  <header class="border-b border-zinc-800/80 bg-zinc-900/60 backdrop-blur-md sticky top-0 z-40 px-6 py-3.5 flex justify-between items-center">
-    <div class="flex items-center space-x-6">
-      <a href="/" class="flex items-center space-x-2">
-        <div class="h-7 w-7 bg-brand-600 rounded-lg flex items-center justify-center font-black text-white text-sm tracking-tighter">A</div>
-        <span class="font-extrabold text-lg tracking-wider text-white">AUDIORY</span>
-      </a>
-      <nav class="hidden md:flex space-x-1 text-xs font-semibold text-zinc-400">
-        <a href="#" class="px-3 py-1.5 text-white bg-zinc-800/80 rounded-md">Dashboard</a>
-        <a href="#" class="px-3 py-1.5 hover:text-white transition rounded-md">Catalog</a>
-        <a href="#" class="px-3 py-1.5 hover:text-white transition rounded-md">Analytics</a>
-        <a href="#" class="px-3 py-1.5 hover:text-white transition rounded-md">Royalties & Splits</a>
-      </nav>
-    </div>
-    
-    <div class="flex items-center space-x-4">
-      <button onclick="openReleaseWizard()" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-lg shadow-brand-600/20 flex items-center space-x-2">
-        <i class="fa-solid fa-cloud-arrow-up"></i>
-        <span>Create Release</span>
-      </button>
-      <div class="h-8 w-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-300">
-        DA
-      </div>
-    </div>
-  </header>
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div id="sidebarBackdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden"></div>
 
-  <!-- Dashboard Content -->
-  <main class="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full space-y-8">
-    
-    <!-- Header Banner -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-900 pb-6">
-      <div>
-        <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white">Catalog & Performance</h1>
-        <p class="text-xs md:text-sm text-zinc-400 mt-1">Real-time store delivery status, stream telemetry, and earnings.</p>
-      </div>
-      <div class="flex items-center space-x-2 bg-zinc-900 p-1 border border-zinc-800 rounded-lg text-xs font-medium">
-        <button class="px-3 py-1.5 bg-zinc-800 text-white rounded">Last 30 Days</button>
-        <button class="px-3 py-1.5 text-zinc-400 hover:text-white">Q2 2026</button>
-        <button class="px-3 py-1.5 text-zinc-400 hover:text-white">All Time</button>
-      </div>
-    </div>
-
-    <!-- Analytics Cards Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-5 relative overflow-hidden">
-        <div class="flex justify-between items-start">
-          <span class="text-xs font-medium text-zinc-400">Total Streams</span>
-          <span class="text-emerald-400 text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">+14.2%</span>
-        </div>
-        <p id="metric-streams" class="text-2xl md:text-3xl font-extrabold mt-3 text-white">2,849,120</p>
-        <p class="text-[11px] text-zinc-500 mt-2">Spotify, Apple, TikTok, Amazon</p>
-      </div>
-
-      <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-5 relative overflow-hidden">
-        <div class="flex justify-between items-start">
-          <span class="text-xs font-medium text-zinc-400">Net Balance</span>
-          <span class="text-zinc-400 text-xs">Unpaid</span>
-        </div>
-        <p id="metric-balance" class="text-2xl md:text-3xl font-extrabold mt-3 text-white">$14,892.40</p>
-        <p class="text-[11px] text-zinc-500 mt-2">Next Payout: Aug 15, 2026</p>
-      </div>
-
-      <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-5 relative overflow-hidden">
-        <div class="flex justify-between items-start">
-          <span class="text-xs font-medium text-zinc-400">Active Releases</span>
-          <i class="fa-solid fa-compact-disc text-zinc-600"></i>
-        </div>
-        <p id="metric-catalog" class="text-2xl md:text-3xl font-extrabold mt-3 text-white">18</p>
-        <p class="text-[11px] text-zinc-500 mt-2">16 Live | 2 Pending Inspection</p>
-      </div>
-
-      <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-5 relative overflow-hidden">
-        <div class="flex justify-between items-start">
-          <span class="text-xs font-medium text-zinc-400">Active Split Contracts</span>
-          <i class="fa-solid fa-file-contract text-zinc-600"></i>
-        </div>
-        <p class="text-2xl md:text-3xl font-extrabold mt-3 text-white">6</p>
-        <p class="text-[11px] text-zinc-500 mt-2">Auto-routed to collaborators</p>
-      </div>
-    </div>
-
-    <!-- Catalog Table Section -->
-    <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-xl overflow-hidden">
-      <div class="p-5 border-b border-zinc-800/80 flex justify-between items-center">
-        <h3 class="font-bold text-sm text-white">Recent Releases</h3>
-        <div class="flex items-center space-x-3">
-          <input type="text" placeholder="Search Title, ISRC, UPC..." class="bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-brand-500 w-48 md:w-64">
-        </div>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs text-zinc-300">
-          <thead class="bg-zinc-900/80 text-zinc-400 font-semibold border-b border-zinc-800">
-            <tr>
-              <th class="p-4">Release Title</th>
-              <th class="p-4">Primary Artist</th>
-              <th class="p-4">UPC</th>
-              <th class="p-4">Release Date</th>
-              <th class="p-4">Store Delivery</th>
-              <th class="p-4 text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody id="catalog-table-body" class="divide-y divide-zinc-800/60">
-            <tr class="hover:bg-zinc-900/40 transition">
-              <td class="p-4 flex items-center space-x-3">
-                <div class="h-10 w-10 rounded bg-zinc-800 border border-zinc-700 flex-shrink-0 overflow-hidden">
-                  <div class="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-[10px]">COVER</div>
+    <!-- API Keys Modal -->
+    <div id="apiConfigModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-blur hidden">
+        <div class="bg-brand-card border border-brand-border rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-brand-border pb-3">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-key text-brand-accent"></i>
+                    <h3 class="font-bold text-sm text-white">Too Lost API Configuration</h3>
+                </div>
+                <button onclick="toggleApiModal(false)" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-gray-400">Enter your official Too Lost Developer API credentials below to synchronize catalog distribution automatically.</p>
+            <div class="space-y-3">
+                <div>
+                    <label class="too-lost-form-label">Client ID / App ID</label>
+                    <input type="text" id="tooLostClientId" placeholder="tl_client_..." class="too-lost-input font-mono">
                 </div>
                 <div>
-                  <p class="font-bold text-white text-sm">Midnight Resonance</p>
-                  <p class="text-[10px] text-zinc-500">Single • 1 Track</p>
+                    <label class="too-lost-form-label">Bearer Token / API Secret Key</label>
+                    <input type="password" id="tooLostApiKey" placeholder="tl_sec_..." class="too-lost-input font-mono">
                 </div>
-              </td>
-              <td class="p-4 font-medium">Dan Durk</td>
-              <td class="p-4 font-mono text-zinc-400 text-[11px]">889240192341</td>
-              <td class="p-4 text-zinc-400">Aug 20, 2026</td>
-              <td class="p-4">
-                <span class="inline-flex items-center space-x-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full text-[10px] font-semibold">
-                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-                  <span>Delivered to 150+ Stores</span>
-                </span>
-              </td>
-              <td class="p-4 text-right">
-                <button class="text-zinc-400 hover:text-white px-2 py-1"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                <div>
+                    <label class="too-lost-form-label">API Base Endpoint</label>
+                    <input type="text" id="tooLostApiBase" value="https://api.toolost.com/v1" class="too-lost-input font-mono">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2 border-t border-brand-border">
+                <button onclick="toggleApiModal(false)" class="px-4 py-2 rounded-lg bg-brand-dark border border-brand-border text-xs text-gray-300">Cancel</button>
+                <button onclick="saveApiCredentials()" class="px-4 py-2 rounded-lg bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">Save Configuration</button>
+            </div>
+        </div>
     </div>
-  </main>
 
-  <!-- Production Release Submission Wizard (Modal) -->
-  <div id="release-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl space-y-0">
-      
-      <!-- Modal Header -->
-      <div class="p-6 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
-        <div>
-          <h3 class="text-lg font-bold text-white">Create New Release</h3>
-          <p class="text-xs text-zinc-400">Step <span id="wizard-step-num">1</span> of 4: Metadata & Artwork</p>
+    <!-- ==================== LEFT NAVIGATION SIDEBAR ==================== -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 w-72 bg-brand-sidebar border-r border-brand-border flex flex-col justify-between shrink-0 transition-transform duration-300 z-50 -translate-x-full lg:translate-x-0">
+        <div class="flex flex-col h-full overflow-y-auto custom-scrollbar">
+            
+            <!-- Logo Header -->
+            <div class="h-20 flex items-center justify-between px-6 border-b border-brand-border/60 shrink-0">
+                <a href="#" onclick="navigateTo('dashboard')" class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20">
+                        <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
+                            <i class="fa-solid fa-wave-square text-brand-accent"></i>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-display font-bold text-xl tracking-wider text-white">AUDIORY</span>
+                        <span class="text-[8px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">DISTRIBUTION HUB</span>
+                    </div>
+                </a>
+                <button onclick="toggleMobileSidebar()" class="lg:hidden text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Profile Widget -->
+            <div class="p-4 mx-4 my-4 rounded-xl bg-brand-card/70 border border-brand-border/80 flex items-center gap-3">
+                <div id="userAvatar" class="w-10 h-10 rounded-lg bg-gradient-to-tr from-brand-accent to-brand-purple flex items-center justify-center text-white font-bold font-display text-sm shrink-0">
+                    --
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p id="userName" class="text-xs font-bold text-white truncate">Authenticating...</p>
+                    <p id="userEmail" class="text-[10px] text-gray-400 font-mono truncate">----</p>
+                </div>
+                <button onclick="handleLogout()" title="Logout" class="text-gray-400 hover:text-red-400 transition-colors p-1.5 rounded-lg bg-brand-dark border border-brand-border">
+                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Sidebar Navigation Links -->
+            <nav class="px-3 space-y-6 flex-1 pb-6 text-xs">
+                <div>
+                    <button onclick="navigateTo('dashboard')" id="nav-dashboard" class="nav-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold text-gray-300 hover:text-white hover:bg-brand-hover transition-all active">
+                        <i class="fa-solid fa-chart-pie text-brand-accent w-4"></i>
+                        <span>Dashboard Home</span>
+                    </button>
+                </div>
+
+                <!-- Marketing section -->
+                <div>
+                    <div class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Marketing</div>
+                    <div class="space-y-1">
+                        <button onclick="navigateTo('mkt_dsp')" id="nav-mkt_dsp" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-bullhorn w-4"></i>
+                            <span>DSP Pitching</span>
+                        </button>
+                        <button onclick="navigateTo('mkt_builder')" id="nav-mkt_builder" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-layer-group w-4"></i>
+                            <span>Campaign Builder</span>
+                        </button>
+                        <button onclick="navigateTo('mkt_playlist')" id="nav-mkt_playlist" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-list-check w-4"></i>
+                            <span>3rd Party Playlisting</span>
+                        </button>
+                        <button onclick="navigateTo('mkt_adbox')" id="nav-mkt_adbox" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-rectangle-ad w-4"></i>
+                            <span>Audiory Ad Box</span>
+                        </button>
+                        <button onclick="navigateTo('mkt_influencers')" id="nav-mkt_influencers" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-people-group w-4"></i>
+                            <span>Influencer Campaigns</span>
+                        </button>
+                        <button onclick="navigateTo('mkt_luminate')" id="nav-mkt_luminate" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-solid fa-chart-simple w-4"></i>
+                            <span>Luminate Registration</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Analytics -->
+                <div>
+                    <div class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Analytics</div>
+                    <div class="space-y-1">
+                        <button onclick="navigateTo('ana_meta')" id="nav-ana_meta" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-brands fa-instagram w-4"></i>
+                            <span>Meta Analytics</span>
+                        </button>
+                        <button onclick="navigateTo('ana_yt')" id="nav-ana_yt" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
+                            <i class="fa-brands fa-youtube w-4"></i>
+                            <span>YouTube Telemetry</span>
+                        </button>
+                    </div>
+                </div>
+            </nav>
         </div>
-        <button onclick="closeReleaseWizard()" class="text-zinc-500 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-      </div>
 
-      <!-- Step 1: Metadata Form -->
-      <div id="wizard-step-1" class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="text-xs font-semibold text-zinc-300 block mb-1">Release Title</label>
-            <input type="text" id="wiz-title" placeholder="e.g. Neon Horizon" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-brand-500">
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-zinc-300 block mb-1">Version / Subtitle</label>
-            <input type="text" id="wiz-version" placeholder="e.g. Deluxe Edition / Extended Mix" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-brand-500">
-          </div>
+        <div class="p-4 border-t border-brand-border bg-brand-dark/50 flex items-center justify-between text-[11px] text-gray-500 font-mono shrink-0">
+            <span class="flex items-center gap-2">
+                <span id="dbStatusDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span id="dbStatusText">Cloudflare Hosted</span>
+            </span>
+            <button onclick="toggleApiModal(true)" class="hover:text-brand-accent transition-colors">
+                <i class="fa-solid fa-gear"></i> Keys
+            </button>
         </div>
+    </aside>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="text-xs font-semibold text-zinc-300 block mb-1">Primary Genre</label>
-            <select id="wiz-genre" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-brand-500">
-              <option value="hiphop">Hip Hop / Rap</option>
-              <option value="electronic">Electronic / Dance</option>
-              <option value="pop">Pop</option>
-              <option value="afrobeats">Afrobeats</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-zinc-300 block mb-1">Target Release Date</label>
-            <input type="date" id="wiz-date" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-brand-500">
-          </div>
-        </div>
+    <!-- ==================== MAIN CONTENT AREA ==================== -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <header class="h-20 bg-brand-sidebar border-b border-brand-border px-4 lg:px-8 flex items-center justify-between shrink-0 z-20">
+            <div class="flex items-center gap-3 flex-1">
+                <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 text-gray-400 hover:text-white rounded-lg border border-brand-border bg-brand-dark">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <div class="relative w-full max-w-md hidden sm:block">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                    <input type="text" id="globalSearchInput" onkeyup="handleGlobalSearch(event)" placeholder="Search catalog, UPCs, ISRCs, or artists..." class="w-full bg-brand-dark border border-brand-border rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition-colors">
+                </div>
+            </div>
 
-        <div>
-          <label class="text-xs font-semibold text-zinc-300 block mb-1">Cover Artwork (3000x3000px RGB)</label>
-          <div class="border-2 border-dashed border-zinc-800 rounded-xl p-6 text-center hover:border-brand-500 transition cursor-pointer bg-zinc-950">
-            <i class="fa-solid fa-image text-2xl text-zinc-600 mb-2"></i>
-            <p class="text-xs font-medium text-zinc-300">Drag artwork file here or click to browse</p>
-            <p class="text-[10px] text-zinc-500 mt-1">PNG or JPEG format required</p>
-          </div>
-        </div>
-      </div>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 pl-1">
+                    <div id="topAvatar" class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-purple to-brand-pink flex items-center justify-center font-bold text-xs text-white shadow-md shrink-0">
+                        --
+                    </div>
+                    <div class="hidden md:flex flex-col text-left">
+                        <span id="topUserName" class="text-xs font-bold text-white truncate">----</span>
+                        <span class="text-[10px] text-emerald-400 font-mono">Verified Label Portal</span>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-      <!-- Modal Actions -->
-      <div class="p-4 border-t border-zinc-800 bg-zinc-950/60 flex justify-between items-center">
-        <button onclick="closeReleaseWizard()" class="text-xs font-semibold text-zinc-400 hover:text-white px-4 py-2">Cancel</button>
-        <button onclick="submitReleaseWizard()" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition shadow-lg shadow-brand-600/20">
-          Validate & Submit to Stores
-        </button>
-      </div>
-
+        <main class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 space-y-6 bg-brand-dark" id="mainContentView">
+            <!-- Content view injected dynamically -->
+        </main>
     </div>
-  </div>
 
-  <script type="module">
-    import { distributionApi } from '../src/services/distributionApi.js';
+    <!-- ==================== LOGIC & MODULAR FIRESTORE INTEGRATION ==================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged,
+            signInAnonymously,
+            signOut 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc,
+            collection, 
+            query, 
+            where, 
+            onSnapshot, 
+            addDoc, 
+            getDoc,
+            getDocs,
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    window.openReleaseWizard = () => document.getElementById('release-modal').classList.remove('hidden');
-    window.closeReleaseWizard = () => document.getElementById('release-modal').classList.add('hidden');
+        // Firebase Config
+        const firebaseConfig = {
+           apiKey: "AIzaSyBtii4iYkm7ummyi5SHiQMOMUPrOpwhdrk",
+           authDomain: "audiory-distribution.firebaseapp.com",
+           databaseURL: "https://audiory-distribution-default-rtdb.firebaseio.com",
+           projectId: "audiory-distribution",
+           storageBucket: "audiory-distribution.firebasestorage.app",
+           messagingSenderId: "944053428828",
+           appId: "1:944053428828:web:30277072355728f9c8fc99",
+           measurementId: "G-MXDJH52XX4"
+        };
 
-    window.submitReleaseWizard = async () => {
-      const title = document.getElementById('wiz-title').value;
-      const genre = document.getElementById('wiz-genre').value;
-      const releaseDate = document.getElementById('wiz-date').value;
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-      if (!title || !releaseDate) {
-        alert("Please complete all required fields.");
-        return;
-      }
+        // Global State
+        window.userState = { uid: null, displayName: 'Juice the Mac', email: 'juicethemacboy@gmail.com' };
+        window.currentPage = 'dashboard';
 
-      try {
-        await distributionApi.submitRelease({
-          title,
-          genre,
-          releaseDate,
-          artists: ["Dan Durk"],
-          tracks: [],
-          splits: []
+        window.handleLogout = function() {
+            if (confirm("Log out of Audiory Enterprise?")) {
+                signOut(auth).then(() => window.location.reload());
+            }
+        };
+
+        function updateUserUI() {
+            const name = window.userState.displayName;
+            const initials = name.substring(0, 2).toUpperCase();
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userEmail').textContent = window.userState.email;
+            document.getElementById('userAvatar').textContent = initials;
+            document.getElementById('topAvatar').textContent = initials;
+            document.getElementById('topUserName').textContent = name;
+        }
+
+        // Modular Real-time Data Listeners
+        function listenToUserData(user) {
+            if (!user || !user.uid) return;
+            const uid = user.uid;
+            
+            const userDocRef = doc(db, 'users', uid);
+            onSnapshot(userDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    console.log("Profile Data Loaded:", docSnap.data());
+                }
+            });
+
+            const releasesRef = collection(db, 'users', uid, 'releases');
+            onSnapshot(releasesRef, (snapshot) => {
+                window.userReleasesCache = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            });
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.userState.uid = user.uid;
+                window.userState.displayName = user.displayName || "Juice the Mac";
+                window.userState.email = user.email || "juicethemacboy@gmail.com";
+                updateUserUI();
+                listenToUserData(user);
+            } else {
+                signInAnonymously(auth).catch(err => console.error("Auth Error:", err));
+            }
         });
-        closeReleaseWizard();
-        alert("Release submitted successfully for QC inspection.");
-      } catch (err) {
-        console.error(err);
-        alert(err.message || "Failed to submit release");
-      }
-    };
-  </script>
+
+        window.navigateTo = function(pageId) {
+            window.currentPage = pageId;
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            const activeBtn = document.getElementById(`nav-${pageId}`);
+            if (activeBtn) activeBtn.classList.add('active');
+            renderCurrentPage();
+        };
+
+        window.toggleMobileSidebar = function() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            sidebar.classList.toggle('-translate-x-full');
+            backdrop.classList.toggle('hidden');
+        };
+
+        window.toggleApiModal = function(show) {
+            const modal = document.getElementById('apiConfigModal');
+            if (show) modal.classList.remove('hidden');
+            else modal.classList.add('hidden');
+        };
+
+        window.saveApiCredentials = function() {
+            localStorage.setItem('tl_client_id', document.getElementById('tooLostClientId').value);
+            localStorage.setItem('tl_api_key', document.getElementById('tooLostApiKey').value);
+            alert('Too Lost API Credentials Saved.');
+            toggleApiModal(false);
+        };
+
+        // Form Submission Handler
+        window.handleMarketingSubmission = async function(event, type) {
+            event.preventDefault();
+            const currentUser = auth.currentUser;
+            if (!currentUser) return alert('User authentication required.');
+
+            const form = event.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerText;
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Submitting...';
+
+            const formData = new FormData(form);
+            const payload = {
+                type: type,
+                createdAt: serverTimestamp(),
+                status: 'Pending Review'
+            };
+
+            formData.forEach((value, key) => { payload[key] = value; });
+
+            try {
+                const subColRef = collection(db, 'users', currentUser.uid, 'marketing_requests');
+                await addDoc(subColRef, payload);
+                alert('Request submitted successfully!');
+                form.reset();
+                renderCurrentPage();
+            } catch (err) {
+                console.error('Submission failed:', err);
+                alert('Submission failed: ' + err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalBtnText;
+            }
+        };
+
+        async function getUserReleasesOptions() {
+            const uid = auth.currentUser?.uid;
+            if (!uid) return '<option value="" disabled selected>Please log in</option>';
+
+            try {
+                const snap = await getDocs(collection(db, 'users', uid, 'releases'));
+                if (snap.empty) return '<option value="" disabled selected>No active releases found</option>';
+                return snap.docs.map(doc => `<option value="${doc.id}">${doc.data().title || 'Untitled Release'}</option>`).join('');
+            } catch (err) {
+                return '<option value="" disabled selected>Error loading catalog</option>';
+            }
+        }
+
+        async function renderCurrentPage() {
+            const container = document.getElementById('mainContentView');
+            if (!container) return;
+
+            if (window.currentPage === 'mkt_dsp') {
+                const releaseOptions = await getUserReleasesOptions();
+                container.innerHTML = `
+                    <div class="max-w-4xl mx-auto space-y-6">
+                        <h1 class="text-2xl font-bold text-white">DSP Pitching</h1>
+                        <form onsubmit="handleMarketingSubmission(event, 'DSP Pitching')" class="space-y-4 bg-brand-card p-6 rounded-2xl border border-brand-border">
+                            <div>
+                                <label class="too-lost-form-label">Select Release</label>
+                                <select name="releaseId" required class="too-lost-input">${releaseOptions}</select>
+                            </div>
+                            <div>
+                                <label class="too-lost-form-label">Pitch Story</label>
+                                <textarea name="pitchNote" rows="4" required class="too-lost-input"></textarea>
+                            </div>
+                            <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs">Submit Pitch</button>
+                        </form>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `<div class="p-6 text-white"><h1 class="text-xl font-bold">Dashboard Overview</h1><p class="text-xs text-gray-400 mt-2">Platform connected to Cloudflare Pages.</p></div>`;
+            }
+        }
+
+        renderCurrentPage();
+    </script>
 </body>
 </html>
