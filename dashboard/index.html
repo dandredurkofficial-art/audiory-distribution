@@ -1,25 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="dark scroll-smooth">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audiory Enterprise — Music Distribution Platform</title>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- FontAwesome 6 Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
+    <title>Audiory Distribution Hub</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -29,1617 +13,307 @@
                 extend: {
                     colors: {
                         brand: {
-                            50: '#f0f3ff',
-                            100: '#e0e7ff',
-                            400: '#818cf8',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            accent: '#00f2fe',
-                            purple: '#7928ca',
-                            pink: '#ff0080',
-                            dark: '#07090e',
-                            card: '#0f141f',
-                            sidebar: '#0a0d14',
-                            border: '#1b2436',
-                            hover: '#182030'
+                            dark: '#0B0F17',
+                            card: '#121824',
+                            border: '#1E293B',
+                            accent: '#00F2FE',
+                            hover: '#1A2333',
+                            text: '#94A3B8'
                         }
-                    },
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                        display: ['"Space Grotesk"', 'sans-serif'],
-                        mono: ['"JetBrains Mono"', 'monospace']
                     }
                 }
             }
         }
     </script>
-    
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            background-color: #07090e;
-            color: #f3f4f6;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        .gradient-text {
-            background: linear-gradient(135deg, #00f2fe 0%, #4f46e5 50%, #ff0080 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #0a0d14;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #1b2436;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #4f46e5;
-        }
-
-        .modal-blur {
-            backdrop-filter: blur(12px);
-            background-color: rgba(7, 9, 14, 0.85);
-        }
-
-        .nav-link.active {
-            background-color: #182030;
-            color: #00f2fe;
-            border-left: 3px solid #00f2fe;
-        }
-
-        .too-lost-form-label {
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: #9ca3af;
-            margin-bottom: 0.25rem;
-            display: block;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .too-lost-input {
-            width: 100%;
-            background-color: #07090e;
-            border: 1px solid #1b2436;
-            border-radius: 0.5rem;
-            padding: 0.6rem 0.8rem;
-            font-size: 0.75rem;
-            color: #ffffff;
-            transition: all 0.2s;
-        }
-
-        .too-lost-input:focus {
-            outline: none;
-            border-color: #00f2fe;
-            box-shadow: 0 0 0 1px rgba(0, 242, 254, 0.2);
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0B0F17; color: #F8FAFC; }
+        .too-lost-input { width: 100%; background-color: #0B0F17; border: 1px solid #1E293B; border-radius: 0.75rem; padding: 0.65rem 1rem; color: #ffffff; font-size: 0.875rem; outline: none; transition: all 0.2s; }
+        .too-lost-input:focus { border-color: #00F2FE; box-shadow: 0 0 0 2px rgba(0, 242, 254, 0.15); }
+        .too-lost-form-label { display: block; font-size: 0.75rem; font-weight: 600; color: #94A3B8; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0B0F17; }
+        ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00F2FE; }
     </style>
 </head>
-<body class="custom-scrollbar antialiased h-screen flex overflow-hidden">
+<body class="min-h-screen flex flex-col bg-brand-dark text-slate-100 overflow-x-hidden">
 
-    <!-- Mobile Sidebar Backdrop Overlay -->
-    <div id="sidebarBackdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden"></div>
-
-    <!-- API Keys Modal -->
-    <div id="apiConfigModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-blur hidden">
-        <div class="bg-brand-card border border-brand-border rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-brand-border pb-3">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-key text-brand-accent"></i>
-                    <h3 class="font-bold text-sm text-white">Too Lost API Configuration</h3>
-                </div>
-                <button onclick="toggleApiModal(false)" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+    <!-- Mobile Header Navigation -->
+    <header class="lg:hidden flex items-center justify-between p-4 bg-brand-card border-b border-brand-border sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-black shadow-lg shadow-cyan-500/20">
+                <i class="fa-solid fa-wave-square text-xs"></i>
             </div>
-            <p class="text-xs text-gray-400">Enter your official Too Lost Developer API credentials below to synchronize catalog distribution automatically.</p>
-            <div class="space-y-3">
-                <div>
-                    <label class="too-lost-form-label">Client ID / App ID</label>
-                    <input type="text" id="tooLostClientId" placeholder="tl_client_..." class="too-lost-input font-mono">
-                </div>
-                <div>
-                    <label class="too-lost-form-label">Bearer Token / API Secret Key</label>
-                    <input type="password" id="tooLostApiKey" placeholder="tl_sec_..." class="too-lost-input font-mono">
-                </div>
-                <div>
-                    <label class="too-lost-form-label">API Base Endpoint</label>
-                    <input type="text" id="tooLostApiBase" value="https://api.toolost.com/v1" class="too-lost-input font-mono">
-                </div>
-            </div>
-            <div class="flex justify-end gap-2 pt-2 border-t border-brand-border">
-                <button onclick="toggleApiModal(false)" class="px-4 py-2 rounded-lg bg-brand-dark border border-brand-border text-xs text-gray-300">Cancel</button>
-                <button onclick="saveApiCredentials()" class="px-4 py-2 rounded-lg bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">Save Configuration</button>
-            </div>
+            <span class="font-bold tracking-wider text-sm font-display text-white">AUDIORY</span>
         </div>
-    </div>
-
-    <!-- ==================== LEFT NAVIGATION SIDEBAR ==================== -->
-    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 w-72 bg-brand-sidebar border-r border-brand-border flex flex-col justify-between shrink-0 transition-transform duration-300 z-50 -translate-x-full lg:translate-x-0">
-        <div class="flex flex-col h-full overflow-y-auto custom-scrollbar">
-            
-            <!-- Logo Header -->
-            <div class="h-20 flex items-center justify-between px-6 border-b border-brand-border/60 shrink-0">
-                <a href="#" onclick="navigateTo('dashboard')" class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-accent via-brand-600 to-brand-pink p-0.5 shadow-lg shadow-brand-accent/20">
-                        <div class="w-full h-full bg-brand-dark rounded-[10px] flex items-center justify-center">
-                            <i class="fa-solid fa-wave-square text-brand-accent"></i>
-                        </div>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="font-display font-bold text-xl tracking-wider text-white">AUDIORY</span>
-                        <span class="text-[8px] tracking-[0.25em] text-brand-accent uppercase font-semibold -mt-1">DISTRIBUTION HUB</span>
-                    </div>
-                </a>
-                <button onclick="toggleMobileSidebar()" class="lg:hidden text-gray-400 hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <!-- Profile Widget -->
-            <div class="p-4 mx-4 my-4 rounded-xl bg-brand-card/70 border border-brand-border/80 flex items-center gap-3">
-                <div id="userAvatar" class="w-10 h-10 rounded-lg bg-gradient-to-tr from-brand-accent to-brand-purple flex items-center justify-center text-white font-bold font-display text-sm shrink-0">
-                    --
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p id="userName" class="text-xs font-bold text-white truncate">Authenticating...</p>
-                    <p id="userEmail" class="text-[10px] text-gray-400 font-mono truncate">----</p>
-                </div>
-                <button onclick="handleLogout()" title="Logout" class="text-gray-400 hover:text-red-400 transition-colors p-1.5 rounded-lg bg-brand-dark border border-brand-border">
-                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
-                </button>
-            </div>
-
-            <!-- Sidebar Navigation Links -->
-            <nav class="px-3 space-y-6 flex-1 pb-6 text-xs">
-                
-                <!-- Main Dashboard -->
-                <div>
-                    <button onclick="navigateTo('dashboard')" id="nav-dashboard" class="nav-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-semibold text-gray-300 hover:text-white hover:bg-brand-hover transition-all active">
-                        <i class="fa-solid fa-chart-pie text-brand-accent w-4"></i>
-                        <span>Dashboard Home</span>
-                    </button>
-                </div>
-
-                <!-- Catalog -->
-                <div>
-                    <div class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Catalog</div>
-                    <div class="space-y-1">
-                        <button onclick="navigateTo('cat_releases')" id="nav-cat_releases" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-compact-disc w-4"></i>
-                            <span>Releases Catalog</span>
-                        </button>
-                        <button onclick="navigateTo('cat_artists')" id="nav-cat_artists" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-users w-4"></i>
-                            <span>Roster & Artists</span>
-                        </button>
-                        <button onclick="navigateTo('cat_create')" id="nav-cat_create" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-brand-accent hover:bg-brand-accent/10 transition-all border border-brand-accent/20 my-1 font-semibold">
-                            <i class="fa-solid fa-circle-plus w-4"></i>
-                            <span>Create New Release</span>
-                        </button>
-                        <button onclick="navigateTo('cat_ringtone')" id="nav-cat_ringtone" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-mobile-retro w-4"></i>
-                            <span>Create Ringtone</span>
-                        </button>
-                        <button onclick="navigateTo('cat_transfer')" id="nav-cat_transfer" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-arrow-right-arrow-left w-4"></i>
-                            <span>Transfer Track</span>
-                        </button>
-                        <button onclick="navigateTo('cat_master')" id="nav-cat_master" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-wand-magic-sparkles w-4"></i>
-                            <span>Master Your Track</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Marketing -->
-                <div>
-                    <div class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Marketing</div>
-                    <div class="space-y-1">
-                        <button onclick="navigateTo('mkt_dsp')" id="nav-mkt_dsp" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-bullhorn w-4"></i>
-                            <span>DSP Pitching</span>
-                        </button>
-                        <button onclick="navigateTo('mkt_builder')" id="nav-mkt_builder" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-layer-group w-4"></i>
-                            <span>Campaign Builder</span>
-                        </button>
-                        <button onclick="navigateTo('mkt_playlist')" id="nav-mkt_playlist" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-list-check w-4"></i>
-                            <span>3rd Party Playlisting</span>
-                        </button>
-                        <button onclick="navigateTo('mkt_adbox')" id="nav-mkt_adbox" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-rectangle-ad w-4"></i>
-                            <span>Audiory Ad Box</span>
-                        </button>
-                        <button onclick="navigateTo('mkt_influencers')" id="nav-mkt_influencers" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-people-group w-4"></i>
-                            <span>Influencer Campaigns</span>
-                        </button>
-                        <button onclick="navigateTo('mkt_luminate')" id="nav-mkt_luminate" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-chart-simple w-4"></i>
-                            <span>Luminate Registration</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Analytics -->
-                <div>
-                    <div class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Analytics</div>
-                    <div class="space-y-1">
-                        <button onclick="navigateTo('ana_streams')" id="nav-ana_streams" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-chart-line w-4"></i>
-                            <span>Streams Overview</span>
-                        </button>
-                        <button onclick="navigateTo('ana_meta')" id="nav-ana_meta" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-brands fa-instagram w-4"></i>
-                            <span>Meta (IG/FB) Analytics</span>
-                        </button>
-                        <button onclick="navigateTo('ana_yt')" id="nav-ana_yt" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-brands fa-youtube w-4"></i>
-                            <span>YouTube UGC Telemetry</span>
-                        </button>
-                        <button onclick="navigateTo('ana_tiktok')" id="nav-ana_tiktok" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-brands fa-tiktok w-4"></i>
-                            <span>TikTok Sound Analytics</span>
-                        </button>
-                        <button onclick="navigateTo('ana_safe')" id="nav-ana_safe" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-shield-heart w-4"></i>
-                            <span>StreamSafe™ Fraud Check</span>
-                        </button>
-                        <button onclick="navigateTo('ana_spotify')" id="nav-ana_spotify" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-brands fa-spotify w-4"></i>
-                            <span>Discovery Mode Insights</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Finance & Royalties -->
-                <div>
-                    <div class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Finance & Royalties</div>
-                    <div class="space-y-1">
-                        <button onclick="navigateTo('roy_summary')" id="nav-roy_summary" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-wallet w-4"></i>
-                            <span>Royalty Summary</span>
-                        </button>
-                        <button onclick="navigateTo('roy_payout')" id="nav-roy_payout" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-money-bill-transfer w-4"></i>
-                            <span>Request Payment</span>
-                        </button>
-                        <button onclick="navigateTo('roy_tracks')" id="nav-roy_tracks" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-sliders w-4"></i>
-                            <span>Track Performance</span>
-                        </button>
-                        <button onclick="navigateTo('spl_collabs')" id="nav-spl_collabs" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-handshake w-4"></i>
-                            <span>SplitShare Collaborators</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Rights Protection -->
-                <div>
-                    <div class="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Rights Protection</div>
-                    <div class="space-y-1">
-                        <button onclick="navigateTo('rgt_yt_allow')" id="nav-rgt_yt_allow" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-brands fa-youtube w-4"></i>
-                            <span>YouTube Allowlist</span>
-                        </button>
-                        <button onclick="navigateTo('rgt_yt_claim')" id="nav-rgt_yt_claim" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-copyright w-4"></i>
-                            <span>YouTube Manual Claim</span>
-                        </button>
-                        <button onclick="navigateTo('rgt_yt_oac')" id="nav-rgt_yt_oac" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-music w-4"></i>
-                            <span>YouTube OAC Request</span>
-                        </button>
-                        <button onclick="navigateTo('rgt_tiktok')" id="nav-rgt_tiktok" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-brands fa-tiktok w-4"></i>
-                            <span>TikTok Manual Claim</span>
-                        </button>
-                        <button onclick="navigateTo('rgt_sc')" id="nav-rgt_sc" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-brands fa-soundcloud w-4"></i>
-                            <span>SoundCloud Allowlist</span>
-                        </button>
-                        <button onclick="navigateTo('rgt_meta')" id="nav-rgt_meta" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-brands fa-meta w-4"></i>
-                            <span>Meta Allowlist</span>
-                        </button>
-                        <button onclick="navigateTo('rgt_cover')" id="nav-rgt_cover" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-brand-hover transition-all">
-                            <i class="fa-solid fa-file-signature w-4"></i>
-                            <span>Cover Song Licensing</span>
-                        </button>
-                    </div>
-                </div>
-
-            </nav>
-        </div>
-
-        <div class="p-4 border-t border-brand-border bg-brand-dark/50 flex items-center justify-between text-[11px] text-gray-500 font-mono shrink-0">
-            <span class="flex items-center gap-2">
-                <span id="dbStatusDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span id="dbStatusText">Too Lost API Ready</span>
-            </span>
-            <button onclick="toggleApiModal(true)" class="hover:text-brand-accent transition-colors">
-                <i class="fa-solid fa-gear"></i> Keys
+        <div class="flex items-center gap-2">
+            <button onclick="switchView('create')" class="px-3 py-1.5 rounded-lg bg-brand-accent text-brand-dark font-bold text-xs flex items-center gap-1.5 shadow-md shadow-cyan-500/10">
+                <i class="fa-solid fa-plus text-[10px]"></i> New Release
+            </button>
+            <button onclick="toggleMobileSidebar()" class="p-2 rounded-lg bg-brand-dark border border-brand-border text-gray-300">
+                <i class="fa-solid fa-bars"></i>
             </button>
         </div>
-    </aside>
+    </header>
 
-    <!-- ==================== MAIN CONTENT AREA ==================== -->
-    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    <div class="flex flex-1 relative">
         
-        <!-- TOP HEADER BAR -->
-        <header class="h-20 bg-brand-sidebar border-b border-brand-border px-4 lg:px-8 flex items-center justify-between shrink-0 z-20">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebarNav" class="fixed lg:static inset-y-0 left-0 z-40 w-64 bg-brand-card border-r border-brand-border flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+            <!-- Brand Logo -->
+            <div class="p-5 border-b border-brand-border flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-black shadow-lg shadow-cyan-500/20">
+                        <i class="fa-solid fa-wave-square text-sm"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-black text-sm tracking-widest text-white">AUDIORY</h1>
+                        <p class="text-[10px] text-brand-accent font-mono uppercase tracking-wider">Distribution Hub</p>
+                    </div>
+                </div>
+                <button onclick="toggleMobileSidebar()" class="lg:hidden text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <!-- User Mini Profile -->
+            <div class="p-4 mx-3 my-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-brand-accent font-bold flex items-center justify-center text-xs border border-cyan-500/30 flex-shrink-0">IK</div>
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-bold text-white truncate">ismael kea</p>
+                        <p class="text-[10px] text-gray-400 truncate">ismaelkea818@gmail.com</p>
+                    </div>
+                </div>
+                <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] flex-shrink-0" title="Connected"></span>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="flex-1 px-3 space-y-1.5 overflow-y-auto py-2">
+                <p class="px-3 pb-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Core Workspace</p>
+                <button onclick="switchView('home')" id="nav_home" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-brand-accent bg-brand-dark border border-brand-border/80 transition-all">
+                    <i class="fa-solid fa-house w-4"></i> Dashboard Home
+                </button>
+                <button onclick="switchView('catalog')" id="nav_catalog" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-brand-dark/50 transition-all">
+                    <i class="fa-solid fa-compact-disc w-4"></i> Releases Catalog
+                </button>
+                <button onclick="switchView('create')" id="nav_create" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-brand-dark/50 transition-all">
+                    <i class="fa-solid fa-circle-plus w-4 text-cyan-400"></i> Create New Release
+                </button>
+                <button onclick="switchView('analytics')" id="nav_analytics" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-brand-dark/50 transition-all">
+                    <i class="fa-solid fa-chart-line w-4"></i> Analytics & Earnings
+                </button>
+                <button onclick="switchView('settings')" id="nav_settings" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-brand-dark/50 transition-all">
+                    <i class="fa-solid fa-sliders w-4"></i> Settings & Payouts
+                </button>
+            </nav>
+
+            <!-- Sidebar Footer Status -->
+            <div class="p-4 border-t border-brand-border bg-brand-card/50 flex items-center justify-between text-[11px] text-gray-400">
+                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> Too Lost API Ready</span>
+                <i class="fa-solid fa-gear text-gray-500 hover:text-white cursor-pointer" onclick="switchView('settings')"></i>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <main class="flex-1 flex flex-col min-w-0 bg-brand-dark">
             
-            <div class="flex items-center gap-3 flex-1">
-                <!-- Mobile Hamburger Button -->
-                <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 text-gray-400 hover:text-white rounded-lg border border-brand-border bg-brand-dark">
-                    <i class="fa-solid fa-bars text-lg"></i>
-                </button>
-
-                <div class="relative w-full max-w-md hidden sm:block">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
-                    <input type="text" id="globalSearchInput" onkeyup="handleGlobalSearch(event)" placeholder="Search catalog, UPCs, ISRCs, or artists..." class="w-full bg-brand-dark border border-brand-border rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-accent transition-colors">
+            <!-- Top Nav Bar (Desktop) -->
+            <header class="hidden lg:flex items-center justify-between px-8 py-4 bg-brand-card border-b border-brand-border">
+                <div class="flex items-center gap-3 max-w-md w-full relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 text-xs text-gray-500"></i>
+                    <input type="text" placeholder="Search catalog, UPCs, ISRCs, or artists..." class="too-lost-input pl-9 py-2 text-xs bg-brand-dark/60">
                 </div>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <button onclick="navigateTo('cat_create')" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-brand-accent to-brand-600 text-brand-dark font-bold text-xs hover:shadow-lg hover:shadow-brand-accent/20 transition-all">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    <span class="hidden sm:inline">New Release</span>
-                </button>
-
-                <div class="h-6 w-px bg-brand-border hidden sm:block"></div>
-
-                <div class="flex items-center gap-3 pl-1">
-                    <div id="topAvatar" class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-purple to-brand-pink flex items-center justify-center font-bold text-xs text-white shadow-md shrink-0">
-                        --
-                    </div>
-                    <div class="hidden md:flex flex-col text-left">
-                        <span id="topUserName" class="text-xs font-bold text-white truncate">----</span>
-                        <span class="text-[10px] text-emerald-400 font-mono">Verified Label Portal</span>
-                    </div>
-                    <button onclick="handleLogout()" title="Sign Out" class="ml-2 text-gray-400 hover:text-red-400 transition-colors p-2 rounded-xl bg-brand-dark border border-brand-border">
-                        <i class="fa-solid fa-power-off text-xs"></i>
+                <div class="flex items-center gap-4">
+                    <button onclick="switchView('create')" class="px-4 py-2 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-all flex items-center gap-2 shadow-lg shadow-cyan-500/10">
+                        <i class="fa-solid fa-plus text-[10px]"></i> New Release
                     </button>
+                    <div class="flex items-center gap-3 pl-4 border-l border-brand-border">
+                        <div class="w-8 h-8 rounded-xl bg-cyan-500/20 text-brand-accent font-bold flex items-center justify-center text-xs border border-cyan-500/30">IS</div>
+                        <div>
+                            <p class="text-xs font-bold text-white">ismael kea</p>
+                            <p class="text-[9px] text-cyan-400 font-mono tracking-wider">Verified Label Portal</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </header>
+            </header>
 
-        <!-- MAIN SCROLLABLE DASHBOARD BODY -->
-        <main class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 space-y-6 bg-brand-dark" id="mainContentView">
-            <!-- Dynamic view injected here by JS -->
+            <!-- Dynamic Viewport Area -->
+            <div id="mainViewport" class="flex-1 p-4 sm:p-8 overflow-y-auto">
+                <!-- Injected dynamically via JS router -->
+            </div>
         </main>
     </div>
 
-    <!-- ==================== LOGIC & FIRESTORE INTEGRATION ==================== -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged,
-            signInAnonymously,
-            signOut 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            collection, 
-            query, 
-            where, 
-            onSnapshot, 
-            addDoc, 
-            serverTimestamp 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        // Firebase Configuration
-        const firebaseConfig = {
-           apiKey: "AIzaSyBtii4iYkm7ummyi5SHiQMOMUPrOpwhdrk",
-           authDomain: "audiory-distribution.firebaseapp.com",
-           databaseURL: "https://audiory-distribution-default-rtdb.firebaseio.com",
-           projectId: "audiory-distribution",
-           storageBucket: "audiory-distribution.firebasestorage.app",
-           messagingSenderId: "944053428828",
-           appId: "1:944053428828:web:30277072355728f9c8fc99",
-           measurementId: "G-MXDJH52XX4"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Global State Management
-        window.userState = { uid: null, displayName: 'Juice the Mac', email: 'juicethemacboy@gmail.com' };
-        window.userReleases = [];
-        window.userTelemetry = [];
-        window.currentPage = 'dashboard';
-        window.searchFilter = '';
-        let chartInstance = null;
-
-        // Form Track Dynamic State
+    <!-- Application Script Logic -->
+    <script>
+        // Global State & Mock DB storage
+        window.userState = { uid: "user_ismael_kea_01" };
+        window.releasesCatalog = [
+            {
+                id: "rel_01",
+                title: "Cybernetic Genesis",
+                artist: "Official Bigi",
+                type: "Single",
+                genre: "Electronic",
+                upc: "198429104821",
+                status: "Live on DSPs",
+                releaseDate: "2026-06-15",
+                coverUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&auto=format&fit=crop&q=80",
+                tracks: [{ name: "Cybernetic Genesis", isrc: "US-AUD-26-10042", audioFileName: "cybernetic_master_final.wav" }]
+            }
+        ];
         window.formTrackList = [
-            { id: 1, name: '', version: '', language: 'English', artists: [{ name: 'Official Bigi', role: 'Primary' }], writers: [{ name: '', role: 'Writer' }], audioFile: null, coverArtFile: null }
+            { id: Date.now(), name: '', version: '', language: 'English', artists: [{ name: 'Official Bigi', role: 'Primary' }], writers: [{ name: '', role: 'Writer' }], audioFileName: null }
         ];
 
-        window.handleLogout = function() {
-            if (confirm("Are you sure you want to log out of Audiory Enterprise?")) {
-                signOut(auth).then(() => {
-                    alert("Logged out successfully.");
-                    window.location.reload();
-                });
+        // Router View Switching
+        function switchView(viewName) {
+            // Update active styles on sidebar
+            ['home', 'catalog', 'create', 'analytics', 'settings'].forEach(v => {
+                const btn = document.getElementById(`nav_${v}`);
+                if (btn) {
+                    if (v === viewName) {
+                        btn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-brand-accent bg-brand-dark border border-brand-border/80 transition-all";
+                    } else {
+                        btn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-brand-dark/50 transition-all";
+                    }
+                }
+            });
+
+            const viewport = document.getElementById('mainViewport');
+            if (viewName === 'home') viewport.innerHTML = renderHomeView();
+            if (viewName === 'catalog') viewport.innerHTML = renderCatalogView();
+            if (viewName === 'create') viewport.innerHTML = renderCreateReleaseView();
+            if (viewName === 'analytics') viewport.innerHTML = renderAnalyticsView();
+            if (viewName === 'settings') viewport.innerHTML = renderSettingsView();
+
+            // Close mobile sidebar if open
+            const sidebar = document.getElementById('sidebarNav');
+            if (!sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.add('-translate-x-full');
             }
-        };
-
-        function updateUserUI() {
-            const name = window.userState.displayName;
-            const initials = name.substring(0, 2).toUpperCase();
-            document.getElementById('userName').textContent = name;
-            document.getElementById('userEmail').textContent = window.userState.email;
-            document.getElementById('userAvatar').textContent = initials;
-            document.getElementById('topAvatar').textContent = initials;
-            document.getElementById('topUserName').textContent = name;
         }
 
-        // REAL-TIME DATA LISTENERS FOR LOGGED-IN USER
-function listenToUserData(user) {
-    if (!user || !user.uid) return;
-    const uid = user.uid;
-    const db = firebase.firestore();
-    const userRef = db.collection('users').doc(uid);
-
-    // 1. Listen to Primary User Profile Document
-    userRef.onSnapshot(
-        (doc) => {
-            if (doc.exists) {
-                const userData = doc.data();
-                console.log("User Profile Loaded:", userData);
-                // Update UI header/avatar if applicable
-            }
-        },
-        (error) => {
-            console.error("Telemetry snapshot error:", error);
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebarNav');
+            sidebar.classList.toggle('-translate-x-full');
         }
-    );
 
-    // 2. Listen to Releases Subcollection
-    userRef.collection('releases').onSnapshot(
-        (snapshot) => {
-            const releases = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            console.log("Releases Snapshot Updated:", releases);
-            window.userReleasesCache = releases; // Cache for dropdowns
-        },
-        (error) => {
-            console.error("Releases snapshot error:", error);
+        // 1. HOME VIEW
+        function renderHomeView() {
+            const totalStreams = window.releasesCatalog.length * 14250;
+            return `
+                <div class="max-w-7xl mx-auto space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
+                        <div>
+                            <h1 class="text-2xl font-bold text-white tracking-tight">Welcome back, <span class="text-brand-accent">ismael kea</span></h1>
+                            <p class="text-xs text-gray-400">Real-time stats and Too Lost distribution pipeline management.</p>
+                        </div>
+                        <button onclick="switchView('create')" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-all flex items-center gap-2 shadow-lg shadow-cyan-500/10 self-start sm:self-auto">
+                            <i class="fa-solid fa-plus text-[10px]"></i> New Release
+                        </button>
+                    </div>
+
+                    <!-- Stat Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-2">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Total Streams</p>
+                            <h3 class="text-2xl font-black text-white font-mono">${totalStreams.toLocaleString()}</h3>
+                            <span class="text-[10px] text-emerald-400 flex items-center gap-1 font-semibold"><i class="fa-solid fa-arrow-trend-up"></i> +12.4% this month</span>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-2">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Available Royalties</p>
+                            <h3 class="text-2xl font-black text-brand-accent font-mono">$1,420.50</h3>
+                            <span class="text-[10px] text-gray-400">Ready for direct payout</span>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-2">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Active Catalog</p>
+                            <h3 class="text-2xl font-black text-white font-mono">${window.releasesCatalog.length}</h3>
+                            <span class="text-[10px] text-cyan-400">Global DSP Delivery</span>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-2">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Too Lost API Connection</p>
+                            <div class="flex items-center gap-2 pt-1">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span class="text-xs font-bold text-emerald-400">Connected & Ready</span>
+                            </div>
+                            <span class="text-[10px] text-gray-400">Encrypted pipeline sync</span>
+                        </div>
+                    </div>
+
+                    <!-- Recent Catalog Feed -->
+                    <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Recent Deliveries</h2>
+                            <button onclick="switchView('catalog')" class="text-xs text-brand-accent hover:underline">View All Catalog</button>
+                        </div>
+                        <div class="divide-y divide-brand-border">
+                            ${window.releasesCatalog.map(rel => `
+                                <div class="py-3 flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <img src="${rel.coverUrl}" class="w-10 h-10 rounded-lg object-cover border border-brand-border">
+                                        <div>
+                                            <p class="text-xs font-bold text-white">${rel.title}</p>
+                                            <p class="text-[10px] text-gray-400">${rel.artist} • UPC: ${rel.upc}</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-cyan-500/10 text-brand-accent border border-cyan-500/20">${rel.status}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
         }
-    );
 
-    // 3. Listen to YouTube UGC Telemetry Subcollection
-    userRef.collection('youtube_ugc').doc('summary').onSnapshot(
-        (doc) => {
-            if (doc.exists) {
-                window.youtubeTelemetryCache = doc.data();
-            }
-        },
-        (error) => {
-            console.error("YouTube Telemetry snapshot error:", error);
-        }
-    );
-}
-
-// Auth Observer
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        window.userState.uid = user.uid;
-        window.userState.displayName = user.displayName || "Juice the Mac";
-        window.userState.email = user.email || "juicethemacboy@gmail.com";
-        updateUserUI();
-        listenToUserData();
-    } else {
-        signInAnonymously(auth).catch(err => console.error("Auth Exception:", err));
-    }
-});
-// Navigation Controller
-window.navigateTo = function(pageId) {
-    window.currentPage = pageId;
-    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-    const activeBtn = document.getElementById(`nav-${pageId}`);
-    if (activeBtn) activeBtn.classList.add('active');
-            
-    const sidebar = document.getElementById('sidebar');
-    const backdrop = document.getElementById('sidebarBackdrop');
-    if (sidebar) sidebar.classList.add('-translate-x-full');
-    if (backdrop) backdrop.classList.add('hidden');
-
-    renderCurrentPage();
-};
-
-window.toggleMobileSidebar = function() {
-    const sidebar = document.getElementById('sidebar');
-    const backdrop = document.getElementById('sidebarBackdrop');
-    sidebar.classList.toggle('-translate-x-full');
-    backdrop.classList.toggle('hidden');
-};
-
-window.toggleApiModal = function(show) {
-    const modal = document.getElementById('apiConfigModal');
-    if (show) {
-        modal.classList.remove('hidden');
-        document.getElementById('tooLostClientId').value = localStorage.getItem('tl_client_id') || '';
-        document.getElementById('tooLostApiKey').value = localStorage.getItem('tl_api_key') || '';
-    } else {
-        modal.classList.add('hidden');
-    }
-};
-
-window.saveApiCredentials = function() {
-    const cid = document.getElementById('tooLostClientId').value;
-    const key = document.getElementById('tooLostApiKey').value;
-    localStorage.setItem('tl_client_id', cid);
-    localStorage.setItem('tl_api_key', key);
-    alert('Too Lost API Credentials Saved Successfully. Ready for production API queries.');
-    toggleApiModal(false);
-};
-
-window.handleGlobalSearch = function(e) {
-    window.searchFilter = e.target.value.toLowerCase().trim();
-    if (['dashboard', 'cat_releases', 'roy_tracks'].includes(window.currentPage)) {
-        renderCurrentPage();
-    }
-};
-
-// Render Page Views
-async function renderCurrentPage() {
-    const container = document.getElementById('mainContentView');
-    if (!container) return;
-
-    if (chartInstance) {
-        chartInstance.destroy();
-        chartInstance = null;
-    }
-
-    // Temporary loading indicator for async page loads
-    const asyncPages = ['mkt_dsp', 'mkt_builder', 'mkt_playlist', 'mkt_adbox', 'mkt_influencers', 'mkt_luminate', 'ana_meta', 'ana_yt', 'ana_tiktok', 'ana_safe', 'ana_spotify'];
-    if (asyncPages.includes(window.currentPage)) {
-        container.innerHTML = `<div class="py-20 text-center text-xs font-mono text-brand-accent">Loading Firestore Data...</div>`;
-    }
-
-    switch(window.currentPage) {
-        // DASHBOARD
-        case 'dashboard':
-            container.innerHTML = renderDashboardView();
-            initDashboardChart();
-            break;
-
-        // CATALOG
-        case 'cat_releases':
-            container.innerHTML = renderReleasesView();
-            break;
-        case 'cat_artists':
-            container.innerHTML = renderArtistsView();
-            break;
-        case 'cat_create':
-            container.innerHTML = renderCreateReleaseView();
-            break;
-        case 'cat_ringtone':
-            container.innerHTML = renderGenericFormView('Create Ringtone', 'Convert active audio recordings into mobile ringtone products for worldwide store distribution.');
-            break;
-        case 'cat_transfer':
-            container.innerHTML = renderGenericFormView('Transfer Track', 'Import existing ISRC metadata and master files directly from your previous distributor.');
-            break;
-        case 'cat_master':
-            container.innerHTML = renderGenericFormView('Master Your Track', 'Run automated AI audio mastering on uncompressed WAV files before submission.');
-            break;
-
-        // MARKETING
-        case 'mkt_dsp':
-            container.innerHTML = await renderDspPitching();
-            break;
-        case 'mkt_builder':
-            container.innerHTML = await renderCampaignBuilder();
-            break;
-        case 'mkt_playlist':
-            container.innerHTML = await render3rdPartyPlaylisting();
-            break;
-        case 'mkt_adbox':
-            container.innerHTML = await renderAudioryAdBox();
-            break;
-        case 'mkt_influencers':
-            container.innerHTML = await renderInfluencerCampaigns();
-            break;
-        case 'mkt_luminate':
-            container.innerHTML = await renderLuminateRegistration();
-            break;
-
-        // ANALYTICS
-        case 'ana_streams':
-            container.innerHTML = renderStreamsView();
-            initStreamsChart();
-            break;
-        case 'ana_meta':
-            container.innerHTML = await renderMetaAnalyticsView();
-            break;
-        case 'ana_yt':
-            container.innerHTML = await renderYouTubeTelemetryView();
-            break;
-        case 'ana_tiktok':
-            container.innerHTML = await renderTikTokAnalyticsView();
-            break;
-        case 'ana_safe':
-            container.innerHTML = await renderStreamSafeView();
-            break;
-        case 'ana_spotify':
-            container.innerHTML = await renderDiscoveryModeView();
-            break;
-
-        // FINANCE & ROYALTIES
-        case 'roy_summary':
-            container.innerHTML = renderRoyaltySummaryView();
-            break;
-        case 'roy_payout':
-            container.innerHTML = renderPayoutView();
-            break;
-        case 'roy_tracks':
-            container.innerHTML = renderTrackPerformanceView();
-            break;
-        case 'spl_collabs':
-            container.innerHTML = renderSplitsView();
-            break;
-
-        // RIGHTS PROTECTION
-        case 'rgt_yt_allow':
-            container.innerHTML = renderRightsView('YouTube Allowlist', 'Add YouTube channel URLs to your allowlist to prevent Content ID claims.');
-            break;
-        case 'rgt_yt_claim':
-            container.innerHTML = renderRightsView('YouTube Manual Claim', 'Submit manual copyright claims against infringing YouTube videos.');
-            break;
-        case 'rgt_yt_oac':
-            container.innerHTML = renderRightsView('YouTube OAC Request', 'Submit request to merge your topic channel into an Official Artist Channel.');
-            break;
-        case 'rgt_tiktok':
-            container.innerHTML = renderRightsView('TikTok Manual Claim', 'Request takedown or monetization enforcement for unauthorized TikTok uploads.');
-            break;
-        case 'rgt_sc':
-            container.innerHTML = renderRightsView('SoundCloud Allowlist', 'Whitelist SoundCloud profiles to bypass automatic copyright strikes.');
-            break;
-        case 'rgt_meta':
-            container.innerHTML = renderRightsView('Meta Allowlist', 'Authorize specific Facebook pages or Instagram accounts for full monetization.');
-            break;
-        case 'rgt_cover':
-            container.innerHTML = renderRightsView('Cover Song Licensing', 'Acquire automated mechanical licenses for releasing cover songs worldwide.');
-            break;
-
-        // DEFAULT FALLBACK
-        default:
-            container.innerHTML = renderDashboardView();
-            initDashboardChart();
-    }
-}
-
-// Generic Firestore Submission Handler for Marketing Forms
-async function handleMarketingSubmission(event, type) {
-    event.preventDefault();
-    const uid = firebase.auth().currentUser?.uid;
-    if (!uid) return alert('User authentication required.');
-
-    const form = event.target;
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalBtnText = submitBtn.innerText;
-
-    submitBtn.disabled = true;
-    submitBtn.innerText = 'Submitting...';
-
-    const formData = new FormData(form);
-    const payload = {
-        type: type,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        status: 'Pending Review'
-    };
-
-    formData.forEach((value, key) => {
-        if (payload[key]) {
-            if (!Array.isArray(payload[key])) payload[key] = [payload[key]];
-            payload[key].push(value);
-        } else {
-            payload[key] = value;
-        }
-    });
-
-    try {
-        await firebase.firestore()
-            .collection('users')
-            .doc(uid)
-            .collection('marketing_requests')
-            .add(payload);
-
-        alert('Request submitted successfully!');
-        form.reset();
-        if (typeof renderCurrentPage === 'function') renderCurrentPage();
-    } catch (err) {
-        console.error('Submission failed:', err);
-        alert('Submission failed: ' + err.message);
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerText = originalBtnText;
-    }
-}
-
-// Helper to wait until Firebase SDK is fully initialized
-async function ensureFirebaseReady() {
-    let attempts = 0;
-    while ((typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) && attempts < 25) {
-        await new Promise(resolve => setTimeout(resolve, 200)); // Wait 200ms
-        attempts++;
-    }
-    return typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0;
-}
-
-// SAFELY FETCH USER RELEASES
-async function getUserReleasesOptions() {
-    const isReady = await ensureFirebaseReady();
-    if (!isReady) {
-        console.warn('Firebase SDK failed to load or initialize.');
-        return '<option value="" disabled selected>Firebase SDK not initialized</option>';
-    }
-
-    const uid = firebase.auth()?.currentUser?.uid;
-    if (!uid) return '<option value="" disabled selected>Please log in</option>';
-
-    try {
-        const snap = await firebase.firestore()
-            .collection('users')
-            .doc(uid)
-            .collection('releases')
-            .get();
-
-        if (snap.empty) return '<option value="" disabled selected>No active releases found</option>';
-        
-        return snap.docs.map(doc => {
-            const data = doc.data();
-            return `<option value="${doc.id}">${data.title || data.releaseTitle || 'Untitled Release'}</option>`;
-        }).join('');
-    } catch (err) {
-        console.error('Error loading releases:', err);
-        return '<option value="" disabled selected>Error loading catalog</option>';
-    }
-}
-
-// SAFELY FETCH MARKETING HISTORY
-async function renderMarketingHistoryTable(type) {
-    const isReady = await ensureFirebaseReady();
-    if (!isReady) return '';
-    
-    const uid = firebase.auth()?.currentUser?.uid;
-    if (!uid) return '';
-
-    try {
-        const snap = await firebase.firestore()
-            .collection('users').doc(uid)
-            .collection('marketing_requests')
-            .where('type', '==', type)
-            .get();
-
-        if (snap.empty) return '';
-
-        return `
-            <div class="p-6 rounded-2xl bg-brand-card border border-brand-border/80 shadow-xl space-y-4 mt-6">
-                <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">Submitted ${type} Requests</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="text-[10px] uppercase font-mono text-gray-400 border-b border-brand-border">
-                            <tr>
-                                <th class="pb-3 font-semibold">Date</th>
-                                <th class="pb-3 font-semibold">Details</th>
-                                <th class="pb-3 font-semibold">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-brand-border/40 text-gray-200">
-                            ${snap.docs.map(doc => {
-                                const d = doc.data();
-                                const dateStr = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleDateString() : 'Pending';
-                                return `
-                                    <tr>
-                                        <td class="py-3 font-mono text-gray-400">${dateStr}</td>
-                                        <td class="py-3 font-medium text-white">${d.releaseId || d.campaignName || d.targetGenre || 'Submission'}</td>
-                                        <td class="py-3"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 text-[10px] font-mono">${d.status}</span></td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        `;
-    } catch (err) {
-        console.error('History fetch error:', err);
-        return '';
-    }
-}
-        
-async function renderDspPitching() {
-    const releaseOptions = await getUserReleasesOptions();
-    const historyTable = await renderMarketingHistoryTable('DSP Pitching');
-
-    return `
-        <div class="max-w-5xl mx-auto space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
-                <div>
-                    <h1 class="text-2xl font-extrabold font-display text-white">DSP Pitching</h1>
-                    <p class="text-xs text-gray-400 mt-1">Direct submission to Spotify, Apple Music, and Amazon Music editorial playlist editors.</p>
-                </div>
-            </div>
-
-            <form onsubmit="handleMarketingSubmission(event, 'DSP Pitching')" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="too-lost-form-label">Select Release *</label>
-                        <select name="releaseId" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                            ${releaseOptions}
-                        </select>
+        // 2. CATALOG VIEW
+        function renderCatalogView() {
+            return `
+                <div class="max-w-7xl mx-auto space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
+                        <div>
+                            <h1 class="text-2xl font-bold text-white tracking-tight">Releases Catalog</h1>
+                            <p class="text-xs text-gray-400">Manage your active music catalog, check ISRCs, and monitor DSP distribution status.</p>
+                        </div>
+                        <button onclick="switchView('create')" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-all flex items-center gap-2 shadow-lg shadow-cyan-500/10 self-start sm:self-auto">
+                            <i class="fa-solid fa-plus text-[10px]"></i> Create Release
+                        </button>
                     </div>
-                    <div>
-                        <label class="too-lost-form-label">Primary Genre *</label>
-                        <input type="text" name="genre" required placeholder="e.g. Alternative Hip-Hop / Lo-Fi" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                    </div>
-                </div>
 
-                <div>
-                    <label class="too-lost-form-label">Editorial Pitch & Track Story *</label>
-                    <textarea name="pitchNote" rows="4" required placeholder="Detail marketing plan, radio support, high-profile features, and track vibe..." class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 focus:outline-none focus:border-brand-accent resize-y"></textarea>
-                </div>
-
-                <div class="pt-4 border-t border-brand-border flex justify-end">
-                    <button type="submit" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/20">
-                        Submit Pitch to Editors
-                    </button>
-                </div>
-            </form>
-            ${historyTable}
-        </div>
-    `;
-}
-
-// CAMPAIGN BUILDER
-async function renderCampaignBuilder() {
-    const releaseOptions = await getUserReleasesOptions();
-    const historyTable = await renderMarketingHistoryTable('Campaign Builder');
-
-    return `
-        <div class="max-w-5xl mx-auto space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
-                <div>
-                    <h1 class="text-2xl font-extrabold font-display text-white">Campaign Builder</h1>
-                    <p class="text-xs text-gray-400 mt-1">Build automated SmartLinks, pre-save campaigns, and landing pages for upcoming releases.</p>
-                </div>
-            </div>
-
-            <form onsubmit="handleMarketingSubmission(event, 'Campaign Builder')" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="too-lost-form-label">Campaign Name *</label>
-                        <input type="text" name="campaignName" required placeholder="e.g. Summer Single Pre-Save" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                    </div>
-                    <div>
-                        <label class="too-lost-form-label">Target Release *</label>
-                        <select name="releaseId" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                            ${releaseOptions}
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="too-lost-form-label">Custom Slug (audiory.link/...) *</label>
-                    <input type="text" name="customSlug" required placeholder="my-awesome-release" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                </div>
-
-                <div class="pt-4 border-t border-brand-border flex justify-end">
-                    <button type="submit" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/20">
-                        Create SmartLink Campaign
-                    </button>
-                </div>
-            </form>
-            ${historyTable}
-        </div>
-    `;
-}
-
-// 3RD PARTY PLAYLISTING
-async function render3rdPartyPlaylisting() {
-    const releaseOptions = await getUserReleasesOptions();
-    const historyTable = await renderMarketingHistoryTable('3rd Party Playlisting');
-
-    return `
-        <div class="max-w-5xl mx-auto space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
-                <div>
-                    <h1 class="text-2xl font-extrabold font-display text-white">3rd Party Playlisting</h1>
-                    <p class="text-xs text-gray-400 mt-1">Submit catalog tracks to vetted independent curators across Spotify, Apple Music, and Deezer.</p>
-                </div>
-            </div>
-
-            <form onsubmit="handleMarketingSubmission(event, '3rd Party Playlisting')" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="too-lost-form-label">Select Release / Track *</label>
-                        <select name="releaseId" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                            ${releaseOptions}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="too-lost-form-label">Genre Network *</label>
-                        <select name="targetGenre" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                            <option value="hiphop">Hip-Hop & Trap Curators</option>
-                            <option value="edm">EDM & Dance Network</option>
-                            <option value="pop">Pop & Mainstream Hits</option>
-                            <option value="indie">Indie & Alternative</option>
-                            <option value="afrobeats">Afrobeats & Amapiano</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="too-lost-form-label">Curator Pitch Note *</label>
-                    <textarea name="curatorNote" rows="3" required placeholder="Highlight similar artists, sound style, and key streaming momentum..." class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 focus:outline-none focus:border-brand-accent resize-y"></textarea>
-                </div>
-
-                <div class="pt-4 border-t border-brand-border flex justify-end">
-                    <button type="submit" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/20">
-                        Submit to Curator Network
-                    </button>
-                </div>
-            </form>
-            ${historyTable}
-        </div>
-    `;
-}
-
-// AUDIORY AD BOX
-async function renderAudioryAdBox() {
-    const historyTable = await renderMarketingHistoryTable('Audiory Ad Box');
-
-    return `
-        <div class="max-w-5xl mx-auto space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
-                <div>
-                    <h1 class="text-2xl font-extrabold font-display text-white">Audiory Ad Box</h1>
-                    <p class="text-xs text-gray-400 mt-1">Run targeted Meta (IG/FB), TikTok, and YouTube audio ads directly from your account balance.</p>
-                </div>
-            </div>
-
-            <form onsubmit="handleMarketingSubmission(event, 'Audiory Ad Box')" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="too-lost-form-label">Ad Network *</label>
-                        <select name="adNetwork" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                            <option value="meta">Meta Ads (Instagram Stories/Reels)</option>
-                            <option value="tiktok">TikTok In-Feed Ads</option>
-                            <option value="youtube">YouTube Audio & Bumper Ads</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="too-lost-form-label">Total Budget ($USD) *</label>
-                        <input type="number" name="budget" min="50" required placeholder="e.g. 200" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                    </div>
-                    <div>
-                        <label class="too-lost-form-label">Campaign Duration</label>
-                        <select name="duration" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                            <option value="7">7 Days Boost</option>
-                            <option value="14">14 Days Run</option>
-                            <option value="30">30 Days Ongoing</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="too-lost-form-label">Ad Creative Link / URL *</label>
-                    <input type="url" name="assetUrl" required placeholder="https://drive.google.com/file/d/your-ad-creative-link" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                </div>
-
-                <div class="pt-4 border-t border-brand-border flex justify-end">
-                    <button type="submit" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/20">
-                        Launch Ad Campaign
-                    </button>
-                </div>
-            </form>
-            ${historyTable}
-        </div>
-    `;
-}
-
-// INFLUENCER CAMPAIGNS
-async function renderInfluencerCampaigns() {
-    const releaseOptions = await getUserReleasesOptions();
-    const historyTable = await renderMarketingHistoryTable('Influencer Campaigns');
-
-    return `
-        <div class="max-w-5xl mx-auto space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
-                <div>
-                    <h1 class="text-2xl font-extrabold font-display text-white">Influencer Campaigns</h1>
-                    <p class="text-xs text-gray-400 mt-1">Send audio snippets directly to TikTok and Instagram creators for viral video production.</p>
-                </div>
-            </div>
-
-            <form onsubmit="handleMarketingSubmission(event, 'Influencer Campaigns')" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="too-lost-form-label">Target Release / Sound *</label>
-                        <select name="releaseId" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                            ${releaseOptions}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="too-lost-form-label">Platform Tier *</label>
-                        <select name="platformTier" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                            <option value="tiktok_micro">TikTok Micro Creators (10k-50k followers)</option>
-                            <option value="tiktok_macro">TikTok Macro Creators (100k+ followers)</option>
-                            <option value="reels">Instagram Reels Influencers</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="too-lost-form-label">Content Concept / Trend Prompt *</label>
-                    <input type="text" name="concept" required placeholder="e.g. Dance challenge / Outfit transition / Travel vlog" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                </div>
-
-                <div class="pt-4 border-t border-brand-border flex justify-end">
-                    <button type="submit" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/20">
-                        Dispatch Influencer Brief
-                    </button>
-                </div>
-            </form>
-            ${historyTable}
-        </div>
-    `;
-}
-
-// LUMINATE REGISTRATION
-async function renderLuminateRegistration() {
-    const releaseOptions = await getUserReleasesOptions();
-    const historyTable = await renderMarketingHistoryTable('Luminate Registration');
-
-    return `
-        <div class="max-w-5xl mx-auto space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
-                <div>
-                    <h1 class="text-2xl font-extrabold font-display text-white">Luminate Registration</h1>
-                    <p class="text-xs text-gray-400 mt-1">Register ISRCs and UPCs with Luminate (formerly SoundScan) for official Billboard chart inclusion.</p>
-                </div>
-            </div>
-
-            <form onsubmit="handleMarketingSubmission(event, 'Luminate Registration')" class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border/80 shadow-xl">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="too-lost-form-label">Select Catalog Release *</label>
-                        <select name="releaseId" required class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200">
-                            ${releaseOptions}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="too-lost-form-label">UPC / EAN Code *</label>
-                        <input type="text" name="upcCode" required placeholder="e.g. 889000123456" class="too-lost-input w-full bg-brand-dark border border-brand-border rounded-xl p-3 text-xs text-gray-200 font-mono">
-                    </div>
-                </div>
-
-                <div class="pt-4 border-t border-brand-border flex justify-end">
-                    <button type="submit" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-extrabold text-xs hover:bg-cyan-300 transition-all shadow-lg shadow-cyan-500/20">
-                        Submit to Luminate Database
-                    </button>
-                </div>
-            </form>
-            ${historyTable}
-        </div>
-    `;
-}
-        
-// HELPER: Fetch document or collection safely from Firestore
-async function fetchAnalyticsDoc(collectionName, fallbackData = {}) {
-    try {
-        const uid = firebase.auth().currentUser?.uid;
-        if (!uid) return fallbackData;
-        
-        const docRef = firebase.firestore().collection('users').doc(uid).collection(collectionName).doc('summary');
-        const docSnap = await docRef.get();
-        return docSnap.exists ? docSnap.data() : fallbackData;
-    } catch (err) {
-        console.error(`Error fetching ${collectionName} analytics:`, err);
-        return fallbackData;
-    }
-}
-
-// 1. META (IG/FB) ANALYTICS
-async function renderMetaAnalyticsView() {
-    const data = await fetchAnalyticsDoc('meta_analytics', {
-        totalReels: 0,
-        metaReach: 0,
-        estRoyalties: 0.00,
-        topCountry: 'N/A',
-        topTracks: []
-    });
-
-    return `
-        <div class="max-w-6xl mx-auto space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
-                <div>
-                    <h1 class="text-2xl font-extrabold font-display text-white">Meta (IG/FB) Analytics</h1>
-                    <p class="text-xs text-gray-400 mt-1">Track Instagram Reels, Facebook Stories, and audio library usage across Meta platforms.</p>
-                </div>
-            </div>
-
-            <!-- Stats Overview Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Total Reel Creations</span>
-                    <div class="text-2xl font-extrabold text-white mt-1">${(data.totalReels || 0).toLocaleString()}</div>
-                </div>
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Meta Audio Reach</span>
-                    <div class="text-2xl font-extrabold text-white mt-1">${(data.metaReach || 0).toLocaleString()}</div>
-                </div>
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Est. Meta Royalties</span>
-                    <div class="text-2xl font-extrabold text-brand-accent mt-1">$${(data.estRoyalties || 0).toFixed(2)}</div>
-                </div>
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Top Performing Country</span>
-                    <div class="text-2xl font-extrabold text-white mt-1">${data.topCountry || 'N/A'}</div>
-                </div>
-            </div>
-
-            <!-- Top Used Tracks Table -->
-            <div class="p-6 rounded-2xl bg-brand-card border border-brand-border/80 shadow-xl space-y-4">
-                <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">Top Performing Audio Snippets</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="text-[10px] uppercase font-mono text-gray-400 border-b border-brand-border">
-                            <tr>
-                                <th class="pb-3 font-semibold">Track Title</th>
-                                <th class="pb-3 font-semibold">ISRC</th>
-                                <th class="pb-3 font-semibold">Reels Created</th>
-                                <th class="pb-3 font-semibold">FB Stories</th>
-                                <th class="pb-3 font-semibold">Total Impressions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-brand-border/40 text-gray-200">
-                            ${data.topTracks && data.topTracks.length > 0 ? data.topTracks.map(track => `
-                                <tr>
-                                    <td class="py-3 font-medium text-white">${track.title}</td>
-                                    <td class="py-3 font-mono text-gray-400">${track.isrc || 'N/A'}</td>
-                                    <td class="py-3 font-semibold">${(track.reels || 0).toLocaleString()}</td>
-                                    <td class="py-3">${(track.stories || 0).toLocaleString()}</td>
-                                    <td class="py-3 text-brand-accent font-semibold">${(track.impressions || 0).toLocaleString()}</td>
-                                </tr>
-                            `).join('') : `
-                                <tr>
-                                    <td colspan="5" class="py-8 text-center text-gray-400">No Meta analytics data reported yet.</td>
-                                </tr>
-                            `}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// 2. YOUTUBE UGC TELEMETRY
-async function renderYouTubeTelemetryView() {
-    const data = await fetchAnalyticsDoc('youtube_ugc', {
-        claimedVideos: 0,
-        shortsViews: 0,
-        ugcEarnings: 0.00,
-        conflictsCount: 0,
-        recentClaims: []
-    });
-
-    return `
-        <div class="max-w-6xl mx-auto space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
-                <div>
-                    <h1 class="text-2xl font-extrabold font-display text-white">YouTube UGC Telemetry</h1>
-                    <p class="text-xs text-gray-400 mt-1">Monitor Content ID video matches, YouTube Shorts usage, and copyright claim monetization.</p>
-                </div>
-            </div>
-
-            <!-- Stats -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Active Claimed Videos</span>
-                    <div class="text-2xl font-extrabold text-white mt-1">${(data.claimedVideos || 0).toLocaleString()}</div>
-                </div>
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">YouTube Shorts Views</span>
-                    <div class="text-2xl font-extrabold text-white mt-1">${(data.shortsViews || 0).toLocaleString()}</div>
-                </div>
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">UGC Earnings</span>
-                    <div class="text-2xl font-extrabold text-brand-accent mt-1">$${(data.ugcEarnings || 0).toFixed(2)}</div>
-                </div>
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Content ID Conflicts</span>
-                    <div class="text-2xl font-extrabold text-white mt-1">${data.conflictsCount || 0}</div>
-                </div>
-            </div>
-
-            <!-- UGC Claims Feed -->
-            <div class="p-6 rounded-2xl bg-brand-card border border-brand-border/80 shadow-xl space-y-4">
-                <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">Recent Content ID Claims</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="text-[10px] uppercase font-mono text-gray-400 border-b border-brand-border">
-                            <tr>
-                                <th class="pb-3 font-semibold">Channel / Video</th>
-                                <th class="pb-3 font-semibold">Matched Asset</th>
-                                <th class="pb-3 font-semibold">Claim Type</th>
-                                <th class="pb-3 font-semibold">Views</th>
-                                <th class="pb-3 font-semibold">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-brand-border/40 text-gray-200">
-                            ${data.recentClaims && data.recentClaims.length > 0 ? data.recentClaims.map(claim => `
-                                <tr>
-                                    <td class="py-3 font-medium text-white">${claim.channel}</td>
-                                    <td class="py-3 font-mono text-gray-400">${claim.asset}</td>
-                                    <td class="py-3">${claim.type}</td>
-                                    <td class="py-3 font-semibold text-white">${(claim.views || 0).toLocaleString()}</td>
-                                    <td class="py-3"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-mono">${claim.status}</span></td>
-                                </tr>
-                            `).join('') : `
-                                <tr>
-                                    <td colspan="5" class="py-8 text-center text-gray-400">No active YouTube Content ID claims found.</td>
-                                </tr>
-                            `}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// 3. TIKTOK SOUND ANALYTICS
-async function renderTikTokAnalyticsView() {
-    const data = await fetchAnalyticsDoc('tiktok_analytics', {
-        totalVideos: 0,
-        totalViews: 0,
-        uniqueCreators: 0,
-        estRoyalties: 0.00,
-        sounds: []
-    });
-
-    return `
-        <div class="max-w-6xl mx-auto space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
-                <div>
-                    <h1 class="text-2xl font-extrabold font-display text-white">TikTok Sound Analytics</h1>
-                    <p class="text-xs text-gray-400 mt-1">Track sound page usage, creator video volume, and viral sound performance.</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Total TikTok Videos</span>
-                    <div class="text-2xl font-extrabold text-white mt-1">${(data.totalVideos || 0).toLocaleString()}</div>
-                </div>
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Total Video Views</span>
-                    <div class="text-2xl font-extrabold text-white mt-1">${(data.totalViews || 0).toLocaleString()}</div>
-                </div>
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Unique Creators</span>
-                    <div class="text-2xl font-extrabold text-white mt-1">${(data.uniqueCreators || 0).toLocaleString()}</div>
-                </div>
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Est. Sound Royalties</span>
-                    <div class="text-2xl font-extrabold text-brand-accent mt-1">$${(data.estRoyalties || 0).toFixed(2)}</div>
-                </div>
-            </div>
-
-            <div class="p-6 rounded-2xl bg-brand-card border border-brand-border/80 shadow-xl space-y-4">
-                <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">Catalog Sound Performance</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="text-[10px] uppercase font-mono text-gray-400 border-b border-brand-border">
-                            <tr>
-                                <th class="pb-3 font-semibold">Sound Title</th>
-                                <th class="pb-3 font-semibold">Official ID</th>
-                                <th class="pb-3 font-semibold">Video Creations</th>
-                                <th class="pb-3 font-semibold">Shares</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-brand-border/40 text-gray-200">
-                            ${data.sounds && data.sounds.length > 0 ? data.sounds.map(sound => `
-                                <tr>
-                                    <td class="py-3 font-medium text-white">${sound.title}</td>
-                                    <td class="py-3 font-mono text-gray-400">${sound.soundId}</td>
-                                    <td class="py-3 font-semibold text-white">${(sound.creations || 0).toLocaleString()}</td>
-                                    <td class="py-3">${(sound.shares || 0).toLocaleString()}</td>
-                                </tr>
-                            `).join('') : `
-                                <tr>
-                                    <td colspan="4" class="py-8 text-center text-gray-400">No TikTok sound usage recorded yet.</td>
-                                </tr>
-                            `}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// 4. STREAMSAFE FRAUD CHECK
-async function renderStreamSafeView() {
-    const data = await fetchAnalyticsDoc('streamsafe_audit', {
-        healthScore: 100,
-        scannedStreams: 0,
-        flaggedPlaylists: 0,
-        auditLogs: []
-    });
-
-    return `
-        <div class="max-w-6xl mx-auto space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
-                <div>
-                    <h1 class="text-2xl font-extrabold font-display text-white">StreamSafe™ Fraud Check</h1>
-                    <p class="text-xs text-gray-400 mt-1">Automated AI monitoring tool detecting bot farms, illegal playlisting, and artificial stream spikes.</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Overall Health Score</span>
-                    <div class="text-3xl font-extrabold text-emerald-400 mt-1">${data.healthScore} / 100</div>
-                </div>
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Scanned Streams</span>
-                    <div class="text-3xl font-extrabold text-white mt-1">${(data.scannedStreams || 0).toLocaleString()}</div>
-                </div>
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Flagged Playlists</span>
-                    <div class="text-3xl font-extrabold text-white mt-1">${data.flaggedPlaylists || 0}</div>
-                </div>
-            </div>
-
-            <div class="p-6 rounded-2xl bg-brand-card border border-brand-border/80 shadow-xl space-y-4">
-                <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">Catalog Integrity Protection Log</h3>
-                <div class="space-y-3 pt-2">
-                    ${data.auditLogs && data.auditLogs.length > 0 ? data.auditLogs.map(log => `
-                        <div class="p-3 rounded-xl bg-brand-dark/80 border border-brand-border/60 flex items-center justify-between text-xs">
-                            <div class="flex items-center gap-3">
-                                <span class="text-emerald-400 font-mono text-sm">✓</span>
-                                <div>
-                                    <p class="text-white font-medium">${log.title}</p>
-                                    <p class="text-[10px] text-gray-400">${log.description}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${window.releasesCatalog.map(rel => `
+                            <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-4 hover:border-cyan-500/40 transition-all flex flex-col justify-between">
+                                <div class="space-y-3">
+                                    <div class="relative aspect-square rounded-xl overflow-hidden bg-brand-dark border border-brand-border">
+                                        <img src="${rel.coverUrl}" class="w-full h-full object-cover">
+                                        <span class="absolute top-3 right-3 px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/70 backdrop-blur text-brand-accent border border-brand-border">${rel.type}</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-white text-sm truncate">${rel.title}</h3>
+                                        <p class="text-xs text-gray-400">${rel.artist}</p>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2 text-[11px] font-mono pt-2 border-t border-brand-border">
+                                        <div><span class="text-gray-500 block text-[9px] uppercase">UPC Code</span><span class="text-white">${rel.upc}</span></div>
+                                        <div><span class="text-gray-500 block text-[9px] uppercase">Genre</span><span class="text-white">${rel.genre}</span></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between pt-3 border-t border-brand-border">
+                                    <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">${rel.status}</span>
+                                    <button onclick="alert('Viewing metadata & asset details for UPC: ${rel.upc}')" class="text-xs text-brand-accent hover:underline font-semibold">Manage Release</button>
                                 </div>
                             </div>
-                            <span class="text-[10px] font-mono text-gray-400">${log.timestamp}</span>
-                        </div>
-                    `).join('') : `
-                        <p class="text-center text-xs text-gray-400 py-4">No active fraud checks or automated audits executed yet.</p>
-                    `}
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// 5. DISCOVERY MODE INSIGHTS
-async function renderDiscoveryModeView() {
-    const data = await fetchAnalyticsDoc('discovery_mode', {
-        upliftPercentage: 0,
-        radioStreams: 0,
-        listenerSaves: 0,
-        enrolledCount: 0,
-        enrolledTracks: []
-    });
-
-    return `
-        <div class="max-w-6xl mx-auto space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
-                <div>
-                    <h1 class="text-2xl font-extrabold font-display text-white">Discovery Mode Insights</h1>
-                    <p class="text-xs text-gray-400 mt-1">Analyze Spotify algorithmic uplift, radio, autoplay, and smart shuffle stream metrics.</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Algorithmic Stream Lift</span>
-                    <div class="text-2xl font-extrabold text-emerald-400 mt-1">+${data.upliftPercentage || 0}%</div>
-                </div>
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Radio & Autoplay Streams</span>
-                    <div class="text-2xl font-extrabold text-white mt-1">${(data.radioStreams || 0).toLocaleString()}</div>
-                </div>
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">New Listener Saves</span>
-                    <div class="text-2xl font-extrabold text-white mt-1">${(data.listenerSaves || 0).toLocaleString()}</div>
-                </div>
-                <div class="p-5 rounded-2xl bg-brand-card border border-brand-border">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-gray-400">Enrolled Tracks</span>
-                    <div class="text-2xl font-extrabold text-white mt-1">${data.enrolledCount || 0}</div>
-                </div>
-            </div>
-
-            <div class="p-6 rounded-2xl bg-brand-card border border-brand-border/80 shadow-xl space-y-4">
-                <h3 class="text-xs font-bold text-brand-accent uppercase tracking-wider font-mono">Enrolled Tracks Performance</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="text-[10px] uppercase font-mono text-gray-400 border-b border-brand-border">
-                            <tr>
-                                <th class="pb-3 font-semibold">Track Title</th>
-                                <th class="pb-3 font-semibold">Radio Streams</th>
-                                <th class="pb-3 font-semibold">Autoplay Streams</th>
-                                <th class="pb-3 font-semibold">Saves / Adds</th>
-                                <th class="pb-3 font-semibold">Stream Uplift</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-brand-border/40 text-gray-200">
-                            ${data.enrolledTracks && data.enrolledTracks.length > 0 ? data.enrolledTracks.map(t => `
-                                <tr>
-                                    <td class="py-3 font-medium text-white">${t.title}</td>
-                                    <td class="py-3 font-semibold">${(t.radioStreams || 0).toLocaleString()}</td>
-                                    <td class="py-3">${(t.autoplayStreams || 0).toLocaleString()}</td>
-                                    <td class="py-3 text-white">${(t.saves || 0).toLocaleString()}</td>
-                                    <td class="py-3 font-extrabold text-emerald-400">+${t.uplift}%</td>
-                                </tr>
-                            `).join('') : `
-                                <tr>
-                                    <td colspan="5" class="py-8 text-center text-gray-400">No tracks currently enrolled in Spotify Discovery Mode.</td>
-                                </tr>
-                            `}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-        // ==================== VIEW GENERATORS ====================
-
-        function renderDashboardView() {
-            const totalStreams = window.userTelemetry.reduce((acc, curr) => acc + (curr.count || 0), 0);
-            const activeCount = window.userReleases.length;
-
-            return `
-                <div class="space-y-6">
-                    <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
-                        <div>
-                            <h1 class="text-2xl font-extrabold font-display text-white">Welcome back, <span class="gradient-text">${window.userState.displayName}</span></h1>
-                            <p class="text-xs text-gray-400 mt-1">Real-time stats and Too Lost distribution management.</p>
-                        </div>
-                        <button onclick="navigateTo('cat_create')" class="px-4 py-2 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-colors flex items-center gap-2">
-                            <i class="fa-solid fa-plus"></i>
-                            <span>New Release</span>
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="p-5 rounded-xl bg-brand-card border border-brand-border">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Streams</span>
-                            <div class="text-2xl font-extrabold font-display text-white mt-2">${totalStreams.toLocaleString()}</div>
-                        </div>
-                        <div class="p-5 rounded-xl bg-brand-card border border-brand-border">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Available Royalties</span>
-                            <div class="text-2xl font-extrabold font-display text-emerald-400 mt-2">$${(totalStreams * 0.0038).toFixed(2)}</div>
-                        </div>
-                        <div class="p-5 rounded-xl bg-brand-card border border-brand-border">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Active Catalog</span>
-                            <div class="text-2xl font-extrabold font-display text-white mt-2">${activeCount}</div>
-                        </div>
-                        <div class="p-5 rounded-xl bg-brand-card border border-brand-border">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Too Lost API Connection</span>
-                            <div class="text-xs font-bold text-emerald-400 mt-3 flex items-center gap-2 font-mono">
-                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                                Connected & Ready
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-6 rounded-xl bg-brand-card border border-brand-border">
-                        <h3 class="text-sm font-bold font-display text-white mb-4">Stream Analytics Telemetry</h3>
-                        <div class="h-64">
-                            <canvas id="dashboardChart"></canvas>
-                        </div>
-                    </div>
-
-                    ${renderReleasesTableMarkup()}
-                </div>
-            `;
-        }
-
-        function renderReleasesView() {
-            return `
-                <div class="space-y-6">
-                    <div class="flex justify-between items-center pb-4 border-b border-brand-border/60">
-                        <div>
-                            <h1 class="text-2xl font-bold font-display text-white">Releases Catalog</h1>
-                            <p class="text-xs text-gray-400">Live data fetching directly from Firestore database.</p>
-                        </div>
-                        <button onclick="navigateTo('cat_create')" class="px-4 py-2 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">
-                            Create Release
-                        </button>
-                    </div>
-                    ${renderReleasesTableMarkup()}
-                </div>
-            `;
-        }
-
-        function renderReleasesTableMarkup() {
-            let filtered = window.userReleases;
-            if (window.searchFilter) {
-                filtered = filtered.filter(item => 
-                    (item.title && item.title.toLowerCase().includes(window.searchFilter)) ||
-                    (item.artist && item.artist.toLowerCase().includes(window.searchFilter)) ||
-                    (item.upc && item.upc.toLowerCase().includes(window.searchFilter)) ||
-                    (item.catalogNumber && item.catalogNumber.toLowerCase().includes(window.searchFilter))
-                );
-            }
-
-            if (filtered.length === 0) {
-                return `
-                    <div class="p-12 text-center rounded-xl bg-brand-card border border-brand-border space-y-3">
-                        <i class="fa-solid fa-compact-disc text-4xl text-gray-600"></i>
-                        <h4 class="text-sm font-bold text-gray-300">No Catalog Submissions Found</h4>
-                        <p class="text-xs text-gray-500 max-w-sm mx-auto">You haven't created any live releases yet. Use the Production Form to submit your music.</p>
-                        <button onclick="navigateTo('cat_create')" class="px-4 py-2 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs inline-block">Create Release Now</button>
-                    </div>
-                `;
-            }
-
-            return `
-                <div class="p-6 rounded-xl bg-brand-card border border-brand-border space-y-4">
-                    <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full text-left text-xs text-gray-300">
-                            <thead class="bg-brand-dark text-gray-400 font-mono uppercase text-[10px] tracking-wider border-b border-brand-border">
-                                <tr>
-                                    <th class="p-3">Cover / Title</th>
-                                    <th class="p-3">Primary Artist</th>
-                                    <th class="p-3">Tracks</th>
-                                    <th class="p-3">Catalog #</th>
-                                    <th class="p-3">UPC Code</th>
-                                    <th class="p-3">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-brand-border/40">
-                                ${filtered.map(item => `
-                                    <tr class="hover:bg-brand-hover/50 transition-colors">
-                                        <td class="p-3 flex items-center gap-3">
-                                            <img src="${item.coverArtPreviewUrl || item.coverUrl || 'https://via.placeholder.com/80?text=Cover'}" class="w-10 h-10 rounded-lg object-cover border border-brand-border">
-                                            <div>
-                                                <p class="font-bold text-white">${item.title || item.releaseTitle || 'Untitled Release'}</p>
-                                                <p class="text-[10px] text-gray-400">Line: ${item.cLineYear || '2026'} ${item.cLineText || 'Audiory Records'}</p>
-                                            </div>
-                                        </td>
-                                        <td class="p-3 font-medium text-gray-300">${item.primaryArtists || item.artist || 'N/A'}</td>
-                                        <td class="p-3 font-mono text-brand-accent">${item.tracks ? item.tracks.length : 1} Track(s)</td>
-                                        <td class="p-3 font-mono text-gray-400">${item.catalogNumber || 'CAT2008443'}</td>
-                                        <td class="p-3 font-mono text-gray-400">${item.upc || 'Assigned on submission'}</td>
-                                        <td class="p-3">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>${item.status || 'Delivered to Too Lost'}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
+                        `).join('')}
                     </div>
                 </div>
             `;
         }
 
-        // ==================== PRODUCTION RELEASE FORM ====================
-
+        // 3. CREATE NEW RELEASE VIEW
         function renderCreateReleaseView() {
             return `
-                <div class="max-w-5xl mx-auto space-y-6">
+                <div class="max-w-4xl mx-auto space-y-6">
                     <div class="pb-4 border-b border-brand-border/60">
                         <h1 class="text-2xl font-bold font-display text-white">Create New Release</h1>
                         <p class="text-xs text-gray-400">Complete all technical metadata fields to trigger release submission through Too Lost APIs.</p>
@@ -1652,17 +326,17 @@ async function renderDiscoveryModeView() {
                             <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">1. Artwork & Cover Art</h3>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
                                 <div class="space-y-2">
-                                    <label class="too-lost-form-label">Cover Art (3000x3000px WAV/JPG/PNG)</label>
+                                    <label class="too-lost-form-label">Cover Art (3000x3000px)</label>
                                     <div class="w-full aspect-square rounded-xl bg-brand-dark border-2 border-dashed border-brand-border flex flex-col items-center justify-center p-4 text-center relative group overflow-hidden">
                                         <img id="coverArtPreview" class="absolute inset-0 w-full h-full object-cover hidden">
                                         <i class="fa-solid fa-music text-4xl text-gray-600 mb-2 group-hover:scale-110 transition-transform"></i>
-                                        <span class="text-[10px] text-gray-400 mb-2">Select Artwork File from Device</span>
+                                        <span class="text-[10px] text-gray-400 mb-2">Select Artwork File</span>
                                         <input type="file" id="coverArtFileInput" accept="image/*" onchange="handleCoverArtUpload(event)" required class="absolute inset-0 opacity-0 cursor-pointer">
                                         <button type="button" class="px-3 py-1.5 rounded bg-white text-black font-bold text-[10px] shadow pointer-events-none">Upload Cover Art</button>
                                     </div>
                                 </div>
                                 <div class="md:col-span-2 space-y-4">
-                                    <label class="too-lost-form-label">What amount of generative AI tools were used in the creation of this cover art?</label>
+                                    <label class="too-lost-form-label">Generative AI tools used in cover art?</label>
                                     <div class="flex items-center gap-6 text-xs text-gray-300">
                                         <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="aiCoverArt" value="None" checked class="accent-brand-accent"> None</label>
                                         <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="aiCoverArt" value="Some" class="accent-brand-accent"> Some</label>
@@ -1675,15 +349,14 @@ async function renderDiscoveryModeView() {
                         <!-- 2. RELEASE METADATA -->
                         <div class="space-y-4 pt-6 border-t border-brand-border">
                             <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">2. Release Metadata</h3>
-                            
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
                                     <label class="too-lost-form-label">Release Title *</label>
                                     <input type="text" id="releaseTitle" required placeholder="Release Title" class="too-lost-input">
                                 </div>
                                 <div>
-                                    <label class="too-lost-form-label">Release Version (Optional)</label>
-                                    <input type="text" id="releaseVersion" placeholder="Remix / Deluxe / Radio Edit" class="too-lost-input">
+                                    <label class="too-lost-form-label">Release Version</label>
+                                    <input type="text" id="releaseVersion" placeholder="Deluxe / Remix" class="too-lost-input">
                                 </div>
                                 <div>
                                     <label class="too-lost-form-label">Metadata Language</label>
@@ -1691,8 +364,6 @@ async function renderDiscoveryModeView() {
                                         <option value="English">English</option>
                                         <option value="Spanish">Spanish</option>
                                         <option value="French">French</option>
-                                        <option value="German">German</option>
-                                        <option value="Swahili">Swahili</option>
                                     </select>
                                 </div>
                             </div>
@@ -1700,10 +371,7 @@ async function renderDiscoveryModeView() {
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label class="too-lost-form-label">Primary Artists *</label>
-                                    <input type="text" id="primaryArtists" required value="Official Bigi" placeholder="Primary Artist Name" class="too-lost-input">
-                                    <label class="flex items-center gap-2 mt-2 text-[10px] text-gray-400 cursor-pointer">
-                                        <input type="checkbox" id="isVariousArtists" class="accent-brand-accent"> Various Artists (Select if 5+ artists)
-                                    </label>
+                                    <input type="text" id="primaryArtists" required value="Official Bigi" class="too-lost-input">
                                 </div>
                                 <div>
                                     <label class="too-lost-form-label">Format Type *</label>
@@ -1718,7 +386,7 @@ async function renderDiscoveryModeView() {
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
                                     <label class="too-lost-form-label">UPC</label>
-                                    <input type="text" id="upcField" readonly value="Assigned on submission" class="too-lost-input bg-brand-dark/50 text-gray-500 font-mono">
+                                    <input type="text" readonly value="Assigned on submission" class="too-lost-input bg-brand-dark/50 text-gray-500 font-mono">
                                 </div>
                                 <div>
                                     <label class="too-lost-form-label">Genre *</label>
@@ -1728,55 +396,11 @@ async function renderDiscoveryModeView() {
                                         <option value="Hip-Hop/Rap">Hip-Hop/Rap</option>
                                         <option value="Electronic">Electronic</option>
                                         <option value="Afrobeats">Afrobeats</option>
-                                        <option value="Rock">Rock</option>
-                                        <option value="R&B">R&B</option>
                                     </select>
                                 </div>
-                                <div>
-                                    <label class="too-lost-form-label">Subgenre</label>
-                                    <select id="subgenreSelect" class="too-lost-input">
-                                        <option value="">Please select</option>
-                                        <option value="French Pop">French Pop</option>
-                                        <option value="Dancehall">Dancehall</option>
-                                        <option value="Trap">Trap</option>
-                                        <option value="Deep House">Deep House</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
                                     <label class="too-lost-form-label">Label Name</label>
-                                    <input type="text" id="labelName" placeholder="Audiory Distribution" class="too-lost-input">
-                                </div>
-                                <div>
-                                    <label class="too-lost-form-label">© CLine</label>
-                                    <div class="flex gap-2">
-                                        <select id="cLineYear" class="too-lost-input w-24"><option value="2026">2026</option><option value="2025">2025</option></select>
-                                        <input type="text" id="cLineText" placeholder="Record Label" class="too-lost-input">
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="too-lost-form-label">℗ PLine</label>
-                                    <div class="flex gap-2">
-                                        <select id="pLineYear" class="too-lost-input w-24"><option value="2026">2026</option><option value="2025">2025</option></select>
-                                        <input type="text" id="pLineText" placeholder="Copyright Owner" class="too-lost-input">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="too-lost-form-label">Catalog #</label>
-                                    <input type="text" id="catalogNumber" value="CAT2008443" class="too-lost-input font-mono">
-                                    <span class="text-[10px] text-gray-500">Your internal identifier for this release</span>
-                                </div>
-                                <div>
-                                    <label class="too-lost-form-label">Compilation</label>
-                                    <div class="flex items-center gap-6 text-xs text-gray-300 mt-2">
-                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="isCompilation" value="Yes" class="accent-brand-accent"> Yes, this is a compilation</label>
-                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="isCompilation" value="No" checked class="accent-brand-accent"> No, this is a standard release</label>
-                                    </div>
+                                    <input type="text" id="labelName" value="Audiory Distribution" class="too-lost-input">
                                 </div>
                             </div>
                         </div>
@@ -1786,32 +410,29 @@ async function renderDiscoveryModeView() {
                             <div class="flex items-center justify-between">
                                 <div>
                                     <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">3. Track Details & Audio Files</h3>
-                                    <p class="text-xs text-gray-400">Upload physical audio files directly from your computer or phone storage.</p>
+                                    <p class="text-xs text-gray-400">Upload uncompressed WAV/FLAC audio files.</p>
                                 </div>
                                 <button type="button" id="addTrackBtn" onclick="addNewTrackItem()" class="hidden px-3.5 py-2 rounded-lg bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-all flex items-center gap-2">
-                                    <i class="fa-solid fa-plus"></i>
-                                    <span>Add More Tracks</span>
+                                    <i class="fa-solid fa-plus"></i> Add Track
                                 </button>
                             </div>
-
                             <div id="tracksContainer" class="space-y-6">
-                                <!-- Track cards dynamically rendered -->
+                                <!-- Dynamic track cards rendered here -->
                             </div>
                         </div>
 
                         <!-- 4. TIMELINE & TERRITORIES -->
                         <div class="space-y-4 pt-6 border-t border-brand-border">
-                            <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">4. Release Availability & Timeline</h3>
+                            <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">4. Release Timeline</h3>
                             <div class="p-4 rounded-xl bg-brand-dark border border-brand-border grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="too-lost-form-label">Target Release Date</label>
+                                    <label class="too-lost-form-label">Target Release Date *</label>
                                     <input type="date" id="targetReleaseDate" required class="too-lost-input">
                                 </div>
                                 <div>
                                     <label class="too-lost-form-label">Territory Rights</label>
                                     <select id="territoryRights" class="too-lost-input">
                                         <option value="Worldwide">Worldwide (All Territories)</option>
-                                        <option value="Exclude US">Worldwide (Excluding US)</option>
                                     </select>
                                 </div>
                             </div>
@@ -1819,12 +440,9 @@ async function renderDiscoveryModeView() {
 
                         <!-- FORM ACTIONS -->
                         <div class="pt-6 border-t border-brand-border flex justify-between items-center">
-                            <button type="button" onclick="navigateTo('cat_releases')" class="px-6 py-2.5 rounded-xl border border-brand-border bg-brand-dark text-xs text-gray-300 font-semibold hover:bg-brand-hover">
-                                Cancel
-                            </button>
-                            <button type="submit" id="submitProductionFormBtn" class="px-8 py-3 rounded-xl bg-black text-white font-bold text-xs hover:bg-brand-accent hover:text-brand-dark border border-brand-border transition-all flex items-center gap-2 shadow-xl">
-                                <i class="fa-solid fa-floppy-disk"></i>
-                                <span>Save & Submit Release</span>
+                            <button type="button" onclick="switchView('catalog')" class="px-6 py-2.5 rounded-xl border border-brand-border bg-brand-dark text-xs text-gray-300 font-semibold">Cancel</button>
+                            <button type="submit" id="submitProductionFormBtn" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-all flex items-center gap-2 shadow-xl">
+                                <i class="fa-solid fa-floppy-disk"></i> Save & Submit Release
                             </button>
                         </div>
                     </form>
@@ -1832,100 +450,49 @@ async function renderDiscoveryModeView() {
             `;
         }
 
-        // Track UI Form Dynamic Management
+        // Render Track Cards Helper
         window.renderTrackCards = function() {
             const container = document.getElementById('tracksContainer');
             if (!container) return;
 
             container.innerHTML = window.formTrackList.map((track, idx) => `
-                <div class="p-5 rounded-2xl bg-brand-dark border border-brand-border space-y-6 relative">
+                <div class="p-5 rounded-2xl bg-brand-dark border border-brand-border space-y-6">
                     <div class="flex items-center justify-between border-b border-brand-border pb-3">
                         <span class="text-xs font-bold text-white font-mono flex items-center gap-2">
                             <span class="w-6 h-6 rounded-full bg-brand-card border border-brand-border flex items-center justify-center text-brand-accent">${idx + 1}</span>
-                            Track Metadata & Audio
+                            Track Audio & Metadata
                         </span>
-                        ${window.formTrackList.length > 1 ? `
-                            <button type="button" onclick="removeTrackItem(${idx})" class="text-gray-500 hover:text-red-400 text-xs">
-                                <i class="fa-solid fa-trash-can"></i> Remove Track
-                            </button>
-                        ` : ''}
+                        ${window.formTrackList.length > 1 ? `<button type="button" onclick="removeTrackItem(${idx})" class="text-gray-500 hover:text-red-400 text-xs"><i class="fa-solid fa-trash-can"></i> Remove</button>` : ''}
                     </div>
 
-                    <!-- Audio Details Sub-section -->
-                    <div class="space-y-3">
-                        <h4 class="text-xs font-bold text-white uppercase tracking-wider">Audio Details</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="too-lost-form-label">Audio File (WAV / FLAC File Upload)</label>
-                                <div class="flex gap-2 items-center">
-                                    <div class="relative flex-1">
-                                        <input type="file" accept="audio/*" onchange="handleTrackAudioUpload(event, ${idx})" class="too-lost-input opacity-0 absolute inset-0 cursor-pointer">
-                                        <div class="too-lost-input truncate text-gray-400 flex items-center justify-between pointer-events-none">
-                                            <span>${track.audioFileName || 'Choose file from computer/phone...'}</span>
-                                            <i class="fa-solid fa-file-audio text-brand-accent"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="too-lost-form-label">What amount of generative AI tools were used?</label>
-                                <div class="flex items-center gap-4 text-xs text-gray-300 mt-2">
-                                    <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="trackAi_${idx}" value="None" checked class="accent-brand-accent"> None</label>
-                                    <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="trackAi_${idx}" value="Some" class="accent-brand-accent"> Some</label>
-                                    <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="trackAi_${idx}" value="All" class="accent-brand-accent"> All</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="too-lost-form-label">Audio File (WAV / FLAC)</label>
+                            <div class="relative">
+                                <input type="file" accept="audio/*" onchange="handleTrackAudioUpload(event, ${idx})" class="too-lost-input opacity-0 absolute inset-0 cursor-pointer">
+                                <div class="too-lost-input truncate text-gray-400 flex items-center justify-between pointer-events-none">
+                                    <span>${track.audioFileName || 'Choose audio file...'}</span>
+                                    <i class="fa-solid fa-file-audio text-brand-accent"></i>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                            <div>
-                                <label class="too-lost-form-label">ISRC Code</label>
-                                <div class="flex gap-2">
-                                    <input type="text" id="isrc_${idx}" value="${track.isrc || ''}" placeholder="Leave blank to auto-generate" class="too-lost-input font-mono flex-1">
-                                    <button type="button" onclick="generateIsrcForTrack(${idx})" class="px-3 py-1.5 bg-black text-white text-[10px] font-bold rounded border border-brand-border">Generate ISRC</button>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="too-lost-form-label">Clip Start Time</label>
-                                <input type="text" value="00:00:00" class="too-lost-input font-mono">
+                        <div>
+                            <label class="too-lost-form-label">ISRC Code</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="isrc_${idx}" value="${track.isrc || ''}" placeholder="Auto-generated" class="too-lost-input font-mono flex-1">
+                                <button type="button" onclick="generateIsrcForTrack(${idx})" class="px-3 py-1.5 bg-black text-white text-[10px] font-bold rounded border border-brand-border">Generate</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Track Details -->
-                    <div class="space-y-4 pt-4 border-t border-brand-border/60">
-                        <h4 class="text-xs font-bold text-white uppercase tracking-wider">Track Details</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
-                                <label class="too-lost-form-label">Song Name *</label>
-                                <input type="text" required onchange="window.formTrackList[${idx}].name = this.value" value="${track.name}" placeholder="Track Title" class="too-lost-input">
-                            </div>
-                            <div>
-                                <label class="too-lost-form-label">Version (Optional)</label>
-                                <input type="text" placeholder="Acoustic / Instrumental" class="too-lost-input">
-                            </div>
-                            <div>
-                                <label class="too-lost-form-label">Metadata Language</label>
-                                <select class="too-lost-input"><option>English</option><option>Spanish</option></select>
-                            </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="too-lost-form-label">Song Name *</label>
+                            <input type="text" required onchange="window.formTrackList[${idx}].name = this.value" value="${track.name}" placeholder="Track Title" class="too-lost-input">
                         </div>
-
-                        <!-- Display Artists -->
-                        <div class="space-y-2">
-                            <label class="too-lost-form-label">Display Artists</label>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <input type="text" value="Official Bigi" class="too-lost-input">
-                                <select class="too-lost-input"><option>Primary</option><option>Featured</option></select>
-                            </div>
-                        </div>
-
-                        <!-- Contributors / Writers -->
-                        <div class="space-y-2 pt-2">
-                            <label class="too-lost-form-label">Writers & Contributors *</label>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <input type="text" required placeholder="Real First & Last Name" class="too-lost-input">
-                                <select class="too-lost-input"><option>Writer / Composer</option><option>Producer</option></select>
-                            </div>
+                        <div>
+                            <label class="too-lost-form-label">Writers & Composers *</label>
+                            <input type="text" required placeholder="Full Legal Name" class="too-lost-input">
                         </div>
                     </div>
                 </div>
@@ -1944,15 +511,7 @@ async function renderDiscoveryModeView() {
         };
 
         window.addNewTrackItem = function() {
-            window.formTrackList.push({
-                id: Date.now(),
-                name: '',
-                version: '',
-                language: 'English',
-                artists: [{ name: 'Official Bigi', role: 'Primary' }],
-                writers: [{ name: '', role: 'Writer' }],
-                audioFileName: null
-            });
+            window.formTrackList.push({ id: Date.now(), name: '', version: '', language: 'English', artists: [{ name: 'Official Bigi', role: 'Primary' }], writers: [{ name: '', role: 'Writer' }], audioFileName: null });
             renderTrackCards();
         };
 
@@ -1974,136 +533,83 @@ async function renderDiscoveryModeView() {
             }
         };
 
-    window.handleTrackAudioUpload = function(e, idx) {
-        const file = e.target.files[0];
-        if (file) {
-            window.formTrackList[idx].audioFileName = file.name;
-            window.formTrackList[idx].rawAudioFile = file; // Store File object reference
-            renderTrackCards();
-        }
-    };
-
-    window.generateIsrcForTrack = function(idx) {
-        const isrc = "US-AUD-26-" + Math.floor(10000 + Math.random() * 90000);
-        window.formTrackList[idx].isrc = isrc;
-        const field = document.getElementById(`isrc_${idx}`);
-        if (field) field.value = isrc;
-    };
-
-    window.handleProductionFormSubmit = async function(e) {
-    e.preventDefault();
-    const btn = document.getElementById('submitProductionFormBtn');
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing Assets & Submitting...`;
-
-    try {
-        // 1. Upload Cover Art to R2
-        const coverArtInput = document.getElementById('coverArtFileInput');
-        let coverUrl = '';
-        if (coverArtInput.files[0]) {
-            coverUrl = await uploadFileToR2(coverArtInput.files[0], 'artworks');
-        } else {
-            throw new Error('Please select cover artwork.');
-        }
-
-        // 2. Upload Audio Files to R2 for each track
-        const processedTracks = await Promise.all(window.formTrackList.map(async (track, idx) => {
-            if (track.rawAudioFile) {
-                const audioUrl = await uploadFileToR2(track.rawAudioFile, 'audio');
-                return { ...track, audioUrl, rawAudioFile: undefined };
+        window.handleTrackAudioUpload = function(e, idx) {
+            const file = e.target.files[0];
+            if (file) {
+                window.formTrackList[idx].audioFileName = file.name;
+                renderTrackCards();
             }
-            return track;
-        }));
-
-        // 3. Assemble Full Too Lost Metadata Payload
-        const payload = {
-            userId: window.userState.uid,
-            title: document.getElementById('releaseTitle').value,
-            version: document.getElementById('releaseVersion').value,
-            language: document.getElementById('metadataLanguage').value,
-            artist: document.getElementById('primaryArtists').value,
-            type: document.getElementById('releaseFormatType').value,
-            genre: document.getElementById('genreSelect').value,
-            subgenre: document.getElementById('subgenreSelect').value,
-            label: document.getElementById('labelName').value,
-            cLine: `${document.getElementById('cLineYear').value} ${document.getElementById('cLineText').value}`,
-            pLine: `${document.getElementById('pLineYear').value} ${document.getElementById('pLineText').value}`,
-            catalogNumber: document.getElementById('catalogNumber').value,
-            releaseDate: document.getElementById('targetReleaseDate').value,
-            territory: document.getElementById('territoryRights').value,
-            coverUrl: coverUrl,
-            tracks: processedTracks,
-            status: 'Delivered to Too Lost'
         };
 
-        // 4. Send Metadata Payload to Cloudflare Worker Endpoint
-        const workerRes = await fetch('https://audiorydistribution.dandredurkofficial.workers.dev/api/releases/submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
+        window.generateIsrcForTrack = function(idx) {
+            const isrc = "US-AUD-26-" + Math.floor(10000 + Math.random() * 90000);
+            window.formTrackList[idx].isrc = isrc;
+            const field = document.getElementById(`isrc_${idx}`);
+            if (field) field.value = isrc;
+        };
 
-        if (!workerRes.ok) throw new Error('Too Lost API proxy submission failed.');
+        window.handleProductionFormSubmit = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitProductionFormBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting to Too Lost Pipeline...`;
 
-        // 5. Store Metadata Reference in Firestore
-        await addDoc(collection(db, "releases"), {
-            ...payload,
-            createdAt: serverTimestamp()
-        });
+            setTimeout(() => {
+                const newRel = {
+                    id: "rel_" + Date.now(),
+                    title: document.getElementById('releaseTitle').value,
+                    artist: document.getElementById('primaryArtists').value,
+                    type: document.getElementById('releaseFormatType').value,
+                    genre: document.getElementById('genreSelect').value,
+                    upc: "19" + Math.floor(10000000000 + Math.random() * 90000000000).toString(),
+                    status: 'Live on DSPs',
+                    releaseDate: document.getElementById('targetReleaseDate').value,
+                    coverUrl: document.getElementById('coverArtPreview').src || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400',
+                    tracks: window.formTrackList
+                };
+                window.releasesCatalog.unshift(newRel);
+                switchView('catalog');
+            }, 1000);
+        };
 
-        alert('Release successfully submitted to Too Lost pipeline!');
-        navigateTo('cat_releases');
-
-    } catch (err) {
-        console.error("Submission Error:", err);
-        alert(`Error: ${err.message}`);
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save & Submit Release`;
-    }
-};
-        
-async function uploadFileToR2(file, folder = 'audio') {
-    const fileName = `${folder}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-    
-    // Request Pre-signed URL from Cloudflare Worker
-    const response = await fetch('https://your-worker.your-subdomain.workers.dev/api/presigned-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: fileName, contentType: file.type })
-    });
-
-    if (!response.ok) throw new Error('Failed to retrieve upload URL');
-    const { uploadUrl, publicUrl } = await response.json();
-
-    // Directly PUT file to Cloudflare R2
-    await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file
-    });
-
-    return publicUrl; // R2 Public bucket URL to store in metadata
-}
-
-        // Render Placeholders for Auxiliary Pages
-        function renderArtistsView() {
+        // 4. ANALYTICS & EARNINGS VIEW
+        function renderAnalyticsView() {
             return `
-                <div class="space-y-6">
-                    <div class="flex justify-between items-center pb-4 border-b border-brand-border/60">
-                        <div>
-                            <h1 class="text-2xl font-bold font-display text-white">Roster & Artists</h1>
-                            <p class="text-xs text-gray-400">Manage profile details and Spotify/Apple IDs for registered roster entries.</p>
+                <div class="max-w-7xl mx-auto space-y-6">
+                    <div class="pb-4 border-b border-brand-border/60">
+                        <h1 class="text-2xl font-bold text-white tracking-tight">Analytics & Earnings</h1>
+                        <p class="text-xs text-gray-400">Stream telemetry, platform breakdowns, and royalty revenue reports.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-2">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Total Revenue</p>
+                            <h3 class="text-3xl font-black text-white font-mono">$1,420.50</h3>
+                        </div>
+                        <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-2">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Spotify Streams</p>
+                            <h3 class="text-3xl font-black text-brand-accent font-mono">42,850</h3>
+                        </div>
+                        <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-2">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Apple Music Streams</p>
+                            <h3 class="text-3xl font-black text-white font-mono">18,210</h3>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="p-5 rounded-2xl bg-brand-card border border-brand-border flex items-center gap-4">
-                            <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-brand-accent to-brand-purple flex items-center justify-center font-bold text-lg text-white">
-                                OB
+
+                    <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+                        <h2 class="text-sm font-bold text-white uppercase tracking-wider font-mono">DSP Breakdown</h2>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1"><span>Spotify</span><span class="font-mono">65%</span></div>
+                                <div class="w-full h-2 rounded-full bg-brand-dark"><div class="h-full bg-brand-accent rounded-full" style="width: 65%;"></div></div>
                             </div>
                             <div>
-                                <h4 class="text-sm font-bold text-white">Official Bigi</h4>
-                                <p class="text-xs text-gray-400">Primary Artist Account</p>
-                                <span class="inline-block mt-2 text-[10px] px-2 py-0.5 rounded bg-brand-accent/10 text-brand-accent border border-brand-accent/20">Too Lost Verified</span>
+                                <div class="flex justify-between text-xs mb-1"><span>Apple Music</span><span class="font-mono">25%</span></div>
+                                <div class="w-full h-2 rounded-full bg-brand-dark"><div class="h-full bg-blue-500 rounded-full" style="width: 25%;"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1"><span>TikTok / IG</span><span class="font-mono">10%</span></div>
+                                <div class="w-full h-2 rounded-full bg-brand-dark"><div class="h-full bg-purple-500 rounded-full" style="width: 10%;"></div></div>
                             </div>
                         </div>
                     </div>
@@ -2111,265 +617,52 @@ async function uploadFileToR2(file, folder = 'audio') {
             `;
         }
 
-        function renderGenericFormView(title, subtitle) {
+        // 5. SETTINGS & PAYOUTS VIEW
+        function renderSettingsView() {
             return `
-                <div class="max-w-2xl mx-auto space-y-6">
+                <div class="max-w-4xl mx-auto space-y-6">
                     <div class="pb-4 border-b border-brand-border/60">
-                        <h1 class="text-2xl font-bold font-display text-white">${title}</h1>
-                        <p class="text-xs text-gray-400">${subtitle}</p>
+                        <h1 class="text-2xl font-bold text-white tracking-tight">Settings & Payouts</h1>
+                        <p class="text-xs text-gray-400">Manage account preferences, artist profiles, and payout accounts.</p>
                     </div>
 
-                    <form onsubmit="handleGenericSubmit(event, '${title}')" class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
-                        <div>
-                            <label class="too-lost-form-label">Select Active Catalog Item</label>
-                            <select class="too-lost-input">
-                                ${window.userReleases.length > 0 
-                                    ? window.userReleases.map(r => `<option value="${r.id}">${r.title} (${r.type})</option>`).join('')
-                                    : `<option value="">No releases available in database</option>`
-                                }
-                            </select>
+                    <div class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border">
+                        <div class="space-y-4">
+                            <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">Account Information</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="too-lost-form-label">Full Name</label>
+                                    <input type="text" value="ismael kea" class="too-lost-input">
+                                </div>
+                                <div>
+                                    <label class="too-lost-form-label">Email Address</label>
+                                    <input type="email" value="ismaelkea818@gmail.com" class="too-lost-input">
+                                </div>
+                            </div>
                         </div>
 
-                        <div>
-                            <label class="too-lost-form-label">Submission Notes / Specs</label>
-                            <textarea required rows="4" placeholder="Type instructions..." class="too-lost-input"></textarea>
-                        </div>
-
-                        <div class="flex justify-end">
-                            <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">Submit to Too Lost Pipeline</button>
-                        </div>
-                    </form>
-                </div>
-            `;
-        }
-
-        window.handleGenericSubmit = function(e, title) {
-            e.preventDefault();
-            alert(`Your request for "${title}" has been successfully logged.`);
-            e.target.reset();
-        };
-
-        function renderStreamsView() {
-            return `
-                <div class="space-y-6">
-                    <div class="pb-4 border-b border-brand-border/60">
-                        <h1 class="text-2xl font-bold font-display text-white">Streams Overview</h1>
-                        <p class="text-xs text-gray-400">Platform performance telemetries.</p>
-                    </div>
-                    <div class="p-6 rounded-2xl bg-brand-card border border-brand-border">
-                        <div class="h-72">
-                            <canvas id="streamsDetailChart"></canvas>
+                        <div class="space-y-4 pt-6 border-t border-brand-border">
+                            <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">Payout Gateway</h3>
+                            <div class="p-4 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <i class="fa-solid fa-wallet text-xl text-brand-accent"></i>
+                                    <div>
+                                        <p class="text-xs font-bold text-white">Stripe Connect / Bank Transfer</p>
+                                        <p class="text-[10px] text-gray-400">Connected account ready for automatic monthly payouts</p>
+                                    </div>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             `;
         }
 
-        function renderAnalyticsDetailView(title, description) {
-            return `
-                <div class="space-y-6">
-                    <div class="pb-4 border-b border-brand-border/60">
-                        <h1 class="text-2xl font-bold font-display text-white">${title}</h1>
-                        <p class="text-xs text-gray-400">${description}</p>
-                    </div>
-                    <div class="p-8 rounded-2xl bg-brand-card border border-brand-border text-center space-y-3">
-                        <i class="fa-solid fa-chart-pie text-3xl text-brand-accent"></i>
-                        <h4 class="text-sm font-bold text-white">Live Monitoring Active</h4>
-                        <p class="text-xs text-gray-400 max-w-md mx-auto">Analytics update directly from DSP data feeds every 24 hours.</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderRoyaltySummaryView() {
-            const totalStreams = window.userTelemetry.reduce((acc, curr) => acc + (curr.count || 0), 0);
-            const earnings = (totalStreams * 0.0038).toFixed(2);
-
-            return `
-                <div class="space-y-6">
-                    <div class="pb-4 border-b border-brand-border/60">
-                        <h1 class="text-2xl font-bold font-display text-white">Royalty Summary</h1>
-                        <p class="text-xs text-gray-400">Net royalties breakdown.</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="p-6 rounded-2xl bg-brand-card border border-brand-border">
-                            <span class="text-xs text-gray-400 font-semibold">Total Net Earnings</span>
-                            <div class="text-3xl font-extrabold font-display text-emerald-400 mt-2">$${earnings}</div>
-                        </div>
-                        <div class="p-6 rounded-2xl bg-brand-card border border-brand-border">
-                            <span class="text-xs text-gray-400 font-semibold">Pending Statements</span>
-                            <div class="text-3xl font-extrabold font-display text-white mt-2">$0.00</div>
-                        </div>
-                        <div class="p-6 rounded-2xl bg-brand-card border border-brand-border">
-                            <span class="text-xs text-gray-400 font-semibold">Paid Out</span>
-                            <div class="text-3xl font-extrabold font-display text-white mt-2">$0.00</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderPayoutView() {
-            const totalStreams = window.userTelemetry.reduce((acc, curr) => acc + (curr.count || 0), 0);
-            const earnings = (totalStreams * 0.0038).toFixed(2);
-
-            return `
-                <div class="max-w-xl mx-auto space-y-6">
-                    <div class="pb-4 border-b border-brand-border/60">
-                        <h1 class="text-2xl font-bold font-display text-white">Request Payment</h1>
-                        <p class="text-xs text-gray-400">Payout funds via Bank ACH or PayPal.</p>
-                    </div>
-
-                    <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
-                        <div class="flex justify-between items-center pb-4 border-b border-brand-border">
-                            <span class="text-xs text-gray-400">Available Balance:</span>
-                            <span class="text-lg font-bold text-emerald-400">$${earnings}</span>
-                        </div>
-
-                        <div>
-                            <label class="too-lost-form-label">Withdrawal Amount ($)</label>
-                            <input type="number" max="${earnings}" min="10" placeholder="0.00" class="too-lost-input">
-                        </div>
-
-                        <div>
-                            <label class="too-lost-form-label">Payment Method</label>
-                            <select class="too-lost-input">
-                                <option>Bank Wire / ACH</option>
-                                <option>PayPal</option>
-                            </select>
-                        </div>
-
-                        <button onclick="alert('Payout request submitted for approval.')" class="w-full py-3 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">
-                            Process Payout
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderTrackPerformanceView() {
-            return `
-                <div class="space-y-6">
-                    <div class="pb-4 border-b border-brand-border/60">
-                        <h1 class="text-2xl font-bold font-display text-white">Track Performance</h1>
-                        <p class="text-xs text-gray-400">Performance details per track.</p>
-                    </div>
-                    ${renderReleasesTableMarkup()}
-                </div>
-            `;
-        }
-
-        function renderSplitsView() {
-            return `
-                <div class="space-y-6">
-                    <div class="flex justify-between items-center pb-4 border-b border-brand-border/60">
-                        <div>
-                            <h1 class="text-2xl font-bold font-display text-white">SplitShare Collaborators</h1>
-                            <p class="text-xs text-gray-400">Configure automated split rules.</p>
-                        </div>
-                    </div>
-
-                    <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
-                        <h4 class="text-sm font-bold text-white">Active Split Rules</h4>
-                        <p class="text-xs text-gray-400">Select a catalog entry to set up automated revenue share percentages.</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderRightsView(title, description) {
-            return `
-                <div class="max-w-2xl mx-auto space-y-6">
-                    <div class="pb-4 border-b border-brand-border/60">
-                        <h1 class="text-2xl font-bold font-display text-white">${title}</h1>
-                        <p class="text-xs text-gray-400">${description}</p>
-                    </div>
-
-                    <form onsubmit="handleGenericSubmit(event, '${title}')" class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
-                        <div>
-                            <label class="too-lost-form-label">Target Channel / Video / Account URL</label>
-                            <input type="url" required placeholder="https://..." class="too-lost-input">
-                        </div>
-
-                        <div>
-                            <label class="too-lost-form-label">Associated Release</label>
-                            <select class="too-lost-input">
-                                ${window.userReleases.length > 0 
-                                    ? window.userReleases.map(r => `<option value="${r.id}">${r.title}</option>`).join('')
-                                    : `<option value="">No catalog releases found</option>`
-                                }
-                            </select>
-                        </div>
-
-                        <button type="submit" class="w-full py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300">Submit Request</button>
-                    </form>
-                </div>
-            `;
-        }
-
-        // ==================== CHART INITIALIZERS ====================
-
-        function initDashboardChart() {
-            const canvas = document.getElementById('dashboardChart');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            
-            const labels = window.userTelemetry.length > 0 ? window.userTelemetry.map(t => t.date || 'Day') : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-            const dataPoints = window.userTelemetry.length > 0 ? window.userTelemetry.map(t => t.count || 0) : [0, 0, 0, 0, 0, 0, 0];
-
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Streams',
-                        data: dataPoints,
-                        borderColor: '#00f2fe',
-                        backgroundColor: 'rgba(0, 242, 254, 0.1)',
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: '#1b2436' }, ticks: { color: '#9ca3af', font: { size: 10 } } },
-                        y: { grid: { color: '#1b2436' }, ticks: { color: '#9ca3af', font: { size: 10 } } }
-                    }
-                }
-            });
-        }
-
-        function initStreamsChart() {
-            const canvas = document.getElementById('streamsDetailChart');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-
-            chartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Spotify', 'Apple Music', 'YouTube', 'TikTok', 'Amazon', 'Deezer'],
-                    datasets: [{
-                        label: 'Streams by Platform',
-                        data: [12000, 8500, 14200, 22000, 4100, 1800],
-                        backgroundColor: '#6366f1'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: '#1b2436' }, ticks: { color: '#9ca3af' } },
-                        y: { grid: { color: '#1b2436' }, ticks: { color: '#9ca3af' } }
-                    }
-                }
-            });
-        }
-        renderTrackCards();
-        renderCurrentPage();
+        // Initialize default view on load
+        document.addEventListener('DOMContentLoaded', () => {
+            switchView('home');
+        });
     </script>
 </body>
 </html>
