@@ -77,19 +77,21 @@
                 <button onclick="toggleMobileSidebar()" class="lg:hidden text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
-            <!-- User Mini Profile -->
+            <!-- Dynamic Authenticated User Profile -->
             <div class="p-4 mx-3 my-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between">
                 <div class="flex items-center gap-3 overflow-hidden">
-                    <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-brand-accent font-bold flex items-center justify-center text-xs border border-cyan-500/30 flex-shrink-0">IK</div>
+                    <div id="userInitials" class="w-8 h-8 rounded-lg bg-cyan-500/20 text-brand-accent font-bold flex items-center justify-center text-xs border border-cyan-500/30 flex-shrink-0">--</div>
                     <div class="overflow-hidden">
-                        <p class="text-xs font-bold text-white truncate">ismael kea</p>
-                        <p class="text-[10px] text-gray-400 truncate">ismaelkea818@gmail.com</p>
+                        <p id="userName" class="text-xs font-bold text-white truncate">Loading Auth...</p>
+                        <p id="userEmail" class="text-[10px] text-gray-400 truncate">Connecting Firebase...</p>
                     </div>
                 </div>
-                <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] flex-shrink-0" title="Connected"></span>
+                <button onclick="handleSignOut()" title="Sign Out" class="text-gray-500 hover:text-red-400 transition-colors">
+                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                </button>
             </div>
 
-            <!-- Nav Links -->
+            <!-- Navigation Links -->
             <nav class="flex-1 px-3 space-y-1.5 overflow-y-auto py-2">
                 <p class="px-3 pb-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Core Workspace</p>
                 <button onclick="switchView('home')" id="nav_home" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-brand-accent bg-brand-dark border border-brand-border/80 transition-all">
@@ -109,200 +111,199 @@
                 </button>
             </nav>
 
-            <!-- Sidebar Footer Status -->
             <div class="p-4 border-t border-brand-border bg-brand-card/50 flex items-center justify-between text-[11px] text-gray-400">
-                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> Too Lost API Ready</span>
+                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> Too Lost API Gateway</span>
                 <i class="fa-solid fa-gear text-gray-500 hover:text-white cursor-pointer" onclick="switchView('settings')"></i>
             </div>
         </aside>
 
-        <!-- Main Content Wrapper -->
+        <!-- Main Content Viewport -->
         <main class="flex-1 flex flex-col min-w-0 bg-brand-dark">
-            
-            <!-- Top Nav Bar (Desktop) -->
             <header class="hidden lg:flex items-center justify-between px-8 py-4 bg-brand-card border-b border-brand-border">
                 <div class="flex items-center gap-3 max-w-md w-full relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 text-xs text-gray-500"></i>
-                    <input type="text" placeholder="Search catalog, UPCs, ISRCs, or artists..." class="too-lost-input pl-9 py-2 text-xs bg-brand-dark/60">
+                    <input type="text" placeholder="Search live catalog, UPCs, ISRCs..." class="too-lost-input pl-9 py-2 text-xs bg-brand-dark/60">
                 </div>
                 <div class="flex items-center gap-4">
                     <button onclick="switchView('create')" class="px-4 py-2 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-all flex items-center gap-2 shadow-lg shadow-cyan-500/10">
                         <i class="fa-solid fa-plus text-[10px]"></i> New Release
                     </button>
-                    <div class="flex items-center gap-3 pl-4 border-l border-brand-border">
-                        <div class="w-8 h-8 rounded-xl bg-cyan-500/20 text-brand-accent font-bold flex items-center justify-center text-xs border border-cyan-500/30">IS</div>
-                        <div>
-                            <p class="text-xs font-bold text-white">ismael kea</p>
-                            <p class="text-[9px] text-cyan-400 font-mono tracking-wider">Verified Label Portal</p>
-                        </div>
-                    </div>
                 </div>
             </header>
 
-            <!-- Dynamic Viewport Area -->
             <div id="mainViewport" class="flex-1 p-4 sm:p-8 overflow-y-auto">
-                <!-- Injected dynamically via JS router -->
+                <div class="flex items-center justify-center h-64">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl text-brand-accent"></i>
+                </div>
             </div>
         </main>
     </div>
 
-    <!-- Application Script Logic -->
-    <script>
-        // Global State & Mock DB storage
-        window.userState = { uid: "user_ismael_kea_01" };
-        window.releasesCatalog = [
-            {
-                id: "rel_01",
-                title: "Cybernetic Genesis",
-                artist: "Official Bigi",
-                type: "Single",
-                genre: "Electronic",
-                upc: "198429104821",
-                status: "Live on DSPs",
-                releaseDate: "2026-06-15",
-                coverUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&auto=format&fit=crop&q=80",
-                tracks: [{ name: "Cybernetic Genesis", isrc: "US-AUD-26-10042", audioFileName: "cybernetic_master_final.wav" }]
-            }
-        ];
+    <!-- Production JavaScript Module Hooking Firebase, Worker & R2 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Firebase Client Configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_FIREBASE_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Production Configuration Endpoints
+        const WORKER_BASE_URL = "https://your-worker.your-subdomain.workers.dev";
+
+        // Global State Variables
+        window.currentUser = null;
+        window.releasesCatalog = [];
         window.formTrackList = [
-            { id: Date.now(), name: '', version: '', language: 'English', artists: [{ name: 'Official Bigi', role: 'Primary' }], writers: [{ name: '', role: 'Writer' }], audioFileName: null }
+            { id: Date.now(), name: '', version: '', language: 'English', artists: '', writers: '', isrc: '', audioFileName: null, rawAudioFile: null }
         ];
 
-        // Router View Switching
-        function switchView(viewName) {
-            // Update active styles on sidebar
+        // Auth Observer Hook
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                window.currentUser = user;
+                document.getElementById('userName').innerText = user.displayName || user.email.split('@')[0];
+                document.getElementById('userEmail').innerText = user.email;
+                document.getElementById('userInitials').innerText = (user.displayName || user.email).substring(0, 2).toUpperCase();
+                
+                await loadLiveCatalog();
+                switchView('home');
+            } else {
+                // Redirect unauthenticated user to login view
+                window.location.href = '/login.html';
+            }
+        });
+
+        window.handleSignOut = () => signOut(auth).then(() => window.location.href = '/login.html');
+
+        // Fetch Live Releases from Firestore
+        async function loadLiveCatalog() {
+            try {
+                const q = query(collection(db, "releases"), where("userId", "==", window.currentUser.uid));
+                const querySnapshot = await getDocs(q);
+                window.releasesCatalog = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            } catch (err) {
+                console.error("Error loading live catalog:", err);
+            }
+        }
+
+        // Direct R2 Binary Upload via Cloudflare Worker Pre-Signed URLs
+        async function uploadFileToR2(file, folder = 'audio') {
+            const fileName = `${folder}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+            const token = await window.currentUser.getIdToken();
+
+            const res = await fetch(`${WORKER_BASE_URL}/api/presigned-url`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ key: fileName, contentType: file.type })
+            });
+
+            if (!res.ok) throw new Error('Failed to retrieve upload URL from Worker');
+            const { uploadUrl, publicUrl } = await res.json();
+
+            // Direct binary PUT to R2 Bucket
+            const uploadRes = await fetch(uploadUrl, {
+                method: 'PUT',
+                headers: { 'Content-Type': file.type },
+                body: file
+            });
+
+            if (!uploadRes.ok) throw new Error('Failed uploading binary to Cloudflare R2');
+            return publicUrl;
+        }
+
+        // View Router Switching
+        window.switchView = function(viewName) {
             ['home', 'catalog', 'create', 'analytics', 'settings'].forEach(v => {
                 const btn = document.getElementById(`nav_${v}`);
                 if (btn) {
-                    if (v === viewName) {
-                        btn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-brand-accent bg-brand-dark border border-brand-border/80 transition-all";
-                    } else {
-                        btn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-brand-dark/50 transition-all";
-                    }
+                    btn.className = (v === viewName)
+                        ? "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-brand-accent bg-brand-dark border border-brand-border/80 transition-all"
+                        : "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-brand-dark/50 transition-all";
                 }
             });
 
             const viewport = document.getElementById('mainViewport');
             if (viewName === 'home') viewport.innerHTML = renderHomeView();
             if (viewName === 'catalog') viewport.innerHTML = renderCatalogView();
-            if (viewName === 'create') viewport.innerHTML = renderCreateReleaseView();
+            if (viewName === 'create') {
+                viewport.innerHTML = renderCreateReleaseView();
+                renderTrackCards();
+            }
             if (viewName === 'analytics') viewport.innerHTML = renderAnalyticsView();
             if (viewName === 'settings') viewport.innerHTML = renderSettingsView();
 
-            // Close mobile sidebar if open
             const sidebar = document.getElementById('sidebarNav');
-            if (!sidebar.classList.contains('-translate-x-full')) {
-                sidebar.classList.add('-translate-x-full');
-            }
-        }
+            if (!sidebar.classList.contains('-translate-x-full')) sidebar.classList.add('-translate-x-full');
+        };
 
-        function toggleMobileSidebar() {
-            const sidebar = document.getElementById('sidebarNav');
-            sidebar.classList.toggle('-translate-x-full');
-        }
+        window.toggleMobileSidebar = () => document.getElementById('sidebarNav').classList.toggle('-translate-x-full');
 
-        // 1. HOME VIEW
+        // Render Functions
         function renderHomeView() {
-            const totalStreams = window.releasesCatalog.length * 14250;
             return `
                 <div class="max-w-7xl mx-auto space-y-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
                         <div>
-                            <h1 class="text-2xl font-bold text-white tracking-tight">Welcome back, <span class="text-brand-accent">ismael kea</span></h1>
-                            <p class="text-xs text-gray-400">Real-time stats and Too Lost distribution pipeline management.</p>
+                            <h1 class="text-2xl font-bold text-white tracking-tight">Welcome, <span class="text-brand-accent">${window.currentUser?.displayName || 'Partner'}</span></h1>
+                            <p class="text-xs text-gray-400">Live production telemetry & Too Lost API gateway pipeline.</p>
                         </div>
-                        <button onclick="switchView('create')" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-all flex items-center gap-2 shadow-lg shadow-cyan-500/10 self-start sm:self-auto">
+                        <button onclick="switchView('create')" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs flex items-center gap-2 shadow-lg shadow-cyan-500/10">
                             <i class="fa-solid fa-plus text-[10px]"></i> New Release
                         </button>
                     </div>
 
-                    <!-- Stat Cards -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-2">
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Total Streams</p>
-                            <h3 class="text-2xl font-black text-white font-mono">${totalStreams.toLocaleString()}</h3>
-                            <span class="text-[10px] text-emerald-400 flex items-center gap-1 font-semibold"><i class="fa-solid fa-arrow-trend-up"></i> +12.4% this month</span>
-                        </div>
-                        <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-2">
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Available Royalties</p>
-                            <h3 class="text-2xl font-black text-brand-accent font-mono">$1,420.50</h3>
-                            <span class="text-[10px] text-gray-400">Ready for direct payout</span>
-                        </div>
                         <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-2">
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Active Catalog</p>
                             <h3 class="text-2xl font-black text-white font-mono">${window.releasesCatalog.length}</h3>
-                            <span class="text-[10px] text-cyan-400">Global DSP Delivery</span>
                         </div>
                         <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-2">
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Too Lost API Connection</p>
-                            <div class="flex items-center gap-2 pt-1">
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                <span class="text-xs font-bold text-emerald-400">Connected & Ready</span>
-                            </div>
-                            <span class="text-[10px] text-gray-400">Encrypted pipeline sync</span>
-                        </div>
-                    </div>
-
-                    <!-- Recent Catalog Feed -->
-                    <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
-                        <div class="flex items-center justify-between">
-                            <h2 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Recent Deliveries</h2>
-                            <button onclick="switchView('catalog')" class="text-xs text-brand-accent hover:underline">View All Catalog</button>
-                        </div>
-                        <div class="divide-y divide-brand-border">
-                            ${window.releasesCatalog.map(rel => `
-                                <div class="py-3 flex items-center justify-between gap-4">
-                                    <div class="flex items-center gap-3">
-                                        <img src="${rel.coverUrl}" class="w-10 h-10 rounded-lg object-cover border border-brand-border">
-                                        <div>
-                                            <p class="text-xs font-bold text-white">${rel.title}</p>
-                                            <p class="text-[10px] text-gray-400">${rel.artist} • UPC: ${rel.upc}</p>
-                                        </div>
-                                    </div>
-                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-cyan-500/10 text-brand-accent border border-cyan-500/20">${rel.status}</span>
-                                </div>
-                            `).join('')}
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Status</p>
+                            <span class="text-xs font-bold text-emerald-400 flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> R2 & Too Lost Ready</span>
                         </div>
                     </div>
                 </div>
             `;
         }
 
-        // 2. CATALOG VIEW
         function renderCatalogView() {
+            if (window.releasesCatalog.length === 0) {
+                return `
+                    <div class="text-center py-20 bg-brand-card rounded-2xl border border-brand-border space-y-4">
+                        <i class="fa-solid fa-compact-disc text-4xl text-gray-600"></i>
+                        <h3 class="text-lg font-bold text-white">No Releases In Your Catalog</h3>
+                        <p class="text-xs text-gray-400">Create your first release to start distributing music globally.</p>
+                        <button onclick="switchView('create')" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs">Create Release Now</button>
+                    </div>
+                `;
+            }
             return `
                 <div class="max-w-7xl mx-auto space-y-6">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
-                        <div>
-                            <h1 class="text-2xl font-bold text-white tracking-tight">Releases Catalog</h1>
-                            <p class="text-xs text-gray-400">Manage your active music catalog, check ISRCs, and monitor DSP distribution status.</p>
-                        </div>
-                        <button onclick="switchView('create')" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-all flex items-center gap-2 shadow-lg shadow-cyan-500/10 self-start sm:self-auto">
-                            <i class="fa-solid fa-plus text-[10px]"></i> Create Release
-                        </button>
-                    </div>
-
+                    <h1 class="text-2xl font-bold text-white">Releases Catalog</h1>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         ${window.releasesCatalog.map(rel => `
-                            <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-4 hover:border-cyan-500/40 transition-all flex flex-col justify-between">
-                                <div class="space-y-3">
-                                    <div class="relative aspect-square rounded-xl overflow-hidden bg-brand-dark border border-brand-border">
-                                        <img src="${rel.coverUrl}" class="w-full h-full object-cover">
-                                        <span class="absolute top-3 right-3 px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/70 backdrop-blur text-brand-accent border border-brand-border">${rel.type}</span>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold text-white text-sm truncate">${rel.title}</h3>
-                                        <p class="text-xs text-gray-400">${rel.artist}</p>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-2 text-[11px] font-mono pt-2 border-t border-brand-border">
-                                        <div><span class="text-gray-500 block text-[9px] uppercase">UPC Code</span><span class="text-white">${rel.upc}</span></div>
-                                        <div><span class="text-gray-500 block text-[9px] uppercase">Genre</span><span class="text-white">${rel.genre}</span></div>
-                                    </div>
+                            <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+                                <img src="${rel.coverUrl}" class="w-full aspect-square object-cover rounded-xl border border-brand-border">
+                                <div>
+                                    <h3 class="font-bold text-white text-sm">${rel.title}</h3>
+                                    <p class="text-xs text-gray-400">${rel.artist}</p>
                                 </div>
-                                <div class="flex items-center justify-between pt-3 border-t border-brand-border">
-                                    <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">${rel.status}</span>
-                                    <button onclick="alert('Viewing metadata & asset details for UPC: ${rel.upc}')" class="text-xs text-brand-accent hover:underline font-semibold">Manage Release</button>
-                                </div>
+                                <div class="text-[10px] font-mono text-gray-400 pt-2 border-t border-brand-border">UPC: ${rel.upc || 'Pending Assign'}</div>
                             </div>
                         `).join('')}
                     </div>
@@ -310,139 +311,58 @@
             `;
         }
 
-        // 3. CREATE NEW RELEASE VIEW
         function renderCreateReleaseView() {
             return `
                 <div class="max-w-4xl mx-auto space-y-6">
                     <div class="pb-4 border-b border-brand-border/60">
-                        <h1 class="text-2xl font-bold font-display text-white">Create New Release</h1>
-                        <p class="text-xs text-gray-400">Complete all technical metadata fields to trigger release submission through Too Lost APIs.</p>
+                        <h1 class="text-2xl font-bold text-white">Create Production Release</h1>
+                        <p class="text-xs text-gray-400">Upload binaries to Cloudflare R2 and send metadata to Too Lost Distribution API.</p>
                     </div>
 
                     <form id="productionReleaseForm" onsubmit="handleProductionFormSubmit(event)" class="space-y-8 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border">
-                        
-                        <!-- 1. COVER ART SECTION -->
                         <div class="space-y-4">
-                            <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">1. Artwork & Cover Art</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-                                <div class="space-y-2">
-                                    <label class="too-lost-form-label">Cover Art (3000x3000px)</label>
-                                    <div class="w-full aspect-square rounded-xl bg-brand-dark border-2 border-dashed border-brand-border flex flex-col items-center justify-center p-4 text-center relative group overflow-hidden">
-                                        <img id="coverArtPreview" class="absolute inset-0 w-full h-full object-cover hidden">
-                                        <i class="fa-solid fa-music text-4xl text-gray-600 mb-2 group-hover:scale-110 transition-transform"></i>
-                                        <span class="text-[10px] text-gray-400 mb-2">Select Artwork File</span>
-                                        <input type="file" id="coverArtFileInput" accept="image/*" onchange="handleCoverArtUpload(event)" required class="absolute inset-0 opacity-0 cursor-pointer">
-                                        <button type="button" class="px-3 py-1.5 rounded bg-white text-black font-bold text-[10px] shadow pointer-events-none">Upload Cover Art</button>
-                                    </div>
-                                </div>
-                                <div class="md:col-span-2 space-y-4">
-                                    <label class="too-lost-form-label">Generative AI tools used in cover art?</label>
-                                    <div class="flex items-center gap-6 text-xs text-gray-300">
-                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="aiCoverArt" value="None" checked class="accent-brand-accent"> None</label>
-                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="aiCoverArt" value="Some" class="accent-brand-accent"> Some</label>
-                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="aiCoverArt" value="All" class="accent-brand-accent"> All</label>
-                                    </div>
-                                </div>
+                            <h3 class="text-sm font-bold text-brand-accent font-mono uppercase">1. Cover Art (Direct R2 Upload)</h3>
+                            <div class="flex items-center gap-4">
+                                <input type="file" id="coverArtFileInput" accept="image/*" required class="too-lost-input">
                             </div>
                         </div>
 
-                        <!-- 2. RELEASE METADATA -->
                         <div class="space-y-4 pt-6 border-t border-brand-border">
-                            <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">2. Release Metadata</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="too-lost-form-label">Release Title *</label>
-                                    <input type="text" id="releaseTitle" required placeholder="Release Title" class="too-lost-input">
-                                </div>
-                                <div>
-                                    <label class="too-lost-form-label">Release Version</label>
-                                    <input type="text" id="releaseVersion" placeholder="Deluxe / Remix" class="too-lost-input">
-                                </div>
-                                <div>
-                                    <label class="too-lost-form-label">Metadata Language</label>
-                                    <select id="metadataLanguage" class="too-lost-input">
-                                        <option value="English">English</option>
-                                        <option value="Spanish">Spanish</option>
-                                        <option value="French">French</option>
-                                    </select>
-                                </div>
-                            </div>
-
+                            <h3 class="text-sm font-bold text-brand-accent font-mono uppercase">2. Release Metadata</h3>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="too-lost-form-label">Primary Artists *</label>
-                                    <input type="text" id="primaryArtists" required value="Official Bigi" class="too-lost-input">
+                                    <label class="too-lost-form-label">Release Title *</label>
+                                    <input type="text" id="releaseTitle" required class="too-lost-input">
                                 </div>
                                 <div>
-                                    <label class="too-lost-form-label">Format Type *</label>
-                                    <select id="releaseFormatType" onchange="handleFormatTypeChange(this.value)" class="too-lost-input font-bold text-brand-accent">
-                                        <option value="Single">Single Release (1 Track)</option>
-                                        <option value="EP">EP (2-6 Tracks)</option>
-                                        <option value="Album">Album (7+ Tracks)</option>
-                                    </select>
+                                    <label class="too-lost-form-label">Primary Artist *</label>
+                                    <input type="text" id="primaryArtists" required class="too-lost-input">
                                 </div>
                             </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="too-lost-form-label">UPC</label>
-                                    <input type="text" readonly value="Assigned on submission" class="too-lost-input bg-brand-dark/50 text-gray-500 font-mono">
-                                </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label class="too-lost-form-label">Genre *</label>
                                     <select id="genreSelect" required class="too-lost-input">
-                                        <option value="">Please select</option>
                                         <option value="Pop">Pop</option>
                                         <option value="Hip-Hop/Rap">Hip-Hop/Rap</option>
                                         <option value="Electronic">Electronic</option>
-                                        <option value="Afrobeats">Afrobeats</option>
                                     </select>
                                 </div>
-                                <div>
-                                    <label class="too-lost-form-label">Label Name</label>
-                                    <input type="text" id="labelName" value="Audiory Distribution" class="too-lost-input">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 3. TRACKS & AUDIO DETAILS SECTION -->
-                        <div class="space-y-6 pt-6 border-t border-brand-border">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">3. Track Details & Audio Files</h3>
-                                    <p class="text-xs text-gray-400">Upload uncompressed WAV/FLAC audio files.</p>
-                                </div>
-                                <button type="button" id="addTrackBtn" onclick="addNewTrackItem()" class="hidden px-3.5 py-2 rounded-lg bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-all flex items-center gap-2">
-                                    <i class="fa-solid fa-plus"></i> Add Track
-                                </button>
-                            </div>
-                            <div id="tracksContainer" class="space-y-6">
-                                <!-- Dynamic track cards rendered here -->
-                            </div>
-                        </div>
-
-                        <!-- 4. TIMELINE & TERRITORIES -->
-                        <div class="space-y-4 pt-6 border-t border-brand-border">
-                            <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">4. Release Timeline</h3>
-                            <div class="p-4 rounded-xl bg-brand-dark border border-brand-border grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label class="too-lost-form-label">Target Release Date *</label>
                                     <input type="date" id="targetReleaseDate" required class="too-lost-input">
                                 </div>
-                                <div>
-                                    <label class="too-lost-form-label">Territory Rights</label>
-                                    <select id="territoryRights" class="too-lost-input">
-                                        <option value="Worldwide">Worldwide (All Territories)</option>
-                                    </select>
-                                </div>
                             </div>
                         </div>
 
-                        <!-- FORM ACTIONS -->
-                        <div class="pt-6 border-t border-brand-border flex justify-between items-center">
-                            <button type="button" onclick="switchView('catalog')" class="px-6 py-2.5 rounded-xl border border-brand-border bg-brand-dark text-xs text-gray-300 font-semibold">Cancel</button>
-                            <button type="submit" id="submitProductionFormBtn" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:bg-cyan-300 transition-all flex items-center gap-2 shadow-xl">
-                                <i class="fa-solid fa-floppy-disk"></i> Save & Submit Release
+                        <div class="space-y-6 pt-6 border-t border-brand-border">
+                            <h3 class="text-sm font-bold text-brand-accent font-mono uppercase">3. Audio Files & Track List</h3>
+                            <div id="tracksContainer" class="space-y-4"></div>
+                        </div>
+
+                        <div class="pt-6 border-t border-brand-border flex justify-end">
+                            <button type="submit" id="submitProductionFormBtn" class="px-8 py-3 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs flex items-center gap-2">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Assets & Submit
                             </button>
                         </div>
                     </form>
@@ -450,219 +370,102 @@
             `;
         }
 
-        // Render Track Cards Helper
         window.renderTrackCards = function() {
             const container = document.getElementById('tracksContainer');
             if (!container) return;
-
             container.innerHTML = window.formTrackList.map((track, idx) => `
-                <div class="p-5 rounded-2xl bg-brand-dark border border-brand-border space-y-6">
-                    <div class="flex items-center justify-between border-b border-brand-border pb-3">
-                        <span class="text-xs font-bold text-white font-mono flex items-center gap-2">
-                            <span class="w-6 h-6 rounded-full bg-brand-card border border-brand-border flex items-center justify-center text-brand-accent">${idx + 1}</span>
-                            Track Audio & Metadata
-                        </span>
-                        ${window.formTrackList.length > 1 ? `<button type="button" onclick="removeTrackItem(${idx})" class="text-gray-500 hover:text-red-400 text-xs"><i class="fa-solid fa-trash-can"></i> Remove</button>` : ''}
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="too-lost-form-label">Audio File (WAV / FLAC)</label>
-                            <div class="relative">
-                                <input type="file" accept="audio/*" onchange="handleTrackAudioUpload(event, ${idx})" class="too-lost-input opacity-0 absolute inset-0 cursor-pointer">
-                                <div class="too-lost-input truncate text-gray-400 flex items-center justify-between pointer-events-none">
-                                    <span>${track.audioFileName || 'Choose audio file...'}</span>
-                                    <i class="fa-solid fa-file-audio text-brand-accent"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">ISRC Code</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="isrc_${idx}" value="${track.isrc || ''}" placeholder="Auto-generated" class="too-lost-input font-mono flex-1">
-                                <button type="button" onclick="generateIsrcForTrack(${idx})" class="px-3 py-1.5 bg-black text-white text-[10px] font-bold rounded border border-brand-border">Generate</button>
-                            </div>
-                        </div>
-                    </div>
-
+                <div class="p-4 rounded-xl bg-brand-dark border border-brand-border space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="too-lost-form-label">Song Name *</label>
-                            <input type="text" required onchange="window.formTrackList[${idx}].name = this.value" value="${track.name}" placeholder="Track Title" class="too-lost-input">
+                            <label class="too-lost-form-label">Song Title *</label>
+                            <input type="text" required onchange="window.formTrackList[${idx}].name = this.value" class="too-lost-input">
                         </div>
                         <div>
-                            <label class="too-lost-form-label">Writers & Composers *</label>
-                            <input type="text" required placeholder="Full Legal Name" class="too-lost-input">
+                            <label class="too-lost-form-label">Audio Binary File (WAV/FLAC) *</label>
+                            <input type="file" accept="audio/*" required onchange="window.handleAudioFileSelect(event, ${idx})" class="too-lost-input">
                         </div>
                     </div>
                 </div>
             `).join('');
         };
 
-        window.handleFormatTypeChange = function(type) {
-            const addBtn = document.getElementById('addTrackBtn');
-            if (type === 'Single') {
-                window.formTrackList = [window.formTrackList[0]];
-                if (addBtn) addBtn.classList.add('hidden');
-            } else {
-                if (addBtn) addBtn.classList.remove('hidden');
-            }
-            renderTrackCards();
-        };
-
-        window.addNewTrackItem = function() {
-            window.formTrackList.push({ id: Date.now(), name: '', version: '', language: 'English', artists: [{ name: 'Official Bigi', role: 'Primary' }], writers: [{ name: '', role: 'Writer' }], audioFileName: null });
-            renderTrackCards();
-        };
-
-        window.removeTrackItem = function(idx) {
-            window.formTrackList.splice(idx, 1);
-            renderTrackCards();
-        };
-
-        window.handleCoverArtUpload = function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    const preview = document.getElementById('coverArtPreview');
-                    preview.src = evt.target.result;
-                    preview.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
+        window.handleAudioFileSelect = (e, idx) => {
+            if (e.target.files[0]) {
+                window.formTrackList[idx].rawAudioFile = e.target.files[0];
             }
         };
 
-        window.handleTrackAudioUpload = function(e, idx) {
-            const file = e.target.files[0];
-            if (file) {
-                window.formTrackList[idx].audioFileName = file.name;
-                renderTrackCards();
-            }
-        };
-
-        window.generateIsrcForTrack = function(idx) {
-            const isrc = "US-AUD-26-" + Math.floor(10000 + Math.random() * 90000);
-            window.formTrackList[idx].isrc = isrc;
-            const field = document.getElementById(`isrc_${idx}`);
-            if (field) field.value = isrc;
-        };
-
+        // Form Submit Handler
         window.handleProductionFormSubmit = async function(e) {
             e.preventDefault();
             const btn = document.getElementById('submitProductionFormBtn');
             btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting to Too Lost Pipeline...`;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Uploading to R2...`;
 
-            setTimeout(() => {
-                const newRel = {
-                    id: "rel_" + Date.now(),
+            try {
+                // 1. Upload Artwork directly to R2 Bucket
+                const coverArtFile = document.getElementById('coverArtFileInput').files[0];
+                const coverUrl = await uploadFileToR2(coverArtFile, 'artworks');
+
+                // 2. Upload Track Audio Binaries to R2
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Uploading Audio Files...`;
+                const processedTracks = await Promise.all(window.formTrackList.map(async (track) => {
+                    const audioUrl = await uploadFileToR2(track.rawAudioFile, 'audio');
+                    return { name: track.name, audioUrl };
+                }));
+
+                // 3. Assemble API Payload
+                const payload = {
+                    userId: window.currentUser.uid,
                     title: document.getElementById('releaseTitle').value,
                     artist: document.getElementById('primaryArtists').value,
-                    type: document.getElementById('releaseFormatType').value,
                     genre: document.getElementById('genreSelect').value,
-                    upc: "19" + Math.floor(10000000000 + Math.random() * 90000000000).toString(),
-                    status: 'Live on DSPs',
                     releaseDate: document.getElementById('targetReleaseDate').value,
-                    coverUrl: document.getElementById('coverArtPreview').src || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400',
-                    tracks: window.formTrackList
+                    coverUrl,
+                    tracks: processedTracks
                 };
-                window.releasesCatalog.unshift(newRel);
+
+                // 4. Proxy Request to Cloudflare Worker -> Too Lost API
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Proxying to Too Lost...`;
+                const token = await window.currentUser.getIdToken();
+                const workerRes = await fetch(`${WORKER_BASE_URL}/api/releases/submit`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!workerRes.ok) throw new Error('Worker gateway failed submission');
+                const tooLostData = await workerRes.json();
+
+                // 5. Store Metadata Reference in Firestore
+                await addDoc(collection(db, "releases"), {
+                    ...payload,
+                    tooLostId: tooLostData.id || null,
+                    createdAt: serverTimestamp()
+                });
+
+                await loadLiveCatalog();
                 switchView('catalog');
-            }, 1000);
+
+            } catch (err) {
+                console.error("Submission Error:", err);
+                alert(`Error: ${err.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Upload Assets & Submit`;
+            }
         };
 
-        // 4. ANALYTICS & EARNINGS VIEW
         function renderAnalyticsView() {
-            return `
-                <div class="max-w-7xl mx-auto space-y-6">
-                    <div class="pb-4 border-b border-brand-border/60">
-                        <h1 class="text-2xl font-bold text-white tracking-tight">Analytics & Earnings</h1>
-                        <p class="text-xs text-gray-400">Stream telemetry, platform breakdowns, and royalty revenue reports.</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                        <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-2">
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Total Revenue</p>
-                            <h3 class="text-3xl font-black text-white font-mono">$1,420.50</h3>
-                        </div>
-                        <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-2">
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Spotify Streams</p>
-                            <h3 class="text-3xl font-black text-brand-accent font-mono">42,850</h3>
-                        </div>
-                        <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-2">
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Apple Music Streams</p>
-                            <h3 class="text-3xl font-black text-white font-mono">18,210</h3>
-                        </div>
-                    </div>
-
-                    <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
-                        <h2 class="text-sm font-bold text-white uppercase tracking-wider font-mono">DSP Breakdown</h2>
-                        <div class="space-y-3">
-                            <div>
-                                <div class="flex justify-between text-xs mb-1"><span>Spotify</span><span class="font-mono">65%</span></div>
-                                <div class="w-full h-2 rounded-full bg-brand-dark"><div class="h-full bg-brand-accent rounded-full" style="width: 65%;"></div></div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs mb-1"><span>Apple Music</span><span class="font-mono">25%</span></div>
-                                <div class="w-full h-2 rounded-full bg-brand-dark"><div class="h-full bg-blue-500 rounded-full" style="width: 25%;"></div></div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs mb-1"><span>TikTok / IG</span><span class="font-mono">10%</span></div>
-                                <div class="w-full h-2 rounded-full bg-brand-dark"><div class="h-full bg-purple-500 rounded-full" style="width: 10%;"></div></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            return `<div class="max-w-7xl mx-auto"><h1 class="text-2xl font-bold text-white">Analytics & Earnings</h1><p class="text-xs text-gray-400 mt-2">Connect your Too Lost royalty reports via Worker API.</p></div>`;
         }
 
-        // 5. SETTINGS & PAYOUTS VIEW
         function renderSettingsView() {
-            return `
-                <div class="max-w-4xl mx-auto space-y-6">
-                    <div class="pb-4 border-b border-brand-border/60">
-                        <h1 class="text-2xl font-bold text-white tracking-tight">Settings & Payouts</h1>
-                        <p class="text-xs text-gray-400">Manage account preferences, artist profiles, and payout accounts.</p>
-                    </div>
-
-                    <div class="space-y-6 bg-brand-card p-6 sm:p-8 rounded-2xl border border-brand-border">
-                        <div class="space-y-4">
-                            <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">Account Information</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="too-lost-form-label">Full Name</label>
-                                    <input type="text" value="ismael kea" class="too-lost-input">
-                                </div>
-                                <div>
-                                    <label class="too-lost-form-label">Email Address</label>
-                                    <input type="email" value="ismaelkea818@gmail.com" class="too-lost-input">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="space-y-4 pt-6 border-t border-brand-border">
-                            <h3 class="text-sm font-bold text-brand-accent uppercase tracking-wider font-mono">Payout Gateway</h3>
-                            <div class="p-4 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fa-solid fa-wallet text-xl text-brand-accent"></i>
-                                    <div>
-                                        <p class="text-xs font-bold text-white">Stripe Connect / Bank Transfer</p>
-                                        <p class="text-[10px] text-gray-400">Connected account ready for automatic monthly payouts</p>
-                                    </div>
-                                </div>
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            return `<div class="max-w-4xl mx-auto"><h1 class="text-2xl font-bold text-white">Settings & Payouts</h1><p class="text-xs text-gray-400 mt-2">Configure Stripe payout settings and legal identity details.</p></div>`;
         }
-
-        // Initialize default view on load
-        document.addEventListener('DOMContentLoaded', () => {
-            switchView('home');
-        });
     </script>
 </body>
 </html>
