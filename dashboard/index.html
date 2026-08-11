@@ -272,39 +272,32 @@
             }
         }
 
-        // Direct R2 Upload via Cloudflare Worker Pre-Signed URLs (Fixed)
+        // Direct Multipart Upload to Cloudflare Worker R2 Bucket
         async function uploadFileToR2(file, folder = 'audio') {
-            const fileName = `${folder}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
             const token = await window.currentUser.getIdToken();
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', folder);
 
-            const res = await fetch(`${WORKER_BASE_URL}/api/presigned-url`, {
+            const res = await fetch(`${WORKER_BASE_URL}/api/upload`, {
                 method: 'POST',
                 headers: { 
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ key: fileName, contentType: file.type })
+                body: formData
             });
 
-            if (!res.ok) throw new Error(`Worker URL request failed with status ${res.status}`);
-    
-            const data = await res.json();
-            // Handles multiple possible property names from Cloudflare Worker response
-            const uploadUrl = data.uploadUrl || data.url || data.signedUrl;
-            const publicUrl = data.publicUrl || data.fileUrl || `${WORKER_BASE_URL}/${fileName}`;
-
-            if (!uploadUrl) {
-                throw new Error("Worker endpoint did not return a valid 'uploadUrl' property.");
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(`Worker upload failed with status ${res.status}: ${errText}`);
             }
 
-            const uploadRes = await fetch(uploadUrl, {
-                method: 'PUT',
-                headers: { 'Content-Type': file.type },
-                body: file
-            });
+            const data = await res.json();
+            if (!data.success || !data.url) {
+                throw new Error(`Upload failed: ${data.error || 'No public URL returned from Worker'}`);
+            }
 
-            if (!uploadRes.ok) throw new Error(`Failed uploading binary to Cloudflare R2 (Status ${uploadRes.status})`);
-            return publicUrl;
+            return data.url;
         }
 
         // View Router
@@ -726,12 +719,11 @@
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const arrayBuffer = await file.arrayBuffer();
 
-            // 1. Generate checksum preview BEFORE decodeAudioData detaches the buffer
+            // Sliced before decodeAudioData detaches the buffer thread
             const mockChecksum = Array.from(new Uint8Array(arrayBuffer.slice(0, 16)))
                 .map(b => b.toString(16).padStart(2, '0'))
                 .join('');
 
-            // 2. Pass the ArrayBuffer to decodeAudioData
             const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 
             return {
@@ -745,7 +737,7 @@
                 fileSize: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
                 checksum: mockChecksum,
                 loudness: '-14.2 LUFS (Integrated)',
-                uploadStatus: 'Validated & Ready for R2'
+                uploadStatus: 'Validated & Uploaded'
             };
         }
 
