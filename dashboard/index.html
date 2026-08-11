@@ -997,10 +997,10 @@ window.handleFormSubmission = async function(e) {
             copyright_line: window.releaseState.label.cLine,
             phonogram_line: window.releaseState.label.pLine,
             
-            // Map primary/associated artists
+            // Map primary/associated artists with array-formatted roles
             participants: window.releaseState.artists.map(artist => ({
                 name: artist.name,
-                role: artist.role.toLowerCase().replace(/\s+/g, '_'), // e.g. "primary_artist"
+                role: [artist.role === 'primary' ? 'Primary Artist' : artist.role],
                 spotify_id: artist.spotifyId || undefined,
                 apple_id: artist.appleId || undefined
             })),
@@ -1017,7 +1017,10 @@ window.handleFormSubmission = async function(e) {
                 genre: track.metadata.genre || undefined,
                 lyrics: track.lyrics.plain || undefined,
                 participants: track.contributors.length > 0 
-                    ? track.contributors.map(c => ({ name: c.name, role: "featured_artist" }))
+                    ? track.contributors.map(c => ({ 
+                        name: c.name, 
+                        role: ["Featured Artist"] 
+                      }))
                     : undefined
             }))
         };
