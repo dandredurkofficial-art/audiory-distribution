@@ -369,8 +369,7 @@
             `;
         }
 
-        /// Updated: Render Catalog
-function renderCatalogView() {
+        function renderCatalogView() {
     if (!window.releasesCatalog || window.releasesCatalog.length === 0) {
         return `
             <div class="text-center py-20 bg-brand-card rounded-2xl border border-brand-border space-y-4">
@@ -385,23 +384,29 @@ function renderCatalogView() {
     return `
         <div class="max-w-7xl mx-auto space-y-6">
             <h1 class="text-2xl font-bold text-white">Releases Catalog</h1>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                ${window.releasesCatalog.map(rel => `
-                    <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-4">
-                        <img src="${rel.artwork?.url || rel.cover_url || 'https://via.placeholder.com/300'}" class="w-full aspect-square object-cover rounded-xl border border-brand-border">
-                        <div>
-                            <h3 class="font-bold text-white text-sm">${rel.metadata?.title || rel.title || 'Untitled Release'}</h3>
-                            <p class="text-xs text-gray-400">${rel.artists ? rel.artists.map(a => a.name).join(', ') : (rel.artist || 'Unknown Artist')}</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                ${window.releasesCatalog.map(rel => {
+                    const artworkSrc = rel.coverUrl || rel.cover_url || rel.artwork?.url || 'https://placehold.co/400x400/1e293b/06b6d4?text=No+Cover';
+                    return `
+                        <div class="p-4 rounded-2xl bg-brand-card border border-brand-border flex items-center gap-4">
+                            <img src="${artworkSrc}" alt="${rel.title || 'Release Cover'}" 
+                                 class="w-24 h-24 sm:w-28 sm:h-28 object-cover rounded-xl border border-brand-border flex-shrink-0" 
+                                 onerror="this.src='https://placehold.co/400x400/1e293b/06b6d4?text=No+Cover'">
+                            <div class="flex-1 min-w-0 space-y-1">
+                                <h3 class="font-bold text-white text-sm truncate">${rel.metadata?.title || rel.title || 'Untitled Release'}</h3>
+                                <p class="text-xs text-gray-400 truncate">${rel.artists ? rel.artists.map(a => a.name).join(', ') : (rel.artist || 'Unknown Artist')}</p>
+                                <div class="text-[10px] font-mono text-cyan-400 pt-1">
+                                    ${rel.metadata?.type || rel.type || 'Single'} • <span class="text-gray-400">${rel.status || 'Submitted'}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="text-[10px] font-mono text-gray-400 pt-2 border-t border-brand-border">
-                            Type: ${rel.metadata?.type || 'Single'} | Status: ${rel.status || 'Submitted'}
-                        </div>
-                    </div>
-                `).join('')}
+                    `;
+                }).join('')}
             </div>
         </div>
     `;
 }
+        
         // Render Create Release Form Container
         window.renderCreateReleaseView = function() {
             return `
@@ -983,6 +988,61 @@ function renderCatalogView() {
                 <p><strong>Track Count:</strong> ${window.releaseState.tracks.length}</p>
             `;
         }
+
+        // Master List of Too Lost Supported Genres and Dependent Subgenres
+const GENRE_MAP = {
+    "Afrobeats": ["Afro-Pop", "Afro-Fusion", "Amapiano", "Highlife", "Afro-House", "Ndombolo"],
+    "Pop": ["Dance Pop", "Indie Pop", "Synth-Pop", "K-Pop", "Teen Pop"],
+    "Hip-Hop/Rap": ["Trap", "Boom Bap", "Drill", "Conscious Rap", "Melodic Rap", "Gangsta Rap"],
+    "R&B/Soul": ["Contemporary R&B", "Neo-Soul", "Afro-R&B", "Soul", "Funk"],
+    "Electronic/Dance": ["House", "Techno", "Trance", "EDM", "Dubstep", "Drum & Bass", "Deep House"],
+    "Reggae/Dancehall": ["Dancehall", "Roots Reggae", "Dub", "Ska", "Reggaeton"],
+    "Rock": ["Alternative Rock", "Indie Rock", "Hard Rock", "Punk Rock", "Soft Rock"],
+    "Latin": ["Reggaeton", "Bachata", "Salsa", "Latin Trap", "Cumbia"],
+    "Gospel/Christian": ["Christian Hip-Hop", "Worship", "Contemporary Gospel", "Traditional Gospel"],
+    "Jazz": ["Smooth Jazz", "Bebop", "Fusion", "Acid Jazz"],
+    "Classical": ["Symphonic", "Chamber", "Opera", "Modern Classical"]
+};
+
+// Handle Primary Genre Change (Updates Subgenre Dropdown)
+window.handlePrimaryGenreChange = function(selectedGenre) {
+    window.releaseState.metadata.primaryGenre = selectedGenre;
+    window.releaseState.metadata.secondaryGenre = ''; // Reset subgenre
+
+    const subSelect = document.getElementById('secondaryGenreSelect');
+    if (!subSelect) return;
+
+    if (!selectedGenre || !GENRE_MAP[selectedGenre]) {
+        subSelect.innerHTML = `<option value="">-- Select Primary Genre First --</option>`;
+        subSelect.disabled = true;
+        return;
+    }
+
+    const subgenres = GENRE_MAP[selectedGenre];
+    subSelect.disabled = false;
+    subSelect.innerHTML = `<option value="">Select Subgenre / Secondary Genre</option>` +
+        subgenres.map(sub => `<option value="${sub}">${sub}</option>`).join('');
+};
+
+// Handle Track Genre Change
+window.handleTrackGenreChange = function(trackIndex, selectedGenre) {
+    window.releaseState.tracks[trackIndex].metadata.genre = selectedGenre;
+    window.releaseState.tracks[trackIndex].metadata.subgenre = '';
+
+    const subSelect = document.getElementById(`track_subgenre_${trackIndex}`);
+    if (!subSelect) return;
+
+    if (!selectedGenre || !GENRE_MAP[selectedGenre]) {
+        subSelect.innerHTML = `<option value="">-- Select Genre First --</option>`;
+        subSelect.disabled = true;
+        return;
+    }
+
+    const subgenres = GENRE_MAP[selectedGenre];
+    subSelect.disabled = false;
+    subSelect.innerHTML = `<option value="">Select Subgenre</option>` +
+        subgenres.map(sub => `<option value="${sub}">${sub}</option>`).join('');
+};
 
         window.handleFormSubmission = async function(e) {
     e.preventDefault();
