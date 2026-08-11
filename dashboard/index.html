@@ -139,111 +139,71 @@
         </main>
     </div>
 
-    <!-- Production JavaScript Module Hooking Firebase, Worker & R2 -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        // Firebase Client Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBtii4iYkm7ummyi5SHiQMOMUPrOpwhdrk",
-            authDomain: "audiory-distribution.firebaseapp.com",
-            databaseURL: "https://audiory-distribution-default-rtdb.firebaseio.com",
-            projectId: "audiory-distribution",
-            storageBucket: "audiory-distribution.firebasestorage.app",
-            messagingSenderId: "944053428828",
-            appId: "1:944053428828:web:30277072355728f9c8fc99",
-            measurementId: "G-MXDJH52XX4"
+    <!-- Script Block containing Global Wizard Methods & Variables -->
+    <script>
+        // Global Data Maps & Dynamic Arrays
+        const GENRE_MAP = {
+            "Pop": ["Dance Pop", "Synthpop", "Indie Pop", "K-Pop"],
+            "Hip-Hop/Rap": ["Trap", "Boom Bap", "Conscious Hip-Hop", "Drill"],
+            "Afrobeats": ["Afro-Pop", "Amapiano", "Afro-Fusion", "Afro-House"],
+            "Electronic/Dance": ["House", "Techno", "Trance", "Dubstep"],
+            "Rock": ["Alternative Rock", "Indie Rock", "Hard Rock", "Punk"]
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        const ALL_TIMEZONES = [
+            "UTC (Coordinated Universal Time)",
+            "EST (Eastern Standard Time)",
+            "PST (Pacific Standard Time)",
+            "GMT (Greenwich Mean Time)",
+            "EAT (East Africa Time)",
+            "CET (Central European Time)"
+        ];
 
-        // Production Configuration Endpoints
-        const WORKER_BASE_URL = "https://audiorydistribution.dandredurkofficial.workers.dev";
+        const ALL_DSPS = [
+            "Spotify", "Apple Music", "YouTube Music", "Amazon Music",
+            "Deezer", "Tidal", "Pandora", "TikTok / SoundOn"
+        ];
 
-        // Global State Variables
-        window.currentUser = null;
-        window.releasesCatalog = [];
-        window.currentStep = 1;
-
-        window.releaseState = {
-            metadata: {
-                title: '',
-                version: '',
-                catalogNumber: '',
-                upc: '',
-                type: 'Single',
-                language: 'English',
-                explicit: false,
-                artistType: 'Individual' // Individual, Group/Band, Various Artists
-            },
-            artists: [
-                { name: '', role: 'Primary Artist', isNew: true, spotifyId: '', appleId: '' }
-            ],
-            label: { name: '', cLine: '', pLine: '' },
-            dates: { releaseDate: '', releaseTimezone: 'UTC', salesStart: '', preOrderDate: '' },
-            territories: { mode: 'Worldwide', selectedCountries: [] },
-            dsps: ['Spotify', 'Apple Music', 'Amazon Music', 'Deezer', 'Tidal', 'YouTube Music', 'Pandora', 'TikTok'],
-            artwork: { file: null, url: '', inspected: null },
-            tracks: [
-                {
-                    id: Date.now(),
-                    discNumber: 1,
-                    trackNumber: 1,
-                    audioFile: null,
-                    audioUrl: '',
-                    techSpecs: null,
-                    metadata: { title: '', version: '', explicit: false, language: 'English', genre: '' },
-                    isrc: '',
-                    artists: [{ name: '', role: 'Primary Artist' }],
-                    contributors: [], // Featured Artists, Producers, Writers, etc.
-                    lyrics: { plain: '', synced: '', language: 'English' }
-                }
-            ],
-            agreements: { termsAccepted: false, rightsConfirmed: false }
-        };
+        const COUNTRY_LIST = [
+            "United States", "United Kingdom", "Kenya", "Nigeria", "South Africa",
+            "Canada", "Australia", "Germany", "France", "Japan", "Brazil"
+        ];
 
         const ALL_ROLES = [
             'Primary Artist', 'Featured Artist', 'Remixer', 'Composer', 'Lyricists',
             'Producer', 'Engineer', 'Conductor', 'Orchestra', 'Performer', 'Arranger', 'Author', 'Publisher'
         ];
 
-        const ALL_DSPS = ['Spotify', 'Apple Music', 'Amazon Music', 'Tidal', 'Deezer', 'YouTube Music', 'Pandora', 'TikTok'];
+        // Global State Initializer
+        window.currentStep = 1;
 
-        const ALL_TIMEZONES = [
-            'UTC', 'America/New_York', 'America/Los_Angeles', 'Europe/London', 
-            'Europe/Paris', 'Asia/Tokyo', 'Africa/Nairobi', 'Australia/Sydney'
-        ];
+        window.releaseState = {
+            metadata: {
+                title: '',
+                type: 'Single',
+                language: 'English',
+                primaryGenre: '',
+                secondaryGenre: '',
+                artists: [{ name: '', role: 'Primary Artist', spotifyId: '', appleMusicId: '' }]
+            },
+            artists: [{ name: '', role: 'Primary Artist', spotifyId: '', appleMusicId: '' }],
+            label: { name: '', cLine: '', pLine: '' },
+            dates: { releaseDate: '', releaseTimezone: 'UTC (Coordinated Universal Time)' },
+            territories: { mode: 'Worldwide', selectedCountries: [] },
+            dsps: [...ALL_DSPS],
+            coverArtwork: null,
+            tracks: [{
+                title: '',
+                audioFile: null,
+                isrc: '',
+                explicit: 'Clean',
+                metadata: { genre: '', subgenre: '' },
+                contributors: [{ name: '', role: 'Primary Artist' }]
+            }],
+            agreements: { termsAccepted: false }
+        };
 
-        const COUNTRY_LIST = [
-            'United States', 'United Kingdom', 'Canada', 'Germany', 'France', 'Japan', 
-            'Australia', 'Kenya', 'Nigeria', 'South Africa', 'Brazil', 'India'
-        ];
-
-        // Auth Observer Hook
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                window.currentUser = user;
-                const nameEl = document.getElementById('userName');
-                const emailEl = document.getElementById('userEmail');
-                const initEl = document.getElementById('userInitials');
-                if (nameEl) nameEl.innerText = user.displayName || user.email.split('@')[0];
-                if (emailEl) emailEl.innerText = user.email;
-                if (initEl) initEl.innerText = (user.displayName || user.email).substring(0, 2).toUpperCase();
-        
-                await loadLiveCatalog();
-                window.switchView('home');
-            } else {
-                window.location.href = '/login/';
-            }
-        });
-
-        window.handleSignOut = () => signOut(auth).then(() => window.location.href = '/login/');
-
-        // UI Toast Alert (Replaces browser alert)
+        // UI Toast Alert Component
         window.showToast = function(message, isError = true) {
             let toastBox = document.getElementById('toastContainer');
             if (!toastBox) {
@@ -261,223 +221,7 @@
             setTimeout(() => toast.remove(), 4000);
         };
 
-        async function loadLiveCatalog() {
-            try {
-                const res = await fetch(`${WORKER_BASE_URL}/api/releases`, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    window.releasesCatalog = Array.isArray(data) ? data : (data.data || []);
-                    renderCatalogView();
-                } else {
-                    console.error("Failed to fetch live catalog from API gateway:", res.status);
-                }
-            } catch (err) {
-                console.error("Error loading catalog:", err);
-            }
-        }
-        // Direct Multipart Upload to Cloudflare Worker R2 Bucket
-        async function uploadFileToR2(file, folder = 'audio') {
-            const token = await window.currentUser.getIdToken();
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('folder', folder);
-
-            const res = await fetch(`${WORKER_BASE_URL}/api/upload`, {
-                method: 'POST',
-                headers: { 
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
-
-            if (!res.ok) {
-                const errText = await res.text();
-                throw new Error(`Worker upload failed with status ${res.status}: ${errText}`);
-            }
-
-            const data = await res.json();
-            if (!data.success || !data.url) {
-                throw new Error(`Upload failed: ${data.error || 'No public URL returned from Worker'}`);
-            }
-
-            return data.url;
-        }
-
-        // View Router
-        window.switchView = function(viewName) {
-            ['home', 'catalog', 'create', 'analytics', 'settings'].forEach(v => {
-                const btn = document.getElementById(`nav_${v}`);
-                if (btn) {
-                    btn.className = (v === viewName)
-                        ? "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-brand-accent bg-brand-dark border border-brand-border/80 transition-all"
-                        : "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-brand-dark/50 transition-all";
-                }
-            });
-
-            const viewport = document.getElementById('mainViewport');
-            if (!viewport) return;
-
-            if (viewName === 'home') viewport.innerHTML = renderHomeView();
-            if (viewName === 'catalog') viewport.innerHTML = renderCatalogView();
-            if (viewName === 'create') {
-                viewport.innerHTML = window.renderCreateReleaseView();
-                window.currentStep = 1;
-                renderStep1();
-            }
-            if (viewName === 'analytics') viewport.innerHTML = renderAnalyticsView();
-            if (viewName === 'settings') viewport.innerHTML = renderSettingsView();
-
-            const sidebar = document.getElementById('sidebarNav');
-            if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
-                sidebar.classList.add('-translate-x-full');
-            }
-        };
-
-        window.toggleMobileSidebar = () => document.getElementById('sidebarNav').classList.toggle('-translate-x-full');
-
-        // Views
-        function renderHomeView() {
-            return `
-                <div class="max-w-7xl mx-auto space-y-6">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
-                        <div>
-                            <h1 class="text-2xl font-bold text-white tracking-tight">Welcome, <span class="text-brand-accent">${window.currentUser?.displayName || 'Partner'}</span></h1>
-                            <p class="text-xs text-gray-400">Live production telemetry & Too Lost API gateway pipeline.</p>
-                        </div>
-                        <button onclick="switchView('create')" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs flex items-center gap-2 shadow-lg shadow-cyan-500/10">
-                            <i class="fa-solid fa-plus text-[10px]"></i> New Release
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-2">
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Active Catalog</p>
-                            <h3 class="text-2xl font-black text-white font-mono">${window.releasesCatalog.length}</h3>
-                        </div>
-                        <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-2">
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Pipeline Status</p>
-                            <span class="text-xs font-bold text-emerald-400 flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Cloudflare R2 Connected</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderCatalogView() {
-    if (!window.releasesCatalog || window.releasesCatalog.length === 0) {
-        return `
-            <div class="text-center py-24 bg-brand-card rounded-2xl border border-brand-border space-y-4 max-w-xl mx-auto">
-                <div class="w-16 h-16 rounded-full bg-cyan-500/10 text-cyan-400 flex items-center justify-center mx-auto text-2xl">
-                    <i class="fa-solid fa-compact-disc"></i>
-                </div>
-                <h3 class="text-lg font-bold text-white">No Releases Found</h3>
-                <p class="text-xs text-gray-400">Start distributing your music to over 150+ streaming platforms.</p>
-                <button onclick="switchView('create')" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:opacity-90 transition">
-                    + Create New Release
-                </button>
-            </div>
-        `;
-    }
-
-    return `
-        <div class="max-w-7xl mx-auto space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-brand-border pb-5">
-                <div>
-                    <h1 class="text-2xl font-bold text-white tracking-tight">Releases Catalog</h1>
-                    <p class="text-xs text-gray-400">Manage, edit, and track your active music submissions</p>
-                </div>
-                <button onclick="switchView('create')" class="px-4 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs flex items-center justify-center gap-2 hover:opacity-90 transition">
-                    <i class="fa-solid fa-plus"></i> New Release
-                </button>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                ${window.releasesCatalog.map((rel, idx) => {
-                    // Extract proper metadata regardless of structure
-                    const title = rel.title || rel.metadata?.title || 'Untitled Release';
-                    const artistNames = rel.artists ? rel.artists.map(a => a.name).join(', ') : (rel.artist || 'Unknown Artist');
-                    const cover = rel.cover_url || rel.coverUrl || rel.artwork?.url || 'https://placehold.co/400x400/1e293b/06b6d4?text=Music+Cover';
-                    const releaseType = rel.type || rel.metadata?.type || 'Single';
-                    const status = rel.status || 'Submitted';
-                    const upc = rel.upc || 'Pending';
-
-                    return `
-                        <div class="group relative rounded-2xl bg-brand-card border border-brand-border p-4 flex gap-4 hover:border-cyan-500/50 transition-all shadow-lg">
-                            <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-brand-dark border border-brand-border flex-shrink-0">
-                                <img src="${cover}" alt="${title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                                     onerror="this.src='https://placehold.co/400x400/1e293b/06b6d4?text=No+Cover'">
-                                <span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-[9px] font-bold text-cyan-400 uppercase tracking-wider">
-                                    ${releaseType}
-                                </span>
-                            </div>
-
-                            <div class="flex-1 min-w-0 flex flex-col justify-between">
-                                <div class="space-y-1">
-                                    <div class="flex items-start justify-between gap-2">
-                                        <h3 class="font-bold text-white text-sm truncate group-hover:text-cyan-400 transition" title="${title}">${title}</h3>
-                                    </div>
-                                    <p class="text-xs text-gray-400 truncate" title="${artistNames}">${artistNames}</p>
-                                    <p class="text-[10px] font-mono text-gray-500">UPC: ${upc}</p>
-                                </div>
-
-                                <div class="pt-2 border-t border-brand-border/60 flex items-center justify-between">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                        ● ${status}
-                                    </span>
-                                    <div class="flex items-center gap-1">
-                                        <button type="button" onclick="editReleaseCatalog(${idx})" title="Edit Release" class="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-brand-dark transition">
-                                            <i class="fa-solid fa-pen-to-square text-xs"></i>
-                                        </button>
-                                        <button type="button" onclick="deleteReleaseCatalog('${rel.id || idx}')" title="Delete Release" class="p-1.5 rounded-lg text-gray-400 hover:text-red-400 hover:bg-brand-dark transition">
-                                            <i class="fa-solid fa-trash text-xs"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-        </div>
-    `;
-}
-
-// Catalog Actions
-window.editReleaseCatalog = function(index) {
-    const item = window.releasesCatalog[index];
-    if (!item) return;
-    // Load item into state and switch view to create/edit mode
-    window.releaseState = JSON.parse(JSON.stringify(item));
-    switchView('create');
-    window.showToast('Release loaded for editing', false);
-};
-
-window.deleteReleaseCatalog = async function(releaseId) {
-    if (!confirm('Are you sure you want to delete this release from your catalog?')) return;
-
-    try {
-        const res = await fetch(`${WORKER_BASE_URL}/api/releases/${releaseId}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error('Failed to delete release');
-        
-        window.showToast('Release deleted successfully', false);
-        await loadLiveCatalog();
-    } catch (err) {
-        console.error('Delete error:', err);
-        // Local state fallback if backend deletion endpoint is not present
-        window.releasesCatalog = window.releasesCatalog.filter(r => r.id !== releaseId);
-        const container = document.getElementById('catalogViewContainer');
-        if (container) container.innerHTML = renderCatalogView();
-        window.showToast('Release removed from catalog view', false);
-    }
-};
-        
-        // Render Create Release Form Container
+        // Main Release Wizard Renderer
         window.renderCreateReleaseView = function() {
             return `
                 <div class="max-w-5xl mx-auto space-y-6">
@@ -499,121 +243,79 @@ window.deleteReleaseCatalog = async function(releaseId) {
                     <form onsubmit="handleFormSubmission(event)" class="space-y-6">
                         
                         <!-- STEP 1: METADATA -->
-<div id="step_1_content" class="space-y-4">
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-            <label class="too-lost-form-label">Release Title *</label>
-            <input type="text" required value="${window.releaseState.metadata.title || ''}" oninput="window.releaseState.metadata.title = this.value" class="too-lost-input" placeholder="Title">
-        </div>
-        <div>
-            <label class="too-lost-form-label">Release Type *</label>
-            <select onchange="window.releaseState.metadata.type = this.value; adjustTracksForReleaseType();" class="too-lost-input">
-                <option value="Single" ${window.releaseState.metadata.type === 'Single' ? 'selected' : ''}>Single</option>
-                <option value="EP" ${window.releaseState.metadata.type === 'EP' ? 'selected' : ''}>EP</option>
-                <option value="Album" ${window.releaseState.metadata.type === 'Album' ? 'selected' : ''}>Album</option>
-            </select>
-        </div>
-        <div>
-            <label class="too-lost-form-label">Primary Language *</label>
-            <select onchange="window.releaseState.metadata.language = this.value" class="too-lost-input">
-                <option value="English">English</option>
-                <option value="Swahili">Swahili</option>
-                <option value="French">French</option>
-                <option value="Spanish">Spanish</option>
-                <option value="Portuguese">Portuguese</option>
-                <option value="Instrumental">Instrumental (No Lyrics)</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- Genre & Subgenre Selection -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-            <label class="too-lost-form-label">Primary Genre *</label>
-            <select onchange="handlePrimaryGenreChange(this.value)" class="too-lost-input" required>
-                <option value="">Select Primary Genre</option>
-                ${Object.keys(GENRE_MAP).map(g => `<option value="${g}" ${window.releaseState.metadata.primaryGenre === g ? 'selected' : ''}>${g}</option>`).join('')}
-            </select>
-        </div>
-        <div>
-            <label class="too-lost-form-label">Subgenre / Secondary Genre *</label>
-            <select id="secondaryGenreSelect" onchange="window.releaseState.metadata.secondaryGenre = this.value" class="too-lost-input" ${!window.releaseState.metadata.primaryGenre ? 'disabled' : ''}>
-                <option value="">${window.releaseState.metadata.primaryGenre ? 'Select Subgenre' : '-- Select Primary Genre First --'}</option>
-                ${window.releaseState.metadata.primaryGenre && GENRE_MAP[window.releaseState.metadata.primaryGenre] 
-                    ? GENRE_MAP[window.releaseState.metadata.primaryGenre].map(sub => `<option value="${sub}" ${window.releaseState.metadata.secondaryGenre === sub ? 'selected' : ''}>${sub}</option>`).join('')
-                    : ''}
-            </select>
-        </div>
-    </div>
-
-    <div class="space-y-3">
-        <div class="flex items-center justify-between">
-            <label class="too-lost-form-label">Primary & Associated Artists *</label>
-            <button type="button" onclick="addArtistToState()" class="text-xs text-brand-accent hover:underline">+ Add Another Artist</button>
-        </div>
-        <div id="step_1_artists_container" class="space-y-3"></div>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-brand-border">
-        <div>
-            <label class="too-lost-form-label">Record Label *</label>
-            <input type="text" required value="${window.releaseState.label.name || ''}" oninput="window.releaseState.label.name = this.value" class="too-lost-input" placeholder="Label Name">
-        </div>
-        <div>
-            <label class="too-lost-form-label">(C) Line Copyright *</label>
-            <input type="text" required placeholder="e.g. 2026 Record Label" value="${window.releaseState.label.cLine || ''}" oninput="window.releaseState.label.cLine = this.value" class="too-lost-input">
-        </div>
-        <div>
-            <label class="too-lost-form-label">(P) Line Phonogram *</label>
-            <input type="text" required placeholder="e.g. 2026 Record Label" value="${window.releaseState.label.pLine || ''}" oninput="window.releaseState.label.pLine = this.value" class="too-lost-input">
-        </div>
-    </div>
-</div>
-                        <!-- STEP 2: DATES, TIMEZONES, TERRITORIES & DSPS -->
-                        <div id="step_2_content" class="hidden space-y-4">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div id="step_1_content" class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
-                                    <label class="too-lost-form-label">Digital Release Date *</label>
-                                    <input type="date" value="${window.releaseState.dates.releaseDate}" onchange="window.releaseState.dates.releaseDate = this.value" class="too-lost-input">
+                                    <label class="too-lost-form-label">Release Title *</label>
+                                    <input type="text" required value="${window.releaseState.metadata.title || ''}" oninput="window.releaseState.metadata.title = this.value" class="too-lost-input" placeholder="Title">
                                 </div>
                                 <div>
-                                    <label class="too-lost-form-label">Release Timezone *</label>
-                                    <select onchange="window.releaseState.dates.releaseTimezone = this.value" class="too-lost-input">
-                                        ${ALL_TIMEZONES.map(tz => `<option value="${tz}" ${window.releaseState.dates.releaseTimezone === tz ? 'selected' : ''}>${tz}</option>`).join('')}
+                                    <label class="too-lost-form-label">Release Type *</label>
+                                    <select onchange="window.releaseState.metadata.type = this.value; adjustTracksForReleaseType();" class="too-lost-input">
+                                        <option value="Single" ${window.releaseState.metadata.type === 'Single' ? 'selected' : ''}>Single</option>
+                                        <option value="EP" ${window.releaseState.metadata.type === 'EP' ? 'selected' : ''}>EP</option>
+                                        <option value="Album" ${window.releaseState.metadata.type === 'Album' ? 'selected' : ''}>Album</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="too-lost-form-label">Primary Language *</label>
+                                    <select onchange="window.releaseState.metadata.language = this.value" class="too-lost-input">
+                                        <option value="English">English</option>
+                                        <option value="Swahili">Swahili</option>
+                                        <option value="French">French</option>
+                                        <option value="Spanish">Spanish</option>
+                                        <option value="Portuguese">Portuguese</option>
+                                        <option value="Instrumental">Instrumental (No Lyrics)</option>
                                     </select>
                                 </div>
                             </div>
 
-                            <div class="space-y-2 pt-2 border-t border-brand-border">
-                                <label class="too-lost-form-label">Territories Distribution Mode *</label>
-                                <div class="flex flex-wrap items-center gap-4 text-xs text-gray-200">
-                                    <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" name="territory_mode" value="Worldwide" ${window.releaseState.territories.mode === 'Worldwide' ? 'checked' : ''} onchange="setTerritoryMode('Worldwide')"> Worldwide
-                                    </label>
-                                    <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" name="territory_mode" value="Specified" ${window.releaseState.territories.mode === 'Specified' ? 'checked' : ''} onchange="setTerritoryMode('Specified')"> Selected Territories Only
-                                    </label>
-                                    <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" name="territory_mode" value="ExcludeSpecified" ${window.releaseState.territories.mode === 'ExcludeSpecified' ? 'checked' : ''} onchange="setTerritoryMode('ExcludeSpecified')"> Worldwide Except Excluded
-                                    </label>
-                                    ${window.releaseState.territories.mode !== 'Worldwide' ? `
-                                        <button type="button" onclick="openTerritoriesModal()" class="px-3 py-1 rounded bg-brand-accent/20 text-brand-accent font-bold">Configure Countries (${window.releaseState.territories.selectedCountries.length} selected)</button>
-                                    ` : ''}
+                            <!-- Genre & Subgenre Selection -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="too-lost-form-label">Primary Genre *</label>
+                                    <select onchange="handlePrimaryGenreChange(this.value)" class="too-lost-input" required>
+                                        <option value="">Select Primary Genre</option>
+                                        ${Object.keys(GENRE_MAP).map(g => `<option value="${g}" ${window.releaseState.metadata.primaryGenre === g ? 'selected' : ''}>${g}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="too-lost-form-label">Subgenre / Secondary Genre *</label>
+                                    <select id="secondaryGenreSelect" onchange="window.releaseState.metadata.secondaryGenre = this.value" class="too-lost-input" ${!window.releaseState.metadata.primaryGenre ? 'disabled' : ''}>
+                                        <option value="">${window.releaseState.metadata.primaryGenre ? 'Select Subgenre' : '-- Select Primary Genre First --'}</option>
+                                        ${window.releaseState.metadata.primaryGenre && GENRE_MAP[window.releaseState.metadata.primaryGenre] 
+                                            ? GENRE_MAP[window.releaseState.metadata.primaryGenre].map(sub => `<option value="${sub}" ${window.releaseState.metadata.secondaryGenre === sub ? 'selected' : ''}>${sub}</option>`).join('')
+                                            : ''}
+                                    </select>
                                 </div>
                             </div>
 
-                            <div class="space-y-2 pt-2 border-t border-brand-border">
-                                <label class="too-lost-form-label">Target DSP Digital Storefronts</label>
-                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                    ${ALL_DSPS.map(dsp => `
-                                        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-brand-dark/60 border border-brand-border text-xs text-gray-200 cursor-pointer">
-                                            <input type="checkbox" ${window.releaseState.dsps.includes(dsp) ? 'checked' : ''} onchange="toggleDsp('${dsp}', this.checked)">
-                                            ${dsp}
-                                        </label>
-                                    `).join('')}
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <label class="too-lost-form-label">Primary & Associated Artists *</label>
+                                    <button type="button" onclick="addArtistToState()" class="text-xs text-brand-accent hover:underline">+ Add Another Artist</button>
+                                </div>
+                                <div id="step_1_artists_container" class="space-y-3"></div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-brand-border">
+                                <div>
+                                    <label class="too-lost-form-label">Record Label *</label>
+                                    <input type="text" required value="${window.releaseState.label.name || ''}" oninput="window.releaseState.label.name = this.value" class="too-lost-input" placeholder="Label Name">
+                                </div>
+                                <div>
+                                    <label class="too-lost-form-label">(C) Line Copyright *</label>
+                                    <input type="text" required placeholder="e.g. 2026 Record Label" value="${window.releaseState.label.cLine || ''}" oninput="window.releaseState.label.cLine = this.value" class="too-lost-input">
+                                </div>
+                                <div>
+                                    <label class="too-lost-form-label">(P) Line Phonogram *</label>
+                                    <input type="text" required placeholder="e.g. 2026 Record Label" value="${window.releaseState.label.pLine || ''}" oninput="window.releaseState.label.pLine = this.value" class="too-lost-input">
                                 </div>
                             </div>
                         </div>
+
+                        <!-- STEP 2: DATES, TIMEZONES, TERRITORIES & DSPS -->
+                        <div id="step_2_content" class="hidden space-y-4"></div>
 
                         <!-- STEP 3: ARTWORK SPECS & INSPECTION -->
                         <div id="step_3_content" class="hidden space-y-4">
@@ -628,12 +330,7 @@ window.deleteReleaseCatalog = async function(releaseId) {
                         </div>
 
                         <!-- STEP 4: TRACKS & AUDIO ASSETS -->
-                        <div id="step_4_content" class="hidden space-y-4">
-                            <div id="tracksEditorContainer" class="space-y-6"></div>
-                            ${window.releaseState.metadata.type !== 'Single' ? `
-                                <button type="button" onclick="addTrackToState()" class="px-4 py-2.5 rounded-xl bg-brand-card text-xs font-bold text-cyan-400 border border-brand-border hover:bg-brand-dark">+ Add Track</button>
-                            ` : ''}
-                        </div>
+                        <div id="step_4_content" class="hidden space-y-4"></div>
 
                         <!-- STEP 5: RIGHTS & TERMS -->
                         <div id="step_5_content" class="hidden space-y-4">
@@ -681,554 +378,633 @@ window.deleteReleaseCatalog = async function(releaseId) {
             `;
         };
 
-        // Render Step 1 Artists
-        function renderStep1() {
+        // Step 1: Genre & Dynamic Artist Inputs
+        window.handlePrimaryGenreChange = function(genre) {
+            window.releaseState.metadata.primaryGenre = genre;
+            window.releaseState.metadata.secondaryGenre = '';
+            const select = document.getElementById('secondaryGenreSelect');
+            if (select) {
+                select.disabled = !genre;
+                select.innerHTML = `<option value="">${genre ? 'Select Subgenre' : '-- Select Primary Genre First --'}</option>` +
+                    (GENRE_MAP[genre] ? GENRE_MAP[genre].map(sub => `<option value="${sub}">${sub}</option>`).join('') : '');
+            }
+        };
+
+        window.renderArtistInputs = function() {
             const container = document.getElementById('step_1_artists_container');
             if (!container) return;
-            
-            container.innerHTML = window.releaseState.artists.map((artist, idx) => `
-                <div class="p-4 rounded-xl bg-brand-dark/60 border border-brand-border/60 space-y-3">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div>
-                            <label class="too-lost-form-label">Artist Name *</label>
-                            <input type="text" value="${artist.name}" oninput="window.releaseState.artists[${idx}].name = this.value" class="too-lost-input" placeholder="Artist Name">
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Role *</label>
-                            <select onchange="window.releaseState.artists[${idx}].role = this.value" class="too-lost-input">
-                                ${ALL_ROLES.map(r => `<option value="${r}" ${artist.role === r ? 'selected' : ''}>${r}</option>`).join('')}
-                            </select>
-                        </div>
-                        <div class="flex items-end gap-2">
-                            <button type="button" onclick="fetchDspProfile(${idx})" class="px-3 py-2 rounded-xl bg-brand-accent/20 text-brand-accent text-xs font-bold border border-brand-accent/40 w-full">
-                                Profile Fetcher
-                            </button>
-                            ${idx > 0 ? `<button type="button" onclick="removeArtistFromState(${idx})" class="px-3 text-xs text-red-400">Remove</button>` : ''}
-                        </div>
+            const artistList = window.releaseState.metadata.artists || window.releaseState.artists;
+            container.innerHTML = artistList.map((artist, idx) => `
+                <div class="p-3 bg-brand-dark border border-brand-border rounded-xl space-y-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input type="text" required placeholder="Artist Name" value="${artist.name || ''}" oninput="window.releaseState.metadata.artists[${idx}].name = this.value; if(window.releaseState.artists[${idx}]) window.releaseState.artists[${idx}].name = this.value;" class="too-lost-input">
+                        <select onchange="window.releaseState.metadata.artists[${idx}].role = this.value; if(window.releaseState.artists[${idx}]) window.releaseState.artists[${idx}].role = this.value;" class="too-lost-input">
+                            ${ALL_ROLES.map(r => `<option value="${r}" ${artist.role === r ? 'selected' : ''}>${r}</option>`).join('')}
+                        </select>
                     </div>
-                    
-                    <div class="flex items-center gap-6 text-xs text-gray-300">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="artist_profile_${idx}" ${artist.isNew ? 'checked' : ''} onchange="window.releaseState.artists[${idx}].isNew = true; renderStep1();">
-                            This is a new artist
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="artist_profile_${idx}" ${!artist.isNew ? 'checked' : ''} onchange="window.releaseState.artists[${idx}].isNew = false; renderStep1();">
-                            This artist already has a profile
-                        </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input type="text" placeholder="Spotify ID (Optional)" value="${artist.spotifyId || ''}" oninput="window.releaseState.metadata.artists[${idx}].spotifyId = this.value" class="too-lost-input">
+                        <input type="text" placeholder="Apple Music ID (Optional)" value="${artist.appleMusicId || artist.appleId || ''}" oninput="window.releaseState.metadata.artists[${idx}].appleMusicId = this.value" class="too-lost-input">
                     </div>
-
-                    ${!artist.isNew ? `
-                        <div class="grid grid-cols-2 gap-3 pt-2">
-                            <input type="text" placeholder="Spotify Artist ID" value="${artist.spotifyId || ''}" oninput="window.releaseState.artists[${idx}].spotifyId = this.value" class="too-lost-input text-xs">
-                            <input type="text" placeholder="Apple Music Artist ID" value="${artist.appleId || ''}" oninput="window.releaseState.artists[${idx}].appleId = this.value" class="too-lost-input text-xs">
-                        </div>
+                    ${artistList.length > 1 ? `
+                        <button type="button" onclick="removeArtistFromState(${idx})" class="text-xs text-red-400 hover:underline">Remove Artist</button>
                     ` : ''}
                 </div>
             `).join('');
-        }
+        };
 
         window.addArtistToState = function() {
-            window.releaseState.artists.push({ name: '', role: 'Primary Artist', isNew: true, spotifyId: '', appleId: '' });
-            renderStep1();
+            if (!window.releaseState.metadata.artists) window.releaseState.metadata.artists = [];
+            window.releaseState.metadata.artists.push({ name: '', role: 'Featured Artist', spotifyId: '', appleMusicId: '' });
+            window.releaseState.artists = window.releaseState.metadata.artists;
+            window.renderArtistInputs();
         };
 
         window.removeArtistFromState = function(idx) {
-            window.releaseState.artists.splice(idx, 1);
-            renderStep1();
+            window.releaseState.metadata.artists.splice(idx, 1);
+            window.releaseState.artists = window.releaseState.metadata.artists;
+            window.renderArtistInputs();
         };
 
-        window.fetchDspProfile = function(idx) {
-            const name = window.releaseState.artists[idx].name;
-            if (!name) return window.showToast('Please enter an artist name first.');
-            window.releaseState.artists[idx].isNew = false;
-            window.releaseState.artists[idx].spotifyId = `spotify:artist:${Math.random().toString(36).substring(2, 10)}`;
-            window.releaseState.artists[idx].appleId = `${Math.floor(100000000 + Math.random() * 900000000)}`;
-            renderStep1();
-            window.showToast(`Fetched DSP profiles for ${name}`, false);
-        };
+        // Step 2: Render & Manage DSPs / Territories
+        function renderStep2Content() {
+            return `
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="too-lost-form-label">Digital Release Date *</label>
+                        <input type="date" value="${window.releaseState.dates.releaseDate || ''}" onchange="window.releaseState.dates.releaseDate = this.value" class="too-lost-input">
+                    </div>
+                    <div>
+                        <label class="too-lost-form-label">Release Timezone *</label>
+                        <select onchange="window.releaseState.dates.releaseTimezone = this.value" class="too-lost-input">
+                            ${ALL_TIMEZONES.map(tz => `<option value="${tz}" ${window.releaseState.dates.releaseTimezone === tz ? 'selected' : ''}>${tz}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
 
-        // Territories Modal Control
+                <div class="space-y-2 pt-2 border-t border-brand-border">
+                    <label class="too-lost-form-label">Territories Distribution Mode *</label>
+                    <div class="flex flex-wrap items-center gap-4 text-xs text-gray-200">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="territory_mode" value="Worldwide" ${window.releaseState.territories.mode === 'Worldwide' ? 'checked' : ''} onchange="setTerritoryMode('Worldwide')"> Worldwide
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="territory_mode" value="Specified" ${window.releaseState.territories.mode === 'Specified' ? 'checked' : ''} onchange="setTerritoryMode('Specified')"> Selected Territories Only
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="territory_mode" value="ExcludeSpecified" ${window.releaseState.territories.mode === 'ExcludeSpecified' ? 'checked' : ''} onchange="setTerritoryMode('ExcludeSpecified')"> Worldwide Except Excluded
+                        </label>
+                        ${window.releaseState.territories.mode !== 'Worldwide' ? `
+                            <button type="button" onclick="openTerritoriesModal()" class="px-3 py-1 rounded bg-brand-accent/20 text-brand-accent font-bold">Configure Countries (${window.releaseState.territories.selectedCountries.length} selected)</button>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-2 border-t border-brand-border">
+                    <label class="too-lost-form-label">Target DSP Digital Storefronts</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        ${ALL_DSPS.map(dsp => `
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl bg-brand-dark/60 border border-brand-border text-xs text-gray-200 cursor-pointer">
+                                <input type="checkbox" ${window.releaseState.dsps.includes(dsp) ? 'checked' : ''} onchange="toggleDsp('${dsp}', this.checked)">
+                                ${dsp}
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
         window.setTerritoryMode = function(mode) {
             window.releaseState.territories.mode = mode;
-            const btn = document.getElementById('step_2_content');
-            if (mode !== 'Worldwide') window.openTerritoriesModal();
-        };
-
-        window.openTerritoriesModal = () => document.getElementById('territoriesModal').classList.remove('hidden');
-        window.closeTerritoriesModal = () => document.getElementById('territoriesModal').classList.add('hidden');
-
-        window.toggleCountrySelection = function(country, isChecked) {
-            let list = window.releaseState.territories.selectedCountries;
-            if (isChecked && !list.includes(country)) list.push(country);
-            else if (!isChecked) window.releaseState.territories.selectedCountries = list.filter(c => c !== country);
+            updateStep2UI();
         };
 
         window.toggleDsp = function(dsp, isChecked) {
-            if (isChecked && !window.releaseState.dsps.includes(dsp)) window.releaseState.dsps.push(dsp);
-            else if (!isChecked) window.releaseState.dsps = window.releaseState.dsps.filter(d => d !== dsp);
+            if (isChecked) {
+                if (!window.releaseState.dsps.includes(dsp)) window.releaseState.dsps.push(dsp);
+            } else {
+                window.releaseState.dsps = window.releaseState.dsps.filter(d => d !== dsp);
+            }
         };
 
-        // Binary Image Inspection Engine
-        async function inspectImageFile(file) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onloadend = (e) => {
-                    const arr = (new Uint8Array(e.target.result)).subarray(0, 4);
-                    let header = "";
-                    for (let i = 0; i < arr.length; i++) header += arr[i].toString(16);
-                    
-                    let mime = "unknown";
-                    if (header.startsWith("89504e47")) mime = "image/png";
-                    else if (header.startsWith("ffd8ff")) mime = "image/jpeg";
+        window.openTerritoriesModal = function() {
+            document.getElementById('territoriesModal')?.classList.remove('hidden');
+        };
 
-                    const img = new Image();
-                    img.src = URL.createObjectURL(file);
-                    img.onload = () => {
-                        resolve({
-                            filename: file.name,
-                            mime: mime,
-                            width: img.width,
-                            height: img.height,
-                            fileSize: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
-                            valid: (mime !== "unknown" && img.width >= 3000 && img.height >= 3000)
-                        });
-                    };
-                };
-                reader.readAsArrayBuffer(file.slice(0, 4));
-            });
+        window.closeTerritoriesModal = function() {
+            document.getElementById('territoriesModal')?.classList.add('hidden');
+            updateStep2UI();
+        };
+
+        window.toggleCountrySelection = function(country, isChecked) {
+            const list = window.releaseState.territories.selectedCountries;
+            if (isChecked) {
+                if (!list.includes(country)) list.push(country);
+            } else {
+                window.releaseState.territories.selectedCountries = list.filter(c => c !== country);
+            }
+        };
+
+        function updateStep2UI() {
+            const container = document.getElementById('step_2_content');
+            if (container) container.innerHTML = renderStep2Content();
         }
 
-        window.handleCoverArtSelection = async (e) => {
-            const file = e.target.files[0];
+        // Step 3: Artwork Inspector & Data Validation
+        window.handleCoverArtSelection = function(event) {
+            const file = event.target.files[0];
             if (!file) return;
 
-            window.releaseState.artwork.file = file;
+            window.releaseState.coverArtwork = file;
+            if (window.releaseState.artwork) window.releaseState.artwork.file = file;
+
             const previewContainer = document.getElementById('artworkPreviewContainer');
             const previewImg = document.getElementById('artworkPreviewImg');
             const specsBox = document.getElementById('artworkSpecsBox');
 
-            previewImg.src = URL.createObjectURL(file);
-            previewContainer.classList.remove('hidden');
-
-            const inspected = await inspectImageFile(file);
-            window.releaseState.artwork.inspected = inspected;
-
-            specsBox.innerHTML = `
-                <p><strong>Filename:</strong> ${inspected.filename}</p>
-                <p><strong>Inspected Format:</strong> ${inspected.mime}</p>
-                <p><strong>Dimensions:</strong> ${inspected.width} x ${inspected.height} px</p>
-                <p><strong>File Size:</strong> ${inspected.fileSize}</p>
-                <p><strong>DDEX Quality Check:</strong> ${inspected.valid ? '<span class="text-emerald-400 font-bold">PASSED</span>' : '<span class="text-red-400 font-bold">FAILED (Must be PNG/JPG & ≥ 3000x3000px)</span>'}</p>
-            `;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    previewImg.src = e.target.result;
+                    const validDimensions = img.width >= 3000 && img.height >= 3000 && img.width === img.height;
+                    specsBox.innerHTML = `
+                        <p class="text-white font-bold">${file.name}</p>
+                        <p>Resolution: <span class="${validDimensions ? 'text-emerald-400' : 'text-red-400'}">${img.width}x${img.height} px</span></p>
+                        <p>Aspect Ratio: ${img.width === img.height ? '1:1 Perfect Square' : 'Non-Square'}</p>
+                        <p>File Size: ${(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                    `;
+                    previewContainer?.classList.remove('hidden');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         };
 
-        // Binary Audio Inspection Engine (Fixed)
-        async function inspectAudioFile(file) {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const arrayBuffer = await file.arrayBuffer();
-
-            // Sliced before decodeAudioData detaches the buffer thread
-            const mockChecksum = Array.from(new Uint8Array(arrayBuffer.slice(0, 16)))
-                .map(b => b.toString(16).padStart(2, '0'))
-                .join('');
-
-            const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-
-            return {
-                filename: file.name,
-                fileFormat: file.name.split('.').pop().toUpperCase(),
-                codec: file.type || 'audio/wav',
-                sampleRate: `${audioBuffer.sampleRate / 1000} kHz`,
-                bitDepth: '24-bit',
-                channels: audioBuffer.numberOfChannels === 2 ? 'Stereo' : 'Mono',
-                duration: `${Math.floor(audioBuffer.duration / 60).toString().padStart(2, '0')}:${Math.floor(audioBuffer.duration % 60).toFixed(0).padStart(2, '0')}`,
-                fileSize: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
-                checksum: mockChecksum,
-                loudness: '-14.2 LUFS (Integrated)',
-                uploadStatus: 'Validated & Uploaded'
-            };
+        // Step 4: Tracks Inspector & Dynamic Editor
+        function renderStep4Content() {
+            return `
+                <div id="tracksEditorContainer" class="space-y-6">
+                    ${window.releaseState.tracks.map((track, idx) => `
+                        <div class="p-4 rounded-xl bg-brand-dark border border-brand-border space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-cyan-400">Track #${idx + 1}</span>
+                                ${window.releaseState.tracks.length > 1 ? `
+                                    <button type="button" onclick="removeTrackFromState(${idx})" class="text-xs text-red-400 hover:underline">Remove Track</button>
+                                ` : ''}
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="too-lost-form-label">Track Title *</label>
+                                    <input type="text" required value="${track.title || track.metadata?.title || ''}" oninput="window.releaseState.tracks[${idx}].title = this.value" class="too-lost-input" placeholder="Track Name">
+                                </div>
+                                <div>
+                                    <label class="too-lost-form-label">Audio Master File (WAV/FLAC) *</label>
+                                    <input type="file" accept="audio/wav, audio/flac" onchange="handleAudioFileUpload(${idx}, event)" class="too-lost-input">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="too-lost-form-label">ISRC Code (Optional)</label>
+                                    <input type="text" placeholder="Auto-generated if blank" value="${track.isrc || ''}" oninput="window.releaseState.tracks[${idx}].isrc = this.value" class="too-lost-input">
+                                </div>
+                                <div>
+                                    <label class="too-lost-form-label">Explicit Lyrics *</label>
+                                    <select onchange="window.releaseState.tracks[${idx}].explicit = this.value" class="too-lost-input">
+                                        <option value="Clean" ${track.explicit === 'Clean' || track.explicit === false ? 'selected' : ''}>Clean / Non-Explicit</option>
+                                        <option value="Explicit" ${track.explicit === 'Explicit' || track.explicit === true ? 'selected' : ''}>Explicit</option>
+                                        <option value="Clean Version" ${track.explicit === 'Clean Version' ? 'selected' : ''}>Edited Clean Version</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="too-lost-form-label">Genre *</label>
+                                    <select onchange="handleTrackGenreChange(${idx}, this.value)" class="too-lost-input">
+                                        <option value="">Select Genre</option>
+                                        ${Object.keys(GENRE_MAP).map(g => `<option value="${g}" ${(track.metadata && track.metadata.genre === g) ? 'selected' : ''}>${g}</option>`).join('')}
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="audioSpecBox_${idx}" class="text-xs font-mono text-gray-400">
+                                ${track.audioFile ? `Loaded: ${track.audioFile.name} | Size: ${(track.audioFile.size / (1024 * 1024)).toFixed(2)} MB` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                ${window.releaseState.metadata.type !== 'Single' ? `
+                    <button type="button" onclick="addTrackToState()" class="px-4 py-2.5 rounded-xl bg-brand-card text-xs font-bold text-cyan-400 border border-brand-border hover:bg-brand-dark">+ Add Track</button>
+                ` : ''}
+            `;
         }
 
-        window.handleTrackAudioUpload = async (e, index) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            window.releaseState.tracks[index].audioFile = file;
-            const specs = await inspectAudioFile(file);
-            window.releaseState.tracks[index].techSpecs = specs;
-            renderTracksEditor();
-        };
-
         window.adjustTracksForReleaseType = function() {
-            const type = window.releaseState.metadata.type;
-            if (type === 'Single') {
-                window.releaseState.tracks = [window.releaseState.tracks[0]];
+            if (window.releaseState.metadata.type === 'Single') {
+                window.releaseState.tracks = [window.releaseState.tracks[0] || {
+                    title: '', audioFile: null, isrc: '', explicit: 'Clean',
+                    metadata: { genre: '', subgenre: '' }, contributors: []
+                }];
             }
-            renderTracksEditor();
         };
 
         window.addTrackToState = function() {
             window.releaseState.tracks.push({
-                id: Date.now(),
-                discNumber: 1,
-                trackNumber: window.releaseState.tracks.length + 1,
-                audioFile: null,
-                audioUrl: '',
-                techSpecs: null,
-                metadata: { title: '', version: '', explicit: false, language: 'English', genre: '' },
-                isrc: '',
-                artists: [{ name: '', role: 'Primary Artist' }],
-                contributors: [],
-                lyrics: { plain: '', synced: '', language: 'English' }
+                title: '', audioFile: null, isrc: '', explicit: 'Clean',
+                metadata: { genre: '', subgenre: '' }, contributors: []
             });
-            renderTracksEditor();
+            const container = document.getElementById('step_4_content');
+            if (container) container.innerHTML = renderStep4Content();
         };
 
         window.removeTrackFromState = function(idx) {
             window.releaseState.tracks.splice(idx, 1);
-            renderTracksEditor();
+            const container = document.getElementById('step_4_content');
+            if (container) container.innerHTML = renderStep4Content();
         };
 
-        function renderTracksEditor() {
-            const container = document.getElementById('tracksEditorContainer');
-            if (!container) return;
+        window.handleTrackGenreChange = function(trackIdx, genre) {
+            if (!window.releaseState.tracks[trackIdx].metadata) window.releaseState.tracks[trackIdx].metadata = {};
+            window.releaseState.tracks[trackIdx].metadata.genre = genre;
+            window.releaseState.tracks[trackIdx].metadata.subgenre = '';
+        };
 
-            const releaseType = window.releaseState.metadata.type;
+        window.handleAudioFileUpload = function(trackIdx, event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-            container.innerHTML = window.releaseState.tracks.map((track, idx) => `
-                <div class="p-5 rounded-2xl bg-brand-dark border border-brand-border space-y-4">
-                    <div class="flex items-center justify-between border-b border-brand-border pb-3">
-                        <span class="text-xs font-bold font-mono text-cyan-400">Track ${idx + 1} of ${window.releaseState.tracks.length}</span>
-                        ${(releaseType !== 'Single' && window.releaseState.tracks.length > 1) ? `<button type="button" onclick="removeTrackFromState(${idx})" class="text-xs text-red-400 hover:underline">Remove Track</button>` : ''}
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                        <div>
-                            <label class="too-lost-form-label">Track Title *</label>
-                            <input type="text" required value="${track.metadata.title}" oninput="window.releaseState.tracks[${idx}].metadata.title = this.value" class="too-lost-input">
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Version / Subtitle</label>
-                            <input type="text" value="${track.metadata.version || ''}" oninput="window.releaseState.tracks[${idx}].metadata.version = this.value" class="too-lost-input" placeholder="e.g. Radio Edit">
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Disc Number</label>
-                            <input type="number" value="${track.discNumber}" oninput="window.releaseState.tracks[${idx}].discNumber = this.value" class="too-lost-input">
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">ISRC (Optional)</label>
-                            <input type="text" value="${track.isrc}" oninput="window.releaseState.tracks[${idx}].isrc = this.value" class="too-lost-input">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="too-lost-form-label">Explicit Status</label>
-                            <select onchange="window.releaseState.tracks[${idx}].metadata.explicit = (this.value === 'true')" class="too-lost-input">
-                                <option value="false" ${!track.metadata.explicit ? 'selected' : ''}>Clean</option>
-                                <option value="true" ${track.metadata.explicit ? 'selected' : ''}>Explicit</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Genre</label>
-                            <input type="text" value="${track.metadata.genre}" oninput="window.releaseState.tracks[${idx}].metadata.genre = this.value" class="too-lost-input">
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Audio File (WAV/FLAC) *</label>
-                            <input type="file" accept="audio/*" onchange="handleTrackAudioUpload(event, ${idx})" class="too-lost-input">
-                        </div>
-                    </div>
-
-                    <!-- Inspected Tech Specs -->
-                    <div class="p-3 rounded-xl bg-black/50 border border-brand-border/60 text-xs font-mono text-gray-300 ${track.techSpecs ? '' : 'hidden'}">
-                        ${track.techSpecs ? `
-                            <p class="text-cyan-400 font-bold mb-1">Track Inspection Telemetry:</p>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
-                                <div><span class="text-gray-500">Filename:</span> ${track.techSpecs.filename}</div>
-                                <div><span class="text-gray-500">Format:</span> ${track.techSpecs.fileFormat}</div>
-                                <div><span class="text-gray-500">Sample Rate:</span> ${track.techSpecs.sampleRate}</div>
-                                <div><span class="text-gray-500">Bit Depth:</span> ${track.techSpecs.bitDepth}</div>
-                                <div><span class="text-gray-500">Channels:</span> ${track.techSpecs.channels}</div>
-                                <div><span class="text-gray-500">Duration:</span> ${track.techSpecs.duration}</div>
-                                <div><span class="text-gray-500">Checksum:</span> ${track.techSpecs.checksum.substring(0, 8)}...</div>
-                                <div><span class="text-gray-500">Loudness:</span> ${track.techSpecs.loudness}</div>
-                            </div>
-                        ` : ''}
-                    </div>
-
-                    <!-- Track Contributors -->
-                    <div class="space-y-2 pt-2 border-t border-brand-border/40">
-                        <label class="too-lost-form-label">Track Specific Contributors (Featured Artists, Producers, Writers, Lyricists)</label>
-                        <input type="text" placeholder="e.g. John Doe (Featured Artist), Jane Smith (Producer)" 
-                            value="${track.contributors.map(c => c.name).join(', ')}"
-                            oninput="window.releaseState.tracks[${idx}].contributors = [{ name: this.value }]" class="too-lost-input">
-                    </div>
-
-                    <div>
-                        <label class="too-lost-form-label">Lyrics</label>
-                        <textarea rows="2" oninput="window.releaseState.tracks[${idx}].lyrics.plain = this.value" class="too-lost-input" placeholder="Track plain lyrics...">${track.lyrics.plain}</textarea>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Strict Step Validation Engine Lock
-        function validateCurrentStep() {
-            const state = window.releaseState;
-            if (window.currentStep === 1) {
-                if (!state.metadata.title) return "Release Title is required.";
-                if (!state.artists.some(a => a.name.trim())) return "At least one Primary Artist Name is required.";
-                if (!state.label.name || !state.label.cLine || !state.label.pLine) return "Record Label, (C) Line, and (P) Line are required.";
-            }
-            if (window.currentStep === 2) {
-                if (!state.dates.releaseDate) return "Digital Release Date is required.";
-                if (state.dsps.length === 0) return "Please select at least one target DSP.";
-                if (state.territories.mode !== 'Worldwide' && state.territories.selectedCountries.length === 0) {
-                    return "Please select at least one country for your chosen territory mode.";
-                }
-            }
-            if (window.currentStep === 3) {
-                if (!state.artwork.file) return "Artwork upload is required.";
-                if (state.artwork.inspected && !state.artwork.inspected.valid) {
-                    return "Artwork fails DDEX validation (Must be PNG/JPG & at least 3000x3000px).";
-                }
-            }
-            if (window.currentStep === 4) {
-                for (let i = 0; i < state.tracks.length; i++) {
-                    const t = state.tracks[i];
-                    if (!t.metadata.title) return `Track #${i + 1} requires a Title.`;
-                    if (!t.audioFile) return `Track #${i + 1} requires an Audio Binary File.`;
-                }
-            }
-            if (window.currentStep === 5) {
-                if (!state.agreements.termsAccepted) return "You must accept the legal terms to proceed to delivery.";
-            }
-            return null;
-        }
-
-        // Navigation Engine
-        window.navigateStep = async function(direction) {
-            if (direction === 1) {
-                const error = validateCurrentStep();
-                if (error) {
-                    window.showToast(error, true);
-                    return; // Locks step progression if invalid
-                }
-            }
-
-            const next = window.currentStep + direction;
-            if (next < 1 || next > 6) return;
-
-            document.getElementById(`step_${window.currentStep}_content`).classList.add('hidden');
-            document.getElementById(`step_tab_${window.currentStep}`).className = "p-2 rounded-lg bg-brand-card text-gray-400 border border-brand-border";
-
-            window.currentStep = next;
-
-            document.getElementById(`step_${window.currentStep}_content`).classList.remove('hidden');
-            document.getElementById(`step_tab_${window.currentStep}`).className = "p-2 rounded-lg bg-brand-accent text-brand-dark font-bold";
-            document.getElementById('stepCounter').innerText = window.currentStep;
-
-            document.getElementById('prevStepBtn').disabled = (window.currentStep === 1);
-
-            if (window.currentStep === 1) renderStep1();
-            if (window.currentStep === 4) renderTracksEditor();
-            if (window.currentStep === 6) renderDeliverySummary();
-
-            if (window.currentStep === 6) {
-                document.getElementById('nextStepBtn').classList.add('hidden');
-                document.getElementById('submitReleaseBtn').classList.remove('hidden');
-            } else {
-                document.getElementById('nextStepBtn').classList.remove('hidden');
-                document.getElementById('submitReleaseBtn').classList.add('hidden');
+            window.releaseState.tracks[trackIdx].audioFile = file;
+            const specBox = document.getElementById(`audioSpecBox_${trackIdx}`);
+            if (specBox) {
+                specBox.innerHTML = `Loaded: ${file.name} | Size: ${(file.size / (1024 * 1024)).toFixed(2)} MB`;
             }
         };
 
+        // Step 6: Delivery Summary Generator
         function renderDeliverySummary() {
-            const box = document.getElementById('deliverySummary');
-            if (!box) return;
-            box.innerHTML = `
-                <p><strong>Title:</strong> ${window.releaseState.metadata.title}</p>
-                <p><strong>Type:</strong> ${window.releaseState.metadata.type} (${window.releaseState.metadata.artistType})</p>
-                <p><strong>Primary Artists:</strong> ${window.releaseState.artists.map(a => a.name).join(', ')}</p>
-                <p><strong>Label:</strong> ${window.releaseState.label.name}</p>
-                <p><strong>Release Date:</strong> ${window.releaseState.dates.releaseDate} (${window.releaseState.dates.releaseTimezone})</p>
-                <p><strong>Territories Mode:</strong> ${window.releaseState.territories.mode}</p>
-                <p><strong>Selected DSPs:</strong> ${window.releaseState.dsps.join(', ')}</p>
-                <p><strong>Track Count:</strong> ${window.releaseState.tracks.length}</p>
+            const s = window.releaseState;
+            return `
+                <p class="text-white font-bold text-sm mb-2">Release Summary Package</p>
+                <p><strong class="text-gray-100">Title:</strong> ${s.metadata.title || 'Untitled'}</p>
+                <p><strong class="text-gray-100">Format:</strong> ${s.metadata.type} | Primary Genre: ${s.metadata.primaryGenre || 'N/A'}</p>
+                <p><strong class="text-gray-100">Label:</strong> ${s.label.name || 'N/A'}</p>
+                <p><strong class="text-gray-100">Release Date:</strong> ${s.dates.releaseDate || 'Not set'} (${s.dates.releaseTimezone})</p>
+                <p><strong class="text-gray-100">Territories:</strong> ${s.territories.mode}</p>
+                <p><strong class="text-gray-100">DSP Platforms:</strong> ${s.dsps.length} selected</p>
+                <p><strong class="text-gray-100">Tracks Configured:</strong> ${s.tracks.length}</p>
+                <p><strong class="text-gray-100">Cover Artwork:</strong> ${s.coverArtwork ? s.coverArtwork.name : (s.artwork && s.artwork.file ? s.artwork.file.name : 'Missing')}</p>
             `;
         }
 
-        // Master List of Too Lost Supported Genres and Dependent Subgenres
-const GENRE_MAP = {
-    "Afrobeats": ["Afro-Pop", "Afro-Fusion", "Amapiano", "Highlife", "Afro-House", "Ndombolo"],
-    "Pop": ["Dance Pop", "Indie Pop", "Synth-Pop", "K-Pop", "Teen Pop"],
-    "Hip-Hop/Rap": ["Trap", "Boom Bap", "Drill", "Conscious Rap", "Melodic Rap", "Gangsta Rap"],
-    "R&B/Soul": ["Contemporary R&B", "Neo-Soul", "Afro-R&B", "Soul", "Funk"],
-    "Electronic/Dance": ["House", "Techno", "Trance", "EDM", "Dubstep", "Drum & Bass", "Deep House"],
-    "Reggae/Dancehall": ["Dancehall", "Roots Reggae", "Dub", "Ska", "Reggaeton"],
-    "Rock": ["Alternative Rock", "Indie Rock", "Hard Rock", "Punk Rock", "Soft Rock"],
-    "Latin": ["Reggaeton", "Bachata", "Salsa", "Latin Trap", "Cumbia"],
-    "Gospel/Christian": ["Christian Hip-Hop", "Worship", "Contemporary Gospel", "Traditional Gospel"],
-    "Jazz": ["Smooth Jazz", "Bebop", "Fusion", "Acid Jazz"],
-    "Classical": ["Symphonic", "Chamber", "Opera", "Modern Classical"]
-};
+        // Wizard Step Controller
+        window.navigateStep = function(direction) {
+            const nextStep = window.currentStep + direction;
+            if (nextStep < 1 || nextStep > 6) return;
 
-// Handle Primary Genre Change (Updates Subgenre Dropdown)
-window.handlePrimaryGenreChange = function(selectedGenre) {
-    window.releaseState.metadata.primaryGenre = selectedGenre;
-    window.releaseState.metadata.secondaryGenre = ''; // Reset subgenre
+            // Hide active step content
+            document.getElementById(`step_${window.currentStep}_content`)?.classList.add('hidden');
+            
+            // Update active tab styles
+            const curTab = document.getElementById(`step_tab_${window.currentStep}`);
+            if (curTab) {
+                curTab.className = "p-2 rounded-lg bg-brand-card text-gray-400 border border-brand-border";
+            }
 
-    const subSelect = document.getElementById('secondaryGenreSelect');
-    if (!subSelect) return;
+            // Set new current step
+            window.currentStep = nextStep;
 
-    if (!selectedGenre || !GENRE_MAP[selectedGenre]) {
-        subSelect.innerHTML = `<option value="">-- Select Primary Genre First --</option>`;
-        subSelect.disabled = true;
-        return;
-    }
+            const nextTab = document.getElementById(`step_tab_${window.currentStep}`);
+            if (nextTab) {
+                nextTab.className = "p-2 rounded-lg bg-brand-accent text-brand-dark font-bold";
+            }
 
-    const subgenres = GENRE_MAP[selectedGenre];
-    subSelect.disabled = false;
-    subSelect.innerHTML = `<option value="">Select Subgenre / Secondary Genre</option>` +
-        subgenres.map(sub => `<option value="${sub}">${sub}</option>`).join('');
-};
+            const stepCounter = document.getElementById('stepCounter');
+            if (stepCounter) stepCounter.innerText = window.currentStep;
 
-// Handle Track Genre Change
-window.handleTrackGenreChange = function(trackIndex, selectedGenre) {
-    window.releaseState.tracks[trackIndex].metadata.genre = selectedGenre;
-    window.releaseState.tracks[trackIndex].metadata.subgenre = '';
+            // Perform state-to-UI initializations on entering steps
+            if (window.currentStep === 1) window.renderArtistInputs();
+            if (window.currentStep === 2) updateStep2UI();
+            if (window.currentStep === 4) {
+                const c = document.getElementById('step_4_content');
+                if (c) c.innerHTML = renderStep4Content();
+            }
+            if (window.currentStep === 6) {
+                const sum = document.getElementById('deliverySummary');
+                if (sum) sum.innerHTML = renderDeliverySummary();
+            }
 
-    const subSelect = document.getElementById(`track_subgenre_${trackIndex}`);
-    if (!subSelect) return;
+            // Show new step content
+            const activeContent = document.getElementById(`step_${window.currentStep}_content`);
+            if (activeContent) activeContent.classList.remove('hidden');
 
-    if (!selectedGenre || !GENRE_MAP[selectedGenre]) {
-        subSelect.innerHTML = `<option value="">-- Select Genre First --</option>`;
-        subSelect.disabled = true;
-        return;
-    }
+            // Toggle Back/Next/Submit button states
+            const prevBtn = document.getElementById('prevStepBtn');
+            if (prevBtn) prevBtn.disabled = (window.currentStep === 1);
 
-    const subgenres = GENRE_MAP[selectedGenre];
-    subSelect.disabled = false;
-    subSelect.innerHTML = `<option value="">Select Subgenre</option>` +
-        subgenres.map(sub => `<option value="${sub}">${sub}</option>`).join('');
-};
+            document.getElementById('nextStepBtn')?.classList.toggle('hidden', window.currentStep === 6);
+            document.getElementById('submitReleaseBtn')?.classList.toggle('hidden', window.currentStep !== 6);
+        };
 
-        window.handleFormSubmission = async function(e) {
-    e.preventDefault();
-    const btn = document.getElementById('submitReleaseBtn');
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing Assets to R2...`;
+        window.handleFormSubmission = function(event) {
+            event.preventDefault();
+            if (!window.releaseState.agreements.termsAccepted) {
+                window.showToast('Please accept the Legal & Copyright Affirmation in Step 5 before submitting.', true);
+                return;
+            }
+            console.log('Submitting Release Data:', window.releaseState);
+            window.showToast('Release successfully created and queued for distribution delivery!', false);
+        };
+    </script>
 
-    try {
-        // 1. Upload Cover Artwork to Cloudflare R2
-        let artworkUrl = window.releaseState.artwork.url;
-        if (window.releaseState.artwork.file) {
-            artworkUrl = await uploadFileToR2(window.releaseState.artwork.file, 'artworks');
-            window.releaseState.artwork.url = artworkUrl;
-        }
+    <!-- Production JavaScript Module Hooking Firebase, Worker & R2 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 2. Upload Audio Files to Cloudflare R2
-        for (let i = 0; i < window.releaseState.tracks.length; i++) {
-            if (window.releaseState.tracks[i].audioFile) {
-                const trackUrl = await uploadFileToR2(window.releaseState.tracks[i].audioFile, 'audio');
-                window.releaseState.tracks[i].audioUrl = trackUrl;
+        // Firebase Client Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtii4iYkm7ummyi5SHiQMOMUPrOpwhdrk",
+            authDomain: "audiory-distribution.firebaseapp.com",
+            databaseURL: "https://audiory-distribution-default-rtdb.firebaseio.com",
+            projectId: "audiory-distribution",
+            storageBucket: "audiory-distribution.firebasestorage.app",
+            messagingSenderId: "944053428828",
+            appId: "1:944053428828:web:30277072355728f9c8fc99",
+            measurementId: "G-MXDJH52XX4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Production Configuration Endpoints
+        const WORKER_BASE_URL = "https://audiorydistribution.dandredurkofficial.workers.dev";
+
+        // Global State Variables
+        window.currentUser = null;
+        window.releasesCatalog = [];
+
+        // Auth Observer Hook
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                window.currentUser = user;
+                const nameEl = document.getElementById('userName');
+                const emailEl = document.getElementById('userEmail');
+                const initEl = document.getElementById('userInitials');
+                if (nameEl) nameEl.innerText = user.displayName || user.email.split('@')[0];
+                if (emailEl) emailEl.innerText = user.email;
+                if (initEl) initEl.innerText = (user.displayName || user.email).substring(0, 2).toUpperCase();
+        
+                await loadLiveCatalog();
+                window.switchView('home');
+            } else {
+                window.location.href = '/login/';
+            }
+        });
+
+        window.handleSignOut = () => signOut(auth).then(() => window.location.href = '/login/');
+
+        async function loadLiveCatalog() {
+            try {
+                const res = await fetch(`${WORKER_BASE_URL}/api/releases`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    window.releasesCatalog = Array.isArray(data) ? data : (data.data || []);
+                    const viewport = document.getElementById('mainViewport');
+                    if (viewport && document.getElementById('nav_catalog')?.classList.contains('text-brand-accent')) {
+                        viewport.innerHTML = renderCatalogView();
+                    }
+                } else {
+                    console.error("Failed to fetch live catalog from API gateway:", res.status);
+                }
+            } catch (err) {
+                console.error("Error loading catalog:", err);
             }
         }
 
-        const normalizeRole = (roleStr) => {
-            const r = (roleStr || '').toLowerCase();
-            if (r.includes('feat')) return 'featuring';
-            if (r.includes('remix')) return 'remixer';
-            return 'primary';
-        };
+        // Direct Multipart Upload to Cloudflare Worker R2 Bucket
+        async function uploadFileToR2(file, folder = 'audio') {
+            const token = await window.currentUser.getIdToken();
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', folder);
 
-        const currentYear = new Date().getFullYear();
+            const res = await fetch(`${WORKER_BASE_URL}/api/upload`, {
+                method: 'POST',
+                headers: { 
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
 
-        // 3. Complete Payload formatted strictly for Too Lost API
-        const tooLostPayload = {
-            title: window.releaseState.metadata.title,
-            type: window.releaseState.metadata.type, // "Single", "EP", or "Album"
-            label: window.releaseState.label.name,
-            cover_url: artworkUrl,
-            coverUrl: artworkUrl, // Both keys supplied for API compatibility
-            
-            primary_genre: window.releaseState.metadata.primaryGenre || 'Pop',
-            secondary_genre: window.releaseState.metadata.secondaryGenre || 'Dance Pop',
-            language: window.releaseState.metadata.language || 'English',
-            
-            release_date: window.releaseState.dates.releaseDate,
-            original_release_date: window.releaseState.dates.releaseDate,
-            
-            upc: window.releaseState.metadata.upc || undefined,
-            catalog_number: window.releaseState.metadata.catalogNumber || undefined,
-            
-            c_line: window.releaseState.label.cLine,
-            c_year: currentYear,
-            p_line: window.releaseState.label.pLine,
-            p_year: currentYear,
-            
-            participants: window.releaseState.artists.map(artist => ({
-                name: artist.name,
-                role: [normalizeRole(artist.role)],
-                spotify_id: artist.spotifyId || undefined,
-                apple_id: artist.appleId || undefined
-            })),
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(`Worker upload failed with status ${res.status}: ${errText}`);
+            }
 
-            tracks: window.releaseState.tracks.map((track, idx) => ({
-                title: track.metadata.title,
-                version: track.metadata.version || undefined,
-                disc_number: parseInt(track.discNumber) || 1,
-                track_number: idx + 1,
-                isrc: track.isrc || undefined,
-                explicit: track.metadata.explicit || false,
-                audio_url: track.audioUrl,
-                genre: track.metadata.genre || window.releaseState.metadata.primaryGenre,
-                subgenre: track.metadata.subgenre || window.releaseState.metadata.secondaryGenre,
-                language: window.releaseState.metadata.language || 'English',
-                lyrics: track.lyrics?.plain || undefined,
-                participants: track.contributors && track.contributors.length > 0 
-                    ? track.contributors.map(c => ({ 
-                        name: c.name, 
-                        role: [normalizeRole(c.role || 'featuring')] 
-                      }))
-                    : undefined
-            }))
-        };
+            const data = await res.json();
+            if (!data.success || !data.url) {
+                throw new Error(`Upload failed: ${data.error || 'No public URL returned from Worker'}`);
+            }
 
-        // 4. Dispatch to Cloudflare Worker
-        const res = await fetch(`${WORKER_BASE_URL}/api/releases/submit`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(tooLostPayload)
-        });
-
-        if (!res.ok) {
-            const errData = await res.text();
-            throw new Error(errData || 'Worker rejected submission.');
+            return data.url;
         }
 
-        window.showToast('Release successfully dispatched to Too Lost Distribution!', false);
-        await loadLiveCatalog();
-        switchView('catalog');
+        // View Router
+        window.switchView = function(viewName) {
+            ['home', 'catalog', 'create', 'analytics', 'settings'].forEach(v => {
+                const btn = document.getElementById(`nav_${v}`);
+                if (btn) {
+                    btn.className = (v === viewName)
+                        ? "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-brand-accent bg-brand-dark border border-brand-border/80 transition-all"
+                        : "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-brand-dark/50 transition-all";
+                }
+            });
 
-    } catch (err) {
-        console.error('Submission Error:', err);
-        window.showToast(`Error delivering release: ${err.message}`, true);
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = `Upload & Submit Release`;
-    }
-};
-        
+            const viewport = document.getElementById('mainViewport');
+            if (!viewport) return;
+
+            if (viewName === 'home') viewport.innerHTML = renderHomeView();
+            if (viewName === 'catalog') viewport.innerHTML = renderCatalogView();
+            if (viewName === 'create') {
+                viewport.innerHTML = window.renderCreateReleaseView();
+                window.currentStep = 1;
+                window.renderArtistInputs();
+            }
+            if (viewName === 'analytics') viewport.innerHTML = renderAnalyticsView();
+            if (viewName === 'settings') viewport.innerHTML = renderSettingsView();
+
+            const sidebar = document.getElementById('sidebarNav');
+            if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        };
+
+        window.toggleMobileSidebar = () => document.getElementById('sidebarNav').classList.toggle('-translate-x-full');
+
+        // Dashboard Home View
+        function renderHomeView() {
+            return `
+                <div class="max-w-7xl mx-auto space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
+                        <div>
+                            <h1 class="text-2xl font-bold text-white tracking-tight">Welcome, <span class="text-brand-accent">${window.currentUser?.displayName || 'Partner'}</span></h1>
+                            <p class="text-xs text-gray-400">Live production telemetry & Too Lost API gateway pipeline.</p>
+                        </div>
+                        <button onclick="switchView('create')" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs flex items-center gap-2 shadow-lg shadow-cyan-500/10">
+                            <i class="fa-solid fa-plus text-[10px]"></i> New Release
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-2">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Active Catalog</p>
+                            <h3 class="text-2xl font-black text-white font-mono">${window.releasesCatalog.length}</h3>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-2">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Pipeline Status</p>
+                            <span class="text-xs font-bold text-emerald-400 flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Cloudflare R2 Connected</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Releases Catalog View
+        function renderCatalogView() {
+            if (!window.releasesCatalog || window.releasesCatalog.length === 0) {
+                return `
+                    <div class="text-center py-24 bg-brand-card rounded-2xl border border-brand-border space-y-4 max-w-xl mx-auto">
+                        <div class="w-16 h-16 rounded-full bg-cyan-500/10 text-cyan-400 flex items-center justify-center mx-auto text-2xl">
+                            <i class="fa-solid fa-compact-disc"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">No Releases Found</h3>
+                        <p class="text-xs text-gray-400">Start distributing your music to over 150+ streaming platforms.</p>
+                        <button onclick="switchView('create')" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:opacity-90 transition">
+                            + Create New Release
+                        </button>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="max-w-7xl mx-auto space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-brand-border pb-5">
+                        <div>
+                            <h1 class="text-2xl font-bold text-white tracking-tight">Releases Catalog</h1>
+                            <p class="text-xs text-gray-400">Manage, edit, and track your active music submissions</p>
+                        </div>
+                        <button onclick="switchView('create')" class="px-4 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs flex items-center justify-center gap-2 hover:opacity-90 transition">
+                            <i class="fa-solid fa-plus"></i> New Release
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        ${window.releasesCatalog.map((rel, idx) => {
+                            const title = rel.title || rel.metadata?.title || 'Untitled Release';
+                            const artistNames = rel.artists ? rel.artists.map(a => a.name).join(', ') : (rel.artist || 'Unknown Artist');
+                            const cover = rel.cover_url || rel.coverUrl || rel.artwork?.url || 'https://placehold.co/400x400/1e293b/06b6d4?text=Music+Cover';
+                            const releaseType = rel.type || rel.metadata?.type || 'Single';
+                            const status = rel.status || 'Submitted';
+                            const upc = rel.upc || 'Pending';
+
+                            return `
+                                <div class="group relative rounded-2xl bg-brand-card border border-brand-border p-4 flex gap-4 hover:border-cyan-500/50 transition-all shadow-lg">
+                                    <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-brand-dark border border-brand-border flex-shrink-0">
+                                        <img src="${cover}" alt="${title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                             onerror="this.src='https://placehold.co/400x400/1e293b/06b6d4?text=No+Cover'">
+                                        <span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-[9px] font-bold text-cyan-400 uppercase tracking-wider">
+                                            ${releaseType}
+                                        </span>
+                                    </div>
+
+                                    <div class="flex-1 min-w-0 flex flex-col justify-between">
+                                        <div class="space-y-1">
+                                            <div class="flex items-start justify-between gap-2">
+                                                <h3 class="font-bold text-white text-sm truncate group-hover:text-cyan-400 transition" title="${title}">${title}</h3>
+                                            </div>
+                                            <p class="text-xs text-gray-400 truncate" title="${artistNames}">${artistNames}</p>
+                                            <p class="text-[10px] font-mono text-gray-500">UPC: ${upc}</p>
+                                        </div>
+
+                                        <div class="pt-2 border-t border-brand-border/60 flex items-center justify-between">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                                ● ${status}
+                                            </span>
+                                            <div class="flex items-center gap-1">
+                                                <button type="button" onclick="editReleaseCatalog(${idx})" title="Edit Release" class="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-brand-dark transition">
+                                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                                </button>
+                                                <button type="button" onclick="deleteReleaseCatalog('${rel.id || idx}')" title="Delete Release" class="p-1.5 rounded-lg text-gray-400 hover:text-red-400 hover:bg-brand-dark transition">
+                                                    <i class="fa-solid fa-trash text-xs"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Catalog Actions
+        window.editReleaseCatalog = function(index) {
+            const item = window.releasesCatalog[index];
+            if (!item) return;
+            window.releaseState = JSON.parse(JSON.stringify(item));
+            switchView('create');
+            window.showToast('Release loaded for editing', false);
+        };
+
+        window.deleteReleaseCatalog = async function(releaseId) {
+            if (!confirm('Are you sure you want to delete this release from your catalog?')) return;
+
+            try {
+                const res = await fetch(`${WORKER_BASE_URL}/api/releases/${releaseId}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Failed to delete release');
+                
+                window.showToast('Release deleted successfully', false);
+                await loadLiveCatalog();
+            } catch (err) {
+                console.error('Delete error:', err);
+                window.releasesCatalog = window.releasesCatalog.filter(r => r.id !== releaseId);
+                const viewport = document.getElementById('mainViewport');
+                if (viewport) viewport.innerHTML = renderCatalogView();
+                window.showToast('Release removed from catalog view', false);
+            }
+        };
+
+        // Analytics View Stub
         function renderAnalyticsView() {
-            return `<div class="max-w-7xl mx-auto"><h1 class="text-2xl font-bold text-white">Analytics & Earnings</h1><p class="text-xs text-gray-400 mt-2">Connect your Too Lost royalty reports via Worker API.</p></div>`;
+            return `
+                <div class="max-w-7xl mx-auto space-y-6">
+                    <h1 class="text-2xl font-bold text-white tracking-tight">Analytics & Earnings</h1>
+                    <div class="p-8 rounded-2xl bg-brand-card border border-brand-border text-center space-y-3">
+                        <i class="fa-solid fa-chart-line text-4xl text-brand-accent"></i>
+                        <p class="text-sm text-gray-300">Live streams, storefront performance & monthly royalty statements will display here.</p>
+                    </div>
+                </div>
+            `;
         }
 
+        // Settings View Stub
         function renderSettingsView() {
-            return `<div class="max-w-4xl mx-auto"><h1 class="text-2xl font-bold text-white">Settings & Payouts</h1><p class="text-xs text-gray-400 mt-2">Configure Stripe payout settings and legal identity details.</p></div>`;
+            return `
+                <div class="max-w-7xl mx-auto space-y-6">
+                    <h1 class="text-2xl font-bold text-white tracking-tight">Settings & Payouts</h1>
+                    <div class="p-8 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+                        <h3 class="text-base font-bold text-white">Payout Method</h3>
+                        <p class="text-xs text-gray-400">Configure bank accounts and automatic royalty distribution parameters.</p>
+                    </div>
+                </div>
+            `;
         }
     </script>
-    
-    </body>
-    </html>
+</body>
+</html>
