@@ -424,54 +424,76 @@ function renderCatalogView() {
                     <form onsubmit="handleFormSubmission(event)" class="space-y-6">
                         
                         <!-- STEP 1: METADATA -->
-                        <div id="step_1_content" class="space-y-4">
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="too-lost-form-label">Release Title *</label>
-                                    <input type="text" required value="${window.releaseState.metadata.title}" oninput="window.releaseState.metadata.title = this.value" class="too-lost-input" placeholder="Title">
-                                </div>
-                                <div>
-                                    <label class="too-lost-form-label">Release Type *</label>
-                                    <select onchange="window.releaseState.metadata.type = this.value; adjustTracksForReleaseType();" class="too-lost-input">
-                                        <option value="Single" ${window.releaseState.metadata.type === 'Single' ? 'selected' : ''}>Single</option>
-                                        <option value="EP" ${window.releaseState.metadata.type === 'EP' ? 'selected' : ''}>EP</option>
-                                        <option value="Album" ${window.releaseState.metadata.type === 'Album' ? 'selected' : ''}>Album</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="too-lost-form-label">Artist Type *</label>
-                                    <select onchange="window.releaseState.metadata.artistType = this.value" class="too-lost-input">
-                                        <option value="Individual">Individual</option>
-                                        <option value="Group/Band">Group / Band</option>
-                                        <option value="Various Artists">Various Artists</option>
-                                    </select>
-                                </div>
-                            </div>
+<div id="step_1_content" class="space-y-4">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+            <label class="too-lost-form-label">Release Title *</label>
+            <input type="text" required value="${window.releaseState.metadata.title || ''}" oninput="window.releaseState.metadata.title = this.value" class="too-lost-input" placeholder="Title">
+        </div>
+        <div>
+            <label class="too-lost-form-label">Release Type *</label>
+            <select onchange="window.releaseState.metadata.type = this.value; adjustTracksForReleaseType();" class="too-lost-input">
+                <option value="Single" ${window.releaseState.metadata.type === 'Single' ? 'selected' : ''}>Single</option>
+                <option value="EP" ${window.releaseState.metadata.type === 'EP' ? 'selected' : ''}>EP</option>
+                <option value="Album" ${window.releaseState.metadata.type === 'Album' ? 'selected' : ''}>Album</option>
+            </select>
+        </div>
+        <div>
+            <label class="too-lost-form-label">Primary Language *</label>
+            <select onchange="window.releaseState.metadata.language = this.value" class="too-lost-input">
+                <option value="English">English</option>
+                <option value="Swahili">Swahili</option>
+                <option value="French">French</option>
+                <option value="Spanish">Spanish</option>
+                <option value="Portuguese">Portuguese</option>
+                <option value="Instrumental">Instrumental (No Lyrics)</option>
+            </select>
+        </div>
+    </div>
 
-                            <div class="space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <label class="too-lost-form-label">Primary & Associated Artists *</label>
-                                    <button type="button" onclick="addArtistToState()" class="text-xs text-brand-accent hover:underline">+ Add Another Artist</button>
-                                </div>
-                                <div id="step_1_artists_container" class="space-y-3"></div>
-                            </div>
+    <!-- Genre & Subgenre Selection -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+            <label class="too-lost-form-label">Primary Genre *</label>
+            <select onchange="handlePrimaryGenreChange(this.value)" class="too-lost-input" required>
+                <option value="">Select Primary Genre</option>
+                ${Object.keys(GENRE_MAP).map(g => `<option value="${g}" ${window.releaseState.metadata.primaryGenre === g ? 'selected' : ''}>${g}</option>`).join('')}
+            </select>
+        </div>
+        <div>
+            <label class="too-lost-form-label">Subgenre / Secondary Genre *</label>
+            <select id="secondaryGenreSelect" onchange="window.releaseState.metadata.secondaryGenre = this.value" class="too-lost-input" ${!window.releaseState.metadata.primaryGenre ? 'disabled' : ''}>
+                <option value="">${window.releaseState.metadata.primaryGenre ? 'Select Subgenre' : '-- Select Primary Genre First --'}</option>
+                ${window.releaseState.metadata.primaryGenre && GENRE_MAP[window.releaseState.metadata.primaryGenre] 
+                    ? GENRE_MAP[window.releaseState.metadata.primaryGenre].map(sub => `<option value="${sub}" ${window.releaseState.metadata.secondaryGenre === sub ? 'selected' : ''}>${sub}</option>`).join('')
+                    : ''}
+            </select>
+        </div>
+    </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-brand-border">
-                                <div>
-                                    <label class="too-lost-form-label">Record Label *</label>
-                                    <input type="text" required value="${window.releaseState.label.name}" oninput="window.releaseState.label.name = this.value" class="too-lost-input" placeholder="Label Name">
-                                </div>
-                                <div>
-                                    <label class="too-lost-form-label">(C) Line Copyright *</label>
-                                    <input type="text" required placeholder="e.g. 2026 Record Label" value="${window.releaseState.label.cLine}" oninput="window.releaseState.label.cLine = this.value" class="too-lost-input">
-                                </div>
-                                <div>
-                                    <label class="too-lost-form-label">(P) Line Phonogram *</label>
-                                    <input type="text" required placeholder="e.g. 2026 Record Label" value="${window.releaseState.label.pLine}" oninput="window.releaseState.label.pLine = this.value" class="too-lost-input">
-                                </div>
-                            </div>
-                        </div>
+    <div class="space-y-3">
+        <div class="flex items-center justify-between">
+            <label class="too-lost-form-label">Primary & Associated Artists *</label>
+            <button type="button" onclick="addArtistToState()" class="text-xs text-brand-accent hover:underline">+ Add Another Artist</button>
+        </div>
+        <div id="step_1_artists_container" class="space-y-3"></div>
+    </div>
 
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-brand-border">
+        <div>
+            <label class="too-lost-form-label">Record Label *</label>
+            <input type="text" required value="${window.releaseState.label.name || ''}" oninput="window.releaseState.label.name = this.value" class="too-lost-input" placeholder="Label Name">
+        </div>
+        <div>
+            <label class="too-lost-form-label">(C) Line Copyright *</label>
+            <input type="text" required placeholder="e.g. 2026 Record Label" value="${window.releaseState.label.cLine || ''}" oninput="window.releaseState.label.cLine = this.value" class="too-lost-input">
+        </div>
+        <div>
+            <label class="too-lost-form-label">(P) Line Phonogram *</label>
+            <input type="text" required placeholder="e.g. 2026 Record Label" value="${window.releaseState.label.pLine || ''}" oninput="window.releaseState.label.pLine = this.value" class="too-lost-input">
+        </div>
+    </div>
+</div>
                         <!-- STEP 2: DATES, TIMEZONES, TERRITORIES & DSPS -->
                         <div id="step_2_content" class="hidden space-y-4">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -962,8 +984,7 @@ function renderCatalogView() {
             `;
         }
 
-        // Submission Handler mapped to Too Lost API schema
-window.handleFormSubmission = async function(e) {
+        window.handleFormSubmission = async function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitReleaseBtn');
     btn.disabled = true;
@@ -985,7 +1006,6 @@ window.handleFormSubmission = async function(e) {
             }
         }
 
-        // Helper to normalize roles to allowed enums
         const normalizeRole = (roleStr) => {
             const r = (roleStr || '').toLowerCase();
             if (r.includes('feat')) return 'featuring';
@@ -993,27 +1013,31 @@ window.handleFormSubmission = async function(e) {
             return 'primary';
         };
 
-        // Helper to normalize release type (checks string vs numeric expected by API)
-        const normalizeType = (typeStr) => {
-            const t = (typeStr || '').toLowerCase().trim();
-            if (t === 'ep') return 'EP'; // Try capitalized or return 2 if integer required
-            if (t === 'album' || t === 'lp') return 'Album'; // Try capitalized or return 3
-            return 'Single'; // Default fallback or return 1
-        };
+        const currentYear = new Date().getFullYear();
 
-        // 3. Map nested frontend releaseState into Too Lost API schema
+        // 3. Complete Payload formatted strictly for Too Lost API
         const tooLostPayload = {
             title: window.releaseState.metadata.title,
-            type: normalizeType(window.releaseState.metadata.type),
+            type: window.releaseState.metadata.type, // "Single", "EP", or "Album"
             label: window.releaseState.label.name,
             cover_url: artworkUrl,
+            coverUrl: artworkUrl, // Both keys supplied for API compatibility
+            
+            primary_genre: window.releaseState.metadata.primaryGenre || 'Pop',
+            secondary_genre: window.releaseState.metadata.secondaryGenre || 'Dance Pop',
+            language: window.releaseState.metadata.language || 'English',
+            
             release_date: window.releaseState.dates.releaseDate,
+            original_release_date: window.releaseState.dates.releaseDate,
+            
             upc: window.releaseState.metadata.upc || undefined,
             catalog_number: window.releaseState.metadata.catalogNumber || undefined,
-            copyright_line: window.releaseState.label.cLine,
-            phonogram_line: window.releaseState.label.pLine,
             
-            // Map primary/associated artists with strictly accepted role enums
+            c_line: window.releaseState.label.cLine,
+            c_year: currentYear,
+            p_line: window.releaseState.label.pLine,
+            p_year: currentYear,
+            
             participants: window.releaseState.artists.map(artist => ({
                 name: artist.name,
                 role: [normalizeRole(artist.role)],
@@ -1021,7 +1045,6 @@ window.handleFormSubmission = async function(e) {
                 apple_id: artist.appleId || undefined
             })),
 
-            // Map tracks array
             tracks: window.releaseState.tracks.map((track, idx) => ({
                 title: track.metadata.title,
                 version: track.metadata.version || undefined,
@@ -1030,9 +1053,11 @@ window.handleFormSubmission = async function(e) {
                 isrc: track.isrc || undefined,
                 explicit: track.metadata.explicit || false,
                 audio_url: track.audioUrl,
-                genre: track.metadata.genre || undefined,
-                lyrics: track.lyrics.plain || undefined,
-                participants: track.contributors.length > 0 
+                genre: track.metadata.genre || window.releaseState.metadata.primaryGenre,
+                subgenre: track.metadata.subgenre || window.releaseState.metadata.secondaryGenre,
+                language: window.releaseState.metadata.language || 'English',
+                lyrics: track.lyrics?.plain || undefined,
+                participants: track.contributors && track.contributors.length > 0 
                     ? track.contributors.map(c => ({ 
                         name: c.name, 
                         role: [normalizeRole(c.role || 'featuring')] 
@@ -1041,18 +1066,16 @@ window.handleFormSubmission = async function(e) {
             }))
         };
 
-        // 4. Dispatch mapped payload to Cloudflare Worker
+        // 4. Dispatch to Cloudflare Worker
         const res = await fetch(`${WORKER_BASE_URL}/api/releases/submit`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(tooLostPayload)
         });
 
         if (!res.ok) {
             const errData = await res.text();
-            throw new Error(errData || 'Worker rejected submission pipeline.');
+            throw new Error(errData || 'Worker rejected submission.');
         }
 
         window.showToast('Release successfully dispatched to Too Lost Distribution!', false);
