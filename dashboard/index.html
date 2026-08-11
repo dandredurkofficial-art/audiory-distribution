@@ -261,16 +261,20 @@
             setTimeout(() => toast.remove(), 4000);
         };
 
-        // Updated: Fetch live catalog directly from Worker endpoint
         async function loadLiveCatalog() {
             try {
                 const token = await window.currentUser.getIdToken();
                 const res = await fetch(`${WORKER_BASE_URL}/api/releases`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 
+                        'X-Custom-Auth': `Bearer ${token}` // Pass Firebase Auth separately for custom Worker checks if needed
+                    }
                 });
+        
                 if (res.ok) {
                     const data = await res.json();
                     window.releasesCatalog = Array.isArray(data) ? data : (data.data || []);
+                } else {
+                    console.error("Too Lost API Auth Error:", await res.text());
                 }
             } catch (err) {
                 console.error("Error loading catalog from worker:", err);
