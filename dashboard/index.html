@@ -828,11 +828,6 @@ function renderDeliverySummary() {
     `;
 }
 
-// 12. Cloudflare R2 Upload Helper
-async function uploadFileToR2(file, folder) {
-    return `https://r2-storage.yourdomain.com/${folder}/${Date.now()}_${file.name}`;
-}
-
 // 13. Form Submission Handler
 window.handleFormSubmission = async function(e) {
     e.preventDefault();
