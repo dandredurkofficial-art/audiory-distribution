@@ -263,10 +263,10 @@
 
         async function loadLiveCatalog() {
             try {
-                const token = await window.currentUser.getIdToken();
                 const res = await fetch(`${WORKER_BASE_URL}/api/releases`, {
+                    method: 'GET',
                     headers: { 
-                        'X-Custom-Auth': `Bearer ${token}` // Pass Firebase Auth separately for custom Worker checks if needed
+                        'Accept': 'application/json'
                     }
                 });
         
@@ -274,7 +274,7 @@
                     const data = await res.json();
                     window.releasesCatalog = Array.isArray(data) ? data : (data.data || []);
                 } else {
-                    console.error("Too Lost API Auth Error:", await res.text());
+                    console.error("Failed to fetch catalog from worker:", await res.text());
                 }
             } catch (err) {
                 console.error("Error loading catalog from worker:", err);
