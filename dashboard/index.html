@@ -264,10 +264,13 @@
         // Load catalog directly via Cloudflare Worker B2B gateway
         async function loadLiveCatalog() {
             try {
+
+                const idToken = window.currentUser ? await window.currentUser.getIdToken() : null;
                 const res = await fetch(`${WORKER_BASE_URL}/api/releases`, {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json'
+                        'Authorization': idToken ? `Bearer ${idToken}` : ''
                     }
                 });
 
