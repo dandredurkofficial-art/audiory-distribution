@@ -963,8 +963,6 @@ function renderCatalogView() {
         }
 
         // Submission Handler
-        // Maps the dashboard's internal releaseState into the top-level
-        // fields expected by the Too Lost release-create endpoint.
 window.handleFormSubmission = async function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitReleaseBtn');
@@ -972,120 +970,31 @@ window.handleFormSubmission = async function(e) {
     btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing Assets to R2...`;
 
     try {
-        const state = window.releaseState;
-
-        // Upload artwork and audio assets first so the API receives their URLs.
-        if (state.artwork.file) {
-            state.artwork.url = await uploadFileToR2(state.artwork.file, 'artworks');
+        if (window.releaseState.artwork.file) {
+            window.releaseState.artwork.url = await uploadFileToR2(window.releaseState.artwork.file, 'artworks');
         }
 
-        for (let i = 0; i < state.tracks.length; i++) {
-            if (state.tracks[i].audioFile) {
-                state.tracks[i].audioUrl = await uploadFileToR2(state.tracks[i].audioFile, 'audio');
+        for (let i = 0; i < window.releaseState.tracks.length; i++) {
+            if (window.releaseState.tracks[i].audioFile) {
+                window.releaseState.tracks[i].audioUrl = await uploadFileToR2(window.releaseState.tracks[i].audioFile, 'audio');
             }
         }
-
-        // Too Lost expects release-level participants at the top level.
-        // Keep only artists with actual names and convert the UI role names
-        // into API-friendly role values.
-        const participants = state.artists
-            .filter(artist => artist && typeof artist.name === 'string' && artist.name.trim())
-            .map(artist => {
-                const roleMap = {
-                    'Primary Artist': 'primary',
-                    'Featured Artist': 'featuring',
-                    'Remixer': 'remixer'
-                };
-
-                return {
-                    name: artist.name.trim(),
-                    role: roleMap[artist.role] || String(artist.role || 'Primary Artist')
-                        .toLowerCase()
-                        .replace(/\s+/g, '_')
-                };
-            });
-
-        if (!participants.length) {
-            throw new Error('At least one release participant/artist is required.');
-        }
-
-        // Build the API payload explicitly instead of sending releaseState
-        // with title/type/label buried inside nested objects.
-        const releasePayload = {
-            type: state.metadata.type,
-            title: state.metadata.title.trim(),
-            label: state.label.name.trim(),
-            participants,
-
-            // Preserve the rest of the release metadata for the API.
-            metadata: {
-                ...state.metadata,
-                title: state.metadata.title.trim(),
-                type: state.metadata.type
-            },
-
-            artists: state.artists,
-            labelMetadata: {
-                name: state.label.name.trim(),
-                cLine: state.label.cLine,
-                pLine: state.label.pLine
-            },
-
-            dates: state.dates,
-            territories: state.territories,
-            dsps: state.dsps,
-
-            artwork: {
-                url: state.artwork.url || '',
-                inspected: state.artwork.inspected || null
-            },
-
-            tracks: state.tracks.map(track => ({
-                ...track,
-                audioFile: undefined
-            })),
-
-            agreements: state.agreements,
-
-            userId: window.currentUser ? window.currentUser.uid : null,
-            submittedAt: new Date().toISOString()
-        };
 
         const res = await fetch(`${WORKER_BASE_URL}/api/releases/submit`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(releasePayload)
+            body: JSON.stringify({
+                ...window.releaseState,
+                userId: window.currentUser ? window.currentUser.uid : null,
+                submittedAt: new Date().toISOString()
+            })
         });
 
-        const responseText = await res.text();
-
         if (!res.ok) {
-            let errorMessage = responseText || 'Worker rejected submission pipeline.';
-
-            try {
-                const errorData = JSON.parse(responseText);
-                if (errorData.message) {
-                    errorMessage = errorData.message;
-
-                    if (errorData.errors) {
-                        const details = Object.entries(errorData.errors)
-                            .map(([field, messages]) => {
-                                const list = Array.isArray(messages) ? messages.join(', ') : String(messages);
-                                return `${field}: ${list}`;
-                            })
-                            .join(' | ');
-
-                        if (details) errorMessage += ` — ${details}`;
-                    }
-                }
-            } catch (_) {
-                // Keep the raw response when it is not JSON.
-            }
-
-            throw new Error(errorMessage);
+            const errData = await res.text();
+            throw new Error(errData || 'Worker rejected submission pipeline.');
         }
 
         window.showToast('Release successfully dispatched to Too Lost Distribution!', false);
