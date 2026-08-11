@@ -962,7 +962,7 @@ function renderCatalogView() {
             `;
         }
 
-        // Submission Handler
+        // Submission Handler mapped to Too Lost API schema
 window.handleFormSubmission = async function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitReleaseBtn');
@@ -970,26 +970,65 @@ window.handleFormSubmission = async function(e) {
     btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing Assets to R2...`;
 
     try {
+        // 1. Upload Cover Artwork to Cloudflare R2
+        let artworkUrl = window.releaseState.artwork.url;
         if (window.releaseState.artwork.file) {
-            window.releaseState.artwork.url = await uploadFileToR2(window.releaseState.artwork.file, 'artworks');
+            artworkUrl = await uploadFileToR2(window.releaseState.artwork.file, 'artworks');
+            window.releaseState.artwork.url = artworkUrl;
         }
 
+        // 2. Upload Audio Files to Cloudflare R2
         for (let i = 0; i < window.releaseState.tracks.length; i++) {
             if (window.releaseState.tracks[i].audioFile) {
-                window.releaseState.tracks[i].audioUrl = await uploadFileToR2(window.releaseState.tracks[i].audioFile, 'audio');
+                const trackUrl = await uploadFileToR2(window.releaseState.tracks[i].audioFile, 'audio');
+                window.releaseState.tracks[i].audioUrl = trackUrl;
             }
         }
 
+        // 3. Map nested frontend releaseState into Too Lost API schema
+        const tooLostPayload = {
+            title: window.releaseState.metadata.title,
+            type: window.releaseState.metadata.type.toLowerCase(), // "single", "ep", or "album"
+            label: window.releaseState.label.name,
+            cover_url: artworkUrl,
+            release_date: window.releaseState.dates.releaseDate,
+            upc: window.releaseState.metadata.upc || undefined,
+            catalog_number: window.releaseState.metadata.catalogNumber || undefined,
+            copyright_line: window.releaseState.label.cLine,
+            phonogram_line: window.releaseState.label.pLine,
+            
+            // Map primary/associated artists
+            participants: window.releaseState.artists.map(artist => ({
+                name: artist.name,
+                role: artist.role.toLowerCase().replace(/\s+/g, '_'), // e.g. "primary_artist"
+                spotify_id: artist.spotifyId || undefined,
+                apple_id: artist.appleId || undefined
+            })),
+
+            // Map tracks array
+            tracks: window.releaseState.tracks.map((track, idx) => ({
+                title: track.metadata.title,
+                version: track.metadata.version || undefined,
+                disc_number: parseInt(track.discNumber) || 1,
+                track_number: idx + 1,
+                isrc: track.isrc || undefined,
+                explicit: track.metadata.explicit || false,
+                audio_url: track.audioUrl,
+                genre: track.metadata.genre || undefined,
+                lyrics: track.lyrics.plain || undefined,
+                participants: track.contributors.length > 0 
+                    ? track.contributors.map(c => ({ name: c.name, role: "featured_artist" }))
+                    : undefined
+            }))
+        };
+
+        // 4. Dispatch mapped payload to Cloudflare Worker
         const res = await fetch(`${WORKER_BASE_URL}/api/releases/submit`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                ...window.releaseState,
-                userId: window.currentUser ? window.currentUser.uid : null,
-                submittedAt: new Date().toISOString()
-            })
+            body: JSON.stringify(tooLostPayload)
         });
 
         if (!res.ok) {
@@ -1009,6 +1048,7 @@ window.handleFormSubmission = async function(e) {
         btn.innerHTML = `Upload & Submit Release`;
     }
 };
+        
         function renderAnalyticsView() {
             return `<div class="max-w-7xl mx-auto"><h1 class="text-2xl font-bold text-white">Analytics & Earnings</h1><p class="text-xs text-gray-400 mt-2">Connect your Too Lost royalty reports via Worker API.</p></div>`;
         }
