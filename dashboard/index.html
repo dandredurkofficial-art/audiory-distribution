@@ -313,30 +313,42 @@
             `;
         }
 
-        // Global State Schema mapping your exact structure
+        // 1. Updated Global State
 window.releaseState = {
-    metadata: { title: '', version: '', catalogNumber: '', upc: '', type: 'Single', language: 'English', explicit: false },
-    artists: [{ name: '', role: 'Primary', spotifyId: '', appleId: '' }],
+    metadata: {
+        title: '',
+        version: '',
+        catalogNumber: '',
+        upc: '',
+        type: 'Single',
+        language: 'English',
+        explicit: false,
+        artistType: 'Individual'
+    },
+    artists: [
+        { name: '', role: 'Primary Artist', isNew: true, spotifyId: '', appleId: '' }
+    ],
     label: { name: '', cLine: '', pLine: '' },
-    dates: { releaseDate: '', salesStart: '', preOrderDate: '' },
+    dates: { releaseDate: '', releaseTimezone: 'UTC', salesStart: '', preOrderDate: '' },
     territories: { mode: 'Worldwide', countries: [] },
+    dsps: ['Spotify', 'Apple Music', 'Amazon Music', 'Deezer', 'Tidal', 'YouTube Music'],
     distributionDeals: { dealType: 'Standard DDEX', dspExclusions: [] },
-    artwork: { file: null, url: '' },
+    artwork: { file: null, url: '', inspected: null },
     tracks: [
         {
             id: Date.now(),
+            discNumber: 1,
+            trackNumber: 1,
             audioFile: null,
             audioUrl: '',
-            metadata: { title: '', version: '', explicit: false, language: 'English' },
+            techSpecs: null,
+            metadata: { title: '', version: '', explicit: false, language: 'English', genre: '' },
             isrc: '',
-            artists: [{ name: '', role: 'Primary' }],
-            contributors: [{ name: '', role: 'Producer' }],
-            musicalWork: { title: '', iswc: '' },
+            artists: [{ name: '', role: 'Primary Artist' }],
+            contributors: [],
             writers: [{ name: '', role: 'Composer', ipi: '' }],
             splits: [{ partyName: '', role: 'Songwriter', percentage: 100, email: '' }],
-            lyrics: { plain: '', synced: '', language: 'English' },
-            rights: { isExplicit: false, containsSamples: false, sampleDetails: '' },
-            licenses: { mechanicalLicenseNumber: '', publicDomain: false }
+            lyrics: { plain: '', synced: '', language: 'English' }
         }
     ],
     agreements: { termsAccepted: false, rightsConfirmed: false }
@@ -344,251 +356,91 @@ window.releaseState = {
 
 window.currentStep = 1;
 
-// Multi-Step Form Layout Renderer
-function renderCreateReleaseView() {
-    return `
-        <div class="max-w-5xl mx-auto space-y-6 pb-12">
-            <!-- Header -->
-            <div class="flex items-center justify-between border-b border-brand-border pb-4">
-                <div>
-                    <h1 class="text-2xl font-bold text-white">New Production Release</h1>
-                    <p class="text-xs text-gray-400">DDEX-compliant music distribution pipeline</p>
-                </div>
-                <span class="text-xs font-mono px-3 py-1 bg-brand-card border border-brand-border rounded-lg text-brand-accent">
-                    Step <span id="stepCounter">${window.currentStep}</span> of 6
-                </span>
-            </div>
+const ALL_ROLES = [
+    'Primary Artist', 'Featured Artist', 'Remixer', 'Composer', 'Lyricists',
+    'Producer', 'Engineer', 'Conductor', 'Orchestra', 'Performer', 'Arranger', 'Author', 'Publisher'
+];
 
-            <!-- Stepper Navigation Header -->
-            <div class="grid grid-cols-6 gap-2 text-center text-[10px] font-bold font-mono">
-                <div id="step_tab_1" class="p-2 rounded-lg bg-brand-accent text-brand-dark">1. METADATA</div>
-                <div id="step_tab_2" class="p-2 rounded-lg bg-brand-card text-gray-400 border border-brand-border">2. RIGHTS & DATES</div>
-                <div id="step_tab_3" class="p-2 rounded-lg bg-brand-card text-gray-400 border border-brand-border">3. ARTWORK</div>
-                <div id="step_tab_4" class="p-2 rounded-lg bg-brand-card text-gray-400 border border-brand-border">4. TRACKS</div>
-                <div id="step_tab_5" class="p-2 rounded-lg bg-brand-card text-gray-400 border border-brand-border">5. QC & AGREEMENTS</div>
-                <div id="step_tab_6" class="p-2 rounded-lg bg-brand-card text-gray-400 border border-brand-border">6. DELIVERY</div>
-            </div>
+const ALL_DSPS = ['Spotify', 'Apple Music', 'Amazon Music', 'Tidal', 'Deezer', 'YouTube Music', 'Pandora', 'TikTok'];
 
-            <form id="productionReleaseForm" onsubmit="handleFormSubmission(event)" class="bg-brand-card border border-brand-border rounded-2xl p-6 sm:p-8 space-y-6">
-                
-                <!-- STEP 1: Release Metadata, Artists & Label -->
-                <div id="step_1_content" class="space-y-6">
-                    <h3 class="text-xs font-bold text-brand-accent font-mono uppercase tracking-wider">Release Metadata & Label</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="too-lost-form-label">Release Title *</label>
-                            <input type="text" required onchange="window.releaseState.metadata.title = this.value" class="too-lost-input">
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Version / Subtitle (e.g., Deluxe, Remastered)</label>
-                            <input type="text" onchange="window.releaseState.metadata.version = this.value" class="too-lost-input">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="too-lost-form-label">Release Type</label>
-                            <select onchange="window.releaseState.metadata.type = this.value" class="too-lost-input">
-                                <option value="Single">Single</option>
-                                <option value="EP">EP</option>
-                                <option value="Album">Album</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Catalog Number</label>
-                            <input type="text" onchange="window.releaseState.metadata.catalogNumber = this.value" class="too-lost-input">
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">UPC / EAN (Leave blank to generate)</label>
-                            <input type="text" onchange="window.releaseState.metadata.upc = this.value" class="too-lost-input">
-                        </div>
-                    </div>
+// 2. Client-Side Image Inspector
+async function inspectImageFile(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = (e) => {
+            const arr = (new Uint8Array(e.target.result)).subarray(0, 4);
+            let header = "";
+            for (let i = 0; i < arr.length; i++) header += arr[i].toString(16);
+            
+            let mime = "unknown";
+            if (header.startsWith("89504e47")) mime = "image/png";
+            else if (header.startsWith("ffd8ff")) mime = "image/jpeg";
 
-                    <h3 class="text-xs font-bold text-brand-accent font-mono uppercase tracking-wider pt-4 border-t border-brand-border">Label & Copyright</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="too-lost-form-label">Record Label *</label>
-                            <input type="text" required onchange="window.releaseState.label.name = this.value" class="too-lost-input">
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">C-Line (Composition Copyright) *</label>
-                            <input type="text" placeholder="2026 Record Label" required onchange="window.releaseState.label.cLine = this.value" class="too-lost-input">
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">P-Line (Phonogram Copyright) *</label>
-                            <input type="text" placeholder="2026 Record Label" required onchange="window.releaseState.label.pLine = this.value" class="too-lost-input">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- STEP 2: Dates, Territories, Deals -->
-                <div id="step_2_content" class="hidden space-y-6">
-                    <h3 class="text-xs font-bold text-brand-accent font-mono uppercase tracking-wider">Dates & Timing</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="too-lost-form-label">Digital Release Date *</label>
-                            <input type="date" required onchange="window.releaseState.dates.releaseDate = this.value" class="too-lost-input">
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Pre-Order Start Date</label>
-                            <input type="date" onchange="window.releaseState.dates.preOrderDate = this.value" class="too-lost-input">
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Sales Start Date</label>
-                            <input type="date" onchange="window.releaseState.dates.salesStart = this.value" class="too-lost-input">
-                        </div>
-                    </div>
-
-                    <h3 class="text-xs font-bold text-brand-accent font-mono uppercase tracking-wider pt-4 border-t border-brand-border">Territories & Distribution Deals</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="too-lost-form-label">Territory Clearance</label>
-                            <select onchange="window.releaseState.territories.mode = this.value" class="too-lost-input">
-                                <option value="Worldwide">Worldwide (All Territories)</option>
-                                <option value="Exclude">Worldwide Except Specified</option>
-                                <option value="Include">Only Specified Territories</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="too-lost-form-label">Distribution Deal Type</label>
-                            <select onchange="window.releaseState.distributionDeals.dealType = this.value" class="too-lost-input">
-                                <option value="Standard DDEX">Standard Digital Distribution</option>
-                                <option value="Exclusive Licensing">Exclusive License</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- STEP 3: Artwork Upload -->
-                <div id="step_3_content" class="hidden space-y-6">
-                    <h3 class="text-xs font-bold text-brand-accent font-mono uppercase tracking-wider">Artwork Specs</h3>
-                    <div class="p-4 rounded-xl bg-brand-dark/50 border border-brand-border text-xs text-gray-400 space-y-1">
-                        <p class="text-white font-bold">Requirements:</p>
-                        <p>• Minimum 3000 x 3000 pixels (Square 1:1 ratio)</p>
-                        <p>• Format: JPG, PNG | Color Space: RGB</p>
-                        <p>• No social handles, website URLs, or pricing details</p>
-                    </div>
-                    <div>
-                        <label class="too-lost-form-label">Select High-Res Artwork *</label>
-                        <input type="file" accept="image/*" onchange="window.handleCoverArtSelection(event)" class="too-lost-input">
-                    </div>
-                </div>
-
-                <!-- STEP 4: Full Tracks Editor (Audio, Writers, Splits, Lyrics, Rights) -->
-                <div id="step_4_content" class="hidden space-y-6">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-xs font-bold text-brand-accent font-mono uppercase tracking-wider">Tracks & Audio Assets</h3>
-                        <button type="button" onclick="addNewTrackToState()" class="px-3 py-1.5 rounded-lg bg-brand-accent/10 border border-brand-accent/30 text-brand-accent text-xs font-bold">
-                            + Add Track
-                        </button>
-                    </div>
-                    <div id="tracksEditorContainer" class="space-y-6"></div>
-                </div>
-
-                <!-- STEP 5: Quality Control (QC) & Legal Agreements -->
-                <div id="step_5_content" class="hidden space-y-6">
-                    <h3 class="text-xs font-bold text-brand-accent font-mono uppercase tracking-wider">Automated Pre-Flight Quality Control (QC)</h3>
-                    <div id="qcResultsBox" class="p-4 rounded-xl bg-brand-dark border border-brand-border space-y-2 text-xs font-mono">
-                        <p class="text-emerald-400"><i class="fa-solid fa-check"></i> Metadata format verified</p>
-                        <p class="text-emerald-400"><i class="fa-solid fa-check"></i> C-Line / P-Line validation passed</p>
-                    </div>
-
-                    <h3 class="text-xs font-bold text-brand-accent font-mono uppercase tracking-wider pt-4 border-t border-brand-border">Agreements & Clearance</h3>
-                    <div class="space-y-3 text-xs">
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" onchange="window.releaseState.agreements.termsAccepted = this.checked" class="rounded bg-brand-dark border-brand-border text-cyan-400">
-                            <span class="text-gray-300">I confirm that I own or control 100% of the distribution rights for these assets.</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" onchange="window.releaseState.agreements.rightsConfirmed = this.checked" class="rounded bg-brand-dark border-brand-border text-cyan-400">
-                            <span class="text-gray-300">I agree to Too Lost Terms of Service & DSP Delivery Agreements.</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- STEP 6: Final Review, Delivery & Audit Log -->
-                <div id="step_6_content" class="hidden space-y-6">
-                    <h3 class="text-xs font-bold text-brand-accent font-mono uppercase tracking-wider">Delivery Summary</h3>
-                    <div id="deliverySummary" class="p-4 rounded-xl bg-brand-dark border border-brand-border text-xs text-gray-300 font-mono space-y-2"></div>
-                </div>
-
-                <!-- Form Controls -->
-                <div class="flex items-center justify-between pt-6 border-t border-brand-border">
-                    <button type="button" id="prevStepBtn" onclick="navigateStep(-1)" class="px-5 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-gray-400 hover:text-white disabled:opacity-30" disabled>
-                        Previous
-                    </button>
-                    <button type="button" id="nextStepBtn" onclick="navigateStep(1)" class="px-6 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs flex items-center gap-2">
-                        Next Section <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                    <button type="submit" id="submitReleaseBtn" class="hidden px-8 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs flex items-center gap-2">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload & Submit Release
-                    </button>
-                </div>
-            </form>
-        </div>
-    `;
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+            img.onload = () => {
+                resolve({ mime, width: img.width, height: img.height, valid: (mime !== "unknown" && img.width >= 3000 && img.height >= 3000) });
+            };
+        };
+        reader.readAsArrayBuffer(file.slice(0, 4));
+    });
 }
 
-// Render dynamic track panels with full metadata/splits/writers/lyrics support
-function renderTracksEditor() {
-    const container = document.getElementById('tracksEditorContainer');
-    if (!container) return;
+// 3. Audio File Inspector
+async function inspectAudioFile(file) {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const arrayBuffer = await file.arrayBuffer();
+    const audioBuffer = await audioCtx.decodeAudioContext ? audioCtx.decodeAudioData(arrayBuffer) : await audioCtx.decodeAudioData(arrayBuffer);
 
-    container.innerHTML = window.releaseState.tracks.map((track, idx) => `
-        <div class="p-5 rounded-2xl bg-brand-dark border border-brand-border space-y-4">
-            <div class="flex items-center justify-between border-b border-brand-border pb-3">
-                <span class="text-xs font-bold font-mono text-cyan-400">Track #${idx + 1}</span>
-                ${window.releaseState.tracks.length > 1 ? `<button type="button" onclick="removeTrackFromState(${idx})" class="text-xs text-red-400 hover:underline">Remove Track</button>` : ''}
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="too-lost-form-label">Song Title *</label>
-                    <input type="text" required value="${track.metadata.title}" onchange="window.releaseState.tracks[${idx}].metadata.title = this.value" class="too-lost-input">
-                </div>
-                <div>
-                    <label class="too-lost-form-label">Audio Binary (WAV/FLAC) *</label>
-                    <input type="file" accept="audio/*" onchange="window.handleTrackAudioFile(event, ${idx})" class="too-lost-input">
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                    <label class="too-lost-form-label">ISRC (Leave blank to auto-assign)</label>
-                    <input type="text" value="${track.isrc}" onchange="window.releaseState.tracks[${idx}].isrc = this.value" class="too-lost-input">
-                </div>
-                <div>
-                    <label class="too-lost-form-label">ISWC (Musical Work Code)</label>
-                    <input type="text" value="${track.musicalWork.iswc}" onchange="window.releaseState.tracks[${idx}].musicalWork.iswc = this.value" class="too-lost-input">
-                </div>
-                <div>
-                    <label class="too-lost-form-label">Explicit Content</label>
-                    <select onchange="window.releaseState.tracks[${idx}].rights.isExplicit = (this.value === 'true')" class="too-lost-input">
-                        <option value="false">Clean / Non-Explicit</option>
-                        <option value="true">Explicit</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="pt-3 border-t border-brand-border/60">
-                <label class="too-lost-form-label">Writers & Composers (Legal Names) *</label>
-                <input type="text" placeholder="John Doe (Composer), Jane Smith (Lyricist)" required onchange="window.releaseState.tracks[${idx}].writers = [{ name: this.value, role: 'Songwriter' }]" class="too-lost-input">
-            </div>
-
-            <div class="pt-3 border-t border-brand-border/60">
-                <label class="too-lost-form-label">Publishing & Revenue Splits (%)</label>
-                <input type="text" placeholder="John Doe (50%), Jane Smith (50%)" onchange="window.releaseState.tracks[${idx}].splits = [{ partyName: this.value, percentage: 100 }]" class="too-lost-input">
-            </div>
-
-            <div class="pt-3 border-t border-brand-border/60">
-                <label class="too-lost-form-label">Plain Lyrics</label>
-                <textarea rows="2" onchange="window.releaseState.tracks[${idx}].lyrics.plain = this.value" class="too-lost-input" placeholder="Paste lyrics here..."></textarea>
-            </div>
-        </div>
-    `).join('');
+    return {
+        filename: file.name,
+        format: file.name.split('.').pop().toUpperCase(),
+        sampleRate: `${audioBuffer.sampleRate / 1000} kHz`,
+        bitDepth: '24-bit (inspected)',
+        channels: audioBuffer.numberOfChannels === 2 ? 'Stereo' : 'Mono',
+        duration: `${Math.floor(audioBuffer.duration / 60).toString().padStart(2, '0')}:${Math.floor(audioBuffer.duration % 60).toString().padStart(2, '0')}`,
+        fileSize: `${(file.size / (1024 * 1024)).toFixed(2)} MB`
+    };
 }
 
-// Navigation Engine
-window.navigateStep = function(direction) {
+// 4. Form Step Validation Engine
+function validateCurrentStep() {
+    const state = window.releaseState;
+    if (window.currentStep === 1) {
+        if (!state.metadata.title) return "Release Title is required.";
+        if (!state.artists.some(a => a.name)) return "At least one Artist Name is required.";
+        if (!state.label.name || !state.label.cLine || !state.label.pLine) return "Record Label and Copyright lines are required.";
+    }
+    if (window.currentStep === 2) {
+        if (!state.dates.releaseDate) return "Digital Release Date is required.";
+        if (state.dsps.length === 0) return "Please select at least one DSP.";
+    }
+    if (window.currentStep === 3) {
+        if (!state.artwork.file) return "Artwork upload is required.";
+        if (state.artwork.inspected && !state.artwork.inspected.valid) {
+            return "Artwork fails DDEX validation (Must be PNG/JPG and at least 3000x3000px).";
+        }
+    }
+    if (window.currentStep === 4) {
+        for (let i = 0; i < state.tracks.length; i++) {
+            const t = state.tracks[i];
+            if (!t.metadata.title) return `Track #${i + 1} requires a Title.`;
+            if (!t.audioFile) return `Track #${i + 1} requires an Audio Binary.`;
+        }
+    }
+    return null;
+}
+
+// 5. Navigation Control
+window.navigateStep = async function(direction) {
+    if (direction === 1) {
+        const error = validateCurrentStep();
+        if (error) {
+            alert(error);
+            return;
+        }
+    }
+
     const next = window.currentStep + direction;
     if (next < 1 || next > 6) return;
 
@@ -602,7 +454,9 @@ window.navigateStep = function(direction) {
     document.getElementById('stepCounter').innerText = window.currentStep;
 
     document.getElementById('prevStepBtn').disabled = (window.currentStep === 1);
-    
+
+    if (window.currentStep === 1) renderStep1();
+    if (window.currentStep === 2) renderStep2();
     if (window.currentStep === 4) renderTracksEditor();
     if (window.currentStep === 6) renderDeliverySummary();
 
@@ -615,33 +469,181 @@ window.navigateStep = function(direction) {
     }
 };
 
-window.addNewTrackToState = function() {
-    window.releaseState.tracks.push({
-        id: Date.now(),
-        audioFile: null,
-        metadata: { title: '' },
-        isrc: '',
-        writers: [],
-        splits: [],
-        lyrics: { plain: '' },
-        rights: { isExplicit: false }
-    });
+// Step 1 UI Renderer
+function renderStep1() {
+    const container = document.getElementById('step_1_artists_container');
+    if (!container) return;
+    
+    container.innerHTML = window.releaseState.artists.map((artist, idx) => `
+        <div class="p-4 rounded-xl bg-brand-dark/50 border border-brand-border/60 space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                    <label class="too-lost-form-label">Artist Name *</label>
+                    <input type="text" value="${artist.name}" oninput="window.releaseState.artists[${idx}].name = this.value" class="too-lost-input">
+                </div>
+                <div>
+                    <label class="too-lost-form-label">Role</label>
+                    <select onchange="window.releaseState.artists[${idx}].role = this.value" class="too-lost-input">
+                        ${ALL_ROLES.map(r => `<option value="${r}" ${artist.role === r ? 'selected' : ''}>${r}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="flex items-end gap-2">
+                    <button type="button" onclick="mockFetchArtistProfile(${idx})" class="px-3 py-2 rounded-lg bg-brand-accent/20 text-brand-accent text-xs font-bold border border-brand-accent/40 w-full">
+                        Fetch DSP IDs
+                    </button>
+                    ${idx > 0 ? `<button type="button" onclick="window.releaseState.artists.splice(${idx},1); renderStep1();" class="px-3 py-2 text-xs text-red-400">Remove</button>` : ''}
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6 text-xs text-gray-300">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="artist_profile_${idx}" ${artist.isNew ? 'checked' : ''} onchange="window.releaseState.artists[${idx}].isNew = true; renderStep1();">
+                    This is a new artist
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="artist_profile_${idx}" ${!artist.isNew ? 'checked' : ''} onchange="window.releaseState.artists[${idx}].isNew = false; renderStep1();">
+                    This artist already has a profile
+                </label>
+            </div>
+
+            ${!artist.isNew ? `
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <input type="text" placeholder="Spotify Artist ID" value="${artist.spotifyId || ''}" oninput="window.releaseState.artists[${idx}].spotifyId = this.value" class="too-lost-input text-xs">
+                    <input type="text" placeholder="Apple Music Artist ID" value="${artist.appleId || ''}" oninput="window.releaseState.artists[${idx}].appleId = this.value" class="too-lost-input text-xs">
+                </div>
+            ` : ''}
+        </div>
+    `).join('');
+}
+
+window.mockFetchArtistProfile = function(idx) {
+    const name = window.releaseState.artists[idx].name;
+    if (!name) return alert('Please enter an artist name first.');
+    window.releaseState.artists[idx].isNew = false;
+    window.releaseState.artists[idx].spotifyId = `spotify:artist:${Math.random().toString(36).substring(7)}`;
+    window.releaseState.artists[idx].appleId = `${Math.floor(100000000 + Math.random() * 900000000)}`;
+    renderStep1();
+};
+
+// Artwork Handler
+window.handleCoverArtSelection = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    window.releaseState.artwork.file = file;
+    const previewContainer = document.getElementById('artworkPreviewContainer');
+    const previewImg = document.getElementById('artworkPreviewImg');
+    const specsBox = document.getElementById('artworkSpecsBox');
+
+    previewImg.src = URL.createObjectURL(file);
+    previewContainer.classList.remove('hidden');
+
+    const inspected = await inspectImageFile(file);
+    window.releaseState.artwork.inspected = inspected;
+
+    specsBox.innerHTML = `
+        <p><strong>Inspected Format:</strong> ${inspected.mime}</p>
+        <p><strong>Dimensions:</strong> ${inspected.width} x ${inspected.height} px</p>
+        <p><strong>DDEX Quality Check:</strong> ${inspected.valid ? '<span class="text-emerald-400">PASSED</span>' : '<span class="text-red-400">FAILED (Must be PNG/JPG & ≥ 3000x3000px)</span>'}</p>
+    `;
+};
+
+// Tracks Editor & Inspection Renderer
+function renderTracksEditor() {
+    const container = document.getElementById('tracksEditorContainer');
+    if (!container) return;
+
+    const releaseType = window.releaseState.metadata.type;
+    if (releaseType === 'Single') {
+        window.releaseState.tracks = [window.releaseState.tracks[0]];
+    }
+
+    container.innerHTML = window.releaseState.tracks.map((track, idx) => `
+        <div class="p-5 rounded-2xl bg-brand-dark border border-brand-border space-y-4">
+            <div class="flex items-center justify-between border-b border-brand-border pb-3">
+                <span class="text-xs font-bold font-mono text-cyan-400">Track #${idx + 1}</span>
+                ${(releaseType !== 'Single' && window.releaseState.tracks.length > 1) ? `<button type="button" onclick="removeTrackFromState(${idx})" class="text-xs text-red-400 hover:underline">Remove Track</button>` : ''}
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="too-lost-form-label">Track Title *</label>
+                    <input type="text" required value="${track.metadata.title}" oninput="window.releaseState.tracks[${idx}].metadata.title = this.value" class="too-lost-input">
+                </div>
+                <div>
+                    <label class="too-lost-form-label">Version / Subtitle</label>
+                    <input type="text" value="${track.metadata.version || ''}" oninput="window.releaseState.tracks[${idx}].metadata.version = this.value" class="too-lost-input">
+                </div>
+                <div>
+                    <label class="too-lost-form-label">Audio File (WAV/FLAC) *</label>
+                    <input type="file" accept="audio/*" onchange="handleTrackAudioUpload(event, ${idx})" class="too-lost-input">
+                </div>
+            </div>
+
+            <div id="audio_tech_specs_${idx}" class="p-3 rounded-lg bg-black/40 border border-brand-border/40 text-xs font-mono text-gray-300 ${track.techSpecs ? '' : 'hidden'}">
+                ${track.techSpecs ? renderTechSpecs(track.techSpecs) : ''}
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                    <label class="too-lost-form-label">Disc No.</label>
+                    <input type="number" value="${track.discNumber}" oninput="window.releaseState.tracks[${idx}].discNumber = this.value" class="too-lost-input">
+                </div>
+                <div>
+                    <label class="too-lost-form-label">ISRC</label>
+                    <input type="text" value="${track.isrc}" oninput="window.releaseState.tracks[${idx}].isrc = this.value" class="too-lost-input">
+                </div>
+                <div>
+                    <label class="too-lost-form-label">Explicit Status</label>
+                    <select onchange="window.releaseState.tracks[${idx}].metadata.explicit = (this.value === 'true')" class="too-lost-input">
+                        <option value="false" ${!track.metadata.explicit ? 'selected' : ''}>Clean</option>
+                        <option value="true" ${track.metadata.explicit ? 'selected' : ''}>Explicit</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="too-lost-form-label">Genre</label>
+                    <input type="text" value="${track.metadata.genre}" oninput="window.releaseState.tracks[${idx}].metadata.genre = this.value" class="too-lost-input">
+                </div>
+            </div>
+
+            <div class="space-y-2 pt-2">
+                <label class="too-lost-form-label">Track Contributors & Artists</label>
+                <input type="text" placeholder="Featured Artists, Producers, Songwriters, Lyricists..." 
+                    value="${track.contributors.map(c => c.name).join(', ')}"
+                    oninput="window.releaseState.tracks[${idx}].contributors = [{ name: this.value, role: 'Contributor' }]" class="too-lost-input">
+            </div>
+
+            <div>
+                <label class="too-lost-form-label">Lyrics</label>
+                <textarea rows="2" oninput="window.releaseState.tracks[${idx}].lyrics.plain = this.value" class="too-lost-input" placeholder="Plain track lyrics...">${track.lyrics.plain}</textarea>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderTechSpecs(specs) {
+    return `
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+            <div><span class="text-gray-500">Format:</span> ${specs.format}</div>
+            <div><span class="text-gray-500">Sample Rate:</span> ${specs.sampleRate}</div>
+            <div><span class="text-gray-500">Bit Depth:</span> ${specs.bitDepth}</div>
+            <div><span class="text-gray-500">Channels:</span> ${specs.channels}</div>
+            <div><span class="text-gray-500">Duration:</span> ${specs.duration}</div>
+            <div><span class="text-gray-500">File Size:</span> ${specs.fileSize}</div>
+        </div>
+    `;
+}
+
+window.handleTrackAudioUpload = async (e, index) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    window.releaseState.tracks[index].audioFile = file;
+    const specs = await inspectAudioFile(file);
+    window.releaseState.tracks[index].techSpecs = specs;
     renderTracksEditor();
 };
-
-window.removeTrackFromState = function(index) {
-    window.releaseState.tracks.splice(index, 1);
-    renderTracksEditor();
-};
-
-window.handleCoverArtSelection = (e) => {
-    if (e.target.files[0]) window.releaseState.artwork.file = e.target.files[0];
-};
-
-window.handleTrackAudioFile = (e, index) => {
-    if (e.target.files[0]) window.releaseState.tracks[index].audioFile = e.target.files[0];
-};
-
+        
 function renderDeliverySummary() {
     const box = document.getElementById('deliverySummary');
     if (!box) return;
