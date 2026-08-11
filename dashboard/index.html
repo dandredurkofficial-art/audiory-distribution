@@ -313,7 +313,7 @@
             `;
         }
 
-        // 1. Updated Global State
+        // 1. Global State
 window.releaseState = {
     metadata: {
         title: '',
@@ -363,7 +363,119 @@ const ALL_ROLES = [
 
 const ALL_DSPS = ['Spotify', 'Apple Music', 'Amazon Music', 'Tidal', 'Deezer', 'YouTube Music', 'Pandora', 'TikTok'];
 
-// 2. Client-Side Image Inspector
+// 2. View Switching Handler
+window.switchView = function(viewName) {
+    const appContainer = document.getElementById('app') || document.getElementById('mainContent');
+    if (!appContainer) return;
+
+    if (viewName === 'createRelease') {
+        appContainer.innerHTML = window.renderCreateReleaseView();
+        window.currentStep = 1;
+        renderStep1();
+    } else if (viewName === 'analytics') {
+        appContainer.innerHTML = renderAnalyticsView();
+    } else if (viewName === 'settings') {
+        appContainer.innerHTML = renderSettingsView();
+    } else {
+        appContainer.innerHTML = `<div class="p-6 text-white"><h1 class="text-xl font-bold">Catalog View</h1></div>`;
+    }
+};
+
+// 3. Render Create Release View Container
+window.renderCreateReleaseView = function() {
+    return `
+        <div class="max-w-5xl mx-auto space-y-6">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-bold text-white">Create New Release</h1>
+                <span class="text-xs text-cyan-400 font-mono">Step <span id="stepCounter">1</span> of 6</span>
+            </div>
+
+            <!-- Wizard Steps Navigation -->
+            <div class="grid grid-cols-6 gap-2 text-center text-xs font-semibold">
+                <div id="step_tab_1" class="p-2 rounded-lg bg-brand-accent text-brand-dark font-bold">1. Metadata</div>
+                <div id="step_tab_2" class="p-2 rounded-lg bg-brand-card text-gray-400 border border-brand-border">2. Dates & DSPs</div>
+                <div id="step_tab_3" class="p-2 rounded-lg bg-brand-card text-gray-400 border border-brand-border">3. Artwork</div>
+                <div id="step_tab_4" class="p-2 rounded-lg bg-brand-card text-gray-400 border border-brand-border">4. Audio Tracks</div>
+                <div id="step_tab_5" class="p-2 rounded-lg bg-brand-card text-gray-400 border border-brand-border">5. Rights & Terms</div>
+                <div id="step_tab_6" class="p-2 rounded-lg bg-brand-card text-gray-400 border border-brand-border">6. Delivery</div>
+            </div>
+
+            <form onsubmit="handleFormSubmission(event)" class="space-y-6">
+                <!-- Step 1 Container -->
+                <div id="step_1_content" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="too-lost-form-label">Release Title *</label>
+                            <input type="text" required value="${window.releaseState.metadata.title}" oninput="window.releaseState.metadata.title = this.value" class="too-lost-input">
+                        </div>
+                        <div>
+                            <label class="too-lost-form-label">Release Type</label>
+                            <select onchange="window.releaseState.metadata.type = this.value; renderTracksEditor();" class="too-lost-input">
+                                <option value="Single">Single</option>
+                                <option value="EP">EP</option>
+                                <option value="Album">Album</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="too-lost-form-label">Record Label *</label>
+                        <input type="text" required value="${window.releaseState.label.name}" oninput="window.releaseState.label.name = this.value" class="too-lost-input" placeholder="Label Name">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" placeholder="(C) Line (e.g. 2026 Record Label)" value="${window.releaseState.label.cLine}" oninput="window.releaseState.label.cLine = this.value" class="too-lost-input">
+                        <input type="text" placeholder="(P) Line (e.g. 2026 Record Label)" value="${window.releaseState.label.pLine}" oninput="window.releaseState.label.pLine = this.value" class="too-lost-input">
+                    </div>
+                    <div id="step_1_artists_container" class="space-y-3"></div>
+                </div>
+
+                <!-- Step 2 Container -->
+                <div id="step_2_content" class="hidden space-y-4">
+                    <div id="step_2_dsps_container" class="space-y-4"></div>
+                </div>
+
+                <!-- Step 3 Container -->
+                <div id="step_3_content" class="hidden space-y-4">
+                    <label class="too-lost-form-label">Cover Artwork (Min 3000x3000px JPG/PNG) *</label>
+                    <input type="file" accept="image/png, image/jpeg" onchange="handleCoverArtSelection(event)" class="too-lost-input">
+                    <div id="artworkPreviewContainer" class="hidden flex gap-4 items-center pt-3">
+                        <img id="artworkPreviewImg" class="w-32 h-32 rounded-lg object-cover border border-brand-border">
+                        <div id="artworkSpecsBox" class="text-xs space-y-1 text-gray-300 font-mono"></div>
+                    </div>
+                </div>
+
+                <!-- Step 4 Container -->
+                <div id="step_4_content" class="hidden space-y-4">
+                    <div id="tracksEditorContainer" class="space-y-4"></div>
+                    <button type="button" onclick="addTrackToState()" class="px-4 py-2 rounded-lg bg-brand-card text-xs font-bold text-cyan-400 border border-brand-border">+ Add Another Track</button>
+                </div>
+
+                <!-- Step 5 Container -->
+                <div id="step_5_content" class="hidden space-y-4">
+                    <div class="p-4 rounded-xl bg-brand-dark border border-brand-border space-y-3 text-xs text-gray-300">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" onchange="window.releaseState.agreements.termsAccepted = this.checked" class="rounded border-brand-border">
+                            I confirm that I own or hold exclusive rights to distribute this master recording and underlying work.
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 6 Container -->
+                <div id="step_6_content" class="hidden space-y-4">
+                    <div id="deliverySummary" class="p-4 rounded-xl bg-brand-dark border border-brand-border space-y-2 text-xs text-gray-300 font-mono"></div>
+                </div>
+
+                <!-- Step Controls -->
+                <div class="flex justify-between items-center pt-4 border-t border-brand-border">
+                    <button type="button" id="prevStepBtn" disabled onclick="navigateStep(-1)" class="px-4 py-2 rounded-lg bg-brand-card text-gray-300 text-xs font-bold disabled:opacity-50">Back</button>
+                    <button type="button" id="nextStepBtn" onclick="navigateStep(1)" class="px-4 py-2 rounded-lg bg-brand-accent text-brand-dark text-xs font-bold">Next Step</button>
+                    <button type="submit" id="submitReleaseBtn" class="hidden px-6 py-2 rounded-lg bg-emerald-500 text-black text-xs font-bold">Upload & Submit Release</button>
+                </div>
+            </form>
+        </div>
+    `;
+};
+
+// 4. File Quality Inspection
 async function inspectImageFile(file) {
     return new Promise((resolve) => {
         const reader = new FileReader();
@@ -386,11 +498,10 @@ async function inspectImageFile(file) {
     });
 }
 
-// 3. Audio File Inspector
 async function inspectAudioFile(file) {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const arrayBuffer = await file.arrayBuffer();
-    const audioBuffer = await audioCtx.decodeAudioContext ? audioCtx.decodeAudioData(arrayBuffer) : await audioCtx.decodeAudioData(arrayBuffer);
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 
     return {
         filename: file.name,
@@ -403,7 +514,67 @@ async function inspectAudioFile(file) {
     };
 }
 
-// 4. Form Step Validation Engine
+// 5. Dynamic Track Control Functions
+window.addTrackToState = function() {
+    window.releaseState.tracks.push({
+        id: Date.now(),
+        discNumber: 1,
+        trackNumber: window.releaseState.tracks.length + 1,
+        audioFile: null,
+        audioUrl: '',
+        techSpecs: null,
+        metadata: { title: '', version: '', explicit: false, language: 'English', genre: '' },
+        isrc: '',
+        artists: [{ name: '', role: 'Primary Artist' }],
+        contributors: [],
+        writers: [{ name: '', role: 'Composer', ipi: '' }],
+        splits: [{ partyName: '', role: 'Songwriter', percentage: 100, email: '' }],
+        lyrics: { plain: '', synced: '', language: 'English' }
+    });
+    renderTracksEditor();
+};
+
+window.removeTrackFromState = function(idx) {
+    window.releaseState.tracks.splice(idx, 1);
+    renderTracksEditor();
+};
+
+// 6. Step 2 UI Renderer
+function renderStep2() {
+    const container = document.getElementById('step_2_dsps_container');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="space-y-4">
+            <div>
+                <label class="too-lost-form-label">Digital Release Date *</label>
+                <input type="date" value="${window.releaseState.dates.releaseDate}" onchange="window.releaseState.dates.releaseDate = this.value" class="too-lost-input">
+            </div>
+            <div>
+                <label class="too-lost-form-label">Select Target DSPs</label>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                    ${ALL_DSPS.map(dsp => `
+                        <label class="flex items-center gap-2 p-2 rounded-lg bg-brand-dark/60 border border-brand-border text-xs text-gray-200 cursor-pointer">
+                            <input type="checkbox" ${window.releaseState.dsps.includes(dsp) ? 'checked' : ''} 
+                                onchange="toggleDsp('${dsp}', this.checked)">
+                            ${dsp}
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+window.toggleDsp = function(dsp, isChecked) {
+    if (isChecked && !window.releaseState.dsps.includes(dsp)) {
+        window.releaseState.dsps.push(dsp);
+    } else if (!isChecked) {
+        window.releaseState.dsps = window.releaseState.dsps.filter(d => d !== dsp);
+    }
+};
+
+// 7. Step Validation Engine
 function validateCurrentStep() {
     const state = window.releaseState;
     if (window.currentStep === 1) {
@@ -431,7 +602,7 @@ function validateCurrentStep() {
     return null;
 }
 
-// 5. Navigation Control
+// 8. Navigation Control
 window.navigateStep = async function(direction) {
     if (direction === 1) {
         const error = validateCurrentStep();
@@ -469,7 +640,7 @@ window.navigateStep = async function(direction) {
     }
 };
 
-// Step 1 UI Renderer
+// 9. Step 1 UI Renderer
 function renderStep1() {
     const container = document.getElementById('step_1_artists_container');
     if (!container) return;
@@ -525,7 +696,7 @@ window.mockFetchArtistProfile = function(idx) {
     renderStep1();
 };
 
-// Artwork Handler
+// 10. Artwork Handler
 window.handleCoverArtSelection = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -548,7 +719,7 @@ window.handleCoverArtSelection = async (e) => {
     `;
 };
 
-// Tracks Editor & Inspection Renderer
+// 11. Tracks Editor & Inspection Renderer
 function renderTracksEditor() {
     const container = document.getElementById('tracksEditorContainer');
     if (!container) return;
@@ -643,7 +814,7 @@ window.handleTrackAudioUpload = async (e, index) => {
     window.releaseState.tracks[index].techSpecs = specs;
     renderTracksEditor();
 };
-        
+
 function renderDeliverySummary() {
     const box = document.getElementById('deliverySummary');
     if (!box) return;
@@ -657,7 +828,12 @@ function renderDeliverySummary() {
     `;
 }
 
-// Complete Assembly Submission Handler
+// 12. Cloudflare R2 Upload Helper
+async function uploadFileToR2(file, folder) {
+    return `https://r2-storage.yourdomain.com/${folder}/${Date.now()}_${file.name}`;
+}
+
+// 13. Form Submission Handler
 window.handleFormSubmission = async function(e) {
     e.preventDefault();
     if (!window.releaseState.agreements.termsAccepted) {
@@ -667,10 +843,9 @@ window.handleFormSubmission = async function(e) {
 
     const btn = document.getElementById('submitReleaseBtn');
     btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing Assets to R2...`;
+    btn.innerHTML = `Processing Assets to R2...`;
 
     try {
-        // 1. Binaries -> R2 Direct Uploads
         if (window.releaseState.artwork.file) {
             window.releaseState.artwork.url = await uploadFileToR2(window.releaseState.artwork.file, 'artworks');
         }
@@ -681,7 +856,6 @@ window.handleFormSubmission = async function(e) {
             }
         }
 
-        // 2. Transmit complete payload to Cloudflare Worker Gateway
         const token = await window.currentUser.getIdToken();
         const res = await fetch(`${WORKER_BASE_URL}/api/releases/submit`, {
             method: 'POST',
@@ -706,16 +880,17 @@ window.handleFormSubmission = async function(e) {
         alert(`Error delivering release: ${err.message}`);
     } finally {
         btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Upload & Submit Release`;
+        btn.innerHTML = `Upload & Submit Release`;
     }
 };
-        function renderAnalyticsView() {
-            return `<div class="max-w-7xl mx-auto"><h1 class="text-2xl font-bold text-white">Analytics & Earnings</h1><p class="text-xs text-gray-400 mt-2">Connect your Too Lost royalty reports via Worker API.</p></div>`;
-        }
 
-        function renderSettingsView() {
-            return `<div class="max-w-4xl mx-auto"><h1 class="text-2xl font-bold text-white">Settings & Payouts</h1><p class="text-xs text-gray-400 mt-2">Configure Stripe payout settings and legal identity details.</p></div>`;
-        }
+function renderAnalyticsView() {
+    return `<div class="max-w-7xl mx-auto"><h1 class="text-2xl font-bold text-white">Analytics & Earnings</h1><p class="text-xs text-gray-400 mt-2">Connect your Too Lost royalty reports via Worker API.</p></div>`;
+}
+
+function renderSettingsView() {
+    return `<div class="max-w-4xl mx-auto"><h1 class="text-2xl font-bold text-white">Settings & Payouts</h1><p class="text-xs text-gray-400 mt-2">Configure Stripe payout settings and legal identity details.</p></div>`;
+}
     </script>
 </body>
 </html>
