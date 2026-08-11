@@ -272,7 +272,7 @@
             }
         }
 
-        // Direct R2 Upload via Cloudflare Worker Pre-Signed URLs
+        // Direct R2 Upload via Cloudflare Worker Pre-Signed URLs (Fixed)
         async function uploadFileToR2(file, folder = 'audio') {
             const fileName = `${folder}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
             const token = await window.currentUser.getIdToken();
@@ -286,8 +286,16 @@
                 body: JSON.stringify({ key: fileName, contentType: file.type })
             });
 
-            if (!res.ok) throw new Error('Failed to retrieve upload URL from Worker');
-            const { uploadUrl, publicUrl } = await res.json();
+            if (!res.ok) throw new Error(`Worker URL request failed with status ${res.status}`);
+    
+            const data = await res.json();
+            // Handles multiple possible property names from Cloudflare Worker response
+            const uploadUrl = data.uploadUrl || data.url || data.signedUrl;
+            const publicUrl = data.publicUrl || data.fileUrl || `${WORKER_BASE_URL}/${fileName}`;
+
+            if (!uploadUrl) {
+                throw new Error("Worker endpoint did not return a valid 'uploadUrl' property.");
+            }
 
             const uploadRes = await fetch(uploadUrl, {
                 method: 'PUT',
@@ -295,7 +303,7 @@
                 body: file
             });
 
-            if (!uploadRes.ok) throw new Error('Failed uploading binary to Cloudflare R2');
+            if (!uploadRes.ok) throw new Error(`Failed uploading binary to Cloudflare R2 (Status ${uploadRes.status})`);
             return publicUrl;
         }
 
@@ -713,15 +721,19 @@
             `;
         };
 
-        // Binary Audio Inspection Engine
+        // Binary Audio Inspection Engine (Fixed)
         async function inspectAudioFile(file) {
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const arrayBuffer = await file.arrayBuffer();
+
+            // 1. Generate checksum preview BEFORE decodeAudioData detaches the buffer
+            const mockChecksum = Array.from(new Uint8Array(arrayBuffer.slice(0, 16)))
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+
+            // 2. Pass the ArrayBuffer to decodeAudioData
             const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 
-            // Compute Mock Checksum & Loudness
-            const mockChecksum = Array.from(new Uint8Array(arrayBuffer.slice(0, 16))).map(b => b.toString(16).padStart(2, '0')).join('');
-            
             return {
                 filename: file.name,
                 fileFormat: file.name.split('.').pop().toUpperCase(),
