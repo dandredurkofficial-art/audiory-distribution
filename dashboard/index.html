@@ -985,6 +985,14 @@ window.handleFormSubmission = async function(e) {
             }
         }
 
+        // Helper to normalize roles to allowed enums: "primary", "featuring", or "remixer"
+        const normalizeRole = (roleStr) => {
+            const r = (roleStr || '').toLowerCase();
+            if (r.includes('feat')) return 'featuring';
+            if (r.includes('remix')) return 'remixer';
+            return 'primary';
+        };
+
         // 3. Map nested frontend releaseState into Too Lost API schema
         const tooLostPayload = {
             title: window.releaseState.metadata.title,
@@ -997,10 +1005,10 @@ window.handleFormSubmission = async function(e) {
             copyright_line: window.releaseState.label.cLine,
             phonogram_line: window.releaseState.label.pLine,
             
-            // Map primary/associated artists with array-formatted roles
+            // Map primary/associated artists with strictly accepted role enums
             participants: window.releaseState.artists.map(artist => ({
                 name: artist.name,
-                role: [artist.role === 'primary' ? 'Primary Artist' : artist.role],
+                role: [normalizeRole(artist.role)],
                 spotify_id: artist.spotifyId || undefined,
                 apple_id: artist.appleId || undefined
             })),
@@ -1019,7 +1027,7 @@ window.handleFormSubmission = async function(e) {
                 participants: track.contributors.length > 0 
                     ? track.contributors.map(c => ({ 
                         name: c.name, 
-                        role: ["Featured Artist"] 
+                        role: [normalizeRole(c.role || 'featuring')] 
                       }))
                     : undefined
             }))
