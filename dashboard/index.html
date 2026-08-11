@@ -269,7 +269,7 @@
                 const res = await fetch(`${WORKER_BASE_URL}/api/releases`, {
                     method: 'GET',
                     headers: {
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
                         'Authorization': idToken ? `Bearer ${idToken}` : ''
                     }
                 });
