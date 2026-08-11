@@ -164,6 +164,42 @@
         // Production Configuration Endpoints
         const WORKER_BASE_URL = "https://audiorydistribution.dandredurkofficial.workers.dev";
 
+        function redirectToTooLostLogin() {
+            const clientId = "a2786dc1-c223-4063-8c65-f50cbc0f8210";
+            const redirectUri = encodeURIComponent("https://distro.audiory.site/dashboard/");
+            const authorizeUrl = `https://sandbox.toolost.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`;
+    
+            window.location.href = authorizeUrl;
+        }
+
+        async function handleOAuthCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+
+            if (code) {
+                try {
+                    const response = await fetch(`${WORKER_BASE_URL}/api/toolost/oauth/token`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            grant_type: 'authorization_code',
+                            code: code,
+                            redirect_uri: 'https://distro.audiory.site/dashboard/'
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.access_token) {
+                        localStorage.setItem('too_lost_token', data.access_token);
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        await loadLiveCatalog();
+                    }
+                } catch (err) {
+                    console.error('Failed to exchange OAuth code:', err);
+                }
+            }
+        }
+
         // Global State Variables
         window.currentUser = null;
         window.releasesCatalog = [];
@@ -233,7 +269,9 @@
                 if (nameEl) nameEl.innerText = user.displayName || user.email.split('@')[0];
                 if (emailEl) emailEl.innerText = user.email;
                 if (initEl) initEl.innerText = (user.displayName || user.email).substring(0, 2).toUpperCase();
-                
+        
+                // Execute the OAuth code exchange check before loading catalog
+                await handleOAuthCallback();
                 await loadLiveCatalog();
                 window.switchView('home');
             } else {
@@ -262,22 +300,32 @@
         };
 
         async function loadLiveCatalog() {
+            const token = localStorage.getItem('too_lost_token');
+            if (!token) {
+                console.warn("No Too Lost token found. Redirecting to authorize...");
+                redirectToTooLostLogin();
+                return;
+            }
+
             try {
                 const res = await fetch(`${WORKER_BASE_URL}/api/releases`, {
                     method: 'GET',
-                    headers: { 
-                        'Accept': 'application/json'
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     }
                 });
-        
+
                 if (res.ok) {
                     const data = await res.json();
                     window.releasesCatalog = Array.isArray(data) ? data : (data.data || []);
-                } else {
-                    console.error("Failed to fetch catalog from worker:", await res.text());
+                    renderCatalogView();
+                } else if (res.status === 401) {
+                    localStorage.removeItem('too_lost_token');
+                    redirectToTooLostLogin();
                 }
             } catch (err) {
-                console.error("Error loading catalog from worker:", err);
+                console.error("Error loading catalog:", err);
             }
         }
 
