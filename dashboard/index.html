@@ -261,14 +261,19 @@
             setTimeout(() => toast.remove(), 4000);
         };
 
-        // Fetch Live Releases from Firestore
+        // Updated: Fetch live catalog directly from Worker endpoint
         async function loadLiveCatalog() {
             try {
-                const q = query(collection(db, "releases"), where("userId", "==", window.currentUser.uid));
-                const querySnapshot = await getDocs(q);
-                window.releasesCatalog = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const token = await window.currentUser.getIdToken();
+                const res = await fetch(`${WORKER_BASE_URL}/api/releases`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    window.releasesCatalog = Array.isArray(data) ? data : (data.data || []);
+                }
             } catch (err) {
-                console.error("Error loading catalog:", err);
+                console.error("Error loading catalog from worker:", err);
             }
         }
 
@@ -360,6 +365,7 @@
             `;
         }
 
+        // Updated: Render Catalog
         function renderCatalogView() {
             if (window.releasesCatalog.length === 0) {
                 return `
@@ -377,19 +383,18 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         ${window.releasesCatalog.map(rel => `
                             <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-4">
-                                <img src="${rel.artwork?.url || 'https://via.placeholder.com/300'}" class="w-full aspect-square object-cover rounded-xl border border-brand-border">
+                                <img src="${rel.artwork?.url || rel.cover_url || 'https://via.placeholder.com/300'}" class="w-full aspect-square object-cover rounded-xl border border-brand-border">
                                 <div>
-                                    <h3 class="font-bold text-white text-sm">${rel.metadata?.title}</h3>
-                                    <p class="text-xs text-gray-400">${rel.artists?.map(a => a.name).join(', ')}</p>
+                                    <h3 class="font-bold text-white text-sm">${rel.metadata?.title || rel.title || 'Untitled Release'}</h3>
+                                    <p class="text-xs text-gray-400">${rel.artists ? rel.artists.map(a => a.name).join(', ') : (rel.artist || 'Unknown Artist')}</p>
                                 </div>
-                                <div class="text-[10px] font-mono text-gray-400 pt-2 border-t border-brand-border">Type: ${rel.metadata?.type} | UPC: ${rel.metadata?.upc || 'Pending'}</div>
+                                <div class="text-[10px] font-mono text-gray-400 pt-2 border-t border-brand-border">Type: ${rel.metadata?.type || 'Single'} | Status: ${rel.status || 'Submitted'}</div>
                             </div>
                         `).join('')}
                     </div>
                 </div>
             `;
         }
-
         // Render Create Release Form Container
         window.renderCreateReleaseView = function() {
             return `
@@ -985,12 +990,13 @@
                 if (!res.ok) throw new Error('Worker rejected submission pipeline.');
 
                 window.showToast('Release successfully dispatched to Too Lost Distribution!', false);
+                await loadLiveCatalog();
                 switchView('catalog');
 
             } catch (err) {
                 console.error('Submission Error:', err);
                 window.showToast(`Error delivering release: ${err.message}`, true);
-            } flex: {
+            } finally {
                 btn.disabled = false;
                 btn.innerHTML = `Upload & Submit Release`;
             }
