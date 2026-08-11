@@ -985,7 +985,7 @@ window.handleFormSubmission = async function(e) {
             }
         }
 
-        // Helper to normalize roles to allowed enums: "primary", "featuring", or "remixer"
+        // Helper to normalize roles to allowed enums
         const normalizeRole = (roleStr) => {
             const r = (roleStr || '').toLowerCase();
             if (r.includes('feat')) return 'featuring';
@@ -993,10 +993,18 @@ window.handleFormSubmission = async function(e) {
             return 'primary';
         };
 
+        // Helper to normalize release type enum ("single", "album", "ep")
+        const normalizeType = (typeStr) => {
+            const t = (typeStr || '').toLowerCase().trim();
+            if (t === 'ep') return 'ep';
+            if (t === 'album' || t === 'lp') return 'album';
+            return 'single'; // Default fallback
+        };
+
         // 3. Map nested frontend releaseState into Too Lost API schema
         const tooLostPayload = {
             title: window.releaseState.metadata.title,
-            type: window.releaseState.metadata.type.toLowerCase(), // "single", "ep", or "album"
+            type: normalizeType(window.releaseState.metadata.type),
             label: window.releaseState.label.name,
             cover_url: artworkUrl,
             release_date: window.releaseState.dates.releaseDate,
