@@ -369,36 +369,39 @@
             `;
         }
 
-        // Updated: Render Catalog
-        function renderCatalogView() {
-            if (window.releasesCatalog.length === 0) {
-                return `
-                    <div class="text-center py-20 bg-brand-card rounded-2xl border border-brand-border space-y-4">
-                        <i class="fa-solid fa-compact-disc text-4xl text-gray-600"></i>
-                        <h3 class="text-lg font-bold text-white">No Releases In Your Catalog</h3>
-                        <p class="text-xs text-gray-400">Create your first release to start distributing music globally.</p>
-                        <button onclick="switchView('create')" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs">Create Release Now</button>
+        /// Updated: Render Catalog
+function renderCatalogView() {
+    if (!window.releasesCatalog || window.releasesCatalog.length === 0) {
+        return `
+            <div class="text-center py-20 bg-brand-card rounded-2xl border border-brand-border space-y-4">
+                <i class="fa-solid fa-compact-disc text-4xl text-gray-600"></i>
+                <h3 class="text-lg font-bold text-white">No Releases In Your Catalog</h3>
+                <p class="text-xs text-gray-400">Create your first release to start distributing music globally.</p>
+                <button onclick="switchView('create')" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs">Create Release Now</button>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="max-w-7xl mx-auto space-y-6">
+            <h1 class="text-2xl font-bold text-white">Releases Catalog</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                ${window.releasesCatalog.map(rel => `
+                    <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+                        <img src="${rel.artwork?.url || rel.cover_url || 'https://via.placeholder.com/300'}" class="w-full aspect-square object-cover rounded-xl border border-brand-border">
+                        <div>
+                            <h3 class="font-bold text-white text-sm">${rel.metadata?.title || rel.title || 'Untitled Release'}</h3>
+                            <p class="text-xs text-gray-400">${rel.artists ? rel.artists.map(a => a.name).join(', ') : (rel.artist || 'Unknown Artist')}</p>
+                        </div>
+                        <div class="text-[10px] font-mono text-gray-400 pt-2 border-t border-brand-border">
+                            Type: ${rel.metadata?.type || 'Single'} | Status: ${rel.status || 'Submitted'}
+                        </div>
                     </div>
-                `;
-            }
-            return `
-                <div class="max-w-7xl mx-auto space-y-6">
-                    <h1 class="text-2xl font-bold text-white">Releases Catalog</h1>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        ${window.releasesCatalog.map(rel => `
-                            <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-4">
-                                <img src="${rel.artwork?.url || rel.cover_url || 'https://via.placeholder.com/300'}" class="w-full aspect-square object-cover rounded-xl border border-brand-border">
-                                <div>
-                                    <h3 class="font-bold text-white text-sm">${rel.metadata?.title || rel.title || 'Untitled Release'}</h3>
-                                    <p class="text-xs text-gray-400">${rel.artists ? rel.artists.map(a => a.name).join(', ') : (rel.artist || 'Unknown Artist')}</p>
-                                </div>
-                                <div class="text-[10px] font-mono text-gray-400 pt-2 border-t border-brand-border">Type: ${rel.metadata?.type || 'Single'} | Status: ${rel.status || 'Submitted'}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
         // Render Create Release Form Container
         window.renderCreateReleaseView = function() {
             return `
@@ -960,52 +963,52 @@
         }
 
         // Submission Handler
-        window.handleFormSubmission = async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('submitReleaseBtn');
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing Assets to R2...`;
+window.handleFormSubmission = async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitReleaseBtn');
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing Assets to R2...`;
 
-            try {
-                if (window.releaseState.artwork.file) {
-                    window.releaseState.artwork.url = await uploadFileToR2(window.releaseState.artwork.file, 'artworks');
-                }
+    try {
+        if (window.releaseState.artwork.file) {
+            window.releaseState.artwork.url = await uploadFileToR2(window.releaseState.artwork.file, 'artworks');
+        }
 
-                for (let i = 0; i < window.releaseState.tracks.length; i++) {
-                    if (window.releaseState.tracks[i].audioFile) {
-                        window.releaseState.tracks[i].audioUrl = await uploadFileToR2(window.releaseState.tracks[i].audioFile, 'audio');
-                    }
-                }
-
-                const token = await window.currentUser.getIdToken();
-                const res = await fetch(`${WORKER_BASE_URL}/api/releases/submit`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        ...window.releaseState,
-                        userId: window.currentUser.uid,
-                        submittedAt: new Date().toISOString()
-                    })
-                });
-
-                if (!res.ok) throw new Error('Worker rejected submission pipeline.');
-
-                window.showToast('Release successfully dispatched to Too Lost Distribution!', false);
-                await loadLiveCatalog();
-                switchView('catalog');
-
-            } catch (err) {
-                console.error('Submission Error:', err);
-                window.showToast(`Error delivering release: ${err.message}`, true);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = `Upload & Submit Release`;
+        for (let i = 0; i < window.releaseState.tracks.length; i++) {
+            if (window.releaseState.tracks[i].audioFile) {
+                window.releaseState.tracks[i].audioUrl = await uploadFileToR2(window.releaseState.tracks[i].audioFile, 'audio');
             }
-        };
+        }
 
+        const res = await fetch(`${WORKER_BASE_URL}/api/releases/submit`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                ...window.releaseState,
+                userId: window.currentUser ? window.currentUser.uid : null,
+                submittedAt: new Date().toISOString()
+            })
+        });
+
+        if (!res.ok) {
+            const errData = await res.text();
+            throw new Error(errData || 'Worker rejected submission pipeline.');
+        }
+
+        window.showToast('Release successfully dispatched to Too Lost Distribution!', false);
+        await loadLiveCatalog();
+        switchView('catalog');
+
+    } catch (err) {
+        console.error('Submission Error:', err);
+        window.showToast(`Error delivering release: ${err.message}`, true);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `Upload & Submit Release`;
+    }
+};
         function renderAnalyticsView() {
             return `<div class="max-w-7xl mx-auto"><h1 class="text-2xl font-bold text-white">Analytics & Earnings</h1><p class="text-xs text-gray-400 mt-2">Connect your Too Lost royalty reports via Worker API.</p></div>`;
         }
