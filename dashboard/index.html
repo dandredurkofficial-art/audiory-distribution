@@ -277,18 +277,31 @@
 
         async function loadLiveCatalog() {
     try {
+        const currentUid = window.currentUser ? window.currentUser.uid : null;
+        if (!currentUid) {
+            window.releasesCatalog = [];
+            if (typeof renderCatalogView === 'function') renderCatalogView();
+            return;
+        }
+
         let serverReleases = [];
 
-        // 1. Attempt API fetch
+        // 1. Attempt API fetch with user token
         try {
+            const token = await window.currentUser.getIdToken();
             const res = await fetch(`${WORKER_BASE_URL}/api/releases`, {
                 method: 'GET',
-                headers: { 'Accept': 'application/json' }
+                headers: { 
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
             });
 
             if (res.ok) {
                 const data = await res.json();
-                serverReleases = Array.isArray(data) ? data : (data.data || []);
+                const rawList = Array.isArray(data) ? data : (data.data || []);
+                // Filter server releases by logged-in user
+                serverReleases = rawList.filter(item => !item.submittedBy || item.submittedBy === currentUid);
             } else {
                 console.error("Failed to fetch live catalog from API gateway:", res.status);
             }
@@ -296,40 +309,44 @@
             console.error("API Gateway error:", fetchErr);
         }
 
-        // 2. Pull cached releases saved in LocalStorage
-        const localReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
+        // 2. Pull local releases & filter strictly for the current logged-in user
+        const allLocalReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
+        const localReleases = allLocalReleases.filter(item => item.submittedBy === currentUid);
 
-        // Helper to extract cover URL across all potential payload keys
+        // Helper to extract cover artwork
         const getCoverUrl = (item) => {
             return item.coverUrl 
                 || item.cover_url 
                 || item.cover_art 
-                || item.cover_artwork 
                 || item.compressedArtwork 
                 || item.artwork?.url 
-                || item.artwork 
                 || '';
         };
 
-        // 3. Merge Local + Server, deduplicating by ID/Title and keeping valid artwork
+        // 3. Merge Local + Server
         const releaseMap = new Map();
 
-        // Load local releases first
         localReleases.forEach(item => {
             const key = String(item.id || item.title);
             const resolvedCover = getCoverUrl(item);
             releaseMap.set(key, {
                 ...item,
                 coverUrl: resolvedCover,
-                compressedArtwork: resolvedCover
+                compressedArtwork: resolvedCover,
+                status: item.status || 'Submitted'
             });
         });
 
-        // Merge server releases (don't overwrite local artwork if server returns empty artwork)
         serverReleases.forEach(item => {
             const key = String(item.id || item.title);
             const serverCover = getCoverUrl(item);
             const existing = releaseMap.get(key);
+
+            // Clean up status if API returns non-standard system strings
+            let cleanStatus = item.status || 'Submitted';
+            if (cleanStatus.includes('Gateway') || cleanStatus.includes('Online')) {
+                cleanStatus = 'Submitted';
+            }
 
             if (existing) {
                 const finalCover = serverCover || existing.coverUrl;
@@ -337,13 +354,15 @@
                     ...existing,
                     ...item,
                     coverUrl: finalCover,
-                    compressedArtwork: finalCover
+                    compressedArtwork: finalCover,
+                    status: existing.status || cleanStatus
                 });
             } else {
                 releaseMap.set(key, {
                     ...item,
                     coverUrl: serverCover,
-                    compressedArtwork: serverCover
+                    compressedArtwork: serverCover,
+                    status: cleanStatus
                 });
             }
         });
@@ -1587,17 +1606,26 @@ window.handleFormSubmission = async function(event) {
         // 7. Complete Progress State
         updateProgress(100, `Release successfully ${isEditing ? 'updated' : 'submitted'}! Redirecting...`);
 
+        const currentUid = window.currentUser ? window.currentUser.uid : 'anonymous';
+
+        // Normalize valid status (preventing server health messages from becoming status badges)
+        let validStatus = 'Submitted';
+        if (serverResponse?.status && !serverResponse.status.includes('Gateway') && !serverResponse.status.includes('Online')) {
+            validStatus = serverResponse.status;
+        }
+
         // Update Local Storage and Catalog state
         const finalId = editingId || serverResponse?.id || serverResponse?.data?.id || Date.now();
         const newReleaseItem = {
             id: finalId,
             title: payload.title,
             type: payload.type,
-            status: serverResponse?.status || 'draft',
+            status: validStatus,
             coverUrl: finalCoverUrl,
             compressedArtwork: finalCoverUrl,
             participants: mappedParticipants,
-            upc: serverResponse?.upc || serverResponse?.data?.upc || 'Pending'
+            upc: serverResponse?.upc || serverResponse?.data?.upc || 'Pending',
+            submittedBy: currentUid
         };
 
         let localSavedReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
