@@ -377,91 +377,164 @@
         }
 
         function renderCatalogView() {
-            if (!window.releasesCatalog || window.releasesCatalog.length === 0) {
-                return `
-                    <div class="text-center py-24 bg-brand-card rounded-2xl border border-brand-border space-y-4 max-w-xl mx-auto">
-                        <div class="w-16 h-16 rounded-full bg-cyan-500/10 text-cyan-400 flex items-center justify-center mx-auto text-2xl">
-                            <i class="fa-solid fa-compact-disc"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-white">No Releases Found</h3>
-                        <p class="text-xs text-gray-400">Start distributing your music to over 150+ streaming platforms.</p>
-                        <button onclick="switchView('create')" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:opacity-90 transition">
-                            + Create New Release
-                        </button>
-                    </div>
-                `;
-            }
+    if (!window.releasesCatalog || window.releasesCatalog.length === 0) {
+        return `
+            <div class="text-center py-24 bg-brand-card rounded-2xl border border-brand-border space-y-4 max-w-xl mx-auto">
+                <div class="w-16 h-16 rounded-full bg-cyan-500/10 text-cyan-400 flex items-center justify-center mx-auto text-2xl">
+                    <i class="fa-solid fa-compact-disc"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">No Releases Found</h3>
+                <p class="text-xs text-gray-400">Start distributing your music to over 150+ streaming platforms.</p>
+                <button onclick="switchView('create')" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs hover:opacity-90 transition">
+                    + Create New Release
+                </button>
+            </div>
+        `;
+    }
 
-            return `
-                <div class="max-w-7xl mx-auto space-y-6">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-brand-border pb-5">
-                        <div>
-                            <h1 class="text-2xl font-bold text-white tracking-tight">Releases Catalog</h1>
-                            <p class="text-xs text-gray-400">Manage, edit, and track your active music submissions</p>
-                        </div>
-                        <button onclick="switchView('create')" class="px-4 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs flex items-center justify-center gap-2 hover:opacity-90 transition">
-                            <i class="fa-solid fa-plus"></i> New Release
-                        </button>
-                    </div>
+    return `
+        <div class="max-w-7xl mx-auto space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-brand-border pb-5">
+                <div>
+                    <h1 class="text-2xl font-bold text-white tracking-tight">Releases Catalog</h1>
+                    <p class="text-xs text-gray-400">Manage, edit, and track your active music submissions</p>
+                </div>
+                <button onclick="switchView('create')" class="px-4 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs flex items-center justify-center gap-2 hover:opacity-90 transition">
+                    <i class="fa-solid fa-plus"></i> New Release
+                </button>
+            </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        ${window.releasesCatalog.map((rel, idx) => {
-                            const title = rel.title || rel.metadata?.title || 'Untitled Release';
-                            const artistNames = rel.artists ? rel.artists.map(a => a.name).join(', ') : (rel.artist || 'Unknown Artist');
-                            const cover = rel.cover_url || rel.coverUrl || rel.artwork?.url || 'https://placehold.co/400x400/1e293b/06b6d4?text=Music+Cover';
-                            const releaseType = rel.type || rel.metadata?.type || 'Single';
-                            const status = rel.status || 'Submitted';
-                            const upc = rel.upc || 'Pending';
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                ${window.releasesCatalog.map((rel, idx) => {
+                    // Title extraction
+                    const title = rel.title || rel.metadata?.title || 'Untitled Release';
 
-                            return `
-                                <div class="group relative rounded-2xl bg-brand-card border border-brand-border p-4 flex gap-4 hover:border-cyan-500/50 transition-all shadow-lg">
-                                    <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-brand-dark border border-brand-border flex-shrink-0">
-                                        <img src="${cover}" alt="${title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                                             onerror="this.src='https://placehold.co/400x400/1e293b/06b6d4?text=No+Cover'">
-                                        <span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-[9px] font-bold text-cyan-400 uppercase tracking-wider">
-                                            ${releaseType}
-                                        </span>
+                    // Artist extraction (handles strings, objects, and primary_artist fallbacks)
+                    let artistNames = 'Unknown Artist';
+                    if (Array.isArray(rel.artists) && rel.artists.length > 0) {
+                        artistNames = rel.artists
+                            .map(a => typeof a === 'string' ? a : (a.name || a.artist_name || ''))
+                            .filter(Boolean)
+                            .join(', ');
+                    } else if (typeof rel.artist === 'string' && rel.artist) {
+                        artistNames = rel.artist;
+                    } else if (rel.primary_artist) {
+                        artistNames = typeof rel.primary_artist === 'string' ? rel.primary_artist : (rel.primary_artist.name || 'Unknown Artist');
+                    }
+
+                    // Cover artwork extraction
+                    const cover = rel.cover_url || rel.coverUrl || rel.cover_art || rel.artwork?.url || 'https://placehold.co/400x400/1e293b/06b6d4?text=No+Cover';
+                    
+                    // Metadata & Status
+                    const releaseType = rel.type || rel.metadata?.type || 'Single';
+                    const status = rel.status || 'Submitted';
+                    const upc = rel.upc || 'Pending';
+
+                    return `
+                        <div class="group relative rounded-2xl bg-brand-card border border-brand-border p-4 flex gap-4 hover:border-cyan-500/50 transition-all shadow-lg">
+                            <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-brand-dark border border-brand-border flex-shrink-0">
+                                <img src="${cover}" alt="${title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                     onerror="this.src='https://placehold.co/400x400/1e293b/06b6d4?text=No+Cover'">
+                                <span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-[9px] font-bold text-cyan-400 uppercase tracking-wider">
+                                    ${releaseType}
+                                </span>
+                            </div>
+
+                            <div class="flex-1 min-w-0 flex flex-col justify-between">
+                                <div class="space-y-1">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <h3 class="font-bold text-white text-sm truncate group-hover:text-cyan-400 transition" title="${title}">${title}</h3>
                                     </div>
+                                    <p class="text-xs text-gray-400 truncate" title="${artistNames}">${artistNames}</p>
+                                    <p class="text-[10px] font-mono text-gray-500">UPC: ${upc}</p>
+                                </div>
 
-                                    <div class="flex-1 min-w-0 flex flex-col justify-between">
-                                        <div class="space-y-1">
-                                            <div class="flex items-start justify-between gap-2">
-                                                <h3 class="font-bold text-white text-sm truncate group-hover:text-cyan-400 transition" title="${title}">${title}</h3>
-                                            </div>
-                                            <p class="text-xs text-gray-400 truncate" title="${artistNames}">${artistNames}</p>
-                                            <p class="text-[10px] font-mono text-gray-500">UPC: ${upc}</p>
-                                        </div>
-
-                                        <div class="pt-2 border-t border-brand-border/60 flex items-center justify-between">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                                ● ${status}
-                                            </span>
-                                            <div class="flex items-center gap-1">
-                                                <button type="button" onclick="editReleaseCatalog(${idx})" title="Edit Release" class="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-brand-dark transition">
-                                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
-                                                </button>
-                                                <button type="button" onclick="deleteReleaseCatalog('${rel.id || idx}')" title="Delete Release" class="p-1.5 rounded-lg text-gray-400 hover:text-red-400 hover:bg-brand-dark transition">
-                                                    <i class="fa-solid fa-trash text-xs"></i>
-                                                </button>
-                                            </div>
-                                        </div>
+                                <div class="pt-2 border-t border-brand-border/60 flex items-center justify-between">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                        ● ${status}
+                                    </span>
+                                    <div class="flex items-center gap-1">
+                                        <button type="button" onclick="editReleaseCatalog(${idx})" title="Edit Release" class="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-brand-dark transition">
+                                            <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                        </button>
+                                        <button type="button" onclick="deleteReleaseCatalog('${rel.id || idx}')" title="Delete Release" class="p-1.5 rounded-lg text-gray-400 hover:text-red-400 hover:bg-brand-dark transition">
+                                            <i class="fa-solid fa-trash text-xs"></i>
+                                        </button>
                                     </div>
                                 </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            `;
-        }
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+}
 
         // Catalog Actions
         window.editReleaseCatalog = function(index) {
-            const item = window.releasesCatalog[index];
-            if (!item) return;
-            window.releaseState = JSON.parse(JSON.stringify(item));
-            switchView('create');
-            window.showToast('Release loaded for editing', false);
-        };
+    const item = window.releasesCatalog[index];
+    if (!item) return;
+
+    // Standardize object structure for the form
+    window.releaseState = {
+        metadata: {
+            title: item.title || item.metadata?.title || '',
+            type: item.type || item.metadata?.type || 'Single',
+            language: item.language || item.metadata?.language || 'English',
+            explicit: item.explicit || item.metadata?.explicit || false,
+            primaryGenre: item.genre || item.primary_genre || item.metadata?.primaryGenre || '',
+            secondaryGenre: item.subgenre || item.secondary_genre || item.metadata?.secondaryGenre || ''
+        },
+        artists: Array.isArray(item.artists) && item.artists.length > 0 
+            ? item.artists.map(a => typeof a === 'string' ? { name: a, role: 'Primary' } : { name: a.name || '', role: a.role || 'Primary' })
+            : [{ name: item.artist || item.primary_artist || '', role: 'Primary' }],
+        label: {
+            name: item.label?.name || item.label || '',
+            cLine: item.label?.cLine || item.c_line || '',
+            pLine: item.label?.pLine || item.p_line || ''
+        },
+        dates: {
+            releaseDate: item.releaseDate || item.release_date || '',
+            timezone: item.timezone || 'Africa/Nairobi'
+        },
+        dsps: item.dsps || MASTER_DSP_LIST.map(d => d.id),
+        artwork: {
+            file: null,
+            url: item.cover_url || item.coverUrl || item.cover_art || item.artwork?.url || '',
+            inspected: null
+        },
+        tracks: Array.isArray(item.tracks) && item.tracks.length > 0 
+            ? item.tracks.map(t => ({
+                metadata: {
+                    title: t.title || t.metadata?.title || '',
+                    version: t.version || t.metadata?.version || '',
+                    genre: t.genre || t.metadata?.genre || '',
+                    subgenre: t.subgenre || t.metadata?.subgenre || '',
+                    explicit: t.explicit || t.metadata?.explicit || false
+                },
+                discNumber: t.discNumber || t.disc_number || 1,
+                isrc: t.isrc || '',
+                audioUrl: t.audio_url || t.audioUrl || '',
+                tiktokStartTime: t.tiktok_start_time || t.tiktokStartTime || '00:30',
+                lyrics: { plain: t.lyrics?.plain || t.lyrics || '' }
+            }))
+            : [{
+                metadata: { title: item.title || '', explicit: false },
+                discNumber: 1,
+                isrc: '',
+                audioUrl: '',
+                tiktokStartTime: '00:30',
+                lyrics: { plain: '' }
+            }],
+        agreements: { termsAccepted: true, rightsConfirmed: true }
+    };
+
+    // Switch view AND explicitly initialize Step 1 content
+    switchView('create');
+    window.renderStepContent(1);
+    window.showToast('Release loaded for editing', false);
+};
 
         window.deleteReleaseCatalog = async function(releaseId) {
             if (!confirm('Are you sure you want to delete this release from your catalog?')) return;
