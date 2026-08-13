@@ -1293,25 +1293,32 @@ window.handleFormSubmission = async function(event) {
             ? (window.releaseState.label.name || window.releaseState.label.label || 'Audiory Records') 
             : (window.releaseState.label || 'Audiory Records');
 
-        // 4. Format Participants array according to Too Lost schema
+        // 4. Format Participants array according to Too Lost schema (role MUST be an array)
         const mappedParticipants = (window.releaseState.artists || []).map(artist => {
             if (typeof artist === 'string') {
                 return {
                     name: artist,
-                    role: 'primary'
+                    role: ['primary']
                 };
             }
+
+            let rolesArray = ['primary'];
+            if (Array.isArray(artist.role)) {
+                rolesArray = artist.role;
+            } else if (typeof artist.role === 'string' && artist.role.trim() !== '') {
+                rolesArray = [artist.role];
+            }
+
             return {
                 name: artist.name || artist.artist_name || 'Official Bigi',
-                role: artist.role || 'primary',
+                role: rolesArray,
                 spotify_id: artist.spotify_id || '',
                 apple_id: artist.apple_id || ''
             };
         });
 
-        // Ensure at least one participant exists
         if (mappedParticipants.length === 0) {
-            mappedParticipants.push({ name: 'Official Bigi', role: 'primary' });
+            mappedParticipants.push({ name: 'Official Bigi', role: ['primary'] });
         }
 
         // 5. Construct Final Payload
@@ -1322,10 +1329,7 @@ window.handleFormSubmission = async function(event) {
             genre: window.releaseState.metadata.primaryGenre,
             subgenre: window.releaseState.metadata.secondaryGenre,
             
-            // Label must be a string
             label: labelString,
-            
-            // Send both keys for maximum backend/Too Lost compatibility
             participants: mappedParticipants,
             artists: mappedParticipants,
 
@@ -1333,7 +1337,6 @@ window.handleFormSubmission = async function(event) {
             timezone: window.releaseState.dates.timezone,
             dsps: window.releaseState.dsps,
             
-            // Send across key variations for backend compatibility
             coverUrl: finalCoverUrl,
             cover_url: finalCoverUrl,
             cover_art: finalCoverUrl,
