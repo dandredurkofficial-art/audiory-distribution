@@ -1250,14 +1250,15 @@ window.handleFormSubmission = async function(event) {
     try {
         window.showToast('Preparing release assets...', false);
         
-        // Artwork upload if file selected
+        // 1. Upload Cover Artwork first and capture URL
+        let finalCoverUrl = window.releaseState.artwork.url || '';
         if (window.releaseState.artwork.file) {
             window.showToast('Uploading cover artwork...', false);
-            const coverUrl = await uploadFileToR2(window.releaseState.artwork.file, 'artwork');
-            window.releaseState.artwork.url = coverUrl;
+            finalCoverUrl = await uploadFileToR2(window.releaseState.artwork.file, 'artwork');
+            window.releaseState.artwork.url = finalCoverUrl;
         }
 
-        // Audio tracks upload if local files selected
+        // 2. Upload Audio Tracks
         for (let i = 0; i < window.releaseState.tracks.length; i++) {
             if (window.releaseState.tracks[i].audioFile) {
                 window.showToast(`Uploading track ${i + 1} audio master...`, false);
@@ -1266,7 +1267,7 @@ window.handleFormSubmission = async function(event) {
             }
         }
 
-        // Payload construction for Too Lost / Worker Gateway
+        // 3. Construct Payload with resolved cover URL
         const payload = {
             title: window.releaseState.metadata.title,
             type: window.releaseState.metadata.type,
@@ -1279,10 +1280,10 @@ window.handleFormSubmission = async function(event) {
             timezone: window.releaseState.dates.timezone,
             dsps: window.releaseState.dsps,
             
-            // FIX: Sending both camelCase and snake_case so Too Lost API receives it regardless of strict schema
-            coverUrl: window.releaseState.artwork.url,
-            cover_url: window.releaseState.artwork.url,
-            cover_art: window.releaseState.artwork.url,
+            // Send across key variations for backend compatibility
+            coverUrl: finalCoverUrl,
+            cover_url: finalCoverUrl,
+            cover_art: finalCoverUrl,
 
             tracks: window.releaseState.tracks.map(t => ({
                 title: t.metadata.title,
@@ -1309,8 +1310,34 @@ window.handleFormSubmission = async function(event) {
 
         if (!res.ok) throw new Error('Failed to create release on server API');
 
+        const serverResponse = await res.json().catch(() => null);
+
+        // 4. Update local state immediately so new releases show instantly
+        const newReleaseItem = {
+            id: serverResponse?.id || Date.now(),
+            title: payload.title,
+            type: payload.type,
+            status: 'draft',
+            coverUrl: finalCoverUrl,
+            compressedArtwork: finalCoverUrl,
+            participants: payload.artists.map(a => typeof a === 'string' ? { name: a, role: ['primary'] } : a),
+            upc: serverResponse?.upc || 'Pending'
+        };
+
+        if (!Array.isArray(window.releasesCatalog)) window.releasesCatalog = [];
+        window.releasesCatalog.unshift(newReleaseItem);
+
         window.showToast('Release submitted successfully!', false);
-        await loadLiveCatalog();
+        
+        // Refresh catalog and navigate
+        if (typeof window.loadLiveCatalog === 'function') {
+            await window.loadLiveCatalog();
+        }
+        
+        if (typeof window.renderDashboardHome === 'function') {
+            window.renderDashboardHome();
+        }
+
         window.switchView('catalog');
 
     } catch (err) {
