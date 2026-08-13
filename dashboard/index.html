@@ -407,24 +407,34 @@
             <!-- Grid matching album square layout -->
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
                 ${window.releasesCatalog.map((rel, idx) => {
-                    // Extract Title
-                    const title = rel.title || rel.metadata?.title || 'Untitled Release';
+                    // Extract Title (Includes Too Lost specific fallback)
+                    const title = rel.title || rel.name || rel.metadata?.title || 'Untitled Release';
 
-                    // Extract Artists
+                    // Extract Artists (Fixes Too Lost multi-role array schema)
                     let artistNames = 'Unknown Artist';
                     if (Array.isArray(rel.artists) && rel.artists.length > 0) {
                         artistNames = rel.artists
-                            .map(a => typeof a === 'string' ? a : (a.name || a.artist_name || ''))
+                            .map(a => {
+                                if (typeof a === 'string') return a;
+                                // Checks Too Lost exact JSON keys or standard API fallbacks
+                                return a.artist_name || a.name || a.display_name || '';
+                            })
                             .filter(Boolean)
                             .join(', ');
+                    } else if (rel.primary_artist) {
+                        artistNames = typeof rel.primary_artist === 'string' ? rel.primary_artist : (rel.primary_artist.artist_name || rel.primary_artist.name || 'Unknown Artist');
                     } else if (typeof rel.artist === 'string' && rel.artist) {
                         artistNames = rel.artist;
-                    } else if (rel.primary_artist) {
-                        artistNames = typeof rel.primary_artist === 'string' ? rel.primary_artist : (rel.primary_artist.name || 'Unknown Artist');
                     }
 
-                    // Extract Cover Artwork (Supports local previews, API links, and nested artwork objects)
-                    const cover = rel.cover_url || rel.coverUrl || rel.cover_art || rel.cover || rel.artwork?.url || rel.artwork || 'https://placehold.co/400x400/1e293b/06b6d4?text=No+Cover';
+                    // Extract Cover Artwork (Adds deep path checks for Too Lost files)
+                    const cover = rel.cover_url || 
+                                  rel.cover_image || 
+                                  rel.coverUrl || 
+                                  rel.cover_art || 
+                                  (rel.artwork && typeof rel.artwork === 'object' ? (rel.artwork.url || rel.artwork.link || rel.artwork.path) : rel.artwork) || 
+                                  (rel.assets && rel.assets.cover_art) ||
+                                  'https://placehold.co/400x400/1e293b/06b6d4?text=No+Cover';
                     
                     const releaseType = rel.type || rel.metadata?.type || 'Single';
                     const status = rel.status || 'Draft';
