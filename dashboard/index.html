@@ -1416,46 +1416,54 @@ window.handleFormSubmission = async function(event) {
             }
         }
 
-        // 3. Format Label as a clean String
-        const labelString = typeof window.releaseState.label === 'object' 
-            ? (window.releaseState.label.name || window.releaseState.label.label || 'Audiory Records') 
-            : (window.releaseState.label || 'Audiory Records');
+        // 3. Format Label dynamically (Strict Validation / Dynamic Fallback)
+        const labelNameInput = typeof window.releaseState.label === 'object' 
+            ? (window.releaseState.label.name || window.releaseState.label.label) 
+            : window.releaseState.label;
+
+        const labelString = (labelNameInput && labelNameInput.trim()) 
+            ? labelNameInput.trim() 
+            : 'Independent'; // Generic music industry default, or leave empty if your backend allows
 
         // 4. Format & Validate Participants array for Too Lost API schema
         const ALLOWED_ROLES = ['primary', 'featuring', 'remixer'];
 
-        const mappedParticipants = (window.releaseState.artists || []).map(artist => {
-            let rawRoles = [];
-            if (typeof artist === 'string') {
-                rawRoles = ['primary'];
-            } else if (Array.isArray(artist.role)) {
-                rawRoles = artist.role;
-            } else if (typeof artist.role === 'string' && artist.role.trim() !== '') {
-                rawRoles = [artist.role];
-            } else {
-                rawRoles = ['primary'];
-            }
+        const mappedParticipants = (window.releaseState.artists || [])
+            .map(artist => {
+                let rawRoles = [];
+                if (typeof artist === 'string') {
+                    rawRoles = ['primary'];
+                } else if (Array.isArray(artist.role)) {
+                    rawRoles = artist.role;
+                } else if (typeof artist.role === 'string' && artist.role.trim() !== '') {
+                    rawRoles = [artist.role];
+                } else {
+                    rawRoles = ['primary'];
+                }
 
-            const cleanedRoles = rawRoles.map(r => {
-                const normalized = String(r).toLowerCase().trim();
-                if (normalized.includes('feat')) return 'featuring';
-                if (normalized.includes('remix')) return 'remixer';
-                if (ALLOWED_ROLES.includes(normalized)) return normalized;
-                return 'primary';
-            });
+                const cleanedRoles = rawRoles.map(r => {
+                    const normalized = String(r).toLowerCase().trim();
+                    if (normalized.includes('feat')) return 'featuring';
+                    if (normalized.includes('remix')) return 'remixer';
+                    if (ALLOWED_ROLES.includes(normalized)) return normalized;
+                    return 'primary';
+                });
 
-            const validRoles = Array.from(new Set(cleanedRoles));
+                const validRoles = Array.from(new Set(cleanedRoles));
+                const artistName = typeof artist === 'string' ? artist : (artist.name || artist.artist_name || '');
 
-            return {
-                name: typeof artist === 'string' ? artist : (artist.name || artist.artist_name || 'Official Bigi'),
-                role: validRoles.length > 0 ? validRoles : ['primary'],
-                spotify_id: artist.spotify_id || '',
-                apple_id: artist.apple_id || ''
-            };
-        });
+                return {
+                    name: artistName.trim(),
+                    role: validRoles.length > 0 ? validRoles : ['primary'],
+                    spotify_id: artist.spotify_id || '',
+                    apple_id: artist.apple_id || ''
+                };
+            })
+            .filter(p => p.name !== ''); // Filter out empty artist entries
 
+        // Validate that at least one artist exists
         if (mappedParticipants.length === 0) {
-            mappedParticipants.push({ name: 'Official Bigi', role: ['primary'] });
+            throw new Error('Please specify at least one Primary Artist name.');
         }
 
         // 5. Construct Final Payload
@@ -1535,7 +1543,6 @@ window.handleFormSubmission = async function(event) {
         let localSavedReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
         
         if (isEditing) {
-            // Replace item in local storage if editing
             const index = localSavedReleases.findIndex(item => String(item.id) === String(editingId));
             if (index !== -1) {
                 localSavedReleases[index] = { ...localSavedReleases[index], ...newReleaseItem };
