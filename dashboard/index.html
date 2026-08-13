@@ -277,16 +277,21 @@
 
         async function loadLiveCatalog() {
     try {
-        const currentUid = window.currentUser ? window.currentUser.uid : null;
+        // Retrieve logged-in user ID
+        const currentUid = window.currentUser ? (window.currentUser.uid || window.currentUser.id) : null;
+        
         if (!currentUid) {
             window.releasesCatalog = [];
-            if (typeof renderCatalogView === 'function') renderCatalogView();
+            if (typeof renderCatalogView === 'function') {
+                const container = document.getElementById('catalog-container') || document.getElementById('main-content');
+                if (container) container.innerHTML = renderCatalogView();
+            }
             return;
         }
 
         let serverReleases = [];
 
-        // 1. Attempt API fetch with user token
+        // 1. Fetch from Cloudflare Worker API
         try {
             const token = await window.currentUser.getIdToken();
             const res = await fetch(`${WORKER_BASE_URL}/api/releases`, {
@@ -299,52 +304,69 @@
 
             if (res.ok) {
                 const data = await res.json();
-                const rawList = Array.isArray(data) ? data : (data.data || []);
-                // Filter server releases by logged-in user
-                serverReleases = rawList.filter(item => !item.submittedBy || item.submittedBy === currentUid);
-            } else {
-                console.error("Failed to fetch live catalog from API gateway:", res.status);
+                const rawList = Array.isArray(data) ? data : (data.data || data.releases || []);
+                
+                // Strictly filter for current UID
+                serverReleases = rawList.filter(item => {
+                    const itemUserId = item.submittedBy || item.userId || item.user_id || item.uid;
+                    return !itemUserId || itemUserId === currentUid;
+                });
             }
         } catch (fetchErr) {
-            console.error("API Gateway error:", fetchErr);
+            console.error("API Gateway fetch error:", fetchErr);
         }
 
-        // 2. Pull local releases & filter strictly for the current logged-in user
+        // 2. Fetch LocalStorage items strictly matching THIS user ID
         const allLocalReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
         const localReleases = allLocalReleases.filter(item => item.submittedBy === currentUid);
 
-        // Helper to extract cover artwork
-        const getCoverUrl = (item) => {
+        // Helper to extract cover URL
+        const resolveCoverUrl = (item) => {
+            if (!item) return '';
+            if (typeof item.artwork === 'string') return item.artwork;
+            if (item.artwork && typeof item.artwork === 'object') {
+                return item.artwork.url || item.artwork.cover_art || '';
+            }
             return item.coverUrl 
+                || item.compressedArtwork 
+                || item.artworkUrl 
                 || item.cover_url 
                 || item.cover_art 
-                || item.compressedArtwork 
-                || item.artwork?.url 
+                || item.image 
                 || '';
         };
 
         // 3. Merge Local + Server
         const releaseMap = new Map();
 
+        // Process Local
         localReleases.forEach(item => {
             const key = String(item.id || item.title);
-            const resolvedCover = getCoverUrl(item);
+            const resolvedCover = resolveCoverUrl(item);
+            
+            let status = item.status || 'Submitted';
+            if (status.toLowerCase().includes('gateway') || status.toLowerCase().includes('online')) {
+                status = 'Submitted';
+            }
+
             releaseMap.set(key, {
                 ...item,
+                submittedBy: currentUid,
                 coverUrl: resolvedCover,
                 compressedArtwork: resolvedCover,
-                status: item.status || 'Submitted'
+                artworkUrl: resolvedCover,
+                status: status
             });
         });
 
+        // Process Server
         serverReleases.forEach(item => {
             const key = String(item.id || item.title);
-            const serverCover = getCoverUrl(item);
+            const serverCover = resolveCoverUrl(item);
             const existing = releaseMap.get(key);
 
-            // Clean up status if API returns non-standard system strings
             let cleanStatus = item.status || 'Submitted';
-            if (cleanStatus.includes('Gateway') || cleanStatus.includes('Online')) {
+            if (cleanStatus.toLowerCase().includes('gateway') || cleanStatus.toLowerCase().includes('online')) {
                 cleanStatus = 'Submitted';
             }
 
@@ -353,15 +375,19 @@
                 releaseMap.set(key, {
                     ...existing,
                     ...item,
+                    submittedBy: currentUid,
                     coverUrl: finalCover,
                     compressedArtwork: finalCover,
-                    status: existing.status || cleanStatus
+                    artworkUrl: finalCover,
+                    status: existing.status && existing.status !== 'draft' ? existing.status : cleanStatus
                 });
             } else {
                 releaseMap.set(key, {
                     ...item,
+                    submittedBy: currentUid,
                     coverUrl: serverCover,
                     compressedArtwork: serverCover,
+                    artworkUrl: serverCover,
                     status: cleanStatus
                 });
             }
@@ -369,18 +395,14 @@
 
         window.releasesCatalog = Array.from(releaseMap.values());
 
-        // 4. Render view
-        if (typeof renderCatalogView === 'function') {
-            const catalogContainer = document.getElementById('catalog-container') || document.getElementById('main-content');
-            if (catalogContainer) {
-                catalogContainer.innerHTML = renderCatalogView();
-            } else {
-                renderCatalogView();
-            }
+        // 4. Render UI
+        const catalogContainer = document.getElementById('catalog-container') || document.getElementById('main-content');
+        if (catalogContainer && typeof renderCatalogView === 'function') {
+            catalogContainer.innerHTML = renderCatalogView();
         }
 
     } catch (err) {
-        console.error("Error loading catalog:", err);
+        console.error("Error loading live catalog:", err);
     }
 }
         
@@ -500,7 +522,7 @@
                     // Title
                     const title = rel.title || rel.metadata?.title || 'Untitled Release';
 
-                    // Artists: Checks participants array (Too Lost format) or traditional artists array
+                    // Artists
                     let artistNames = 'Unknown Artist';
                     if (Array.isArray(rel.participants) && rel.participants.length > 0) {
                         artistNames = rel.participants.map(p => typeof p === 'string' ? p : p.name).filter(Boolean).join(', ');
@@ -510,20 +532,30 @@
                         artistNames = typeof rel.artist === 'string' ? rel.artist : rel.artist.name;
                     }
 
-                    // Cover Artwork: Fallback tree checking all possible property names
-                    const rawCover = rel.coverUrl 
-                        || rel.cover_url 
+                    // Strict Cover URL Extractor
+                    let rawCover = rel.coverUrl 
                         || rel.compressedArtwork 
+                        || rel.artworkUrl 
+                        || rel.cover_url 
                         || rel.cover_art 
-                        || rel.cover_artwork 
-                        || rel.artwork?.url;
+                        || rel.cover_artwork;
 
-                    const cover = (rawCover && typeof rawCover === 'string' && rawCover.trim() !== '')
+                    if (!rawCover && rel.artwork) {
+                        rawCover = typeof rel.artwork === 'string' ? rel.artwork : (rel.artwork.url || rel.artwork.cover_art);
+                    }
+
+                    const cover = (typeof rawCover === 'string' && rawCover.trim() !== '')
                         ? rawCover
                         : 'https://placehold.co/400x400/1e293b/06b6d4?text=No+Cover';
                     
                     const releaseType = rel.type || 'Single';
-                    const status = rel.status || 'Draft';
+                    
+                    // Normalize Status display (Prevent 'draft' or 'Gateway' text)
+                    let status = rel.status || 'Submitted';
+                    if (status.toLowerCase().includes('gateway') || status.toLowerCase().includes('online')) {
+                        status = 'Submitted';
+                    }
+
                     const upc = rel.upc || 'Pending';
 
                     return `
@@ -558,7 +590,7 @@
                                 
                                 <div class="pt-2 flex items-center justify-between text-[10px]">
                                     <span class="font-mono text-gray-500">UPC: ${upc}</span>
-                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 capitalize">
                                         ${status}
                                     </span>
                                 </div>
