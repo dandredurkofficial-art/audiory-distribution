@@ -276,23 +276,44 @@
         };
 
         async function loadLiveCatalog() {
-            try {
-                const res = await fetch(`${WORKER_BASE_URL}/api/releases`, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' }
-                });
+    try {
+        let serverReleases = [];
 
-                if (res.ok) {
-                    const data = await res.json();
-                    window.releasesCatalog = Array.isArray(data) ? data : (data.data || []);
-                    renderCatalogView();
-                } else {
-                    console.error("Failed to fetch live catalog from API gateway:", res.status);
-                }
-            } catch (err) {
-                console.error("Error loading catalog:", err);
+        // Attempt API fetch
+        try {
+            const res = await fetch(`${WORKER_BASE_URL}/api/releases`, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                serverReleases = Array.isArray(data) ? data : (data.data || []);
+            } else {
+                console.error("Failed to fetch live catalog from API gateway:", res.status);
             }
+        } catch (fetchErr) {
+            console.error("API Gateway error:", fetchErr);
         }
+
+        // Pull cached releases saved in LocalStorage
+        const localReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
+
+        // Merge local & server items, deduplicating by ID
+        const combined = [...localReleases, ...serverReleases];
+        const uniqueCatalog = Array.from(new Map(combined.map(item => [String(item.id), item])).values());
+
+        window.releasesCatalog = uniqueCatalog;
+
+        // Render view
+        if (typeof renderCatalogView === 'function') {
+            renderCatalogView();
+        }
+
+    } catch (err) {
+        console.error("Error loading catalog:", err);
+    }
+}
 
         // Direct Multipart Upload to Cloudflare Worker R2 Bucket
         async function uploadFileToR2(file, folder = 'audio') {
@@ -1312,7 +1333,7 @@ window.handleFormSubmission = async function(event) {
 
         const serverResponse = await res.json().catch(() => null);
 
-        // 4. Update local state immediately so new releases show instantly
+        // 4. Construct local release item object
         const newReleaseItem = {
             id: serverResponse?.id || Date.now(),
             title: payload.title,
@@ -1324,6 +1345,12 @@ window.handleFormSubmission = async function(event) {
             upc: serverResponse?.upc || 'Pending'
         };
 
+        // --- SAVE TO LOCALSTORAGE FOR REFRESH PERSISTENCE ---
+        const localSavedReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
+        localSavedReleases.unshift(newReleaseItem);
+        localStorage.setItem('audiory_local_releases', JSON.stringify(localSavedReleases));
+
+        // Update in-memory window catalog
         if (!Array.isArray(window.releasesCatalog)) window.releasesCatalog = [];
         window.releasesCatalog.unshift(newReleaseItem);
 
@@ -1345,7 +1372,7 @@ window.handleFormSubmission = async function(event) {
         window.showToast(`Submission failed: ${err.message}`);
     }
 };
-
+        
     </script>
 </body>
 </html>
