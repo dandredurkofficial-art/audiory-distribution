@@ -1293,25 +1293,34 @@ window.handleFormSubmission = async function(event) {
             ? (window.releaseState.label.name || window.releaseState.label.label || 'Audiory Records') 
             : (window.releaseState.label || 'Audiory Records');
 
-        // 4. Format Participants array according to Too Lost schema (role MUST be an array)
+        // 4. Format & Validate Participants array for Too Lost API schema
+        const ALLOWED_ROLES = ['primary', 'featuring', 'remixer'];
+
         const mappedParticipants = (window.releaseState.artists || []).map(artist => {
+            let rawRoles = [];
             if (typeof artist === 'string') {
-                return {
-                    name: artist,
-                    role: ['primary']
-                };
+                rawRoles = ['primary'];
+            } else if (Array.isArray(artist.role)) {
+                rawRoles = artist.role;
+            } else if (typeof artist.role === 'string' && artist.role.trim() !== '') {
+                rawRoles = [artist.role];
+            } else {
+                rawRoles = ['primary'];
             }
 
-            let rolesArray = ['primary'];
-            if (Array.isArray(artist.role)) {
-                rolesArray = artist.role;
-            } else if (typeof artist.role === 'string' && artist.role.trim() !== '') {
-                rolesArray = [artist.role];
-            }
+            const cleanedRoles = rawRoles.map(r => {
+                const normalized = String(r).toLowerCase().trim();
+                if (normalized.includes('feat')) return 'featuring';
+                if (normalized.includes('remix')) return 'remixer';
+                if (ALLOWED_ROLES.includes(normalized)) return normalized;
+                return 'primary';
+            });
+
+            const validRoles = Array.from(new Set(cleanedRoles));
 
             return {
-                name: artist.name || artist.artist_name || 'Official Bigi',
-                role: rolesArray,
+                name: typeof artist === 'string' ? artist : (artist.name || artist.artist_name || 'Official Bigi'),
+                role: validRoles.length > 0 ? validRoles : ['primary'],
                 spotify_id: artist.spotify_id || '',
                 apple_id: artist.apple_id || ''
             };
@@ -1383,7 +1392,7 @@ window.handleFormSubmission = async function(event) {
             upc: serverResponse?.upc || serverResponse?.data?.upc || 'Pending'
         };
 
-        // --- SAVE TO LOCALSTORAGE FOR REFRESH PERSISTENCE ---
+        // Save to LocalStorage for offline/refresh persistence
         const localSavedReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
         localSavedReleases.unshift(newReleaseItem);
         localStorage.setItem('audiory_local_releases', JSON.stringify(localSavedReleases));
