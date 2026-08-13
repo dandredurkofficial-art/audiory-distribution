@@ -1288,15 +1288,47 @@ window.handleFormSubmission = async function(event) {
             }
         }
 
-        // 3. Construct Payload with resolved cover URL
+        // 3. Format Label as a clean String
+        const labelString = typeof window.releaseState.label === 'object' 
+            ? (window.releaseState.label.name || window.releaseState.label.label || 'Audiory Records') 
+            : (window.releaseState.label || 'Audiory Records');
+
+        // 4. Format Participants array according to Too Lost schema
+        const mappedParticipants = (window.releaseState.artists || []).map(artist => {
+            if (typeof artist === 'string') {
+                return {
+                    name: artist,
+                    role: 'primary'
+                };
+            }
+            return {
+                name: artist.name || artist.artist_name || 'Official Bigi',
+                role: artist.role || 'primary',
+                spotify_id: artist.spotify_id || '',
+                apple_id: artist.apple_id || ''
+            };
+        });
+
+        // Ensure at least one participant exists
+        if (mappedParticipants.length === 0) {
+            mappedParticipants.push({ name: 'Official Bigi', role: 'primary' });
+        }
+
+        // 5. Construct Final Payload
         const payload = {
             title: window.releaseState.metadata.title,
             type: window.releaseState.metadata.type,
             language: window.releaseState.metadata.language,
             genre: window.releaseState.metadata.primaryGenre,
             subgenre: window.releaseState.metadata.secondaryGenre,
-            artists: window.releaseState.artists,
-            label: window.releaseState.label,
+            
+            // Label must be a string
+            label: labelString,
+            
+            // Send both keys for maximum backend/Too Lost compatibility
+            participants: mappedParticipants,
+            artists: mappedParticipants,
+
             releaseDate: window.releaseState.dates.releaseDate,
             timezone: window.releaseState.dates.timezone,
             dsps: window.releaseState.dsps,
@@ -1329,20 +1361,23 @@ window.handleFormSubmission = async function(event) {
             body: JSON.stringify(payload)
         });
 
-        if (!res.ok) throw new Error('Failed to create release on server API');
-
         const serverResponse = await res.json().catch(() => null);
 
-        // 4. Construct local release item object
+        if (!res.ok) {
+            const errorMsg = serverResponse?.message || serverResponse?.error || 'Failed to create release on server API';
+            throw new Error(errorMsg);
+        }
+
+        // 6. Construct local release item object
         const newReleaseItem = {
-            id: serverResponse?.id || Date.now(),
+            id: serverResponse?.id || serverResponse?.data?.id || Date.now(),
             title: payload.title,
             type: payload.type,
             status: 'draft',
             coverUrl: finalCoverUrl,
             compressedArtwork: finalCoverUrl,
-            participants: payload.artists.map(a => typeof a === 'string' ? { name: a, role: ['primary'] } : a),
-            upc: serverResponse?.upc || 'Pending'
+            participants: mappedParticipants,
+            upc: serverResponse?.upc || serverResponse?.data?.upc || 'Pending'
         };
 
         // --- SAVE TO LOCALSTORAGE FOR REFRESH PERSISTENCE ---
