@@ -553,37 +553,64 @@
     `;
 }
         
-        // Catalog Actions
-        window.editReleaseCatalog = function(index) {
+        // Catalog Actions - Edit Release
+window.editReleaseCatalog = function(index) {
     const item = window.releasesCatalog[index];
     if (!item) return;
 
-    // Standardize object structure for the form
+    // 1. Extract Artists/Participants reliably
+    let extractedArtists = [];
+    if (Array.isArray(item.participants) && item.participants.length > 0) {
+        extractedArtists = item.participants.map(p => ({
+            name: typeof p === 'string' ? p : (p.name || ''),
+            role: Array.isArray(p.role) ? (p.role[0] || 'primary') : (p.role || 'primary')
+        }));
+    } else if (Array.isArray(item.artists) && item.artists.length > 0) {
+        extractedArtists = item.artists.map(a => ({
+            name: typeof a === 'string' ? a : (a.name || ''),
+            role: Array.isArray(a.role) ? (a.role[0] || 'primary') : (a.role || 'primary')
+        }));
+    } else if (item.artist) {
+        extractedArtists = [{
+            name: typeof item.artist === 'string' ? item.artist : (item.artist.name || ''),
+            role: 'primary'
+        }];
+    }
+
+    if (extractedArtists.length === 0) {
+        extractedArtists = [{ name: '', role: 'primary' }];
+    }
+
+    // 2. Extract Label cleanly
+    const labelName = typeof item.label === 'object' 
+        ? (item.label.name || item.label.label || '') 
+        : (item.label || '');
+
+    // 3. Set standard releaseState with editing tracking
     window.releaseState = {
+        editingId: item.id || null, // Track ID to prevent creating duplicates
         metadata: {
             title: item.title || item.metadata?.title || '',
             type: item.type || item.metadata?.type || 'Single',
             language: item.language || item.metadata?.language || 'English',
             explicit: item.explicit || item.metadata?.explicit || false,
-            primaryGenre: item.genre || item.primary_genre || item.metadata?.primaryGenre || '',
+            primaryGenre: item.genre || item.primary_genre || item.metadata?.primaryGenre || item.genre_id || '',
             secondaryGenre: item.subgenre || item.secondary_genre || item.metadata?.secondaryGenre || ''
         },
-        artists: Array.isArray(item.artists) && item.artists.length > 0 
-            ? item.artists.map(a => typeof a === 'string' ? { name: a, role: 'Primary' } : { name: a.name || '', role: a.role || 'Primary' })
-            : [{ name: item.artist || item.primary_artist || '', role: 'Primary' }],
+        artists: extractedArtists,
         label: {
-            name: item.label?.name || item.label || '',
-            cLine: item.label?.cLine || item.c_line || '',
-            pLine: item.label?.pLine || item.p_line || ''
+            name: labelName,
+            cLine: item.cLine || item.c_line || item.label?.cLine || '',
+            pLine: item.pLine || item.p_line || item.label?.pLine || ''
         },
         dates: {
             releaseDate: item.releaseDate || item.release_date || '',
             timezone: item.timezone || 'Africa/Nairobi'
         },
-        dsps: item.dsps || MASTER_DSP_LIST.map(d => d.id),
+        dsps: item.dsps || (typeof MASTER_DSP_LIST !== 'undefined' ? MASTER_DSP_LIST.map(d => d.id) : []),
         artwork: {
             file: null,
-            url: item.cover_url || item.coverUrl || item.cover_art || item.artwork?.url || '',
+            url: item.coverUrl || item.cover_url || item.compressedArtwork || item.cover_art || '',
             inspected: null
         },
         tracks: Array.isArray(item.tracks) && item.tracks.length > 0 
@@ -612,11 +639,53 @@
         agreements: { termsAccepted: true, rightsConfirmed: true }
     };
 
-    // Switch view AND explicitly initialize Step 1 content
+    // 4. Switch View & Render Step
     switchView('create');
-    window.renderStepContent(1);
+
+    if (typeof window.renderStepContent === 'function') {
+        window.renderStepContent(1);
+    }
+
+    // 5. Explicitly populate form fields from releaseState
+    setTimeout(() => {
+        populateFormFromState();
+    }, 50);
+
     window.showToast('Release loaded for editing', false);
 };
+
+// Helper function to force form inputs to sync with window.releaseState
+function populateFormFromState() {
+    const state = window.releaseState;
+    if (!state) return;
+
+    // Title
+    const titleInput = document.querySelector('input[name="title"]') || document.getElementById('release-title');
+    if (titleInput) titleInput.value = state.metadata.title;
+
+    // Type
+    const typeSelect = document.querySelector('select[name="type"]') || document.getElementById('release-type');
+    if (typeSelect) typeSelect.value = state.metadata.type;
+
+    // Primary Genre
+    const genreSelect = document.querySelector('select[name="primaryGenre"]') || document.getElementById('primary-genre');
+    if (genreSelect && state.metadata.primaryGenre) genreSelect.value = state.metadata.primaryGenre;
+
+    // Label
+    const labelInput = document.querySelector('input[name="label"]') || document.getElementById('record-label');
+    if (labelInput) labelInput.value = state.label.name;
+
+    // Render / Sync Artist Inputs
+    if (typeof window.renderArtistInputs === 'function') {
+        window.renderArtistInputs();
+    } else {
+        const artistContainer = document.getElementById('artists-container') || document.querySelector('.artists-wrapper');
+        if (artistContainer && state.artists.length > 0) {
+            const firstArtistInput = artistContainer.querySelector('input');
+            if (firstArtistInput) firstArtistInput.value = state.artists[0].name;
+        }
+    }
+}
 
         window.deleteReleaseCatalog = async function(releaseId) {
             if (!confirm('Are you sure you want to delete this release from your catalog?')) return;
@@ -1422,9 +1491,19 @@ window.handleFormSubmission = async function(event) {
             createdAt: new Date().toISOString()
         };
 
+        // 6. Dynamic Fetch Logic: Edit vs Create
         const token = await window.currentUser.getIdToken();
-        const res = await fetch(`${WORKER_BASE_URL}/api/releases`, {
-            method: 'POST',
+        const editingId = window.releaseState.editingId;
+        const isEditing = Boolean(editingId);
+        
+        const endpoint = isEditing 
+            ? `${WORKER_BASE_URL}/api/releases/${editingId}` 
+            : `${WORKER_BASE_URL}/api/releases`;
+
+        const method = isEditing ? 'PUT' : 'POST';
+
+        const res = await fetch(endpoint, {
+            method: method,
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
@@ -1435,32 +1514,56 @@ window.handleFormSubmission = async function(event) {
         const serverResponse = await res.json().catch(() => null);
 
         if (!res.ok) {
-            const errorMsg = serverResponse?.message || serverResponse?.error || 'Failed to create release on server API';
+            const errorMsg = serverResponse?.message || serverResponse?.error || `Failed to ${isEditing ? 'update' : 'create'} release on server API`;
             throw new Error(errorMsg);
         }
 
-        // 6. Construct local release item object
+        // 7. Construct release item object
+        const finalId = editingId || serverResponse?.id || serverResponse?.data?.id || Date.now();
         const newReleaseItem = {
-            id: serverResponse?.id || serverResponse?.data?.id || Date.now(),
+            id: finalId,
             title: payload.title,
             type: payload.type,
-            status: 'draft',
+            status: serverResponse?.status || 'draft',
             coverUrl: finalCoverUrl,
             compressedArtwork: finalCoverUrl,
             participants: mappedParticipants,
             upc: serverResponse?.upc || serverResponse?.data?.upc || 'Pending'
         };
 
-        // Save to LocalStorage for offline/refresh persistence
-        const localSavedReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
-        localSavedReleases.unshift(newReleaseItem);
+        // 8. Update LocalStorage for offline/refresh persistence
+        let localSavedReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
+        
+        if (isEditing) {
+            // Replace item in local storage if editing
+            const index = localSavedReleases.findIndex(item => String(item.id) === String(editingId));
+            if (index !== -1) {
+                localSavedReleases[index] = { ...localSavedReleases[index], ...newReleaseItem };
+            } else {
+                localSavedReleases.unshift(newReleaseItem);
+            }
+        } else {
+            localSavedReleases.unshift(newReleaseItem);
+        }
         localStorage.setItem('audiory_local_releases', JSON.stringify(localSavedReleases));
 
-        // Update in-memory window catalog
+        // 9. Update in-memory window catalog
         if (!Array.isArray(window.releasesCatalog)) window.releasesCatalog = [];
-        window.releasesCatalog.unshift(newReleaseItem);
+        if (isEditing) {
+            const catIndex = window.releasesCatalog.findIndex(item => String(item.id) === String(editingId));
+            if (catIndex !== -1) {
+                window.releasesCatalog[catIndex] = { ...window.releasesCatalog[catIndex], ...newReleaseItem };
+            } else {
+                window.releasesCatalog.unshift(newReleaseItem);
+            }
+        } else {
+            window.releasesCatalog.unshift(newReleaseItem);
+        }
 
-        window.showToast('Release submitted successfully!', false);
+        // Clear editing mode flag
+        window.releaseState.editingId = null;
+
+        window.showToast(`Release ${isEditing ? 'updated' : 'submitted'} successfully!`, false);
         
         // Refresh catalog and navigate
         if (typeof window.loadLiveCatalog === 'function') {
