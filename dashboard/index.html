@@ -279,7 +279,7 @@
     try {
         let serverReleases = [];
 
-        // Attempt API fetch
+        // 1. Attempt API fetch
         try {
             const res = await fetch(`${WORKER_BASE_URL}/api/releases`, {
                 method: 'GET',
@@ -296,25 +296,75 @@
             console.error("API Gateway error:", fetchErr);
         }
 
-        // Pull cached releases saved in LocalStorage
+        // 2. Pull cached releases saved in LocalStorage
         const localReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
 
-        // Merge local & server items, deduplicating by ID
-        const combined = [...localReleases, ...serverReleases];
-        const uniqueCatalog = Array.from(new Map(combined.map(item => [String(item.id), item])).values());
+        // Helper to extract cover URL across all potential payload keys
+        const getCoverUrl = (item) => {
+            return item.coverUrl 
+                || item.cover_url 
+                || item.cover_art 
+                || item.cover_artwork 
+                || item.compressedArtwork 
+                || item.artwork?.url 
+                || item.artwork 
+                || '';
+        };
 
-        window.releasesCatalog = uniqueCatalog;
+        // 3. Merge Local + Server, deduplicating by ID/Title and keeping valid artwork
+        const releaseMap = new Map();
 
-        // Render view
+        // Load local releases first
+        localReleases.forEach(item => {
+            const key = String(item.id || item.title);
+            const resolvedCover = getCoverUrl(item);
+            releaseMap.set(key, {
+                ...item,
+                coverUrl: resolvedCover,
+                compressedArtwork: resolvedCover
+            });
+        });
+
+        // Merge server releases (don't overwrite local artwork if server returns empty artwork)
+        serverReleases.forEach(item => {
+            const key = String(item.id || item.title);
+            const serverCover = getCoverUrl(item);
+            const existing = releaseMap.get(key);
+
+            if (existing) {
+                const finalCover = serverCover || existing.coverUrl;
+                releaseMap.set(key, {
+                    ...existing,
+                    ...item,
+                    coverUrl: finalCover,
+                    compressedArtwork: finalCover
+                });
+            } else {
+                releaseMap.set(key, {
+                    ...item,
+                    coverUrl: serverCover,
+                    compressedArtwork: serverCover
+                });
+            }
+        });
+
+        window.releasesCatalog = Array.from(releaseMap.values());
+
+        // 4. Render view
         if (typeof renderCatalogView === 'function') {
-            renderCatalogView();
+            const catalogContainer = document.getElementById('catalog-container') || document.getElementById('main-content');
+            if (catalogContainer) {
+                catalogContainer.innerHTML = renderCatalogView();
+            } else {
+                renderCatalogView();
+            }
         }
 
     } catch (err) {
         console.error("Error loading catalog:", err);
     }
 }
-
+        
         // Direct Multipart Upload to Cloudflare Worker R2 Bucket
         async function uploadFileToR2(file, folder = 'audio') {
             const token = await window.currentUser.getIdToken();
@@ -434,15 +484,24 @@
                     // Artists: Checks participants array (Too Lost format) or traditional artists array
                     let artistNames = 'Unknown Artist';
                     if (Array.isArray(rel.participants) && rel.participants.length > 0) {
-                        artistNames = rel.participants.map(p => p.name).filter(Boolean).join(', ');
+                        artistNames = rel.participants.map(p => typeof p === 'string' ? p : p.name).filter(Boolean).join(', ');
                     } else if (Array.isArray(rel.artists) && rel.artists.length > 0) {
                         artistNames = rel.artists.map(a => typeof a === 'string' ? a : (a.name || '')).filter(Boolean).join(', ');
                     } else if (rel.artist) {
                         artistNames = typeof rel.artist === 'string' ? rel.artist : rel.artist.name;
                     }
 
-                    // Cover Artwork: Pulls from coverUrl, compressedArtwork, or local fallback
-                    const cover = rel.coverUrl || rel.cover_url || rel.compressedArtwork || rel.cover_art || rel.artwork?.url || 'https://placehold.co/400x400/1e293b/06b6d4?text=No+Cover';
+                    // Cover Artwork: Fallback tree checking all possible property names
+                    const rawCover = rel.coverUrl 
+                        || rel.cover_url 
+                        || rel.compressedArtwork 
+                        || rel.cover_art 
+                        || rel.cover_artwork 
+                        || rel.artwork?.url;
+
+                    const cover = (rawCover && typeof rawCover === 'string' && rawCover.trim() !== '')
+                        ? rawCover
+                        : 'https://placehold.co/400x400/1e293b/06b6d4?text=No+Cover';
                     
                     const releaseType = rel.type || 'Single';
                     const status = rel.status || 'Draft';
