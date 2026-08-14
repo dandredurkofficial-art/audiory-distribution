@@ -162,7 +162,8 @@
         const db = getFirestore(app);
 
         // Production Configuration Endpoints
-        const WORKER_BASE_URL = "https://audiorydistribution.dandredurkofficial.workers.dev";
+        window.WORKER_BASE_URL = "https://audiorydistribution.dandredurkofficial.workers.dev";
+        const WORKER_BASE_URL = window.WORKER_BASE_URL;
 
         // Genre Mapping Constant
         window.GENRE_MAP = {
