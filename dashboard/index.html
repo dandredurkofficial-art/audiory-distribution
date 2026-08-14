@@ -283,19 +283,17 @@
         
         if (!currentUid) {
             window.releasesCatalog = [];
-            if (typeof renderCatalogView === 'function') {
-                const container = document.getElementById('catalog-container') || document.getElementById('main-content');
-                if (container) container.innerHTML = renderCatalogView();
-            }
+            renderCatalogContainer();
             return;
         }
 
         let serverReleases = [];
 
-        // 1. Fetch from Cloudflare Worker API
+        // 1. Fetch live releases from Worker API
         try {
             const token = await window.currentUser.getIdToken();
-            const res = await fetch(`${WORKER_BASE_URL}/api/releases`, {
+            const workerUrl = window.WORKER_BASE_URL || WORKER_BASE_URL;
+            const res = await fetch(`${workerUrl}/api/releases`, {
                 method: 'GET',
                 headers: { 
                     'Accept': 'application/json',
@@ -307,7 +305,7 @@
                 const data = await res.json();
                 const rawList = Array.isArray(data) ? data : (data.data || data.releases || []);
                 
-                // Strictly filter for current UID
+                // Filter: include items if submittedBy matches current UID OR if it's coming straight from authenticated API call
                 serverReleases = rawList.filter(item => {
                     const itemUserId = item.submittedBy || item.userId || item.user_id || item.uid;
                     return !itemUserId || itemUserId === currentUid;
@@ -317,16 +315,19 @@
             console.error("API Gateway fetch error:", fetchErr);
         }
 
-        // 2. Fetch LocalStorage items strictly matching THIS user ID
+        // 2. Fetch LocalStorage items matching current user
         const allLocalReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
-        const localReleases = allLocalReleases.filter(item => item.submittedBy === currentUid);
+        const localReleases = allLocalReleases.filter(item => {
+            const itemUserId = item.submittedBy || item.userId || item.user_id;
+            return !itemUserId || itemUserId === currentUid;
+        });
 
-        // Helper to extract cover URL
+        // Helper to cleanly map cover artwork from Too Lost or custom schemas
         const resolveCoverUrl = (item) => {
             if (!item) return '';
             if (typeof item.artwork === 'string') return item.artwork;
             if (item.artwork && typeof item.artwork === 'object') {
-                return item.artwork.url || item.artwork.cover_art || '';
+                return item.artwork.url || item.artwork.cover_art || item.artwork.path || '';
             }
             return item.coverUrl 
                 || item.compressedArtwork 
@@ -340,70 +341,58 @@
         // 3. Merge Local + Server
         const releaseMap = new Map();
 
-        // Process Local
-        localReleases.forEach(item => {
+        // Process Server Releases First
+        serverReleases.forEach(item => {
             const key = String(item.id || item.title);
-            const resolvedCover = resolveCoverUrl(item);
-            
-            let status = item.status || 'Submitted';
-            if (status.toLowerCase().includes('gateway') || status.toLowerCase().includes('online')) {
-                status = 'Submitted';
+            const serverCover = resolveCoverUrl(item);
+
+            let cleanStatus = item.status || 'Submitted';
+            if (cleanStatus.toLowerCase() === 'draft' || cleanStatus.toLowerCase().includes('gateway')) {
+                cleanStatus = 'Submitted';
             }
 
             releaseMap.set(key, {
                 ...item,
                 submittedBy: currentUid,
-                coverUrl: resolvedCover,
-                compressedArtwork: resolvedCover,
-                artworkUrl: resolvedCover,
-                status: status
+                coverUrl: serverCover,
+                status: cleanStatus
             });
         });
 
-        // Process Server
-        serverReleases.forEach(item => {
+        // Overlay Local Storage Updates
+        localReleases.forEach(item => {
             const key = String(item.id || item.title);
-            const serverCover = resolveCoverUrl(item);
+            const resolvedCover = resolveCoverUrl(item);
             const existing = releaseMap.get(key);
 
             let cleanStatus = item.status || 'Submitted';
-            if (cleanStatus.toLowerCase().includes('gateway') || cleanStatus.toLowerCase().includes('online')) {
+            if (cleanStatus.toLowerCase() === 'draft' || cleanStatus.toLowerCase().includes('gateway')) {
                 cleanStatus = 'Submitted';
             }
 
-            if (existing) {
-                const finalCover = serverCover || existing.coverUrl;
-                releaseMap.set(key, {
-                    ...existing,
-                    ...item,
-                    submittedBy: currentUid,
-                    coverUrl: finalCover,
-                    compressedArtwork: finalCover,
-                    artworkUrl: finalCover,
-                    status: existing.status && existing.status !== 'draft' ? existing.status : cleanStatus
-                });
-            } else {
-                releaseMap.set(key, {
-                    ...item,
-                    submittedBy: currentUid,
-                    coverUrl: serverCover,
-                    compressedArtwork: serverCover,
-                    artworkUrl: serverCover,
-                    status: cleanStatus
-                });
-            }
+            releaseMap.set(key, {
+                ...existing,
+                ...item,
+                submittedBy: currentUid,
+                coverUrl: resolvedCover || (existing ? existing.coverUrl : ''),
+                status: cleanStatus
+            });
         });
 
         window.releasesCatalog = Array.from(releaseMap.values());
 
-        // 4. Render UI
-        const catalogContainer = document.getElementById('catalog-container') || document.getElementById('main-content');
-        if (catalogContainer && typeof renderCatalogView === 'function') {
-            catalogContainer.innerHTML = renderCatalogView();
-        }
+        // 4. Trigger UI Render
+        renderCatalogContainer();
 
     } catch (err) {
         console.error("Error loading live catalog:", err);
+    }
+}
+
+function renderCatalogContainer() {
+    const catalogContainer = document.getElementById('catalog-container') || document.getElementById('main-content');
+    if (catalogContainer && typeof renderCatalogView === 'function') {
+        catalogContainer.innerHTML = renderCatalogView();
     }
 }
         
@@ -517,10 +506,8 @@
                 </button>
             </div>
 
-            <!-- Square Album Grid Layout -->
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
                 ${window.releasesCatalog.map((rel, idx) => {
-                    // Title
                     const title = rel.title || rel.metadata?.title || 'Untitled Release';
 
                     // Artists
@@ -533,14 +520,8 @@
                         artistNames = typeof rel.artist === 'string' ? rel.artist : rel.artist.name;
                     }
 
-                    // Strict Cover URL Extractor
-                    let rawCover = rel.coverUrl 
-                        || rel.compressedArtwork 
-                        || rel.artworkUrl 
-                        || rel.cover_url 
-                        || rel.cover_art 
-                        || rel.cover_artwork;
-
+                    // Raw Cover Resolver
+                    let rawCover = rel.coverUrl || rel.compressedArtwork || rel.artworkUrl || rel.cover_url;
                     if (!rawCover && rel.artwork) {
                         rawCover = typeof rel.artwork === 'string' ? rel.artwork : (rel.artwork.url || rel.artwork.cover_art);
                     }
@@ -551,9 +532,9 @@
                     
                     const releaseType = rel.type || 'Single';
                     
-                    // Normalize Status display (Prevent 'draft' or 'Gateway' text)
+                    // Normalize Status display
                     let status = rel.status || 'Submitted';
-                    if (status.toLowerCase().includes('gateway') || status.toLowerCase().includes('online')) {
+                    if (status.toLowerCase() === 'draft' || status.toLowerCase().includes('gateway')) {
                         status = 'Submitted';
                     }
 
