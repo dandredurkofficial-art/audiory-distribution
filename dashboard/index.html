@@ -1583,6 +1583,9 @@ window.handleFormSubmission = async function(event) {
             throw new Error('Please specify at least one Primary Artist name.');
         }
 
+        const editingId = window.releaseState.editingId;
+        const isEditing = Boolean(editingId);
+
         // 5. Construct Final Payload
         const payload = {
             title: window.releaseState.metadata.title,
@@ -1613,21 +1616,21 @@ window.handleFormSubmission = async function(event) {
             createdAt: new Date().toISOString()
         };
 
-        // 6. Send Request to Worker Gateway API
+        // Pass edit identifiers in payload for update requests
+        if (isEditing) {
+            payload.id = editingId;
+            payload.releaseId = editingId;
+            payload.isUpdate = true;
+        }
+
+        // 6. Send Request to Worker Gateway API using POST (bypasses upstream PUT restriction)
         updateProgress(90, 'Dispatching metadata to DSP Gateway...');
 
         const token = await window.currentUser.getIdToken();
-        const editingId = window.releaseState.editingId;
-        const isEditing = Boolean(editingId);
-        
-        const endpoint = isEditing 
-            ? `${WORKER_BASE_URL}/api/releases/${editingId}` 
-            : `${WORKER_BASE_URL}/api/releases`;
-
-        const method = isEditing ? 'PUT' : 'POST';
+        const endpoint = `${WORKER_BASE_URL}/api/releases`;
 
         const res = await fetch(endpoint, {
-            method: method,
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
