@@ -720,23 +720,53 @@ function populateFormFromState() {
     }
 }
 
-        window.deleteReleaseCatalog = async function(releaseId) {
-            if (!confirm('Are you sure you want to delete this release from your catalog?')) return;
-
-            try {
-                const res = await fetch(`${WORKER_BASE_URL}/api/releases/${releaseId}`, { method: 'DELETE' });
-                if (!res.ok) throw new Error('Failed to delete release');
-                
-                window.showToast('Release deleted successfully', false);
-                await loadLiveCatalog();
-            } catch (err) {
-                console.error('Delete error:', err);
-                window.releasesCatalog = window.releasesCatalog.filter(r => r.id !== releaseId);
-                const container = document.getElementById('mainViewport');
-                if (container) container.innerHTML = renderCatalogView();
-                window.showToast('Release removed from catalog view', false);
+window.deleteReleaseCatalog = async function(releaseId) {
+    try {
+        const token = window.currentUser?.getIdToken ? await window.currentUser.getIdToken() : '';
+        
+        const res = await fetch(`${WORKER_BASE_URL}/api/releases/${releaseId}`, { 
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
-        };
+        });
+
+        if (!res.ok) throw new Error('Failed to delete release on gateway');
+
+        // Remove from memory
+        window.releasesCatalog = (window.releasesCatalog || []).filter(r => String(r.id) !== String(releaseId));
+
+        // Remove from Local Storage
+        let localSavedReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
+        localSavedReleases = localSavedReleases.filter(r => String(r.id) !== String(releaseId));
+        localStorage.setItem('audiory_local_releases', JSON.stringify(localSavedReleases));
+
+        window.showToast('Release deleted successfully', false);
+
+        if (typeof window.loadLiveCatalog === 'function') {
+            await window.loadLiveCatalog();
+        } else {
+            const container = document.getElementById('mainViewport');
+            if (container && typeof renderCatalogView === 'function') {
+                container.innerHTML = renderCatalogView();
+            }
+        }
+    } catch (err) {
+        console.error('Delete error:', err);
+
+        // Fallback: Remove locally from storage and state if API route fails
+        window.releasesCatalog = (window.releasesCatalog || []).filter(r => String(r.id) !== String(releaseId));
+        let localSavedReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
+        localSavedReleases = localSavedReleases.filter(r => String(r.id) !== String(releaseId));
+        localStorage.setItem('audiory_local_releases', JSON.stringify(localSavedReleases));
+
+        const container = document.getElementById('mainViewport');
+        if (container && typeof renderCatalogView === 'function') {
+            container.innerHTML = renderCatalogView();
+        }
+        window.showToast('Release removed from catalog', false);
+    }
+};
 
         function renderAnalyticsView() {
             return `
@@ -1440,7 +1470,6 @@ function renderStep6Content() {
     `;
 }
 
-// Final Submission Handler with Dynamic Progress Bar & Button States
 window.handleFormSubmission = async function(event) {
     if (event) event.preventDefault();
 
@@ -1448,7 +1477,6 @@ window.handleFormSubmission = async function(event) {
         return window.showToast('Please confirm rights affirmation in Step 5 before submitting.');
     }
 
-    // Safeguard: Ensure cover artwork is provided before proceeding
     const hasArtworkFile = Boolean(window.releaseState.artwork?.file);
     const existingArtworkUrl = window.releaseState.artwork?.url || '';
     
@@ -1456,21 +1484,18 @@ window.handleFormSubmission = async function(event) {
         return window.showToast('Please upload cover artwork before submitting.');
     }
 
-    // UI Elements
     const submitBtn = document.getElementById('submit-release-btn') || document.querySelector('button[type="submit"]');
     const progressCard = document.getElementById('submission-progress-card');
     const statusText = document.getElementById('progress-status-text');
     const percentageText = document.getElementById('progress-percentage');
     const progressFill = document.getElementById('progress-bar-fill');
 
-    // Helper: Update Progress UI
     const updateProgress = (percent, message) => {
         if (progressFill) progressFill.style.width = `${percent}%`;
         if (percentageText) percentageText.innerText = `${Math.round(percent)}%`;
         if (statusText) statusText.innerText = message;
     };
 
-    // Helper: Set Button Loading State
     let originalBtnHTML = '';
     if (submitBtn) {
         originalBtnHTML = submitBtn.innerHTML;
@@ -1487,12 +1512,10 @@ window.handleFormSubmission = async function(event) {
         `;
     }
 
-    // Reveal Progress Card
     if (progressCard) progressCard.style.display = 'block';
     updateProgress(5, 'Initializing submission pipeline...');
 
     try {
-        // Calculate Total Progress Steps
         const totalTracks = window.releaseState.tracks?.length || 0;
         const totalUploadSteps = (hasArtworkFile ? 1 : 0) + totalTracks;
         let completedSteps = 0;
@@ -1501,18 +1524,12 @@ window.handleFormSubmission = async function(event) {
         let finalCoverUrl = existingArtworkUrl;
         if (hasArtworkFile) {
             updateProgress(10, 'Uploading Cover Artwork to R2 storage...');
-            
-            // Execute R2 upload
             const uploadRes = await uploadFileToR2(window.releaseState.artwork.file, 'artwork');
-            
-            // Normalize result to a string URL (handles either raw string or { url: "..." } responses)
             finalCoverUrl = typeof uploadRes === 'string' 
                 ? uploadRes 
                 : (uploadRes?.url || uploadRes?.location || uploadRes?.path || '');
 
-            if (!finalCoverUrl) {
-                throw new Error('Artwork upload succeeded but returned an invalid URL.');
-            }
+            if (!finalCoverUrl) throw new Error('Artwork upload succeeded but returned an invalid URL.');
 
             window.releaseState.artwork.url = finalCoverUrl;
             completedSteps++;
@@ -1531,11 +1548,7 @@ window.handleFormSubmission = async function(event) {
                     `Uploading Track ${i + 1} of ${totalTracks}: "${track.metadata?.title || 'Master Audio'}"...`
                 );
                 const trackRes = await uploadFileToR2(track.audioFile, 'audio');
-                
-                const trackUrl = typeof trackRes === 'string' 
-                    ? trackRes 
-                    : (trackRes?.url || trackRes?.location || '');
-
+                const trackUrl = typeof trackRes === 'string' ? trackRes : (trackRes?.url || trackRes?.location || '');
                 window.releaseState.tracks[i].audioUrl = trackUrl;
             }
             completedSteps++;
@@ -1543,23 +1556,16 @@ window.handleFormSubmission = async function(event) {
 
         updateProgress(80, 'Formatting release metadata & participant roles...');
 
-        // 3. Format Label String dynamically
         const labelNameInput = typeof window.releaseState.label === 'object' 
             ? (window.releaseState.label.name || window.releaseState.label.label) 
             : window.releaseState.label;
 
-        const labelString = (labelNameInput && labelNameInput.trim()) 
-            ? labelNameInput.trim() 
-            : 'Independent';
+        const labelString = (labelNameInput && labelNameInput.trim()) ? labelNameInput.trim() : 'Independent';
 
-        // 4. Format & Validate Participants
         const ALLOWED_ROLES = ['primary', 'featuring', 'remixer'];
         const mappedParticipants = (window.releaseState.artists || [])
             .map(artist => {
-                let rawRoles = Array.isArray(artist.role) 
-                    ? artist.role 
-                    : [artist.role || 'primary'];
-
+                let rawRoles = Array.isArray(artist.role) ? artist.role : [artist.role || 'primary'];
                 const cleanedRoles = rawRoles.map(r => {
                     const norm = String(r).toLowerCase().trim();
                     if (norm.includes('feat')) return 'featuring';
@@ -1569,7 +1575,6 @@ window.handleFormSubmission = async function(event) {
                 });
 
                 const artistName = typeof artist === 'string' ? artist : (artist.name || artist.artist_name || '');
-
                 return {
                     name: artistName.trim(),
                     role: Array.from(new Set(cleanedRoles)),
@@ -1586,7 +1591,6 @@ window.handleFormSubmission = async function(event) {
         const editingId = window.releaseState.editingId;
         const isEditing = Boolean(editingId);
 
-        // 5. Construct Final Payload
         const payload = {
             title: window.releaseState.metadata.title,
             type: window.releaseState.metadata.type,
@@ -1616,17 +1620,15 @@ window.handleFormSubmission = async function(event) {
             createdAt: new Date().toISOString()
         };
 
-        // Pass edit identifiers in payload for update requests
         if (isEditing) {
             payload.id = editingId;
             payload.releaseId = editingId;
             payload.isUpdate = true;
         }
 
-        // 6. Send Request to Worker Gateway API using POST (bypasses upstream PUT restriction)
-        updateProgress(90, 'Dispatching metadata to DSP Gateway...');
+        updateProgress(90, 'Dispatching metadata to Gateway...');
 
-        const token = await window.currentUser.getIdToken();
+        const token = window.currentUser?.getIdToken ? await window.currentUser.getIdToken() : '';
         const endpoint = `${WORKER_BASE_URL}/api/releases`;
 
         const res = await fetch(endpoint, {
@@ -1645,19 +1647,17 @@ window.handleFormSubmission = async function(event) {
             throw new Error(errorMsg);
         }
 
-        // 7. Complete Progress State
         updateProgress(100, `Release successfully ${isEditing ? 'updated' : 'submitted'}! Redirecting...`);
 
         const currentUid = window.currentUser ? window.currentUser.uid : 'anonymous';
-
-        // Normalize valid status
         let validStatus = 'Submitted';
         if (serverResponse?.status && !serverResponse.status.includes('Gateway') && !serverResponse.status.includes('Online')) {
             validStatus = serverResponse.status;
         }
 
-        // Update Local Storage and Catalog state
-        const finalId = editingId || serverResponse?.id || serverResponse?.data?.id || Date.now();
+        // PRESERVE EXISTING ID ON EDITING
+        const finalId = isEditing ? editingId : (serverResponse?.id || serverResponse?.data?.id || Date.now());
+
         const newReleaseItem = {
             id: finalId,
             title: payload.title,
@@ -1670,34 +1670,40 @@ window.handleFormSubmission = async function(event) {
             submittedBy: currentUid
         };
 
+        // Update Local Storage cleanly (replace item in place on edit)
         let localSavedReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
         if (isEditing) {
             const index = localSavedReleases.findIndex(item => String(item.id) === String(editingId));
-            if (index !== -1) localSavedReleases[index] = { ...localSavedReleases[index], ...newReleaseItem };
-            else localSavedReleases.unshift(newReleaseItem);
+            if (index !== -1) {
+                localSavedReleases[index] = { ...localSavedReleases[index], ...newReleaseItem };
+            } else {
+                localSavedReleases.unshift(newReleaseItem);
+            }
         } else {
             localSavedReleases.unshift(newReleaseItem);
         }
         localStorage.setItem('audiory_local_releases', JSON.stringify(localSavedReleases));
 
+        // Update global window state in place
         if (!Array.isArray(window.releasesCatalog)) window.releasesCatalog = [];
         if (isEditing) {
             const catIndex = window.releasesCatalog.findIndex(item => String(item.id) === String(editingId));
-            if (catIndex !== -1) window.releasesCatalog[catIndex] = { ...window.releasesCatalog[catIndex], ...newReleaseItem };
-            else window.releasesCatalog.unshift(newReleaseItem);
+            if (catIndex !== -1) {
+                window.releasesCatalog[catIndex] = { ...window.releasesCatalog[catIndex], ...newReleaseItem };
+            } else {
+                window.releasesCatalog.unshift(newReleaseItem);
+            }
         } else {
             window.releasesCatalog.unshift(newReleaseItem);
         }
 
         window.releaseState.editingId = null;
 
-        // Redirect after brief delay
         setTimeout(() => {
             if (typeof window.loadLiveCatalog === 'function') window.loadLiveCatalog();
             if (typeof window.renderDashboardHome === 'function') window.renderDashboardHome();
             if (typeof window.switchView === 'function') window.switchView('catalog');
             
-            // Reset Progress UI
             if (progressCard) progressCard.style.display = 'none';
             if (submitBtn) {
                 submitBtn.disabled = false;
@@ -1715,7 +1721,6 @@ window.handleFormSubmission = async function(event) {
             alert(`Submission failed: ${err.message}`);
         }
         
-        // Reset Button and UI on Error
         if (progressCard) progressCard.style.display = 'none';
         if (submitBtn) {
             submitBtn.disabled = false;
