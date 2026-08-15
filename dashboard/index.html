@@ -1448,6 +1448,14 @@ window.handleFormSubmission = async function(event) {
         return window.showToast('Please confirm rights affirmation in Step 5 before submitting.');
     }
 
+    // Safeguard: Ensure cover artwork is provided before proceeding
+    const hasArtworkFile = Boolean(window.releaseState.artwork?.file);
+    const existingArtworkUrl = window.releaseState.artwork?.url || '';
+    
+    if (!hasArtworkFile && !existingArtworkUrl) {
+        return window.showToast('Please upload cover artwork before submitting.');
+    }
+
     // UI Elements
     const submitBtn = document.getElementById('submit-release-btn') || document.querySelector('button[type="submit"]');
     const progressCard = document.getElementById('submission-progress-card');
@@ -1486,18 +1494,29 @@ window.handleFormSubmission = async function(event) {
     try {
         // Calculate Total Progress Steps
         const totalTracks = window.releaseState.tracks?.length || 0;
-        const hasArtworkFile = Boolean(window.releaseState.artwork?.file);
         const totalUploadSteps = (hasArtworkFile ? 1 : 0) + totalTracks;
         let completedSteps = 0;
 
         // 1. Upload Cover Artwork
-        let finalCoverUrl = window.releaseState.artwork?.url || '';
+        let finalCoverUrl = existingArtworkUrl;
         if (hasArtworkFile) {
             updateProgress(10, 'Uploading Cover Artwork to R2 storage...');
-            finalCoverUrl = await uploadFileToR2(window.releaseState.artwork.file, 'artwork');
+            
+            // Execute R2 upload
+            const uploadRes = await uploadFileToR2(window.releaseState.artwork.file, 'artwork');
+            
+            // Normalize result to a string URL (handles either raw string or { url: "..." } responses)
+            finalCoverUrl = typeof uploadRes === 'string' 
+                ? uploadRes 
+                : (uploadRes?.url || uploadRes?.location || uploadRes?.path || '');
+
+            if (!finalCoverUrl) {
+                throw new Error('Artwork upload succeeded but returned an invalid URL.');
+            }
+
             window.releaseState.artwork.url = finalCoverUrl;
             completedSteps++;
-            const stepPercent = 10 + Math.floor((completedSteps / totalUploadSteps) * 60);
+            const stepPercent = 10 + Math.floor((completedSteps / (totalUploadSteps || 1)) * 60);
             updateProgress(stepPercent, 'Cover Artwork uploaded successfully!');
         } else {
             updateProgress(20, 'Using existing artwork...');
@@ -1508,10 +1527,15 @@ window.handleFormSubmission = async function(event) {
             const track = window.releaseState.tracks[i];
             if (track.audioFile) {
                 updateProgress(
-                    20 + Math.floor((completedSteps / totalUploadSteps) * 60), 
+                    20 + Math.floor((completedSteps / (totalUploadSteps || 1)) * 60), 
                     `Uploading Track ${i + 1} of ${totalTracks}: "${track.metadata?.title || 'Master Audio'}"...`
                 );
-                const trackUrl = await uploadFileToR2(track.audioFile, 'audio');
+                const trackRes = await uploadFileToR2(track.audioFile, 'audio');
+                
+                const trackUrl = typeof trackRes === 'string' 
+                    ? trackRes 
+                    : (trackRes?.url || trackRes?.location || '');
+
                 window.releaseState.tracks[i].audioUrl = trackUrl;
             }
             completedSteps++;
@@ -1575,6 +1599,7 @@ window.handleFormSubmission = async function(event) {
             coverUrl: finalCoverUrl,
             cover_url: finalCoverUrl,
             cover_art: finalCoverUrl,
+            artwork: finalCoverUrl,
             tracks: window.releaseState.tracks.map(t => ({
                 title: t.metadata.title,
                 version: t.metadata.version,
@@ -1622,7 +1647,7 @@ window.handleFormSubmission = async function(event) {
 
         const currentUid = window.currentUser ? window.currentUser.uid : 'anonymous';
 
-        // Normalize valid status (preventing server health messages from becoming status badges)
+        // Normalize valid status
         let validStatus = 'Submitted';
         if (serverResponse?.status && !serverResponse.status.includes('Gateway') && !serverResponse.status.includes('Online')) {
             validStatus = serverResponse.status;
@@ -1663,11 +1688,11 @@ window.handleFormSubmission = async function(event) {
 
         window.releaseState.editingId = null;
 
-        // Redirect after brief delay so user sees 100% complete state
+        // Redirect after brief delay
         setTimeout(() => {
             if (typeof window.loadLiveCatalog === 'function') window.loadLiveCatalog();
             if (typeof window.renderDashboardHome === 'function') window.renderDashboardHome();
-            window.switchView('catalog');
+            if (typeof window.switchView === 'function') window.switchView('catalog');
             
             // Reset Progress UI
             if (progressCard) progressCard.style.display = 'none';
@@ -1681,7 +1706,11 @@ window.handleFormSubmission = async function(event) {
 
     } catch (err) {
         console.error('Submission Error:', err);
-        window.showToast(`Submission failed: ${err.message}`);
+        if (typeof window.showToast === 'function') {
+            window.showToast(`Submission failed: ${err.message}`);
+        } else {
+            alert(`Submission failed: ${err.message}`);
+        }
         
         // Reset Button and UI on Error
         if (progressCard) progressCard.style.display = 'none';
