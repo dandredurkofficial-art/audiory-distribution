@@ -28,6 +28,8 @@
     <!-- FontAwesome & Google Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0B0F17; color: #F8FAFC; }
         .too-lost-input { width: 100%; background-color: #0B0F17; border: 1px solid #1E293B; border-radius: 0.75rem; padding: 0.65rem 1rem; color: #ffffff; font-size: 0.875rem; outline: none; transition: all 0.2s; }
@@ -589,7 +591,7 @@ function renderCatalogContainer() {
     `;
 }
         
-        // Catalog Actions - Edit Release
+// Catalog Actions - Edit Release
 window.editReleaseCatalog = function(index) {
     const item = window.releasesCatalog[index];
     if (!item) return;
@@ -771,16 +773,213 @@ window.deleteReleaseCatalog = async function(releaseId) {
     }
 };
 
-        function renderAnalyticsView() {
-            return `
-                <div class="max-w-7xl mx-auto space-y-6">
-                    <h1 class="text-2xl font-bold text-white">Analytics & Earnings</h1>
-                    <div class="p-8 bg-brand-card border border-brand-border rounded-2xl text-center text-gray-400 text-sm">
-                        Revenue reporting and streaming metrics will sync upon DSP delivery confirmations.
-                    </div>
+let currentAnalyticsPeriod = 'lastThirtyDays';
+let analyticsChartInstance = null;
+
+function renderAnalyticsView() {
+    return `
+        <div class="max-w-7xl mx-auto space-y-6">
+            <!-- Header & Period Filter -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-white">Analytics & Performance</h1>
+                    <p class="text-xs text-gray-400 mt-1">Real-time streaming metrics powered by Too Lost API</p>
                 </div>
-            `;
+                <div class="flex items-center gap-2">
+                    <select id="analytics-period-select" onchange="handlePeriodChange(this.value)" class="bg-brand-card border border-brand-border text-white text-xs rounded-xl px-3 py-2 outline-none focus:border-brand-primary">
+                        <option value="lastSevenDays">Last 7 Days</option>
+                        <option value="lastThirtyDays" selected>Last 30 Days</option>
+                        <option value="lastThreeMonths">Last 3 Months</option>
+                        <option value="lastSixMonths">Last 6 Months</option>
+                        <option value="lastYear">Last Year</option>
+                        <option value="allTime">All Time</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Metric Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="analytics-kpi-container">
+                <div class="bg-brand-card border border-brand-border p-5 rounded-2xl animate-pulse">
+                    <div class="h-3 w-20 bg-gray-700 rounded mb-2"></div>
+                    <div class="h-7 w-24 bg-gray-600 rounded"></div>
+                </div>
+                <div class="bg-brand-card border border-brand-border p-5 rounded-2xl animate-pulse">
+                    <div class="h-3 w-20 bg-gray-700 rounded mb-2"></div>
+                    <div class="h-7 w-24 bg-gray-600 rounded"></div>
+                </div>
+                <div class="bg-brand-card border border-brand-border p-5 rounded-2xl animate-pulse">
+                    <div class="h-3 w-20 bg-gray-700 rounded mb-2"></div>
+                    <div class="h-7 w-24 bg-gray-600 rounded"></div>
+                </div>
+                <div class="bg-brand-card border border-brand-border p-5 rounded-2xl animate-pulse">
+                    <div class="h-3 w-20 bg-gray-700 rounded mb-2"></div>
+                    <div class="h-7 w-24 bg-gray-600 rounded"></div>
+                </div>
+            </div>
+
+            <!-- Streams Chart -->
+            <div class="bg-brand-card border border-brand-border p-6 rounded-2xl">
+                <h2 class="text-sm font-semibold text-white mb-4">Streams Over Time</h2>
+                <div class="relative w-full h-72">
+                    <canvas id="analyticsOverviewChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Top Performing Tracks Table -->
+            <div class="bg-brand-card border border-brand-border rounded-2xl p-6 space-y-4">
+                <h2 class="text-sm font-semibold text-white">Top Performing Tracks</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-gray-300">
+                        <thead class="text-gray-400 border-b border-brand-border uppercase tracking-wider">
+                            <tr>
+                                <th class="pb-3 px-2">Track</th>
+                                <th class="pb-3 px-2">ISRC</th>
+                                <th class="pb-3 px-2 text-right">Streams</th>
+                                <th class="pb-3 px-2 text-right">Saves</th>
+                                <th class="pb-3 px-2 text-right">Engagement</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analytics-tracks-tbody">
+                            <tr>
+                                <td colspan="5" class="py-8 text-center text-gray-500">Loading track performance data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Call this function right after mounting the DOM view
+async function initAnalyticsDashboard(period = 'lastThirtyDays') {
+    try {
+        currentAnalyticsPeriod = period;
+        const currentUid = window.currentUser ? (window.currentUser.uid || window.currentUser.id) : null;
+        if (!currentUid) return;
+
+        const token = await window.currentUser.getIdToken();
+        const workerUrl = window.WORKER_BASE_URL || WORKER_BASE_URL;
+
+        // Parallel fetch for Overview & Track lists
+        const [overviewRes, tracksRes] = await Promise.all([
+            fetch(`${workerUrl}/api/analytics/overview?period=${period}`, {
+                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+            }),
+            fetch(`${workerUrl}/api/analytics/tracks?period=${period}&page=1&perPage=10`, {
+                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+            })
+        ]);
+
+        if (overviewRes.ok) {
+            const overviewJson = await overviewRes.json();
+            const overviewData = overviewJson.data || overviewJson;
+            renderKPIs(overviewData);
+            renderChart(overviewData.chart || []);
         }
+
+        if (tracksRes.ok) {
+            const tracksJson = await tracksRes.json();
+            const trackList = tracksJson.data || [];
+            renderTracksTable(trackList);
+        }
+    } catch (err) {
+        console.error("Analytics fetch error:", err);
+    }
+}
+
+function handlePeriodChange(newPeriod) {
+    initAnalyticsDashboard(newPeriod);
+}
+
+function renderKPIs(data) {
+    const kpiContainer = document.getElementById('analytics-kpi-container');
+    if (!kpiContainer) return;
+
+    kpiContainer.innerHTML = `
+        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
+            <span class="text-xs font-medium text-gray-400">Total Streams</span>
+            <div class="text-2xl font-bold text-white mt-1">${(data.totalStreams || 0).toLocaleString()}</div>
+        </div>
+        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
+            <span class="text-xs font-medium text-gray-400">Total Saves</span>
+            <div class="text-2xl font-bold text-emerald-400 mt-1">${(data.totalSaves || 0).toLocaleString()}</div>
+        </div>
+        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
+            <span class="text-xs font-medium text-gray-400">Total Skips</span>
+            <div class="text-2xl font-bold text-rose-400 mt-1">${(data.totalSkips || 0).toLocaleString()}</div>
+        </div>
+        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
+            <span class="text-xs font-medium text-gray-400">Engagement</span>
+            <div class="text-2xl font-bold text-indigo-400 mt-1">${data.engagement ? Number(data.engagement).toFixed(2) + '%' : 'N/A'}</div>
+        </div>
+    `;
+}
+
+function renderChart(chartData) {
+    const canvas = document.getElementById('analyticsOverviewChart');
+    if (!canvas) return;
+
+    if (analyticsChartInstance) {
+        analyticsChartInstance.destroy();
+    }
+
+    const labels = chartData.map(point => point.date);
+    const streams = chartData.map(point => point.totalStreams);
+
+    const ctx = canvas.getContext('2d');
+    analyticsChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Streams',
+                data: streams,
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.35,
+                pointRadius: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: '#9ca3af', font: { size: 10 } }
+                },
+                y: {
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: '#9ca3af', font: { size: 10 } }
+                }
+            }
+        }
+    });
+}
+
+function renderTracksTable(tracks) {
+    const tbody = document.getElementById('analytics-tracks-tbody');
+    if (!tbody) return;
+
+    if (!tracks.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-500">No track metrics found for this period.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = tracks.map(t => `
+        <tr class="border-b border-brand-border/50 hover:bg-white/5 transition-colors">
+            <td class="py-3 px-2 font-medium text-white">${t.track || 'Unknown Title'}</td>
+            <td class="py-3 px-2 text-gray-400 font-mono">${t.isrc || '-'}</td>
+            <td class="py-3 px-2 text-right font-semibold text-white">${Number(t.totalStreams || 0).toLocaleString()}</td>
+            <td class="py-3 px-2 text-right text-emerald-400">${Number(t.totalSaves || 0).toLocaleString()}</td>
+            <td class="py-3 px-2 text-right text-indigo-400">${t.engagement ? Number(t.engagement).toFixed(2) + '%' : '-'}</td>
+        </tr>
+    `).join('');
+}
 
         function renderSettingsView() {
             return `
