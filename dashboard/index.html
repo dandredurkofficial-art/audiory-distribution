@@ -278,7 +278,7 @@
 
         async function loadLiveCatalog() {
     try {
-        // Retrieve logged-in user ID
+        // Retrieve logged-in user ID strictly
         const currentUid = window.currentUser ? (window.currentUser.uid || window.currentUser.id) : null;
         
         if (!currentUid) {
@@ -305,21 +305,24 @@
                 const data = await res.json();
                 const rawList = Array.isArray(data) ? data : (data.data || data.releases || []);
                 
-                // Filter: include items if submittedBy matches current UID OR if it's coming straight from authenticated API call
+                // STRICT FILTER: Require item user ID to explicitly match currentUid
                 serverReleases = rawList.filter(item => {
                     const itemUserId = item.submittedBy || item.userId || item.user_id || item.uid;
-                    return !itemUserId || itemUserId === currentUid;
+                    return String(itemUserId) === String(currentUid);
                 });
             }
         } catch (fetchErr) {
             console.error("API Gateway fetch error:", fetchErr);
         }
 
-        // 2. Fetch LocalStorage items matching current user
-        const allLocalReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
+        // 2. Fetch User-Scoped LocalStorage items (Isolated per UID)
+        const userLocalStorageKey = `audiory_releases_${currentUid}`;
+        const allLocalReleases = JSON.parse(localStorage.getItem(userLocalStorageKey) || localStorage.getItem('audiory_local_releases') || '[]');
+        
+        // STRICT FILTER: Match explicit user ID only
         const localReleases = allLocalReleases.filter(item => {
             const itemUserId = item.submittedBy || item.userId || item.user_id;
-            return !itemUserId || itemUserId === currentUid;
+            return String(itemUserId) === String(currentUid);
         });
 
         // Helper to cleanly map cover artwork from Too Lost or custom schemas
@@ -1523,7 +1526,7 @@ window.handleFormSubmission = async function(event) {
         // 1. Upload Cover Artwork
         let finalCoverUrl = existingArtworkUrl;
         if (hasArtworkFile) {
-            updateProgress(10, 'Uploading Cover Artwork to R2 storage...');
+            updateProgress(10, 'Uploading Cover Artwork...');
             const uploadRes = await uploadFileToR2(window.releaseState.artwork.file, 'artwork');
             finalCoverUrl = typeof uploadRes === 'string' 
                 ? uploadRes 
@@ -1670,8 +1673,16 @@ window.handleFormSubmission = async function(event) {
             submittedBy: currentUid
         };
 
-        // Update Local Storage cleanly (replace item in place on edit)
-        let localSavedReleases = JSON.parse(localStorage.getItem('audiory_local_releases') || '[]');
+        // Scope storage key dynamically to current user ID
+        const userLocalStorageKey = `audiory_releases_${currentUid}`;
+
+        // Retrieve user-scoped local releases
+        let localSavedReleases = JSON.parse(
+            localStorage.getItem(userLocalStorageKey) || 
+            localStorage.getItem('audiory_local_releases') || 
+            '[]'
+        );
+
         if (isEditing) {
             const index = localSavedReleases.findIndex(item => String(item.id) === String(editingId));
             if (index !== -1) {
@@ -1682,8 +1693,10 @@ window.handleFormSubmission = async function(event) {
         } else {
             localSavedReleases.unshift(newReleaseItem);
         }
-        localStorage.setItem('audiory_local_releases', JSON.stringify(localSavedReleases));
 
+        // Save back to the user-scoped localStorage key
+        localStorage.setItem(userLocalStorageKey, JSON.stringify(localSavedReleases));
+        
         // Update global window state in place
         if (!Array.isArray(window.releasesCatalog)) window.releasesCatalog = [];
         if (isEditing) {
