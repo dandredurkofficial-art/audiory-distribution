@@ -1152,30 +1152,51 @@ async function initEarningsDashboard() {
     const balEl = document.getElementById('earnings-total-balance');
     if (balEl) balEl.innerText = `$${totalRev.toFixed(2)}`;
 
-    // Render Pie Chart
+    // Render Pie Chart or Empty State Fallback
     const canvas = document.getElementById('platformEarningsPieChart');
-    if (canvas && platformData.length > 0) {
-        if (pieChartInstance) pieChartInstance.destroy();
+    const chartContainer = canvas ? canvas.parentElement : null;
 
-        const ctx = canvas.getContext('2d');
-        pieChartInstance = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: platformData.map(p => p.dsp),
-                datasets: [{
-                    data: platformData.map(p => p.revenue),
-                    backgroundColor: ['#1db954', '#fc3c44', '#ff0000', '#00a8e1', '#a238ff', '#6b7280'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { color: '#9ca3af', font: { size: 10 } } }
+    if (canvas) {
+        const hasRevenueData = platformData.length > 0 && platformData.some(p => Number(p.revenue) > 0);
+
+        if (hasRevenueData) {
+            // Remove empty state message if previously appended
+            const existingMsg = chartContainer?.querySelector('.empty-chart-msg');
+            if (existingMsg) existingMsg.remove();
+            
+            canvas.style.display = 'block';
+
+            if (pieChartInstance) pieChartInstance.destroy();
+
+            const ctx = canvas.getContext('2d');
+            pieChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: platformData.map(p => p.dsp),
+                    datasets: [{
+                        data: platformData.map(p => p.revenue),
+                        backgroundColor: ['#1db954', '#fc3c44', '#ff0000', '#00a8e1', '#a238ff', '#6b7280'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#9ca3af', font: { size: 10 } } }
+                    }
                 }
+            });
+        } else {
+            // Hide canvas and show a fallback message when there's no revenue
+            canvas.style.display = 'none';
+            if (chartContainer && !chartContainer.querySelector('.empty-chart-msg')) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.className = 'empty-chart-msg h-full w-full flex items-center justify-center text-gray-500 text-xs font-medium py-12';
+                emptyMsg.innerText = 'No store revenue data available.';
+                chartContainer.appendChild(emptyMsg);
             }
-        });
+        }
     }
 }
 
