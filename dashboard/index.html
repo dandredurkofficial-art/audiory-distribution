@@ -994,6 +994,11 @@ function renderPayoutFields() {
     }
 }
 
+// Helper to retrieve absolute worker base URL
+function getWorkerBaseUrl() {
+    return window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
+}
+
 // 1. Submit Request via API Endpoint
 async function submitWithdrawal(e) {
     e.preventDefault();
@@ -1021,7 +1026,7 @@ async function submitWithdrawal(e) {
     const token = window.currentUser?.token || localStorage.getItem('auth_token');
 
     try {
-        const response = await fetch('/api/withdrawals', {
+        const response = await fetch(`${getWorkerBaseUrl()}/api/withdrawals`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -1037,7 +1042,6 @@ async function submitWithdrawal(e) {
         const resData = await response.json();
 
         if (!response.ok) {
-            // Display Worker error directly (e.g., cycle limit or 15-25 window)
             throw new Error(resData.error || 'Failed to process request.');
         }
 
@@ -1054,7 +1058,7 @@ async function submitWithdrawal(e) {
 async function fetchUserWithdrawals() {
     try {
         const token = window.currentUser?.token || localStorage.getItem('auth_token');
-        const response = await fetch('/api/withdrawals', {
+        const response = await fetch(`${getWorkerBaseUrl()}/api/withdrawals`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) return [];
@@ -1068,7 +1072,7 @@ async function fetchUserWithdrawals() {
 async function fetchTooLostEarnings() {
     try {
         const token = window.currentUser?.token || localStorage.getItem('auth_token');
-        const response = await fetch('/api/toolost/earnings', {
+        const response = await fetch(`${getWorkerBaseUrl()}/api/toolost/earnings`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
