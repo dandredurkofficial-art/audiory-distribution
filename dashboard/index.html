@@ -863,6 +863,7 @@ async function initAnalyticsDashboard(period = 'lastThirtyDays') {
     try {
         currentAnalyticsPeriod = period;
 
+        // Sync dropdown value & listener
         const periodSelect = document.getElementById('analytics-period-select');
         if (periodSelect) {
             periodSelect.value = period;
@@ -872,45 +873,72 @@ async function initAnalyticsDashboard(period = 'lastThirtyDays') {
             }
         }
 
-        const currentUid = window.currentUser ? (window.currentUser.uid || window.currentUser.id) : null;
-        if (!currentUid) {
-            if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-500">User not authenticated.</td></tr>`;
+        // Verify user authentication
+        if (!window.currentUser) {
+            console.warn("Analytics: window.currentUser is missing.");
+            if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-rose-400">Authentication required. Please sign in again.</td></tr>`;
+            renderKPIs({ totalStreams: 0, totalSaves: 0, totalSkips: 0, engagement: 0 });
             return;
         }
 
-        const token = await window.currentUser.getIdToken();
-        const workerUrl = window.WORKER_BASE_URL || WORKER_BASE_URL;
+        // Retrieve Authorization Token
+        let token = "";
+        if (typeof window.currentUser.getIdToken === 'function') {
+            token = await window.currentUser.getIdToken(true); // Force refresh
+        } else if (window.currentUser.accessToken) {
+            token = window.currentUser.accessToken;
+        }
 
+        if (!token) {
+            throw new Error("Missing authentication token");
+        }
+
+        const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
+
+        // Fetch Analytics Data
         const [overviewRes, tracksRes] = await Promise.all([
             fetch(`${workerUrl}/api/analytics/overview?period=${period}`, {
-                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+                method: 'GET',
+                headers: { 
+                    'Authorization': `Bearer ${token}`, 
+                    'Content-Type': 'application/json' 
+                }
             }),
             fetch(`${workerUrl}/api/analytics/tracks?period=${period}&page=1&perPage=10`, {
-                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+                method: 'GET',
+                headers: { 
+                    'Authorization': `Bearer ${token}`, 
+                    'Content-Type': 'application/json' 
+                }
             })
         ]);
 
+        // Process Overview Data
         if (overviewRes.ok) {
             const overviewJson = await overviewRes.json();
             renderKPIs(overviewJson.data || overviewJson);
             renderChart((overviewJson.data || overviewJson).chart || []);
         } else {
-            // Render zeroed KPIs if overview request fails
+            console.error(`Overview API failed: ${overviewRes.status}`);
             renderKPIs({ totalStreams: 0, totalSaves: 0, totalSkips: 0, engagement: 0 });
         }
 
+        // Process Track Data
         if (tracksRes.ok) {
             const tracksJson = await tracksRes.json();
             renderTracksTable(tracksJson.data || []);
         } else {
-            if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-rose-400">Unable to load TooLost track data.</td></tr>`;
+            console.error(`Tracks API failed: ${tracksRes.status}`);
+            if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-rose-400">Unauthorized (401): Check Worker auth middleware.</td></tr>`;
         }
+
     } catch (err) {
-        console.error("Analytics fetch error:", err);
-        if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-rose-400">Connection error to worker API.</td></tr>`;
+        console.error("Analytics Dashboard error:", err);
+        if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-rose-400">Failed to authenticate API request.</td></tr>`;
+        renderKPIs({ totalStreams: 0, totalSaves: 0, totalSkips: 0, engagement: 0 });
     }
 }
-
+        
 function handlePeriodChange(newPeriod) {
     initAnalyticsDashboard(newPeriod);
 }
