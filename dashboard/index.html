@@ -401,31 +401,29 @@ function renderCatalogContainer() {
     }
 }
 
-// Universal Helper: Extracts artist name from nested objects, arrays, or standard fields
-function resolveArtistName(item) {
-    if (!item) return 'Unknown Artist';
+// Exact artist resolver matching renderCatalogView logic
+function resolveArtistName(rel) {
+    if (!rel) return 'Unknown Artist';
 
-    // 1. Array of primary artists (Too Lost API schema)
-    if (Array.isArray(item.primary_artists) && item.primary_artists.length > 0) {
-        return item.primary_artists.map(a => typeof a === 'object' ? (a.name || a.stage_name) : a).join(', ');
-    }
-    if (Array.isArray(item.artists) && item.artists.length > 0) {
-        return item.artists.map(a => typeof a === 'object' ? (a.name || a.stage_name) : a).join(', ');
+    if (Array.isArray(rel.participants) && rel.participants.length > 0) {
+        return rel.participants
+            .map(p => typeof p === 'string' ? p : p.name)
+            .filter(Boolean)
+            .join(', ');
+    } 
+    
+    if (Array.isArray(rel.artists) && rel.artists.length > 0) {
+        return rel.artists
+            .map(a => typeof a === 'string' ? a : (a.name || ''))
+            .filter(Boolean)
+            .join(', ');
+    } 
+    
+    if (rel.artist) {
+        return typeof rel.artist === 'string' ? rel.artist : (rel.artist.name || 'Unknown Artist');
     }
 
-    // 2. Nested objects
-    if (item.primary_artist && typeof item.primary_artist === 'object') {
-        return item.primary_artist.name || item.primary_artist.stage_name || 'Unknown Artist';
-    }
-
-    // 3. String Fallbacks
-    return item.primary_artist 
-        || item.primaryArtist 
-        || item.artist_name 
-        || item.artistName 
-        || item.artist 
-        || item.mainArtist 
-        || 'Unknown Artist';
+    return 'Unknown Artist';
 }
 
 // Universal Helper: Matches resolveCoverUrl logic inside loadLiveCatalog
@@ -629,8 +627,8 @@ function renderHomeView() {
 
 let homeChartInstance = null;
 
+// Updated Dashboard Initialization Function
 async function initHomeDashboard() {
-    // Populate Recent Releases Table
     const catalogTbody = document.getElementById('home-recent-catalog-tbody');
     if (catalogTbody) {
         const catalog = window.releasesCatalog || [];
@@ -638,9 +636,21 @@ async function initHomeDashboard() {
             catalogTbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-gray-500">No releases found. Click "New Release" to start.</td></tr>`;
         } else {
             catalogTbody.innerHTML = catalog.slice(0, 5).map(rel => {
-                // Extract artist & cover using universal helper resolvers
+                const title = rel.title || rel.metadata?.title || 'Untitled Release';
                 const artistName = resolveArtistName(rel);
-                const coverArt = resolveCoverUrl(rel);
+
+                // Exact cover resolver from renderCatalogView
+                let rawCover = rel.coverUrl || rel.compressedArtwork || rel.artworkUrl || rel.cover_url;
+                if (!rawCover && rel.artwork) {
+                    rawCover = typeof rel.artwork === 'string' ? rel.artwork : (rel.artwork.url || rel.artwork.cover_art);
+                }
+                const coverArt = (typeof rawCover === 'string' && rawCover.trim() !== '') ? rawCover : '';
+
+                // Normalize status
+                let status = rel.status || 'Submitted';
+                if (status.toLowerCase() === 'draft' || status.toLowerCase().includes('gateway')) {
+                    status = 'Submitted';
+                }
 
                 return `
                     <tr class="border-b border-brand-border/50 hover:bg-white/5 transition-colors">
@@ -650,13 +660,13 @@ async function initHomeDashboard() {
                                     ? `<img src="${coverArt}" class="w-10 h-10 rounded-lg object-cover border border-brand-border/60 shrink-0" alt="Cover" />`
                                     : `<div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0"><i class="fa-solid fa-music text-gray-400"></i></div>`
                                 }
-                                <span class="font-semibold text-white">${rel.title || 'Untitled'}</span>
+                                <span class="font-semibold text-white">${title}</span>
                             </div>
                         </td>
                         <td class="py-3 px-2 text-gray-300">${artistName}</td>
                         <td class="py-3 px-2 text-gray-400 font-mono">${rel.upc || 'Pending'}</td>
                         <td class="py-3 px-2 text-right">
-                            <span class="px-2 py-0.5 text-[10px] font-medium rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${rel.status || 'Active'}</span>
+                            <span class="px-2 py-0.5 text-[10px] font-medium rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 capitalize">${status}</span>
                         </td>
                     </tr>
                 `;
@@ -664,7 +674,7 @@ async function initHomeDashboard() {
         }
     }
 
-    // Fetch Analytics for KPIs & Chart...
+    // Fetch Overview Analytics
     try {
         if (!window.currentUser) return;
         const token = typeof window.currentUser.getIdToken === 'function' 
