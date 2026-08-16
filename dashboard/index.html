@@ -928,32 +928,7 @@ function showNotification(message, type = 'error') {
     }, 4000);
 }
 
-// Verification Rules Check
-function validateWithdrawalEligibility() {
-    const today = new Date();
-    const currentDay = today.getDate(); 
-    const currentMonthYear = `${today.getFullYear()}-${today.getMonth() + 1}`;
-
-    const currentUid = window.currentUser ? (window.currentUser.uid || window.currentUser.id) : 'guest';
-    const storageKey = `audiory_withdrawals_${currentUid}`;
-    const requests = JSON.parse(localStorage.getItem(storageKey) || '[]');
-
-    const submittedThisMonth = requests.some(r => {
-        const reqDate = new Date(r.date);
-        return `${reqDate.getFullYear()}-${reqDate.getMonth() + 1}` === currentMonthYear;
-    });
-
-    if (currentDay < 15 || currentDay > 25) {
-        return { eligible: false, reason: "Withdrawals are permitted only between the 15th and 25th of the month." };
-    }
-    if (submittedThisMonth) {
-        return { eligible: false, reason: "You have already submitted a withdrawal request for this monthly cycle." };
-    }
-
-    return { eligible: true };
-}
-
-// Always opens the modal when clicked
+// Modal Handlers
 function handleWithdrawClick() {
     const modal = document.getElementById('withdrawModal');
     const balInput = document.getElementById('modal-available-balance');
@@ -1019,25 +994,12 @@ function renderPayoutFields() {
     }
 }
 
-// Executed when artist submits details via "Withdraw Now"
-function submitWithdrawal(e) {
+// 1. Submit Request via API Endpoint
+async function submitWithdrawal(e) {
     e.preventDefault();
 
-    // 1. Date Eligibility Check (15th - 25th)
-    const dateCheck = validateWithdrawalEligibility();
-    if (!dateCheck.eligible) {
-        showNotification(dateCheck.reason, 'error');
-        return;
-    }
-
-    // 2. Minimum Balance Check ($20 limit)
     const amount = parseFloat(document.getElementById('withdrawAmount').value);
     const userBal = window.currentBalance || 0;
-
-    if (isNaN(amount) || amount < 20) {
-        showNotification("Minimum withdrawal threshold is $20.00.", "error");
-        return;
-    }
 
     if (amount > userBal) {
         showNotification("Requested amount exceeds current available balance.", "error");
@@ -1056,27 +1018,53 @@ function submitWithdrawal(e) {
         detailString = `ID: ${document.getElementById('field_tipalti_id').value}`;
     }
 
-    const currentUid = window.currentUser ? (window.currentUser.uid || window.currentUser.id) : 'guest';
-    const storageKey = `audiory_withdrawals_${currentUid}`;
-    const requests = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    const token = window.currentUser?.token || localStorage.getItem('auth_token');
 
-    const newRequest = {
-        id: 'WD-' + Date.now().toString().slice(-6),
-        date: new Date().toISOString(),
-        method: method.toUpperCase(),
-        details: detailString,
-        amount: amount,
-        status: 'Pending'
-    };
+    try {
+        const response = await fetch('/api/withdrawals', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                amount: amount,
+                method: method,
+                details: detailString
+            })
+        });
 
-    requests.unshift(newRequest);
-    localStorage.setItem(storageKey, JSON.stringify(requests));
+        const resData = await response.json();
 
-    closeWithdrawModal();
-    initEarningsDashboard();
-    showNotification("Withdrawal request submitted successfully!", "success");
+        if (!response.ok) {
+            // Display Worker error directly (e.g., cycle limit or 15-25 window)
+            throw new Error(resData.error || 'Failed to process request.');
+        }
+
+        closeWithdrawModal();
+        await initEarningsDashboard();
+        showNotification("Withdrawal request submitted successfully!", "success");
+
+    } catch (err) {
+        showNotification(err.message, "error");
+    }
 }
 
+// 2. Fetch Withdrawal History from Cloudflare KV
+async function fetchUserWithdrawals() {
+    try {
+        const token = window.currentUser?.token || localStorage.getItem('auth_token');
+        const response = await fetch('/api/withdrawals', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) return [];
+        return await response.json();
+    } catch {
+        return [];
+    }
+}
+
+// 3. Fetch Analytics Data
 async function fetchTooLostEarnings() {
     try {
         const token = window.currentUser?.token || localStorage.getItem('auth_token');
@@ -1086,27 +1074,24 @@ async function fetchTooLostEarnings() {
                 'Content-Type': 'application/json'
             }
         });
-        
-        if (!response.ok) throw new Error('Failed to fetch Too Lost analytics');
+        if (!response.ok) throw new Error('Failed to fetch analytics');
         return await response.json();
     } catch (err) {
         return { totalBalance: 0, platformBreakdown: [] };
     }
 }
 
+// Main Dashboard Initializer
 async function initEarningsDashboard() {
-    const currentUid = window.currentUser ? (window.currentUser.uid || window.currentUser.id) : 'guest';
-    const storageKey = `audiory_withdrawals_${currentUid}`;
-    const requests = JSON.parse(localStorage.getItem(storageKey) || '[]');
-
-    // Render Requests Table
+    // Render Requests Table from KV
+    const requests = await fetchUserWithdrawals();
     const tbody = document.getElementById('earnings-withdrawals-tbody');
     if (tbody) {
         if (requests.length === 0) {
             tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-gray-500">No withdrawal records found.</td></tr>`;
         } else {
             tbody.innerHTML = requests.map(r => {
-                const isPaid = r.status.toLowerCase() === 'paid';
+                const isPaid = (r.status || '').toLowerCase() === 'paid';
                 const statusBadge = isPaid
                     ? `<span class="px-2 py-0.5 text-[10px] font-medium rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Paid</span>`
                     : `<span class="px-2 py-0.5 text-[10px] font-medium rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">Pending</span>`;
@@ -1116,7 +1101,7 @@ async function initEarningsDashboard() {
                         <td class="py-3 px-2 font-mono">${new Date(r.date).toLocaleDateString()}</td>
                         <td class="py-3 px-2 font-semibold text-white">${r.method}</td>
                         <td class="py-3 px-2 text-gray-400 truncate max-w-xs">${r.details}</td>
-                        <td class="py-3 px-2 text-right font-mono font-bold text-white">$${r.amount.toFixed(2)}</td>
+                        <td class="py-3 px-2 text-right font-mono font-bold text-white">$${Number(r.amount).toFixed(2)}</td>
                         <td class="py-3 px-2 text-right">${statusBadge}</td>
                     </tr>
                 `;
@@ -1124,7 +1109,7 @@ async function initEarningsDashboard() {
         }
     }
 
-    // Fetch Live Production Data from Too Lost API
+    // Fetch Live Analytics Data
     const apiData = await fetchTooLostEarnings();
     const platformData = apiData.platformBreakdown || [];
 
@@ -1136,8 +1121,8 @@ async function initEarningsDashboard() {
             dspTbody.innerHTML = platformData.map(p => `
                 <tr class="border-b border-brand-border/50 hover:bg-white/5">
                     <td class="py-3 px-2 font-semibold text-white">${p.dsp}</td>
-                    <td class="py-3 px-2 text-right font-mono text-gray-300">${Number(p.streams).toLocaleString()}</td>
-                    <td class="py-3 px-2 text-right font-mono font-bold text-emerald-400">$${Number(p.revenue).toFixed(2)}</td>
+                    <td class="py-3 px-2 text-right font-mono text-gray-300">${Number(p.streams || 0).toLocaleString()}</td>
+                    <td class="py-3 px-2 text-right font-mono font-bold text-emerald-400">$${Number(p.revenue || 0).toFixed(2)}</td>
                 </tr>
             `).join('');
         }
@@ -1152,7 +1137,7 @@ async function initEarningsDashboard() {
     const balEl = document.getElementById('earnings-total-balance');
     if (balEl) balEl.innerText = `$${totalRev.toFixed(2)}`;
 
-    // Render Pie Chart or Empty State Fallback
+    // Render Pie Chart
     const canvas = document.getElementById('platformEarningsPieChart');
     const chartContainer = canvas ? canvas.parentElement : null;
 
@@ -1160,12 +1145,10 @@ async function initEarningsDashboard() {
         const hasRevenueData = platformData.length > 0 && platformData.some(p => Number(p.revenue) > 0);
 
         if (hasRevenueData) {
-            // Remove empty state message if previously appended
             const existingMsg = chartContainer?.querySelector('.empty-chart-msg');
             if (existingMsg) existingMsg.remove();
             
             canvas.style.display = 'block';
-
             if (pieChartInstance) pieChartInstance.destroy();
 
             const ctx = canvas.getContext('2d');
@@ -1188,7 +1171,6 @@ async function initEarningsDashboard() {
                 }
             });
         } else {
-            // Hide canvas and show a fallback message when there's no revenue
             canvas.style.display = 'none';
             if (chartContainer && !chartContainer.querySelector('.empty-chart-msg')) {
                 const emptyMsg = document.createElement('div');
