@@ -895,7 +895,7 @@ function renderEarningsView() {
 
 let pieChartInstance = null;
 
-// Helper: Non-blocking UI Toast Notification
+// Notification UI Banner
 function showNotification(message, type = 'error') {
     let container = document.getElementById('toast-container');
     if (!container) {
@@ -921,12 +921,10 @@ function showNotification(message, type = 'error') {
 
     container.appendChild(toast);
 
-    // Trigger animation
     requestAnimationFrame(() => {
         toast.classList.remove('opacity-0', 'translate-y-2');
     });
 
-    // Auto dismiss after 4 seconds
     setTimeout(() => {
         toast.classList.add('opacity-0', 'translate-y-2');
         setTimeout(() => toast.remove(), 300);
@@ -936,14 +934,13 @@ function showNotification(message, type = 'error') {
 // Date Check: Must be the 15th, and only 1 withdrawal per month
 function checkWithdrawalEligibility() {
     const today = new Date();
-    const currentDay = today.getDate(); // e.g. 15
+    const currentDay = today.getDate(); 
     const currentMonthYear = `${today.getFullYear()}-${today.getMonth() + 1}`;
 
     const currentUid = window.currentUser ? (window.currentUser.uid || window.currentUser.id) : 'guest';
     const storageKey = `audiory_withdrawals_${currentUid}`;
     const requests = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
-    // Check if a request was already submitted this month
     const submittedThisMonth = requests.some(r => {
         const reqDate = new Date(r.date);
         return `${reqDate.getFullYear()}-${reqDate.getMonth() + 1}` === currentMonthYear;
@@ -1071,6 +1068,24 @@ function submitWithdrawal(e) {
     showNotification("Withdrawal request submitted successfully!", "success");
 }
 
+async function fetchTooLostEarnings() {
+    try {
+        const token = window.currentUser?.token || localStorage.getItem('auth_token');
+        const response = await fetch('/api/toolost/earnings', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch Too Lost analytics');
+        return await response.json();
+    } catch (err) {
+        showNotification("Unable to sync earnings with Too Lost API.", "error");
+        return { totalBalance: 0, platformBreakdown: [] };
+    }
+}
+
 async function initEarningsDashboard() {
     const currentUid = window.currentUser ? (window.currentUser.uid || window.currentUser.id) : 'guest';
     const storageKey = `audiory_withdrawals_${currentUid}`;
@@ -1101,27 +1116,29 @@ async function initEarningsDashboard() {
         }
     }
 
-    // Render Mock Platform Breakdown Data (or sync from Worker API)
-    const platformData = [
-        { dsp: 'Spotify', streams: '12,450', revenue: 49.80 },
-        { dsp: 'Apple Music', streams: '8,200', revenue: 41.00 },
-        { dsp: 'YouTube Music', streams: '15,100', revenue: 30.20 },
-        { dsp: 'Amazon Music', streams: '3,100', revenue: 12.40 },
-        { dsp: 'Deezer', streams: '1,400', revenue: 5.60 }
-    ];
+    // Fetch Live Production Data from Too Lost API
+    const apiData = await fetchTooLostEarnings();
+    const platformData = apiData.platformBreakdown || [];
 
     const dspTbody = document.getElementById('earnings-dsp-tbody');
     if (dspTbody) {
-        dspTbody.innerHTML = platformData.map(p => `
-            <tr class="border-b border-brand-border/50 hover:bg-white/5">
-                <td class="py-3 px-2 font-semibold text-white">${p.dsp}</td>
-                <td class="py-3 px-2 text-right font-mono text-gray-300">${p.streams}</td>
-                <td class="py-3 px-2 text-right font-mono font-bold text-emerald-400">$${p.revenue.toFixed(2)}</td>
-            </tr>
-        `).join('');
+        if (platformData.length === 0) {
+            dspTbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-gray-500">No DSP revenue data available.</td></tr>`;
+        } else {
+            dspTbody.innerHTML = platformData.map(p => `
+                <tr class="border-b border-brand-border/50 hover:bg-white/5">
+                    <td class="py-3 px-2 font-semibold text-white">${p.dsp}</td>
+                    <td class="py-3 px-2 text-right font-mono text-gray-300">${Number(p.streams).toLocaleString()}</td>
+                    <td class="py-3 px-2 text-right font-mono font-bold text-emerald-400">$${Number(p.revenue).toFixed(2)}</td>
+                </tr>
+            `).join('');
+        }
     }
 
-    const totalRev = platformData.reduce((acc, curr) => acc + curr.revenue, 0);
+    const totalRev = apiData.totalBalance !== undefined 
+        ? apiData.totalBalance 
+        : platformData.reduce((acc, curr) => acc + (Number(curr.revenue) || 0), 0);
+        
     window.currentBalance = totalRev;
 
     const balEl = document.getElementById('earnings-total-balance');
@@ -1129,7 +1146,7 @@ async function initEarningsDashboard() {
 
     // Render Pie Chart
     const canvas = document.getElementById('platformEarningsPieChart');
-    if (canvas) {
+    if (canvas && platformData.length > 0) {
         if (pieChartInstance) pieChartInstance.destroy();
 
         const ctx = canvas.getContext('2d');
@@ -1139,7 +1156,7 @@ async function initEarningsDashboard() {
                 labels: platformData.map(p => p.dsp),
                 datasets: [{
                     data: platformData.map(p => p.revenue),
-                    backgroundColor: ['#1db954', '#fc3c44', '#ff0000', '#00a8e1', '#a238ff'],
+                    backgroundColor: ['#1db954', '#fc3c44', '#ff0000', '#00a8e1', '#a238ff', '#6b7280'],
                     borderWidth: 0
                 }]
             },
@@ -1154,6 +1171,11 @@ async function initEarningsDashboard() {
     }
 }
 
+// Global Exports
+window.handleWithdrawClick = handleWithdrawClick;
+window.closeWithdrawModal = closeWithdrawModal;
+window.renderPayoutFields = renderPayoutFields;
+window.submitWithdrawal = submitWithdrawal;
 window.initEarningsDashboard = initEarningsDashboard;
 
         function renderCatalogView() {
