@@ -776,6 +776,11 @@ window.deleteReleaseCatalog = async function(releaseId) {
 let currentAnalyticsPeriod = 'lastThirtyDays';
 let analyticsChartInstance = null;
 
+// Expose handlePeriodChange to global scope as a fallback
+window.handlePeriodChange = function(newPeriod) {
+    initAnalyticsDashboard(newPeriod);
+};
+
 function renderAnalyticsView() {
     return `
         <div class="max-w-7xl mx-auto space-y-6">
@@ -786,7 +791,7 @@ function renderAnalyticsView() {
                     <p class="text-xs text-gray-400 mt-1">Real-time streaming metrics</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <select id="analytics-period-select" onchange="handlePeriodChange(this.value)" class="bg-brand-card border border-brand-border text-white text-xs rounded-xl px-3 py-2 outline-none focus:border-brand-primary">
+                    <select id="analytics-period-select" class="bg-brand-card border border-brand-border text-white text-xs rounded-xl px-3 py-2 outline-none focus:border-brand-primary">
                         <option value="lastSevenDays">Last 7 Days</option>
                         <option value="lastThirtyDays" selected>Last 30 Days</option>
                         <option value="lastThreeMonths">Last 3 Months</option>
@@ -855,6 +860,19 @@ function renderAnalyticsView() {
 async function initAnalyticsDashboard(period = 'lastThirtyDays') {
     try {
         currentAnalyticsPeriod = period;
+
+        // Dynamically bind select change event and sync selection value
+        const periodSelect = document.getElementById('analytics-period-select');
+        if (periodSelect) {
+            periodSelect.value = period;
+            if (!periodSelect.dataset.listenerAttached) {
+                periodSelect.dataset.listenerAttached = "true";
+                periodSelect.addEventListener('change', (e) => {
+                    initAnalyticsDashboard(e.target.value);
+                });
+            }
+        }
+
         const currentUid = window.currentUser ? (window.currentUser.uid || window.currentUser.id) : null;
         if (!currentUid) return;
 
