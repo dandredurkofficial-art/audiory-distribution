@@ -994,14 +994,20 @@ function renderPayoutFields() {
     }
 }
 
-// Helper to retrieve absolute worker base URL
-function getWorkerBaseUrl() {
-    return window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
+// Helper to safely retrieve token
+function getAuthToken() {
+    return window.currentUser?.token || localStorage.getItem('auth_token') || '';
 }
 
 // 1. Submit Request via API Endpoint
 async function submitWithdrawal(e) {
     e.preventDefault();
+
+    const token = getAuthToken();
+    if (!token) {
+        showNotification("Authentication token missing. Please log in again.", "error");
+        return;
+    }
 
     const amount = parseFloat(document.getElementById('withdrawAmount').value);
     const userBal = window.currentBalance || 0;
@@ -1022,8 +1028,6 @@ async function submitWithdrawal(e) {
     } else if (method === 'tipalti') {
         detailString = `ID: ${document.getElementById('field_tipalti_id').value}`;
     }
-
-    const token = window.currentUser?.token || localStorage.getItem('auth_token');
 
     try {
         const response = await fetch(`${getWorkerBaseUrl()}/api/withdrawals`, {
@@ -1057,7 +1061,9 @@ async function submitWithdrawal(e) {
 // 2. Fetch Withdrawal History from Cloudflare KV
 async function fetchUserWithdrawals() {
     try {
-        const token = window.currentUser?.token || localStorage.getItem('auth_token');
+        const token = getAuthToken();
+        if (!token) return [];
+
         const response = await fetch(`${getWorkerBaseUrl()}/api/withdrawals`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -1071,7 +1077,9 @@ async function fetchUserWithdrawals() {
 // 3. Fetch Analytics Data
 async function fetchTooLostEarnings() {
     try {
-        const token = window.currentUser?.token || localStorage.getItem('auth_token');
+        const token = getAuthToken();
+        if (!token) return { totalBalance: 0, platformBreakdown: [] };
+
         const response = await fetch(`${getWorkerBaseUrl()}/api/toolost/earnings`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
