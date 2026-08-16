@@ -895,7 +895,7 @@ function renderEarningsView() {
 
 let pieChartInstance = null;
 
-// Non-blocking UI Toast Notification
+// Notification UI Banner
 function showNotification(message, type = 'error') {
     let container = document.getElementById('toast-container');
     if (!container) {
@@ -928,8 +928,8 @@ function showNotification(message, type = 'error') {
     }, 4000);
 }
 
-// Date Check: Must be between 15th and 25th, only 1 request per month cycle
-function checkWithdrawalEligibility() {
+// Verification Rules Check
+function validateWithdrawalEligibility() {
     const today = new Date();
     const currentDay = today.getDate(); 
     const currentMonthYear = `${today.getFullYear()}-${today.getMonth() + 1}`;
@@ -944,7 +944,7 @@ function checkWithdrawalEligibility() {
     });
 
     if (currentDay < 15 || currentDay > 25) {
-        return { eligible: false, reason: "Withdrawals are open exclusively between the 15th and 25th of each month." };
+        return { eligible: false, reason: "Withdrawals are permitted only between the 15th and 25th of the month." };
     }
     if (submittedThisMonth) {
         return { eligible: false, reason: "You have already submitted a withdrawal request for this monthly cycle." };
@@ -953,21 +953,11 @@ function checkWithdrawalEligibility() {
     return { eligible: true };
 }
 
+// Always opens the modal when clicked
 function handleWithdrawClick() {
-    const check = checkWithdrawalEligibility();
-    if (!check.eligible) {
-        showNotification(check.reason, 'error');
-        return;
-    }
-
-    const userBal = window.currentBalance || 0;
-    if (userBal < 20) {
-        showNotification("Minimum withdrawal amount is $20.00.", "error");
-        return;
-    }
-
     const modal = document.getElementById('withdrawModal');
     const balInput = document.getElementById('modal-available-balance');
+    const userBal = window.currentBalance || 0;
 
     if (balInput) balInput.value = `$${userBal.toFixed(2)}`;
     renderPayoutFields();
@@ -1029,31 +1019,32 @@ function renderPayoutFields() {
     }
 }
 
+// Executed when artist submits details via "Withdraw Now"
 function submitWithdrawal(e) {
     e.preventDefault();
-    
-    // Strict Verification on Submit Action
-    const check = checkWithdrawalEligibility();
-    if (!check.eligible) {
-        closeWithdrawModal();
-        showNotification(check.reason, 'error');
+
+    // 1. Date Eligibility Check (15th - 25th)
+    const dateCheck = validateWithdrawalEligibility();
+    if (!dateCheck.eligible) {
+        showNotification(dateCheck.reason, 'error');
         return;
     }
 
+    // 2. Minimum Balance Check ($20 limit)
     const amount = parseFloat(document.getElementById('withdrawAmount').value);
-    const method = document.getElementById('payoutMethod').value;
     const userBal = window.currentBalance || 0;
 
     if (isNaN(amount) || amount < 20) {
-        showNotification("Minimum withdrawal amount is $20.00.", "error");
+        showNotification("Minimum withdrawal threshold is $20.00.", "error");
         return;
     }
 
     if (amount > userBal) {
-        showNotification("Insufficient balance for this withdrawal.", "error");
+        showNotification("Requested amount exceeds current available balance.", "error");
         return;
     }
 
+    const method = document.getElementById('payoutMethod').value;
     let detailString = '';
     if (method === 'mpesa') {
         detailString = `Phone: ${document.getElementById('field_mpesa_phone').value} (${document.getElementById('field_mpesa_name').value})`;
@@ -1083,7 +1074,7 @@ function submitWithdrawal(e) {
 
     closeWithdrawModal();
     initEarningsDashboard();
-    showNotification("Withdrawal request submitted successfully! Your account is locked for this payout cycle.", "success");
+    showNotification("Withdrawal request submitted successfully!", "success");
 }
 
 async function fetchTooLostEarnings() {
@@ -1107,21 +1098,6 @@ async function initEarningsDashboard() {
     const currentUid = window.currentUser ? (window.currentUser.uid || window.currentUser.id) : 'guest';
     const storageKey = `audiory_withdrawals_${currentUid}`;
     const requests = JSON.parse(localStorage.getItem(storageKey) || '[]');
-
-    // Dynamic Button State Locking Logic
-    const btn = document.getElementById('btn-request-withdrawal');
-    const check = checkWithdrawalEligibility();
-    if (btn) {
-        if (!check.eligible) {
-            btn.disabled = true;
-            btn.className = 'px-5 py-2.5 rounded-xl bg-gray-700/50 text-gray-500 font-bold text-xs flex items-center gap-2 cursor-not-allowed border border-gray-600/30';
-            btn.innerHTML = `<i class="fa-solid fa-lock text-xs"></i> Withdrawals Locked`;
-        } else {
-            btn.disabled = false;
-            btn.className = 'px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-brand-dark font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/10 transition-all';
-            btn.innerHTML = `<i class="fa-solid fa-money-bill-transfer text-xs"></i> Request Withdrawal`;
-        }
-    }
 
     // Render Requests Table
     const tbody = document.getElementById('earnings-withdrawals-tbody');
