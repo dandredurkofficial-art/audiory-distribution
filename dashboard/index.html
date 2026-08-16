@@ -480,15 +480,10 @@ function renderHomeView() {
 
     return `
         <div class="max-w-7xl mx-auto space-y-6">
-            <!-- Top Header & Action -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
-                <div>
-                    <h1 class="text-2xl font-bold text-white tracking-tight">Welcome back, <span class="text-brand-accent">${window.currentUser?.displayName || 'Partner'}</span></h1>
-                    <p class="text-xs text-gray-400">Grow, manage, and monetize your music catalog.</p>
-                </div>
-                <button onclick="switchView('create')" class="px-5 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold text-xs flex items-center gap-2 shadow-lg shadow-cyan-500/10 hover:opacity-90 transition-all">
-                    <i class="fa-solid fa-plus text-[10px]"></i> New Release
-                </button>
+            <!-- Header (Removed duplicate New Release button) -->
+            <div class="pb-4 border-b border-brand-border/60">
+                <h1 class="text-2xl font-bold text-white tracking-tight">Welcome back, <span class="text-brand-accent">${window.currentUser?.displayName || 'Partner'}</span></h1>
+                <p class="text-xs text-gray-400 mt-1">Grow, manage, and monetize your music catalog.</p>
             </div>
 
             <!-- KPI Cards Grid -->
@@ -515,9 +510,8 @@ function renderHomeView() {
                 </div>
             </div>
 
-            <!-- Main Content Split: Mini Analytics & Quick Actions -->
+            <!-- Streaming Chart & Quick Actions -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Mini Analytics Chart (2 Cols) -->
                 <div class="lg:col-span-2 bg-brand-card border border-brand-border p-6 rounded-2xl space-y-4">
                     <div class="flex items-center justify-between">
                         <h2 class="text-sm font-semibold text-white">Streaming Overview</h2>
@@ -528,7 +522,6 @@ function renderHomeView() {
                     </div>
                 </div>
 
-                <!-- Quick Actions & Hub Shortcut (1 Col) -->
                 <div class="bg-brand-card border border-brand-border p-6 rounded-2xl space-y-4 flex flex-col justify-between">
                     <div>
                         <h2 class="text-sm font-semibold text-white mb-3">Quick Actions</h2>
@@ -563,7 +556,7 @@ function renderHomeView() {
                 </div>
             </div>
 
-            <!-- Recent Catalog Table -->
+            <!-- Recent Releases Table with Cover Art & Artist Property Fallbacks -->
             <div class="bg-brand-card border border-brand-border rounded-2xl p-6 space-y-4">
                 <div class="flex items-center justify-between">
                     <h2 class="text-sm font-semibold text-white">Recent Releases</h2>
@@ -573,7 +566,7 @@ function renderHomeView() {
                     <table class="w-full text-left text-xs text-gray-300">
                         <thead class="text-gray-400 border-b border-brand-border uppercase tracking-wider">
                             <tr>
-                                <th class="pb-3 px-2">Title</th>
+                                <th class="pb-3 px-2">Release</th>
                                 <th class="pb-3 px-2">Artist</th>
                                 <th class="pb-3 px-2">UPC</th>
                                 <th class="pb-3 px-2 text-right">Status</th>
@@ -594,27 +587,43 @@ function renderHomeView() {
 let homeChartInstance = null;
 
 async function initHomeDashboard() {
-    // 1. Populate Recent Releases Table
+    // Populate Recent Releases Table
     const catalogTbody = document.getElementById('home-recent-catalog-tbody');
     if (catalogTbody) {
         const catalog = window.releasesCatalog || [];
         if (catalog.length === 0) {
             catalogTbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-gray-500">No releases found. Click "New Release" to start.</td></tr>`;
         } else {
-            catalogTbody.innerHTML = catalog.slice(0, 5).map(rel => `
-                <tr class="border-b border-brand-border/50 hover:bg-white/5 transition-colors">
-                    <td class="py-3 px-2 font-semibold text-white">${rel.title || 'Untitled'}</td>
-                    <td class="py-3 px-2 text-gray-300">${rel.artist || 'Unknown'}</td>
-                    <td class="py-3 px-2 text-gray-400 font-mono">${rel.upc || '-'}</td>
-                    <td class="py-3 px-2 text-right">
-                        <span class="px-2 py-0.5 text-[10px] font-medium rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
-                    </td>
-                </tr>
-            `).join('');
+            catalogTbody.innerHTML = catalog.slice(0, 5).map(rel => {
+                // Extract artist with proper fallbacks matching the catalog view
+                const artistName = rel.primary_artist || rel.primaryArtist || rel.artist_name || rel.artist || 'Unknown Artist';
+                
+                // Extract cover image with fallbacks
+                const coverArt = rel.cover_url || rel.coverUrl || rel.cover_art || rel.artwork_url || '';
+
+                return `
+                    <tr class="border-b border-brand-border/50 hover:bg-white/5 transition-colors">
+                        <td class="py-3 px-2">
+                            <div class="flex items-center gap-3">
+                                ${coverArt 
+                                    ? `<img src="${coverArt}" class="w-10 h-10 rounded-lg object-cover border border-brand-border/60 shrink-0" alt="Cover" />`
+                                    : `<div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0"><i class="fa-solid fa-music text-gray-400"></i></div>`
+                                }
+                                <span class="font-semibold text-white">${rel.title || 'Untitled'}</span>
+                            </div>
+                        </td>
+                        <td class="py-3 px-2 text-gray-300">${artistName}</td>
+                        <td class="py-3 px-2 text-gray-400 font-mono">${rel.upc || 'Pending'}</td>
+                        <td class="py-3 px-2 text-right">
+                            <span class="px-2 py-0.5 text-[10px] font-medium rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
     }
 
-    // 2. Fetch Overview Analytics for KPIs & Chart
+    // Fetch Overview Analytics for KPIs & Chart
     try {
         if (!window.currentUser) return;
         const token = typeof window.currentUser.getIdToken === 'function' 
@@ -632,7 +641,6 @@ async function initHomeDashboard() {
             const json = await res.json();
             const data = json.data || json;
 
-            // Update KPI Text
             const streamsEl = document.getElementById('home-stat-streams');
             const savesEl = document.getElementById('home-stat-saves');
             const engEl = document.getElementById('home-stat-engagement');
@@ -641,14 +649,13 @@ async function initHomeDashboard() {
             if (savesEl) savesEl.innerText = Number(data.totalSaves || 0).toLocaleString();
             if (engEl) engEl.innerText = data.engagement ? Number(data.engagement).toFixed(2) + '%' : 'N/A';
 
-            // Render Chart
             renderHomeChart(data.chart || []);
         }
     } catch (err) {
         console.error("Home Dashboard API error:", err);
     }
 }
-
+        
 function renderHomeChart(chartData) {
     const canvas = document.getElementById('homeOverviewChart');
     if (!canvas) return;
