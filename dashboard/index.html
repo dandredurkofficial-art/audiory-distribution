@@ -400,6 +400,49 @@ function renderCatalogContainer() {
         catalogContainer.innerHTML = renderCatalogView();
     }
 }
+
+// Universal Helper: Extracts artist name from nested objects, arrays, or standard fields
+function resolveArtistName(item) {
+    if (!item) return 'Unknown Artist';
+
+    // 1. Array of primary artists (Too Lost API schema)
+    if (Array.isArray(item.primary_artists) && item.primary_artists.length > 0) {
+        return item.primary_artists.map(a => typeof a === 'object' ? (a.name || a.stage_name) : a).join(', ');
+    }
+    if (Array.isArray(item.artists) && item.artists.length > 0) {
+        return item.artists.map(a => typeof a === 'object' ? (a.name || a.stage_name) : a).join(', ');
+    }
+
+    // 2. Nested objects
+    if (item.primary_artist && typeof item.primary_artist === 'object') {
+        return item.primary_artist.name || item.primary_artist.stage_name || 'Unknown Artist';
+    }
+
+    // 3. String Fallbacks
+    return item.primary_artist 
+        || item.primaryArtist 
+        || item.artist_name 
+        || item.artistName 
+        || item.artist 
+        || item.mainArtist 
+        || 'Unknown Artist';
+}
+
+// Universal Helper: Matches resolveCoverUrl logic inside loadLiveCatalog
+function resolveCoverUrl(item) {
+    if (!item) return '';
+    if (typeof item.artwork === 'string') return item.artwork;
+    if (item.artwork && typeof item.artwork === 'object') {
+        return item.artwork.url || item.artwork.cover_art || item.artwork.path || '';
+    }
+    return item.coverUrl 
+        || item.compressedArtwork 
+        || item.artworkUrl 
+        || item.cover_url 
+        || item.cover_art 
+        || item.image 
+        || '';
+}
         
         // Direct Multipart Upload to Cloudflare Worker R2 Bucket
         async function uploadFileToR2(file, folder = 'audio') {
@@ -595,11 +638,9 @@ async function initHomeDashboard() {
             catalogTbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-gray-500">No releases found. Click "New Release" to start.</td></tr>`;
         } else {
             catalogTbody.innerHTML = catalog.slice(0, 5).map(rel => {
-                // Extract artist with proper fallbacks matching the catalog view
-                const artistName = rel.primary_artist || rel.primaryArtist || rel.artist_name || rel.artist || 'Unknown Artist';
-                
-                // Extract cover image with fallbacks
-                const coverArt = rel.cover_url || rel.coverUrl || rel.cover_art || rel.artwork_url || '';
+                // Extract artist & cover using universal helper resolvers
+                const artistName = resolveArtistName(rel);
+                const coverArt = resolveCoverUrl(rel);
 
                 return `
                     <tr class="border-b border-brand-border/50 hover:bg-white/5 transition-colors">
@@ -615,7 +656,7 @@ async function initHomeDashboard() {
                         <td class="py-3 px-2 text-gray-300">${artistName}</td>
                         <td class="py-3 px-2 text-gray-400 font-mono">${rel.upc || 'Pending'}</td>
                         <td class="py-3 px-2 text-right">
-                            <span class="px-2 py-0.5 text-[10px] font-medium rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
+                            <span class="px-2 py-0.5 text-[10px] font-medium rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${rel.status || 'Active'}</span>
                         </td>
                     </tr>
                 `;
@@ -623,7 +664,7 @@ async function initHomeDashboard() {
         }
     }
 
-    // Fetch Overview Analytics for KPIs & Chart
+    // Fetch Analytics for KPIs & Chart...
     try {
         if (!window.currentUser) return;
         const token = typeof window.currentUser.getIdToken === 'function' 
