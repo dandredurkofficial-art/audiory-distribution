@@ -428,36 +428,46 @@ function renderCatalogContainer() {
         }
 
         // View Router
-        window.switchView = function(viewName) {
-            ['home', 'catalog', 'create', 'analytics', 'settings'].forEach(v => {
-                const btn = document.getElementById(`nav_${v}`);
-                if (btn) {
-                    btn.className = (v === viewName)
-                        ? "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-brand-accent bg-brand-dark border border-brand-border/80 transition-all"
-                        : "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-brand-dark/50 transition-all";
-                }
-            });
+window.switchView = function(viewName) {
+    ['home', 'catalog', 'create', 'analytics', 'settings'].forEach(v => {
+        const btn = document.getElementById(`nav_${v}`);
+        if (btn) {
+            btn.className = (v === viewName)
+                ? "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-brand-accent bg-brand-dark border border-brand-border/80 transition-all"
+                : "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-brand-dark/50 transition-all";
+        }
+    });
 
-            const viewport = document.getElementById('mainViewport');
-            if (!viewport) return;
+    const viewport = document.getElementById('mainViewport');
+    if (!viewport) return;
 
-            if (viewName === 'home') viewport.innerHTML = renderHomeView();
-            if (viewName === 'catalog') viewport.innerHTML = renderCatalogView();
-            if (viewName === 'create') {
-                viewport.innerHTML = window.renderCreateReleaseView();
-                window.currentStep = 1;
-                window.renderStepContent(1);
-            }
-            if (viewName === 'analytics') viewport.innerHTML = renderAnalyticsView();
-            if (viewName === 'settings') viewport.innerHTML = renderSettingsView();
+    if (viewName === 'home') viewport.innerHTML = renderHomeView();
+    if (viewName === 'catalog') viewport.innerHTML = renderCatalogView();
+    if (viewName === 'create') {
+        viewport.innerHTML = window.renderCreateReleaseView();
+        window.currentStep = 1;
+        window.renderStepContent(1);
+    }
+    
+    // UPDATED: Render HTML AND initialize analytics fetching
+    if (viewName === 'analytics') {
+        viewport.innerHTML = renderAnalyticsView();
+        if (typeof window.initAnalyticsDashboard === 'function') {
+            window.initAnalyticsDashboard();
+        } else {
+            console.error("window.initAnalyticsDashboard is not loaded yet.");
+        }
+    }
 
-            const sidebar = document.getElementById('sidebarNav');
-            if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
-                sidebar.classList.add('-translate-x-full');
-            }
-        };
+    if (viewName === 'settings') viewport.innerHTML = renderSettingsView();
 
-        window.toggleMobileSidebar = () => document.getElementById('sidebarNav').classList.toggle('-translate-x-full');
+    const sidebar = document.getElementById('sidebarNav');
+    if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.add('-translate-x-full');
+    }
+};
+
+window.toggleMobileSidebar = () => document.getElementById('sidebarNav').classList.toggle('-translate-x-full');
 
         // Views
         function renderHomeView() {
@@ -938,6 +948,8 @@ async function initAnalyticsDashboard(period = 'lastThirtyDays') {
         renderKPIs({ totalStreams: 0, totalSaves: 0, totalSkips: 0, engagement: 0 });
     }
 }
+
+window.initAnalyticsDashboard = initAnalyticsDashboard;
         
 function handlePeriodChange(newPeriod) {
     initAnalyticsDashboard(newPeriod);
