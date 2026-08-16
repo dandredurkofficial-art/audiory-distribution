@@ -856,30 +856,31 @@ function renderAnalyticsView() {
     `;
 }
 
-// Call this function right after mounting the DOM view
 async function initAnalyticsDashboard(period = 'lastThirtyDays') {
+    const kpiContainer = document.getElementById('analytics-kpi-container');
+    const tbody = document.getElementById('analytics-tracks-tbody');
+
     try {
         currentAnalyticsPeriod = period;
 
-        // Dynamically bind select change event and sync selection value
         const periodSelect = document.getElementById('analytics-period-select');
         if (periodSelect) {
             periodSelect.value = period;
             if (!periodSelect.dataset.listenerAttached) {
                 periodSelect.dataset.listenerAttached = "true";
-                periodSelect.addEventListener('change', (e) => {
-                    initAnalyticsDashboard(e.target.value);
-                });
+                periodSelect.addEventListener('change', (e) => initAnalyticsDashboard(e.target.value));
             }
         }
 
         const currentUid = window.currentUser ? (window.currentUser.uid || window.currentUser.id) : null;
-        if (!currentUid) return;
+        if (!currentUid) {
+            if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-500">User not authenticated.</td></tr>`;
+            return;
+        }
 
         const token = await window.currentUser.getIdToken();
         const workerUrl = window.WORKER_BASE_URL || WORKER_BASE_URL;
 
-        // Parallel fetch for Overview & Track lists
         const [overviewRes, tracksRes] = await Promise.all([
             fetch(`${workerUrl}/api/analytics/overview?period=${period}`, {
                 headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
@@ -891,18 +892,22 @@ async function initAnalyticsDashboard(period = 'lastThirtyDays') {
 
         if (overviewRes.ok) {
             const overviewJson = await overviewRes.json();
-            const overviewData = overviewJson.data || overviewJson;
-            renderKPIs(overviewData);
-            renderChart(overviewData.chart || []);
+            renderKPIs(overviewJson.data || overviewJson);
+            renderChart((overviewJson.data || overviewJson).chart || []);
+        } else {
+            // Render zeroed KPIs if overview request fails
+            renderKPIs({ totalStreams: 0, totalSaves: 0, totalSkips: 0, engagement: 0 });
         }
 
         if (tracksRes.ok) {
             const tracksJson = await tracksRes.json();
-            const trackList = tracksJson.data || [];
-            renderTracksTable(trackList);
+            renderTracksTable(tracksJson.data || []);
+        } else {
+            if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-rose-400">Unable to load TooLost track data.</td></tr>`;
         }
     } catch (err) {
         console.error("Analytics fetch error:", err);
+        if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-rose-400">Connection error to worker API.</td></tr>`;
     }
 }
 
