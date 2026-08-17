@@ -895,42 +895,8 @@ function renderEarningsView() {
 
 let pieChartInstance = null;
 
-// Notification UI Banner
-function showNotification(message, type = 'error') {
-    let container = document.getElementById('toast-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'toast-container';
-        container.className = 'fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none';
-        document.body.appendChild(container);
-    }
-
-    const toast = document.createElement('div');
-    const isError = type === 'error';
-    toast.className = `pointer-events-auto flex items-center gap-3 p-4 rounded-xl border text-xs font-medium shadow-xl transition-all duration-300 opacity-0 translate-y-2 ${
-        isError 
-            ? 'bg-red-950/90 border-red-500/30 text-red-200' 
-            : 'bg-emerald-950/90 border-emerald-500/30 text-emerald-200'
-    }`;
-    
-    toast.innerHTML = `
-        <i class="fa-solid ${isError ? 'fa-circle-exclamation text-red-400' : 'fa-circle-check text-emerald-400'} text-base shrink-0"></i>
-        <span class="flex-1">${message}</span>
-        <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-    `;
-
-    container.appendChild(toast);
-    requestAnimationFrame(() => toast.classList.remove('opacity-0', 'translate-y-2'));
-
-    setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-2');
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
-}
-
 // Helper: Safely retrieve active Firebase Token or stored token
 async function getAuthToken() {
-    // 1. Try active Firebase user instance first
     const activeUser = window.currentUser || (window.auth && window.auth.currentUser);
     if (activeUser && typeof activeUser.getIdToken === 'function') {
         try {
@@ -939,7 +905,6 @@ async function getAuthToken() {
             console.warn("Failed to get fresh Firebase token:", err);
         }
     }
-    // 2. Fall back to cached token in localStorage
     return localStorage.getItem('auth_token') || '';
 }
 
@@ -1009,18 +974,17 @@ function renderPayoutFields() {
     }
 }
 
-// Helper to retrieve absolute worker base URL
 function getWorkerBaseUrl() {
     return (window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev').replace(/\/$/, "");
 }
 
-// 1. Submit Request via API Endpoint
+// 1. Submit Withdrawal Request
 async function submitWithdrawal(e) {
     e.preventDefault();
 
     const token = await getAuthToken();
     if (!token) {
-        showNotification("Authentication token missing. Please log in again.", "error");
+        if (typeof showToast === 'function') showToast("Authentication token missing.", true);
         return;
     }
 
@@ -1028,7 +992,7 @@ async function submitWithdrawal(e) {
     const userBal = window.currentBalance || 0;
 
     if (amount > userBal) {
-        showNotification("Requested amount exceeds current available balance.", "error");
+        if (typeof showToast === 'function') showToast("Requested amount exceeds current available balance.", true);
         return;
     }
 
@@ -1066,14 +1030,14 @@ async function submitWithdrawal(e) {
 
         closeWithdrawModal();
         await initEarningsDashboard();
-        showNotification("Withdrawal request submitted successfully!", "success");
+        if (typeof showToast === 'function') showToast("Withdrawal request submitted successfully!", false);
 
     } catch (err) {
-        showNotification(err.message, "error");
+        if (typeof showToast === 'function') showToast(err.message, true);
     }
 }
 
-// 2. Fetch Withdrawal History from Cloudflare KV
+// 2. Fetch User Withdrawals
 async function fetchUserWithdrawals() {
     try {
         const token = await getAuthToken();
@@ -1089,13 +1053,12 @@ async function fetchUserWithdrawals() {
     }
 }
 
-// 3. Fetch Sales Overview & DSP Channels Data from New Routes
+// 3. Fetch Live Too Lost Sales Data Endpoint
 async function fetchTooLostSalesData() {
     try {
         const token = await getAuthToken();
-        if (!token) return { overview: null, channels: [] };
+        if (!token) return { overview: null, platformBreakdown: [] };
 
-        // Fetch Overview and Channel breakdowns concurrently
         const [overviewRes, channelsRes] = await Promise.all([
             fetch(`${getWorkerBaseUrl()}/api/toolost/sales/overview`, {
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
@@ -1106,12 +1069,12 @@ async function fetchTooLostSalesData() {
         ]);
 
         const overview = overviewRes.ok ? await overviewRes.json() : null;
-        const channelsData = channelsRes.ok ? await channelsRes.json() : [];
+        const rawChannels = channelsRes.ok ? await channelsRes.json() : [];
 
-        // Format channels array if wrapped inside an object property (e.g. { data: [...] })
-        const platformBreakdown = Array.isArray(channelsData) 
-            ? channelsData 
-            : (channelsData.data || channelsData.channels || []);
+        // Normalize array structure
+        const platformBreakdown = Array.isArray(rawChannels) 
+            ? rawChannels 
+            : (rawChannels.data || rawChannels.channels || []);
 
         return { overview, platformBreakdown };
     } catch (err) {
@@ -1122,7 +1085,7 @@ async function fetchTooLostSalesData() {
 
 // Main Dashboard Initializer
 async function initEarningsDashboard() {
-    // Render Requests Table from KV
+    // 1. Withdrawal Requests
     const requests = await fetchUserWithdrawals();
     const tbody = document.getElementById('earnings-withdrawals-tbody');
     if (tbody) {
@@ -1148,45 +1111,51 @@ async function initEarningsDashboard() {
         }
     }
 
-    // Fetch Live Sales Data
+    // 2. Fetch Live Sales Data
     const { overview, platformBreakdown } = await fetchTooLostSalesData();
 
-    // Populate DSP Table
+    // 3. Populate DSP Table Dynamically
     const dspTbody = document.getElementById('earnings-dsp-tbody');
     if (dspTbody) {
         if (platformBreakdown.length === 0) {
-            dspTbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-gray-500">No DSP revenue data available.</td></tr>`;
+            dspTbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-gray-500">No store revenue data available.</td></tr>`;
         } else {
-            dspTbody.innerHTML = platformBreakdown.map(p => `
-                <tr class="border-b border-brand-border/50 hover:bg-white/5">
-                    <td class="py-3 px-2 font-semibold text-white">${p.dsp || p.channel || p.name || 'Store'}</td>
-                    <td class="py-3 px-2 text-right font-mono text-gray-300">${Number(p.streams || p.quantity || 0).toLocaleString()}</td>
-                    <td class="py-3 px-2 text-right font-mono font-bold text-emerald-400">$${Number(p.revenue || p.amount || 0).toFixed(2)}</td>
-                </tr>
-            `).join('');
+            dspTbody.innerHTML = platformBreakdown.map(p => {
+                const name = p.name || p.dsp || p.channel || 'Store';
+                const streams = Number(p.streams || p.quantity || p.count || 0);
+                const revenue = Number(p.total || p.revenue || p.amount || 0);
+
+                return `
+                    <tr class="border-b border-brand-border/50 hover:bg-white/5">
+                        <td class="py-3 px-2 font-semibold text-white">${name}</td>
+                        <td class="py-3 px-2 text-right font-mono text-gray-300">${streams.toLocaleString()}</td>
+                        <td class="py-3 px-2 text-right font-mono font-bold text-emerald-400">$${revenue.toFixed(2)}</td>
+                    </tr>
+                `;
+            }).join('');
         }
     }
 
-    // Compute Total Balance
-    const totalRev = overview?.totalBalance ?? overview?.total_earnings ?? 
-        platformBreakdown.reduce((acc, curr) => acc + (Number(curr.revenue || curr.amount) || 0), 0);
-        
-    window.currentBalance = Number(totalRev) || 0;
+    // 4. Compute Total Available Balance
+    const calculatedTotal = platformBreakdown.reduce((acc, curr) => acc + Number(curr.total || curr.revenue || curr.amount || 0), 0);
+    const finalBalance = Number(overview?.totalBalance ?? overview?.total_earnings ?? overview?.total ?? calculatedTotal);
+
+    window.currentBalance = finalBalance;
 
     const balEl = document.getElementById('earnings-total-balance');
     if (balEl) balEl.innerText = `$${window.currentBalance.toFixed(2)}`;
 
-    // Render Pie Chart
+    // 5. Render Pie Chart Dynamically
     const canvas = document.getElementById('platformEarningsPieChart');
     const chartContainer = canvas ? canvas.parentElement : null;
 
     if (canvas) {
-        const hasRevenueData = platformBreakdown.length > 0 && platformBreakdown.some(p => Number(p.revenue || p.amount) > 0);
+        const hasData = platformBreakdown.length > 0 && platformBreakdown.some(p => Number(p.total || p.revenue || p.amount || 0) > 0);
 
-        if (hasRevenueData) {
+        if (hasData) {
             const existingMsg = chartContainer?.querySelector('.empty-chart-msg');
             if (existingMsg) existingMsg.remove();
-            
+
             canvas.style.display = 'block';
             if (pieChartInstance) pieChartInstance.destroy();
 
@@ -1194,10 +1163,10 @@ async function initEarningsDashboard() {
             pieChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: platformBreakdown.map(p => p.dsp || p.channel || p.name),
+                    labels: platformBreakdown.map(p => p.name || p.dsp || p.channel),
                     datasets: [{
-                        data: platformBreakdown.map(p => p.revenue || p.amount),
-                        backgroundColor: ['#1db954', '#fc3c44', '#ff0000', '#00a8e1', '#a238ff', '#6b7280'],
+                        data: platformBreakdown.map(p => Number(p.total || p.revenue || p.amount || 0)),
+                        backgroundColor: ['#1db954', '#fc3c44', '#ff0000', '#00a8e1', '#a238ff', '#6b7280', '#e1306c', '#0084ff'],
                         borderWidth: 0
                     }]
                 },
