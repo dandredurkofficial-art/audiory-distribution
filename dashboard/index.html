@@ -1085,13 +1085,27 @@ async function fetchTooLostSalesData() {
 
 // Main Dashboard Initializer
 async function initEarningsDashboard() {
-    // 1. Withdrawal Requests
+    // -------------------------------------------------------------
+    // 1. Fetch User Withdrawal History & Calculate Totals
+    // -------------------------------------------------------------
     const requests = await fetchUserWithdrawals();
     const tbody = document.getElementById('earnings-withdrawals-tbody');
-    if (tbody) {
-        if (requests.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-gray-500">No withdrawal records found.</td></tr>`;
-        } else {
+    
+    let pendingSum = 0;
+    let paidSum = 0;
+
+    if (Array.isArray(requests) && requests.length > 0) {
+        requests.forEach(r => {
+            const amt = Number(r.amount) || 0;
+            const status = (r.status || '').toLowerCase();
+            if (status === 'paid') {
+                paidSum += amt;
+            } else if (status === 'pending') {
+                pendingSum += amt;
+            }
+        });
+
+        if (tbody) {
             tbody.innerHTML = requests.map(r => {
                 const isPaid = (r.status || '').toLowerCase() === 'paid';
                 const statusBadge = isPaid
@@ -1109,15 +1123,27 @@ async function initEarningsDashboard() {
                 `;
             }).join('');
         }
+    } else if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-gray-500">No withdrawal records found.</td></tr>`;
     }
 
-    // 2. Fetch Live Sales Data
+    // Update Pending Payouts & Lifetime Paid KPI elements directly
+    const pendingEl = document.getElementById('earnings-pending-amount');
+    const paidEl = document.getElementById('earnings-lifetime-paid');
+    if (pendingEl) pendingEl.innerText = `$${pendingSum.toFixed(2)}`;
+    if (paidEl) paidEl.innerText = `$${paidSum.toFixed(2)}`;
+
+    // -------------------------------------------------------------
+    // 2. Fetch Live Too Lost Sales Data
+    // -------------------------------------------------------------
     const { overview, platformBreakdown } = await fetchTooLostSalesData();
 
-    // 3. Populate DSP Table Dynamically
+    // -------------------------------------------------------------
+    // 3. Render DSP Breakdown Table
+    // -------------------------------------------------------------
     const dspTbody = document.getElementById('earnings-dsp-tbody');
     if (dspTbody) {
-        if (platformBreakdown.length === 0) {
+        if (!platformBreakdown || platformBreakdown.length === 0) {
             dspTbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-gray-500">No store revenue data available.</td></tr>`;
         } else {
             dspTbody.innerHTML = platformBreakdown.map(p => {
@@ -1136,16 +1162,22 @@ async function initEarningsDashboard() {
         }
     }
 
-    // 4. Compute Total Available Balance
-    const calculatedTotal = platformBreakdown.reduce((acc, curr) => acc + Number(curr.total || curr.revenue || curr.amount || 0), 0);
-    const finalBalance = Number(overview?.totalBalance ?? overview?.total_earnings ?? overview?.total ?? calculatedTotal);
+    // -------------------------------------------------------------
+    // 4. Compute Available Total Balance
+    // -------------------------------------------------------------
+    const grossRevenue = overview?.totalBalance ?? overview?.total_earnings ?? overview?.total ?? 
+        platformBreakdown.reduce((acc, curr) => acc + Number(curr.total || curr.revenue || curr.amount || 0), 0);
 
-    window.currentBalance = finalBalance;
+    // Available Balance = Gross Revenue minus Pending & Paid withdrawals
+    const availableBalance = Math.max(0, Number(grossRevenue) - (pendingSum + paidSum));
+    window.currentBalance = availableBalance;
 
-    const balEl = document.getElementById('earnings-total-balance');
-    if (balEl) balEl.innerText = `$${window.currentBalance.toFixed(2)}`;
+    const totalBalEl = document.getElementById('earnings-total-balance');
+    if (totalBalEl) totalBalEl.innerText = `$${window.currentBalance.toFixed(2)}`;
 
-    // 5. Render Pie Chart Dynamically
+    // -------------------------------------------------------------
+    // 5. Render Platform Revenue Chart
+    // -------------------------------------------------------------
     const canvas = document.getElementById('platformEarningsPieChart');
     const chartContainer = canvas ? canvas.parentElement : null;
 
