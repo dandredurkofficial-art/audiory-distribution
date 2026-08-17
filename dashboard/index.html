@@ -1074,25 +1074,52 @@ async function fetchUserWithdrawals() {
     }
 }
 
-// 3. Fetch Analytics Data
+// 3. Fetch Too Lost Sales Data
 async function fetchTooLostEarnings() {
     try {
         const token = getAuthToken();
-        if (!token) return { totalBalance: 0, platformBreakdown: [] };
+        if (!token) {
+            return {
+                totalBalance: 0,
+                platformBreakdown: []
+            };
+        }
 
-        const response = await fetch(`${getWorkerBaseUrl()}/api/toolost/earnings`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+        const response = await fetch(
+            `${getWorkerBaseUrl()}/api/toolost/sales/overview`,
+            {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             }
-        });
-        if (!response.ok) throw new Error('Failed to fetch analytics');
-        return await response.json();
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error('Too Lost Sales Overview Error:', data);
+            throw new Error(
+                data?.message ||
+                data?.error ||
+                `Too Lost API returned ${response.status}`
+            );
+        }
+
+        console.log('Too Lost Sales Overview:', data);
+
+        return data;
+
     } catch (err) {
-        return { totalBalance: 0, platformBreakdown: [] };
+        console.error('Failed to fetch Too Lost sales:', err);
+
+        return {
+            totalBalance: 0,
+            platformBreakdown: []
+        };
     }
 }
-
 // Main Dashboard Initializer
 async function initEarningsDashboard() {
     // Render Requests Table from KV
