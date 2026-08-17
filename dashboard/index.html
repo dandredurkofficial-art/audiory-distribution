@@ -928,6 +928,21 @@ function showNotification(message, type = 'error') {
     }, 4000);
 }
 
+// Helper: Safely retrieve active Firebase Token or stored token
+async function getAuthToken() {
+    // 1. Try active Firebase user instance first
+    const activeUser = window.currentUser || (window.auth && window.auth.currentUser);
+    if (activeUser && typeof activeUser.getIdToken === 'function') {
+        try {
+            return await activeUser.getIdToken();
+        } catch (err) {
+            console.warn("Failed to get fresh Firebase token:", err);
+        }
+    }
+    // 2. Fall back to cached token in localStorage
+    return localStorage.getItem('auth_token') || '';
+}
+
 // Modal Handlers
 function handleWithdrawClick() {
     const modal = document.getElementById('withdrawModal');
@@ -994,16 +1009,16 @@ function renderPayoutFields() {
     }
 }
 
-// Helper to safely retrieve token
-function getAuthToken() {
-    return window.currentUser?.token || localStorage.getItem('auth_token') || '';
+// Helper to retrieve absolute worker base URL
+function getWorkerBaseUrl() {
+    return (window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev').replace(/\/$/, "");
 }
 
 // 1. Submit Request via API Endpoint
 async function submitWithdrawal(e) {
     e.preventDefault();
 
-    const token = getAuthToken();
+    const token = await getAuthToken();
     if (!token) {
         showNotification("Authentication token missing. Please log in again.", "error");
         return;
@@ -1061,7 +1076,7 @@ async function submitWithdrawal(e) {
 // 2. Fetch Withdrawal History from Cloudflare KV
 async function fetchUserWithdrawals() {
     try {
-        const token = getAuthToken();
+        const token = await getAuthToken();
         if (!token) return [];
 
         const response = await fetch(`${getWorkerBaseUrl()}/api/withdrawals`, {
@@ -1074,52 +1089,37 @@ async function fetchUserWithdrawals() {
     }
 }
 
-// 3. Fetch Too Lost Sales Data
-async function fetchTooLostEarnings() {
+// 3. Fetch Sales Overview & DSP Channels Data from New Routes
+async function fetchTooLostSalesData() {
     try {
-        const token = getAuthToken();
-        if (!token) {
-            return {
-                totalBalance: 0,
-                platformBreakdown: []
-            };
-        }
+        const token = await getAuthToken();
+        if (!token) return { overview: null, channels: [] };
 
-        const response = await fetch(
-            `${getWorkerBaseUrl()}/api/toolost/sales/overview`,
-            {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
+        // Fetch Overview and Channel breakdowns concurrently
+        const [overviewRes, channelsRes] = await Promise.all([
+            fetch(`${getWorkerBaseUrl()}/api/toolost/sales/overview`, {
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            }),
+            fetch(`${getWorkerBaseUrl()}/api/toolost/sales/channels`, {
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            })
+        ]);
 
-        const data = await response.json();
+        const overview = overviewRes.ok ? await overviewRes.json() : null;
+        const channelsData = channelsRes.ok ? await channelsRes.json() : [];
 
-        if (!response.ok) {
-            console.error('Too Lost Sales Overview Error:', data);
-            throw new Error(
-                data?.message ||
-                data?.error ||
-                `Too Lost API returned ${response.status}`
-            );
-        }
+        // Format channels array if wrapped inside an object property (e.g. { data: [...] })
+        const platformBreakdown = Array.isArray(channelsData) 
+            ? channelsData 
+            : (channelsData.data || channelsData.channels || []);
 
-        console.log('Too Lost Sales Overview:', data);
-
-        return data;
-
+        return { overview, platformBreakdown };
     } catch (err) {
-        console.error('Failed to fetch Too Lost sales:', err);
-
-        return {
-            totalBalance: 0,
-            platformBreakdown: []
-        };
+        console.error("Error fetching Too Lost sales data:", err);
+        return { overview: null, platformBreakdown: [] };
     }
 }
+
 // Main Dashboard Initializer
 async function initEarningsDashboard() {
     // Render Requests Table from KV
@@ -1148,40 +1148,40 @@ async function initEarningsDashboard() {
         }
     }
 
-    // Fetch Live Analytics Data
-    const apiData = await fetchTooLostEarnings();
-    const platformData = apiData.platformBreakdown || [];
+    // Fetch Live Sales Data
+    const { overview, platformBreakdown } = await fetchTooLostSalesData();
 
+    // Populate DSP Table
     const dspTbody = document.getElementById('earnings-dsp-tbody');
     if (dspTbody) {
-        if (platformData.length === 0) {
+        if (platformBreakdown.length === 0) {
             dspTbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-gray-500">No DSP revenue data available.</td></tr>`;
         } else {
-            dspTbody.innerHTML = platformData.map(p => `
+            dspTbody.innerHTML = platformBreakdown.map(p => `
                 <tr class="border-b border-brand-border/50 hover:bg-white/5">
-                    <td class="py-3 px-2 font-semibold text-white">${p.dsp}</td>
-                    <td class="py-3 px-2 text-right font-mono text-gray-300">${Number(p.streams || 0).toLocaleString()}</td>
-                    <td class="py-3 px-2 text-right font-mono font-bold text-emerald-400">$${Number(p.revenue || 0).toFixed(2)}</td>
+                    <td class="py-3 px-2 font-semibold text-white">${p.dsp || p.channel || p.name || 'Store'}</td>
+                    <td class="py-3 px-2 text-right font-mono text-gray-300">${Number(p.streams || p.quantity || 0).toLocaleString()}</td>
+                    <td class="py-3 px-2 text-right font-mono font-bold text-emerald-400">$${Number(p.revenue || p.amount || 0).toFixed(2)}</td>
                 </tr>
             `).join('');
         }
     }
 
-    const totalRev = apiData.totalBalance !== undefined 
-        ? apiData.totalBalance 
-        : platformData.reduce((acc, curr) => acc + (Number(curr.revenue) || 0), 0);
+    // Compute Total Balance
+    const totalRev = overview?.totalBalance ?? overview?.total_earnings ?? 
+        platformBreakdown.reduce((acc, curr) => acc + (Number(curr.revenue || curr.amount) || 0), 0);
         
-    window.currentBalance = totalRev;
+    window.currentBalance = Number(totalRev) || 0;
 
     const balEl = document.getElementById('earnings-total-balance');
-    if (balEl) balEl.innerText = `$${totalRev.toFixed(2)}`;
+    if (balEl) balEl.innerText = `$${window.currentBalance.toFixed(2)}`;
 
     // Render Pie Chart
     const canvas = document.getElementById('platformEarningsPieChart');
     const chartContainer = canvas ? canvas.parentElement : null;
 
     if (canvas) {
-        const hasRevenueData = platformData.length > 0 && platformData.some(p => Number(p.revenue) > 0);
+        const hasRevenueData = platformBreakdown.length > 0 && platformBreakdown.some(p => Number(p.revenue || p.amount) > 0);
 
         if (hasRevenueData) {
             const existingMsg = chartContainer?.querySelector('.empty-chart-msg');
@@ -1194,9 +1194,9 @@ async function initEarningsDashboard() {
             pieChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: platformData.map(p => p.dsp),
+                    labels: platformBreakdown.map(p => p.dsp || p.channel || p.name),
                     datasets: [{
-                        data: platformData.map(p => p.revenue),
+                        data: platformBreakdown.map(p => p.revenue || p.amount),
                         backgroundColor: ['#1db954', '#fc3c44', '#ff0000', '#00a8e1', '#a238ff', '#6b7280'],
                         borderWidth: 0
                     }]
