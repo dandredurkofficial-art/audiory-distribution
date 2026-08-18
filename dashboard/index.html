@@ -1783,13 +1783,11 @@ function renderTracksTable(tracks) {
 function renderSettingsView() {
     return `
         <div class="max-w-7xl mx-auto space-y-8">
-            <!-- Page Header -->
             <div class="pb-4 border-b border-brand-border/60">
                 <h1 class="text-2xl font-bold text-white tracking-tight">Settings & Account Management</h1>
                 <p class="text-xs text-gray-400 mt-1">Manage profile information, team member roles, and tax documentation.</p>
             </div>
 
-            <!-- 1. MY PROFILE SECTION -->
             <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-6">
                 <div class="flex items-center gap-3 pb-3 border-b border-brand-border/40">
                     <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
@@ -1821,7 +1819,6 @@ function renderSettingsView() {
                 </form>
             </div>
 
-            <!-- 2. ACCOUNT MEMBERS SECTION -->
             <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-6">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-brand-border/40">
                     <div class="flex items-center gap-3">
@@ -1855,7 +1852,6 @@ function renderSettingsView() {
                 </div>
             </div>
 
-            <!-- 3. TAX DETAILS SECTION -->
             <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-6">
                 <div class="flex items-center gap-3 pb-3 border-b border-brand-border/40">
                     <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
@@ -1908,23 +1904,19 @@ function renderSettingsView() {
             </div>
         </div>
 
-        <!-- INVITE USER MODAL (Audiory Dark Theme styled after provided layout) -->
         <div id="inviteUserModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
             <div class="bg-brand-card border border-brand-border w-full max-w-lg rounded-2xl p-6 space-y-5 shadow-2xl">
-                <!-- Modal Header -->
                 <div class="flex items-center justify-between border-b border-brand-border/60 pb-3">
                     <h3 class="text-base font-bold text-white">Invite User</h3>
-                    <button onclick="closeInviteUserModal()" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>
+                    <button type="button" onclick="closeInviteUserModal()" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>
                 </div>
 
                 <form id="inviteUserForm" onsubmit="submitUserInvite(event)" class="space-y-5">
-                    <!-- User Email -->
                     <div>
                         <label class="block text-xs font-semibold text-white mb-1.5">User Email</label>
                         <input type="email" id="invite-user-email" required placeholder="colleague@domain.com" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-indigo-500 transition" />
                     </div>
 
-                    <!-- Roles Selection Section -->
                     <div class="space-y-4">
                         <div>
                             <label class="block text-xs font-semibold text-white">Roles</label>
@@ -1932,17 +1924,15 @@ function renderSettingsView() {
                         </div>
 
                         <div class="space-y-4 max-h-72 overflow-y-auto pr-1">
-                            <!-- Role: Content -->
                             <div class="space-y-1">
                                 <label class="flex items-center gap-3 cursor-pointer select-none">
                                     <input type="checkbox" id="role-content" class="sr-only peer" />
                                     <div class="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-500 relative"></div>
                                     <span class="text-xs font-bold text-white">Content</span>
                                 </label>
-                                <p class="text-[11px] text-gray-400 pl-12 leading-relaxed">Allow users to view/create/manage releases on the account. It additionally has access to the Rights and Marketing sections of the platform.</p>
+                                <p class="text-[11px] text-gray-400 pl-12 leading-relaxed">Allow users to view/create/manage releases on the account.</p>
                             </div>
 
-                            <!-- Role: Royalties -->
                             <div class="space-y-1">
                                 <label class="flex items-center gap-3 cursor-pointer select-none">
                                     <input type="checkbox" id="role-royalties" class="sr-only peer" />
@@ -1952,7 +1942,6 @@ function renderSettingsView() {
                                 <p class="text-[11px] text-gray-400 pl-12 leading-relaxed">Allow users to view/manage royalties for the account.</p>
                             </div>
 
-                            <!-- Role: Analytics -->
                             <div class="space-y-1">
                                 <label class="flex items-center gap-3 cursor-pointer select-none">
                                     <input type="checkbox" id="role-analytics" class="sr-only peer" />
@@ -1962,29 +1951,26 @@ function renderSettingsView() {
                                 <p class="text-[11px] text-gray-400 pl-12 leading-relaxed">Allow users to view the analytics of all releases on the account.</p>
                             </div>
 
-                            <!-- Role: SplitShare -->
                             <div class="space-y-1">
                                 <label class="flex items-center gap-3 cursor-pointer select-none">
                                     <input type="checkbox" id="role-splitshare" class="sr-only peer" />
                                     <div class="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-500 relative"></div>
                                     <span class="text-xs font-bold text-white">SplitShare</span>
                                 </label>
-                                <p class="text-[11px] text-gray-400 pl-12 leading-relaxed">Allow users to set splits, invite payees, and share revenue with payee accounts.</p>
+                                <p class="text-[11px] text-gray-400 pl-12 leading-relaxed">Allow users to set splits and invite payees.</p>
                             </div>
 
-                            <!-- Role: Admin -->
                             <div class="space-y-1">
                                 <label class="flex items-center gap-3 cursor-pointer select-none">
                                     <input type="checkbox" id="role-admin" class="sr-only peer" />
                                     <div class="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-500 relative"></div>
                                     <span class="text-xs font-bold text-white">Admin</span>
                                 </label>
-                                <p class="text-[11px] text-gray-400 pl-12 leading-relaxed">Allow full access to all account capabilities. It also allows management of the account's non-Owner user profiles.</p>
+                                <p class="text-[11px] text-gray-400 pl-12 leading-relaxed">Allow full access to all account capabilities.</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Actions -->
                     <div class="pt-3 border-t border-brand-border/60 flex items-center justify-end gap-3">
                         <button type="button" onclick="closeInviteUserModal()" class="px-4 py-2 rounded-xl bg-white/5 text-gray-300 text-xs font-semibold hover:bg-white/10 transition">Cancel</button>
                         <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs transition shadow-lg shadow-indigo-500/10">Send Invite</button>
@@ -1996,36 +1982,64 @@ function renderSettingsView() {
 }
 
 // -------------------------------------------------------------
-// SETTINGS LOGIC & EVENT HANDLERS
+// HELPER UTILITIES
 // -------------------------------------------------------------
+async function getAuthToken() {
+    if (window.firebase && firebase.auth().currentUser) {
+        return await firebase.auth().currentUser.getIdToken();
+    }
+    return window.authToken || '';
+}
 
+function getWorkerBaseUrl() {
+    return window.WORKER_BASE_URL || '';
+}
+
+// -------------------------------------------------------------
+// INITIALIZATION
+// -------------------------------------------------------------
 async function initSettingsView() {
-    const user = window.currentUser || (window.auth && window.auth.currentUser);
+    const user = window.currentUser || (window.firebase && firebase.auth().currentUser);
     
-    // Populate My Profile fields
+    // Populate Profile Fields
     const nameInput = document.getElementById('settings-user-name');
     const emailInput = document.getElementById('settings-user-email');
 
     if (nameInput) nameInput.value = user?.displayName || user?.email?.split('@')[0] || '';
     if (emailInput) emailInput.value = user?.email || '';
 
-    // Load initial members and tax info
+    // Load initial members & tax info
     await Promise.all([
         loadAccountMembers(),
         loadTaxDetails()
     ]);
 }
 
-// Save Profile Handler
+// Handler for Profile Save
 async function handleSaveProfile(e) {
     e.preventDefault();
-    const newName = document.getElementById('settings-user-name').value;
+    const nameInput = document.getElementById('settings-user-name');
+    if (!nameInput) return;
+    const newName = nameInput.value;
     
     try {
-        const user = window.currentUser || (window.auth && window.auth.currentUser);
+        const user = window.currentUser || (window.firebase && firebase.auth().currentUser);
         if (user && typeof user.updateProfile === 'function') {
             await user.updateProfile({ displayName: newName });
         }
+
+        const token = await getAuthToken();
+        if (token) {
+            await fetch(`${getWorkerBaseUrl()}/api/profile`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ displayName: newName })
+            });
+        }
+
         if (typeof showToast === 'function') showToast("Profile name updated successfully!", false);
     } catch (err) {
         if (typeof showToast === 'function') showToast(err.message || "Failed to update profile name.", true);
@@ -2046,14 +2060,16 @@ function closeInviteUserModal() {
 // Submit User Invite Handler
 async function submitUserInvite(e) {
     e.preventDefault();
-    const email = document.getElementById('invite-user-email').value;
+    const emailInput = document.getElementById('invite-user-email');
+    if (!emailInput) return;
+    const email = emailInput.value;
     
     const selectedRoles = [];
-    if (document.getElementById('role-content').checked) selectedRoles.push('Content');
-    if (document.getElementById('role-royalties').checked) selectedRoles.push('Royalties');
-    if (document.getElementById('role-analytics').checked) selectedRoles.push('Analytics');
-    if (document.getElementById('role-splitshare').checked) selectedRoles.push('SplitShare');
-    if (document.getElementById('role-admin').checked) selectedRoles.push('Admin');
+    if (document.getElementById('role-content')?.checked) selectedRoles.push('Content');
+    if (document.getElementById('role-royalties')?.checked) selectedRoles.push('Royalties');
+    if (document.getElementById('role-analytics')?.checked) selectedRoles.push('Analytics');
+    if (document.getElementById('role-splitshare')?.checked) selectedRoles.push('SplitShare');
+    if (document.getElementById('role-admin')?.checked) selectedRoles.push('Admin');
 
     if (selectedRoles.length === 0) {
         if (typeof showToast === 'function') showToast("Please select at least one role.", true);
@@ -2081,7 +2097,7 @@ async function submitUserInvite(e) {
     }
 }
 
-// Fetch Account Members
+// Load Account Members
 async function loadAccountMembers() {
     const tbody = document.getElementById('settings-members-tbody');
     if (!tbody) return;
@@ -2113,7 +2129,7 @@ async function loadAccountMembers() {
                     </span>
                 </td>
                 <td class="py-3 px-2 text-right">
-                    <button onclick="removeMember('${m.id}')" class="text-gray-500 hover:text-red-400 transition"><i class="fa-solid fa-trash text-xs"></i></button>
+                    <button type="button" onclick="removeMember('${m.id}')" class="text-gray-500 hover:text-red-400 transition"><i class="fa-solid fa-trash text-xs"></i></button>
                 </td>
             </tr>
         `).join('');
@@ -2122,16 +2138,36 @@ async function loadAccountMembers() {
     }
 }
 
-// Tax Details Save Handler
+// Revoke Member Handler
+async function removeMember(memberId) {
+    if (!confirm("Are you sure you want to revoke access for this team member?")) return;
+
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${getWorkerBaseUrl()}/api/members/${memberId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error("Failed to remove team member.");
+
+        await loadAccountMembers();
+        if (typeof showToast === 'function') showToast("Member access revoked.", false);
+    } catch (err) {
+        if (typeof showToast === 'function') showToast(err.message, true);
+    }
+}
+
+// Save Tax Details Handler
 async function handleSaveTaxDetails(e) {
     e.preventDefault();
     
     const payload = {
-        legalName: document.getElementById('tax-legal-name').value,
-        classification: document.getElementById('tax-classification').value,
-        country: document.getElementById('tax-country').value,
-        tin: document.getElementById('tax-tin').value,
-        address: document.getElementById('tax-address').value
+        legalName: document.getElementById('tax-legal-name')?.value || '',
+        classification: document.getElementById('tax-classification')?.value || 'individual',
+        country: document.getElementById('tax-country')?.value || '',
+        tin: document.getElementById('tax-tin')?.value || '',
+        address: document.getElementById('tax-address')?.value || ''
     };
 
     try {
@@ -2171,18 +2207,20 @@ async function loadTaxDetails() {
             if (document.getElementById('tax-address')) document.getElementById('tax-address').value = data.address || '';
         }
     } catch {
-        // Silent catch for missing tax records
+        // Silent catch for initial empty state
     }
 }
 
-// Global Exports
+// GLOBAL EXPORTS
 window.renderSettingsView = renderSettingsView;
 window.initSettingsView = initSettingsView;
+window.initSettingsPage = initSettingsView; // Alias for View Router
 window.handleSaveProfile = handleSaveProfile;
 window.openInviteUserModal = openInviteUserModal;
 window.closeInviteUserModal = closeInviteUserModal;
 window.submitUserInvite = submitUserInvite;
 window.handleSaveTaxDetails = handleSaveTaxDetails;
+window.removeMember = removeMember;
 
         // Render Create Release Form Container
         window.renderCreateReleaseView = function() {
