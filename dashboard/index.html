@@ -516,7 +516,14 @@ window.switchView = function(viewName) {
         }
     }
 
-    if (viewName === 'settings') viewport.innerHTML = renderSettingsView();
+    if (viewName === 'settings') {
+        viewport.innerHTML = renderSettingsView();
+        if (typeof window.initSettingsPage === 'function') {
+            window.initSettingsPage();
+        } else {
+            console.error("window.initSettingsPage is not defined.");
+        }
+    }
 
     const sidebar = document.getElementById('sidebarNav');
     if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
