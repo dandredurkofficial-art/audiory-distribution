@@ -1982,19 +1982,22 @@ function renderSettingsView() {
 }
 
 // -------------------------------------------------------------
-// HELPER UTILITIES
+// HELPER UTILITIES (Safe Global Guards)
 // -------------------------------------------------------------
-async function getAuthToken() {
-    if (window.firebase && firebase.auth().currentUser) {
-        return await firebase.auth().currentUser.getIdToken();
-    }
-    return window.authToken || '';
+if (typeof window.getAuthToken !== 'function') {
+    window.getAuthToken = async function() {
+        if (window.firebase && firebase.auth().currentUser) {
+            return await firebase.auth().currentUser.getIdToken();
+        }
+        return window.authToken || '';
+    };
 }
 
-function getWorkerBaseUrl() {
-    return window.WORKER_BASE_URL || '';
+if (typeof window.getWorkerBaseUrl !== 'function') {
+    window.getWorkerBaseUrl = function() {
+        return window.WORKER_BASE_URL || '';
+    };
 }
-
 // -------------------------------------------------------------
 // INITIALIZATION
 // -------------------------------------------------------------
