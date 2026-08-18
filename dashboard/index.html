@@ -1773,16 +1773,409 @@ function renderTracksTable(tracks) {
     `).join('');
 }
 
-        function renderSettingsView() {
-            return `
-                <div class="max-w-7xl mx-auto space-y-6">
-                    <h1 class="text-2xl font-bold text-white">Settings & Payouts</h1>
-                    <div class="p-8 bg-brand-card border border-brand-border rounded-2xl text-center text-gray-400 text-sm">
-                        Manage account configuration, team permissions, and payout withdrawal details.
+function renderSettingsView() {
+    return `
+        <div class="max-w-7xl mx-auto space-y-8">
+            <!-- Page Header -->
+            <div class="pb-4 border-b border-brand-border/60">
+                <h1 class="text-2xl font-bold text-white tracking-tight">Settings & Account Management</h1>
+                <p class="text-xs text-gray-400 mt-1">Manage profile information, team member roles, and tax documentation.</p>
+            </div>
+
+            <!-- 1. MY PROFILE SECTION -->
+            <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-6">
+                <div class="flex items-center gap-3 pb-3 border-b border-brand-border/40">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <i class="fa-solid fa-user-gear"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-white">My Profile</h2>
+                        <p class="text-xs text-gray-400">Update your account identity and contact details.</p>
                     </div>
                 </div>
-            `;
+
+                <form id="profileSettingsForm" onsubmit="handleSaveProfile(event)" class="space-y-4 max-w-xl">
+                    <div>
+                        <label class="block text-[11px] font-medium text-gray-400 mb-1">Display Name</label>
+                        <input type="text" id="settings-user-name" required placeholder="Artist or Legal Name" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-emerald-500 transition" />
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-medium text-gray-400 mb-1">Email Address (Read-only)</label>
+                        <input type="email" id="settings-user-email" readonly class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border/40 text-gray-400 text-xs font-mono cursor-not-allowed select-none" />
+                        <p class="text-[10px] text-gray-500 mt-1">Contact support to request an account email change.</p>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-brand-dark font-bold text-xs shadow-lg shadow-emerald-500/10 transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk text-xs"></i> Save Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 2. ACCOUNT MEMBERS SECTION -->
+            <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-brand-border/40">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                            <i class="fa-solid fa-users-gear"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-base font-bold text-white">Account Members</h2>
+                            <p class="text-xs text-gray-400">Grant team members access to content, analytics, or financials.</p>
+                        </div>
+                    </div>
+                    <button onclick="openInviteUserModal()" class="px-4 py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-indigo-500/10 transition-all self-start sm:self-auto">
+                        <i class="fa-solid fa-user-plus text-xs"></i> Invite Member
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-gray-300">
+                        <thead class="text-gray-400 border-b border-brand-border uppercase tracking-wider text-[10px] font-mono">
+                            <tr>
+                                <th class="pb-3 px-2">Member Email</th>
+                                <th class="pb-3 px-2">Assigned Roles</th>
+                                <th class="pb-3 px-2">Status</th>
+                                <th class="pb-3 px-2 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="settings-members-tbody">
+                            <tr><td colspan="4" class="py-6 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading team members...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. TAX DETAILS SECTION -->
+            <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-6">
+                <div class="flex items-center gap-3 pb-3 border-b border-brand-border/40">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-white">Tax Details & Compliance</h2>
+                        <p class="text-xs text-gray-400">Submit your tax identification to clear royalty withholding requirements.</p>
+                    </div>
+                </div>
+
+                <form id="taxDetailsForm" onsubmit="handleSaveTaxDetails(event)" class="space-y-4 max-w-xl">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-medium text-gray-400 mb-1">Legal Full Name / Business Name</label>
+                            <input type="text" id="tax-legal-name" required placeholder="Legal Entity Name" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 transition" />
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-gray-400 mb-1">Tax Classification</label>
+                            <select id="tax-classification" class="w-full px-3.5 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500">
+                                <option value="individual">Individual / Sole Proprietor</option>
+                                <option value="corporation">Corporation / LLC</option>
+                                <option value="partnership">Partnership</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-medium text-gray-400 mb-1">Tax Residency Country</label>
+                            <input type="text" id="tax-country" required placeholder="e.g. Kenya, United States" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 transition" />
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-gray-400 mb-1">Tax Identification Number (TIN/SSN/KRA PIN)</label>
+                            <input type="text" id="tax-tin" required placeholder="Enter Tax ID" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 font-mono transition" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-medium text-gray-400 mb-1">Registered Address</label>
+                        <textarea id="tax-address" rows="2" required placeholder="Street address, City, Postal Code" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 transition"></textarea>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-brand-dark font-bold text-xs shadow-lg shadow-amber-500/10 transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-paper-plane text-xs"></i> Submit Tax Details
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- INVITE USER MODAL (Audiory Dark Theme styled after provided layout) -->
+        <div id="inviteUserModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-brand-card border border-brand-border w-full max-w-lg rounded-2xl p-6 space-y-5 shadow-2xl">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between border-b border-brand-border/60 pb-3">
+                    <h3 class="text-base font-bold text-white">Invite User</h3>
+                    <button onclick="closeInviteUserModal()" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <form id="inviteUserForm" onsubmit="submitUserInvite(event)" class="space-y-5">
+                    <!-- User Email -->
+                    <div>
+                        <label class="block text-xs font-semibold text-white mb-1.5">User Email</label>
+                        <input type="email" id="invite-user-email" required placeholder="colleague@domain.com" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-indigo-500 transition" />
+                    </div>
+
+                    <!-- Roles Selection Section -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-white">Roles</label>
+                            <p class="text-[11px] text-gray-400 mt-0.5">Please select the roles you'd like this new user to have.</p>
+                        </div>
+
+                        <div class="space-y-4 max-h-72 overflow-y-auto pr-1">
+                            <!-- Role: Content -->
+                            <div class="space-y-1">
+                                <label class="flex items-center gap-3 cursor-pointer select-none">
+                                    <input type="checkbox" id="role-content" class="sr-only peer" />
+                                    <div class="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-500 relative"></div>
+                                    <span class="text-xs font-bold text-white">Content</span>
+                                </label>
+                                <p class="text-[11px] text-gray-400 pl-12 leading-relaxed">Allow users to view/create/manage releases on the account. It additionally has access to the Rights and Marketing sections of the platform.</p>
+                            </div>
+
+                            <!-- Role: Royalties -->
+                            <div class="space-y-1">
+                                <label class="flex items-center gap-3 cursor-pointer select-none">
+                                    <input type="checkbox" id="role-royalties" class="sr-only peer" />
+                                    <div class="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-500 relative"></div>
+                                    <span class="text-xs font-bold text-white">Royalties</span>
+                                </label>
+                                <p class="text-[11px] text-gray-400 pl-12 leading-relaxed">Allow users to view/manage royalties for the account.</p>
+                            </div>
+
+                            <!-- Role: Analytics -->
+                            <div class="space-y-1">
+                                <label class="flex items-center gap-3 cursor-pointer select-none">
+                                    <input type="checkbox" id="role-analytics" class="sr-only peer" />
+                                    <div class="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-500 relative"></div>
+                                    <span class="text-xs font-bold text-white">Analytics</span>
+                                </label>
+                                <p class="text-[11px] text-gray-400 pl-12 leading-relaxed">Allow users to view the analytics of all releases on the account.</p>
+                            </div>
+
+                            <!-- Role: SplitShare -->
+                            <div class="space-y-1">
+                                <label class="flex items-center gap-3 cursor-pointer select-none">
+                                    <input type="checkbox" id="role-splitshare" class="sr-only peer" />
+                                    <div class="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-500 relative"></div>
+                                    <span class="text-xs font-bold text-white">SplitShare</span>
+                                </label>
+                                <p class="text-[11px] text-gray-400 pl-12 leading-relaxed">Allow users to set splits, invite payees, and share revenue with payee accounts.</p>
+                            </div>
+
+                            <!-- Role: Admin -->
+                            <div class="space-y-1">
+                                <label class="flex items-center gap-3 cursor-pointer select-none">
+                                    <input type="checkbox" id="role-admin" class="sr-only peer" />
+                                    <div class="w-9 h-5 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-500 relative"></div>
+                                    <span class="text-xs font-bold text-white">Admin</span>
+                                </label>
+                                <p class="text-[11px] text-gray-400 pl-12 leading-relaxed">Allow full access to all account capabilities. It also allows management of the account's non-Owner user profiles.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="pt-3 border-t border-brand-border/60 flex items-center justify-end gap-3">
+                        <button type="button" onclick="closeInviteUserModal()" class="px-4 py-2 rounded-xl bg-white/5 text-gray-300 text-xs font-semibold hover:bg-white/10 transition">Cancel</button>
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs transition shadow-lg shadow-indigo-500/10">Send Invite</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+}
+
+// -------------------------------------------------------------
+// SETTINGS LOGIC & EVENT HANDLERS
+// -------------------------------------------------------------
+
+async function initSettingsView() {
+    const user = window.currentUser || (window.auth && window.auth.currentUser);
+    
+    // Populate My Profile fields
+    const nameInput = document.getElementById('settings-user-name');
+    const emailInput = document.getElementById('settings-user-email');
+
+    if (nameInput) nameInput.value = user?.displayName || user?.email?.split('@')[0] || '';
+    if (emailInput) emailInput.value = user?.email || '';
+
+    // Load initial members and tax info
+    await Promise.all([
+        loadAccountMembers(),
+        loadTaxDetails()
+    ]);
+}
+
+// Save Profile Handler
+async function handleSaveProfile(e) {
+    e.preventDefault();
+    const newName = document.getElementById('settings-user-name').value;
+    
+    try {
+        const user = window.currentUser || (window.auth && window.auth.currentUser);
+        if (user && typeof user.updateProfile === 'function') {
+            await user.updateProfile({ displayName: newName });
         }
+        if (typeof showToast === 'function') showToast("Profile name updated successfully!", false);
+    } catch (err) {
+        if (typeof showToast === 'function') showToast(err.message || "Failed to update profile name.", true);
+    }
+}
+
+// Modal Toggle Handlers
+function openInviteUserModal() {
+    const modal = document.getElementById('inviteUserModal');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeInviteUserModal() {
+    const modal = document.getElementById('inviteUserModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+// Submit User Invite Handler
+async function submitUserInvite(e) {
+    e.preventDefault();
+    const email = document.getElementById('invite-user-email').value;
+    
+    const selectedRoles = [];
+    if (document.getElementById('role-content').checked) selectedRoles.push('Content');
+    if (document.getElementById('role-royalties').checked) selectedRoles.push('Royalties');
+    if (document.getElementById('role-analytics').checked) selectedRoles.push('Analytics');
+    if (document.getElementById('role-splitshare').checked) selectedRoles.push('SplitShare');
+    if (document.getElementById('role-admin').checked) selectedRoles.push('Admin');
+
+    if (selectedRoles.length === 0) {
+        if (typeof showToast === 'function') showToast("Please select at least one role.", true);
+        return;
+    }
+
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${getWorkerBaseUrl()}/api/members/invite`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, roles: selectedRoles })
+        });
+
+        if (!response.ok) throw new Error('Failed to send invitation');
+
+        closeInviteUserModal();
+        await loadAccountMembers();
+        if (typeof showToast === 'function') showToast(`Invite sent to ${email}!`, false);
+    } catch (err) {
+        if (typeof showToast === 'function') showToast(err.message, true);
+    }
+}
+
+// Fetch Account Members
+async function loadAccountMembers() {
+    const tbody = document.getElementById('settings-members-tbody');
+    if (!tbody) return;
+
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${getWorkerBaseUrl()}/api/members`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const members = response.ok ? await response.json() : [];
+
+        if (!members || members.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-gray-500">No additional team members added.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = members.map(m => `
+            <tr class="border-b border-brand-border/50 hover:bg-white/5 transition">
+                <td class="py-3 px-2 font-semibold text-white">${m.email}</td>
+                <td class="py-3 px-2">
+                    <div class="flex flex-wrap gap-1">
+                        ${(m.roles || []).map(r => `<span class="px-2 py-0.5 text-[10px] rounded-md bg-white/10 text-gray-300 font-mono">${r}</span>`).join('')}
+                    </div>
+                </td>
+                <td class="py-3 px-2">
+                    <span class="px-2 py-0.5 text-[10px] rounded-md ${m.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
+                        ${m.status || 'Pending'}
+                    </span>
+                </td>
+                <td class="py-3 px-2 text-right">
+                    <button onclick="removeMember('${m.id}')" class="text-gray-500 hover:text-red-400 transition"><i class="fa-solid fa-trash text-xs"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    } catch {
+        tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-gray-500">No additional team members added.</td></tr>`;
+    }
+}
+
+// Tax Details Save Handler
+async function handleSaveTaxDetails(e) {
+    e.preventDefault();
+    
+    const payload = {
+        legalName: document.getElementById('tax-legal-name').value,
+        classification: document.getElementById('tax-classification').value,
+        country: document.getElementById('tax-country').value,
+        tin: document.getElementById('tax-tin').value,
+        address: document.getElementById('tax-address').value
+    };
+
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${getWorkerBaseUrl()}/api/tax-details`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error("Failed to save tax details.");
+
+        if (typeof showToast === 'function') showToast("Tax details submitted successfully!", false);
+    } catch (err) {
+        if (typeof showToast === 'function') showToast(err.message, true);
+    }
+}
+
+// Load Existing Tax Details
+async function loadTaxDetails() {
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${getWorkerBaseUrl()}/api/tax-details`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (data) {
+            if (document.getElementById('tax-legal-name')) document.getElementById('tax-legal-name').value = data.legalName || '';
+            if (document.getElementById('tax-classification')) document.getElementById('tax-classification').value = data.classification || 'individual';
+            if (document.getElementById('tax-country')) document.getElementById('tax-country').value = data.country || '';
+            if (document.getElementById('tax-tin')) document.getElementById('tax-tin').value = data.tin || '';
+            if (document.getElementById('tax-address')) document.getElementById('tax-address').value = data.address || '';
+        }
+    } catch {
+        // Silent catch for missing tax records
+    }
+}
+
+// Global Exports
+window.renderSettingsView = renderSettingsView;
+window.initSettingsView = initSettingsView;
+window.handleSaveProfile = handleSaveProfile;
+window.openInviteUserModal = openInviteUserModal;
+window.closeInviteUserModal = closeInviteUserModal;
+window.submitUserInvite = submitUserInvite;
+window.handleSaveTaxDetails = handleSaveTaxDetails;
 
         // Render Create Release Form Container
         window.renderCreateReleaseView = function() {
