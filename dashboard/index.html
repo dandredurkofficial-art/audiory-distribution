@@ -1782,106 +1782,252 @@ function renderTracksTable(tracks) {
 
 function renderSettingsView() {
     const user = window.currentUser || (window.firebase && firebase.auth().currentUser) || {};
-    const userName = user.displayName || 'Ismael Kombo Kea';
-    const userEmail = user.email || 'ismaelkombo699@gmail.com';
-    const avatarLetter = userName.charAt(0).toUpperCase();
+    const userName = user.displayName || 'Artist Profile';
+    const userEmail = user.email || 'artist@domain.com';
+    const initialLetter = userName.charAt(0).toUpperCase();
 
     return `
-        <div class="max-w-6xl mx-auto space-y-6 text-gray-800">
+        <div class="max-w-6xl mx-auto space-y-6 text-gray-200">
             <!-- Header Title -->
-            <div class="pb-2">
-                <h1 class="text-2xl font-semibold text-gray-900 tracking-tight">Account Settings</h1>
+            <div class="pb-2 border-b border-brand-border/60">
+                <h1 class="text-2xl font-bold text-white tracking-tight">Account Settings</h1>
+                <p class="text-xs text-gray-400 mt-1">Manage profile, team access, payout options, and music distribution preferences.</p>
             </div>
 
-            <!-- Top Profile Banner -->
-            <div class="bg-white rounded-2xl p-6 border border-gray-200/80 shadow-sm flex items-center justify-between">
+            <!-- Profile Banner -->
+            <div class="bg-brand-card rounded-2xl p-6 border border-brand-border shadow-lg flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center font-bold text-gray-600 text-xl">
-                        ${avatarLetter}
+                    <div class="w-14 h-14 rounded-full bg-white/10 border border-brand-border flex items-center justify-center font-bold text-white text-xl uppercase">
+                        ${initialLetter}
                     </div>
                     <div>
-                        <h2 class="text-lg font-bold text-gray-900 leading-tight">${userName}</h2>
-                        <p class="text-xs text-gray-500 font-medium mt-0.5">${userEmail}</p>
+                        <h2 class="text-lg font-bold text-white leading-tight">${userName}</h2>
+                        <p class="text-xs text-gray-400 font-mono mt-0.5">${userEmail}</p>
                     </div>
                 </div>
-                <button type="button" onclick="switchSettingsTab('preferences')" class="px-4 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-xs font-semibold text-gray-700 shadow-sm transition flex items-center gap-2">
+                <button type="button" onclick="switchSettingsTab('preferences')" class="px-4 py-2 rounded-xl border border-brand-border bg-white/5 hover:bg-white/10 text-xs font-semibold text-gray-200 transition flex items-center gap-2">
                     <i class="fa-solid fa-sliders text-gray-400"></i> Preferences
                 </button>
             </div>
 
-            <!-- Settings Sub-Navigation Tabs -->
-            <div class="flex items-center gap-2 border-b border-gray-200/80 pb-3 overflow-x-auto text-xs font-semibold text-gray-500">
-                <button onclick="switchSettingsTab('general')" id="tab-btn-general" class="settings-tab-btn px-4 py-2 rounded-lg bg-indigo-50 text-indigo-600 font-bold transition">General</button>
-                <button onclick="switchSettingsTab('account')" id="tab-btn-account" class="settings-tab-btn px-4 py-2 rounded-lg hover:text-gray-900 hover:bg-gray-100 transition">Account Details</button>
-                <button onclick="switchSettingsTab('payouts')" id="tab-btn-payouts" class="settings-tab-btn px-4 py-2 rounded-lg hover:text-gray-900 hover:bg-gray-100 transition">Payout Preferences</button>
-                <button onclick="switchSettingsTab('billing')" id="tab-btn-billing" class="settings-tab-btn px-4 py-2 rounded-lg hover:text-gray-900 hover:bg-gray-100 transition">Billing History</button>
-                <button onclick="switchSettingsTab('documents')" id="tab-btn-documents" class="settings-tab-btn px-4 py-2 rounded-lg hover:text-gray-900 hover:bg-gray-100 transition">Documents</button>
-                <button onclick="switchSettingsTab('login-history')" id="tab-btn-login-history" class="settings-tab-btn px-4 py-2 rounded-lg hover:text-gray-900 hover:bg-gray-100 transition">Login History</button>
+            <!-- Sub-Navigation Tabs -->
+            <div class="flex items-center gap-2 border-b border-brand-border/60 pb-3 overflow-x-auto text-xs font-semibold text-gray-400">
+                <button onclick="switchSettingsTab('general')" id="tab-btn-general" class="settings-tab-btn px-4 py-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold transition">General</button>
+                <button onclick="switchSettingsTab('account')" id="tab-btn-account" class="settings-tab-btn px-4 py-2 rounded-xl hover:text-white hover:bg-white/5 transition">Account Details</button>
+                <button onclick="switchSettingsTab('payouts')" id="tab-btn-payouts" class="settings-tab-btn px-4 py-2 rounded-xl hover:text-white hover:bg-white/5 transition">Payout Preferences</button>
+                <button onclick="switchSettingsTab('billing')" id="tab-btn-billing" class="settings-tab-btn px-4 py-2 rounded-xl hover:text-white hover:bg-white/5 transition">Billing History</button>
+                <button onclick="switchSettingsTab('documents')" id="tab-btn-documents" class="settings-tab-btn px-4 py-2 rounded-xl hover:text-white hover:bg-white/5 transition">Documents</button>
+                <button onclick="switchSettingsTab('login-history')" id="tab-btn-login-history" class="settings-tab-btn px-4 py-2 rounded-xl hover:text-white hover:bg-white/5 transition">Login History</button>
             </div>
 
-            <!-- Tab Panels Container -->
+            <!-- Tab Panels -->
             <div id="settings-tab-content">
-                <!-- General Tab Content (List Cards) -->
+                <!-- General Sub-Page -->
                 <div id="panel-general" class="settings-panel space-y-3">
-                    <div onclick="openSettingsModal('change-password')" class="group bg-white rounded-2xl p-5 border border-gray-200/80 shadow-sm hover:border-indigo-200 hover:shadow-md transition cursor-pointer flex items-center justify-between">
+                    <div onclick="openSettingsModal('Change Password')" class="group bg-brand-card rounded-2xl p-5 border border-brand-border shadow-sm hover:border-cyan-500/40 hover:bg-white/[0.02] transition cursor-pointer flex items-center justify-between">
                         <div class="flex items-center gap-4">
-                            <i class="fa-solid fa-lock text-gray-500 group-hover:text-indigo-600 transition"></i>
-                            <span class="text-sm font-medium text-gray-800">Change Password</span>
+                            <i class="fa-solid fa-lock text-gray-400 group-hover:text-cyan-400 transition"></i>
+                            <span class="text-sm font-medium text-white">Change Password</span>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-xs text-gray-400 group-hover:translate-x-1 transition"></i>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:translate-x-1 transition"></i>
                     </div>
 
-                    <div onclick="openSettingsModal('2fa')" class="group bg-white rounded-2xl p-5 border border-gray-200/80 shadow-sm hover:border-indigo-200 hover:shadow-md transition cursor-pointer flex items-center justify-between">
+                    <div onclick="openSettingsModal('Two Factor Authentication')" class="group bg-brand-card rounded-2xl p-5 border border-brand-border shadow-sm hover:border-cyan-500/40 hover:bg-white/[0.02] transition cursor-pointer flex items-center justify-between">
                         <div class="flex items-center gap-4">
-                            <i class="fa-solid fa-shield-halved text-gray-500 group-hover:text-indigo-600 transition"></i>
-                            <span class="text-sm font-medium text-gray-800">Two Factor Authentication</span>
+                            <i class="fa-solid fa-shield-halved text-gray-400 group-hover:text-cyan-400 transition"></i>
+                            <span class="text-sm font-medium text-white">Two Factor Authentication</span>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-xs text-gray-400 group-hover:translate-x-1 transition"></i>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:translate-x-1 transition"></i>
                     </div>
 
-                    <div onclick="openSettingsModal('spotify-artists')" class="group bg-white rounded-2xl p-5 border border-gray-200/80 shadow-sm hover:border-indigo-200 hover:shadow-md transition cursor-pointer flex items-center justify-between">
+                    <div onclick="openSettingsModal('Spotify for Artists')" class="group bg-brand-card rounded-2xl p-5 border border-brand-border shadow-sm hover:border-emerald-500/40 hover:bg-white/[0.02] transition cursor-pointer flex items-center justify-between">
                         <div class="flex items-center gap-4">
-                            <i class="fa-brands fa-spotify text-gray-500 group-hover:text-emerald-500 transition"></i>
-                            <span class="text-sm font-medium text-gray-800">Instant Access to Spotify for Artists</span>
+                            <i class="fa-brands fa-spotify text-gray-400 group-hover:text-emerald-400 transition"></i>
+                            <span class="text-sm font-medium text-white">Instant Access to Spotify for Artists</span>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-xs text-gray-400 group-hover:translate-x-1 transition"></i>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:translate-x-1 transition"></i>
                     </div>
 
-                    <div onclick="openSettingsModal('audiomack')" class="group bg-white rounded-2xl p-5 border border-gray-200/80 shadow-sm hover:border-indigo-200 hover:shadow-md transition cursor-pointer flex items-center justify-between">
+                    <div onclick="openSettingsModal('Connect Audiomack')" class="group bg-brand-card rounded-2xl p-5 border border-brand-border shadow-sm hover:border-amber-500/40 hover:bg-white/[0.02] transition cursor-pointer flex items-center justify-between">
                         <div class="flex items-center gap-4">
-                            <i class="fa-solid fa-wave-square text-gray-500 group-hover:text-amber-500 transition"></i>
-                            <span class="text-sm font-medium text-gray-800">Connect Audiomack Account</span>
+                            <i class="fa-solid fa-wave-square text-gray-400 group-hover:text-amber-400 transition"></i>
+                            <span class="text-sm font-medium text-white">Connect Audiomack Account</span>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-xs text-gray-400 group-hover:translate-x-1 transition"></i>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:translate-x-1 transition"></i>
                     </div>
 
-                    <div onclick="openSettingsModal('even')" class="group bg-white rounded-2xl p-5 border border-gray-200/80 shadow-sm hover:border-indigo-200 hover:shadow-md transition cursor-pointer flex items-center justify-between">
+                    <div onclick="openSettingsModal('Connect EVEN')" class="group bg-brand-card rounded-2xl p-5 border border-brand-border shadow-sm hover:border-cyan-500/40 hover:bg-white/[0.02] transition cursor-pointer flex items-center justify-between">
                         <div class="flex items-center gap-4">
-                            <i class="fa-solid fa-bolt text-gray-500 group-hover:text-indigo-600 transition"></i>
-                            <span class="text-sm font-medium text-gray-800">Connect EVEN Account</span>
+                            <i class="fa-solid fa-bolt text-gray-400 group-hover:text-cyan-400 transition"></i>
+                            <span class="text-sm font-medium text-white">Connect EVEN Account</span>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-xs text-gray-400 group-hover:translate-x-1 transition"></i>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:translate-x-1 transition"></i>
                     </div>
 
-                    <div onclick="openSettingsModal('spotify-discovery')" class="group bg-white rounded-2xl p-5 border border-gray-200/80 shadow-sm hover:border-indigo-200 hover:shadow-md transition cursor-pointer flex items-center justify-between">
+                    <div onclick="openSettingsModal('Spotify Discovery Mode')" class="group bg-brand-card rounded-2xl p-5 border border-brand-border shadow-sm hover:border-emerald-500/40 hover:bg-white/[0.02] transition cursor-pointer flex items-center justify-between">
                         <div class="flex items-center gap-4">
-                            <i class="fa-brands fa-spotify text-gray-500 group-hover:text-emerald-500 transition"></i>
-                            <span class="text-sm font-medium text-gray-800">Spotify Discovery Mode Preferences</span>
+                            <i class="fa-brands fa-spotify text-gray-400 group-hover:text-emerald-400 transition"></i>
+                            <span class="text-sm font-medium text-white">Spotify Discovery Mode Preferences</span>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-xs text-gray-400 group-hover:translate-x-1 transition"></i>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:translate-x-1 transition"></i>
                     </div>
+                </div>
+
+                <!-- Account Details Sub-Page -->
+                <div id="panel-account" class="settings-panel hidden space-y-6">
+                    <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-6">
+                        <h3 class="text-sm font-bold text-white border-b border-brand-border/40 pb-3">Profile Information</h3>
+                        <form id="profileSettingsForm" onsubmit="handleSaveProfile(event)" class="space-y-4 max-w-xl">
+                            <div>
+                                <label class="block text-[11px] font-medium text-gray-400 mb-1">Display Name</label>
+                                <input type="text" id="settings-user-name" required placeholder="Artist or Label Name" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-cyan-500 transition" />
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-gray-400 mb-1">Email Address (Read-only)</label>
+                                <input type="email" id="settings-user-email" readonly class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border/40 text-gray-400 text-xs font-mono cursor-not-allowed select-none" />
+                            </div>
+                            <button type="submit" class="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition">Save Changes</button>
+                        </form>
+                    </div>
+
+                    <!-- Account Members -->
+                    <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-6">
+                        <div class="flex items-center justify-between border-b border-brand-border/40 pb-3">
+                            <h3 class="text-sm font-bold text-white">Team Members</h3>
+                            <button onclick="openInviteUserModal()" class="px-3.5 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs flex items-center gap-2 transition">
+                                <i class="fa-solid fa-user-plus text-xs"></i> Invite Member
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-gray-300">
+                                <thead class="text-gray-400 border-b border-brand-border uppercase tracking-wider text-[10px] font-mono">
+                                    <tr>
+                                        <th class="pb-3 px-2">Member Email</th>
+                                        <th class="pb-3 px-2">Assigned Roles</th>
+                                        <th class="pb-3 px-2">Status</th>
+                                        <th class="pb-3 px-2 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="settings-members-tbody">
+                                    <tr><td colspan="4" class="py-6 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading team members...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payout Preferences Sub-Page -->
+                <div id="panel-payouts" class="settings-panel hidden p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+                    <h3 class="text-sm font-bold text-white border-b border-brand-border/40 pb-3">Payout & Banking Details</h3>
+                    <p class="text-xs text-gray-400">Configure bank accounts, PayPal, or mobile money split addresses to receive royalties.</p>
+                </div>
+
+                <!-- Billing History Sub-Page -->
+                <div id="panel-billing" class="settings-panel hidden p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+                    <h3 class="text-sm font-bold text-white border-b border-brand-border/40 pb-3">Billing & Subscription Statements</h3>
+                    <p class="text-xs text-gray-400">View past invoices and distribution plan billing history.</p>
+                </div>
+
+                <!-- Documents Sub-Page -->
+                <div id="panel-documents" class="settings-panel hidden p-6 rounded-2xl bg-brand-card border border-brand-border space-y-6">
+                    <h3 class="text-sm font-bold text-white border-b border-brand-border/40 pb-3">Tax & Legal Compliance</h3>
+                    <form id="taxDetailsForm" onsubmit="handleSaveTaxDetails(event)" class="space-y-4 max-w-xl">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[11px] font-medium text-gray-400 mb-1">Legal Name</label>
+                                <input type="text" id="tax-legal-name" required placeholder="Legal Entity Name" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 transition" />
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-gray-400 mb-1">Tax Classification</label>
+                                <select id="tax-classification" class="w-full px-3.5 py-2.5 rounded-xl bg-[#0d1322] border border-brand-border text-white text-xs focus:outline-none">
+                                    <option value="individual">Individual / Sole Proprietor</option>
+                                    <option value="corporation">Corporation / LLC</option>
+                                    <option value="partnership">Partnership</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[11px] font-medium text-gray-400 mb-1">Tax Residency Country</label>
+                                <input type="text" id="tax-country" required placeholder="Tax Residency Country" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 transition" />
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-gray-400 mb-1">Tax ID (TIN / SSN / KRA PIN)</label>
+                                <input type="text" id="tax-tin" required placeholder="Tax ID Number" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 font-mono transition" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-gray-400 mb-1">Registered Address</label>
+                            <textarea id="tax-address" rows="2" required placeholder="Full Street Address" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 transition"></textarea>
+                        </div>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs transition">Submit Tax Form</button>
+                    </form>
+                </div>
+
+                <!-- Login History Sub-Page -->
+                <div id="panel-login-history" class="settings-panel hidden p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+                    <h3 class="text-sm font-bold text-white border-b border-brand-border/40 pb-3">Active Sessions & Login History</h3>
+                    <p class="text-xs text-gray-400">Review recent login activity and manage authorized devices.</p>
                 </div>
             </div>
         </div>
 
-        <!-- Custom In-App Modal (No browser alert popups) -->
-        <div id="customConfirmModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-            <div class="bg-white w-full max-w-sm rounded-2xl p-6 space-y-4 shadow-2xl border border-gray-100">
-                <h3 id="confirmModalTitle" class="text-base font-bold text-gray-900">Revoke Access</h3>
-                <p id="confirmModalMessage" class="text-xs text-gray-500">Are you sure you want to proceed with this action?</p>
+        <!-- Team Member Invite Modal -->
+        <div id="inviteUserModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-brand-card border border-brand-border w-full max-w-lg rounded-2xl p-6 space-y-5 shadow-2xl">
+                <div class="flex items-center justify-between border-b border-brand-border/60 pb-3">
+                    <h3 class="text-base font-bold text-white">Invite Team Member</h3>
+                    <button type="button" onclick="closeInviteUserModal()" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <form id="inviteUserForm" onsubmit="submitUserInvite(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-white mb-1.5">User Email</label>
+                        <input type="email" id="invite-user-email" required placeholder="colleague@domain.com" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-indigo-500 transition" />
+                    </div>
+
+                    <div class="space-y-3">
+                        <label class="block text-xs font-semibold text-white">Assign Roles</label>
+                        <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                            <label class="flex items-center gap-3 cursor-pointer select-none">
+                                <input type="checkbox" id="role-content" class="rounded bg-white/10 border-brand-border text-indigo-500" />
+                                <span class="text-xs font-bold text-white">Content</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer select-none">
+                                <input type="checkbox" id="role-royalties" class="rounded bg-white/10 border-brand-border text-indigo-500" />
+                                <span class="text-xs font-bold text-white">Royalties</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer select-none">
+                                <input type="checkbox" id="role-analytics" class="rounded bg-white/10 border-brand-border text-indigo-500" />
+                                <span class="text-xs font-bold text-white">Analytics</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer select-none">
+                                <input type="checkbox" id="role-splitshare" class="rounded bg-white/10 border-brand-border text-indigo-500" />
+                                <span class="text-xs font-bold text-white">SplitShare</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer select-none">
+                                <input type="checkbox" id="role-admin" class="rounded bg-white/10 border-brand-border text-indigo-500" />
+                                <span class="text-xs font-bold text-white">Admin</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-brand-border/60 flex items-center justify-end gap-3">
+                        <button type="button" onclick="closeInviteUserModal()" class="px-4 py-2 rounded-xl bg-white/5 text-gray-300 text-xs font-semibold hover:bg-white/10 transition">Cancel</button>
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs transition">Send Invite</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Custom Confirmation Modal (Replaces browser confirm alert) -->
+        <div id="customConfirmModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-brand-card w-full max-w-sm rounded-2xl p-6 space-y-4 shadow-2xl border border-brand-border">
+                <h3 id="confirmModalTitle" class="text-base font-bold text-white">Revoke Access</h3>
+                <p id="confirmModalMessage" class="text-xs text-gray-400">Are you sure you want to proceed with this action?</p>
                 <div class="flex items-center justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeConfirmModal(false)" class="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold transition">Cancel</button>
-                    <button type="button" id="confirmModalActionBtn" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition shadow-sm">Confirm</button>
+                    <button type="button" onclick="closeConfirmModal(false)" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-semibold transition">Cancel</button>
+                    <button type="button" id="confirmModalActionBtn" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition">Confirm</button>
                 </div>
             </div>
         </div>
@@ -1906,21 +2052,27 @@ if (typeof window.getWorkerBaseUrl !== 'function') {
     };
 }
 
-// Tab Switching
+// Dynamic Sub-Page Switching
 function switchSettingsTab(tabKey) {
     document.querySelectorAll('.settings-tab-btn').forEach(btn => {
-        btn.classList.remove('bg-indigo-50', 'text-indigo-600', 'font-bold');
-        btn.classList.add('hover:text-gray-900', 'hover:bg-gray-100');
+        btn.classList.remove('bg-cyan-500/10', 'text-cyan-400', 'border', 'border-cyan-500/20', 'font-bold');
+        btn.classList.add('hover:text-white', 'hover:bg-white/5');
     });
 
     const activeBtn = document.getElementById(`tab-btn-${tabKey}`);
     if (activeBtn) {
-        activeBtn.classList.add('bg-indigo-50', 'text-indigo-600', 'font-bold');
-        activeBtn.classList.remove('hover:text-gray-900', 'hover:bg-gray-100');
+        activeBtn.classList.add('bg-cyan-500/10', 'text-cyan-400', 'border', 'border-cyan-500/20', 'font-bold');
+        activeBtn.classList.remove('hover:text-white', 'hover:bg-white/5');
+    }
+
+    document.querySelectorAll('.settings-panel').forEach(panel => panel.classList.add('hidden'));
+    const targetPanel = document.getElementById(`panel-${tabKey}`);
+    if (targetPanel) {
+        targetPanel.classList.remove('hidden');
     }
 }
 
-// Modal handling without browser alerts/confirm popups
+// Custom Modal Confirm System (No standard popups)
 let confirmResolve = null;
 
 function showCustomConfirm(title, message) {
@@ -1951,7 +2103,152 @@ function closeConfirmModal(result) {
     }
 }
 
-// Revoke Member Handler (No old browser alert/confirm popup)
+function openSettingsModal(optionName) {
+    if (typeof showToast === 'function') {
+        showToast(`Opening settings for ${optionName}...`, false);
+    }
+}
+
+// Page Initialization
+async function initSettingsView() {
+    const user = window.currentUser || (window.firebase && firebase.auth().currentUser);
+    
+    const nameInput = document.getElementById('settings-user-name');
+    const emailInput = document.getElementById('settings-user-email');
+
+    if (nameInput) nameInput.value = user?.displayName || user?.email?.split('@')[0] || '';
+    if (emailInput) emailInput.value = user?.email || '';
+
+    await Promise.all([
+        loadAccountMembers(),
+        loadTaxDetails()
+    ]);
+}
+
+// Profile Save
+async function handleSaveProfile(e) {
+    e.preventDefault();
+    const nameInput = document.getElementById('settings-user-name');
+    if (!nameInput) return;
+    const newName = nameInput.value;
+    
+    try {
+        const user = window.currentUser || (window.firebase && firebase.auth().currentUser);
+        if (user && typeof user.updateProfile === 'function') {
+            await user.updateProfile({ displayName: newName });
+        }
+
+        const token = await getAuthToken();
+        if (token) {
+            await fetch(`${getWorkerBaseUrl()}/api/profile`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ displayName: newName })
+            });
+        }
+
+        if (typeof showToast === 'function') showToast("Profile name updated successfully!", false);
+    } catch (err) {
+        if (typeof showToast === 'function') showToast(err.message || "Failed to update profile name.", true);
+    }
+}
+
+// Invite Modals
+function openInviteUserModal() {
+    const modal = document.getElementById('inviteUserModal');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeInviteUserModal() {
+    const modal = document.getElementById('inviteUserModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+// User Invitation Submit
+async function submitUserInvite(e) {
+    e.preventDefault();
+    const emailInput = document.getElementById('invite-user-email');
+    if (!emailInput) return;
+    const email = emailInput.value;
+    
+    const selectedRoles = [];
+    if (document.getElementById('role-content')?.checked) selectedRoles.push('Content');
+    if (document.getElementById('role-royalties')?.checked) selectedRoles.push('Royalties');
+    if (document.getElementById('role-analytics')?.checked) selectedRoles.push('Analytics');
+    if (document.getElementById('role-splitshare')?.checked) selectedRoles.push('SplitShare');
+    if (document.getElementById('role-admin')?.checked) selectedRoles.push('Admin');
+
+    if (selectedRoles.length === 0) {
+        if (typeof showToast === 'function') showToast("Please select at least one role.", true);
+        return;
+    }
+
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${getWorkerBaseUrl()}/api/members/invite`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, roles: selectedRoles })
+        });
+
+        if (!response.ok) throw new Error('Failed to send invitation');
+
+        closeInviteUserModal();
+        await loadAccountMembers();
+        if (typeof showToast === 'function') showToast(`Invite sent to ${email}!`, false);
+    } catch (err) {
+        if (typeof showToast === 'function') showToast(err.message, true);
+    }
+}
+
+// Members Data Loading
+async function loadAccountMembers() {
+    const tbody = document.getElementById('settings-members-tbody');
+    if (!tbody) return;
+
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${getWorkerBaseUrl()}/api/members`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const members = response.ok ? await response.json() : [];
+
+        if (!members || members.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-gray-500">No team members added.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = members.map(m => `
+            <tr class="border-b border-brand-border/50 hover:bg-white/5 transition">
+                <td class="py-3 px-2 font-semibold text-white">${m.email}</td>
+                <td class="py-3 px-2">
+                    <div class="flex flex-wrap gap-1">
+                        ${(m.roles || []).map(r => `<span class="px-2 py-0.5 text-[10px] rounded-md bg-white/10 text-gray-300 font-mono">${r}</span>`).join('')}
+                    </div>
+                </td>
+                <td class="py-3 px-2">
+                    <span class="px-2 py-0.5 text-[10px] rounded-md ${m.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
+                        ${m.status || 'Pending'}
+                    </span>
+                </td>
+                <td class="py-3 px-2 text-right">
+                    <button type="button" onclick="removeMember('${m.id}')" class="text-gray-500 hover:text-red-400 transition"><i class="fa-solid fa-trash text-xs"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    } catch {
+        tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-gray-500">No team members added.</td></tr>`;
+    }
+}
+
+// Remove Team Member Action
 async function removeMember(memberId) {
     const confirmed = await showCustomConfirm("Revoke Access", "Are you sure you want to revoke access for this team member?");
     if (!confirmed) return;
@@ -1965,27 +2262,81 @@ async function removeMember(memberId) {
 
         if (!response.ok) throw new Error("Failed to remove team member.");
 
-        if (typeof loadAccountMembers === 'function') await loadAccountMembers();
+        await loadAccountMembers();
         if (typeof showToast === 'function') showToast("Member access revoked.", false);
     } catch (err) {
         if (typeof showToast === 'function') showToast(err.message, true);
     }
 }
 
-function openSettingsModal(action) {
-    if (typeof showToast === 'function') {
-        showToast(`Opening ${action.replace('-', ' ')}...`, false);
+// Save Tax Details
+async function handleSaveTaxDetails(e) {
+    e.preventDefault();
+    
+    const payload = {
+        legalName: document.getElementById('tax-legal-name')?.value || '',
+        classification: document.getElementById('tax-classification')?.value || 'individual',
+        country: document.getElementById('tax-country')?.value || '',
+        tin: document.getElementById('tax-tin')?.value || '',
+        address: document.getElementById('tax-address')?.value || ''
+    };
+
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${getWorkerBaseUrl()}/api/tax-details`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error("Failed to save tax details.");
+
+        if (typeof showToast === 'function') showToast("Tax details submitted successfully!", false);
+    } catch (err) {
+        if (typeof showToast === 'function') showToast(err.message, true);
     }
 }
 
-// GLOBAL EXPORTS
+// Load Tax Details
+async function loadTaxDetails() {
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${getWorkerBaseUrl()}/api/tax-details`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (data) {
+            if (document.getElementById('tax-legal-name')) document.getElementById('tax-legal-name').value = data.legalName || '';
+            if (document.getElementById('tax-classification')) document.getElementById('tax-classification').value = data.classification || 'individual';
+            if (document.getElementById('tax-country')) document.getElementById('tax-country').value = data.country || '';
+            if (document.getElementById('tax-tin')) document.getElementById('tax-tin').value = data.tin || '';
+            if (document.getElementById('tax-address')) document.getElementById('tax-address').value = data.address || '';
+        }
+    } catch {
+        // Silent catch for initial state
+    }
+}
+
+// EXPORTS
 window.renderSettingsView = renderSettingsView;
+window.initSettingsView = initSettingsView;
+window.initSettingsPage = initSettingsView;
 window.switchSettingsTab = switchSettingsTab;
+window.handleSaveProfile = handleSaveProfile;
+window.openInviteUserModal = openInviteUserModal;
+window.closeInviteUserModal = closeInviteUserModal;
+window.submitUserInvite = submitUserInvite;
+window.handleSaveTaxDetails = handleSaveTaxDetails;
+window.removeMember = removeMember;
 window.showCustomConfirm = showCustomConfirm;
 window.closeConfirmModal = closeConfirmModal;
-window.removeMember = removeMember;
 window.openSettingsModal = openSettingsModal;
-
+        
         // Render Create Release Form Container
         window.renderCreateReleaseView = function() {
             return `
