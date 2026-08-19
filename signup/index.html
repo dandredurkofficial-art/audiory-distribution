@@ -115,7 +115,7 @@
                     <p class="text-xs sm:text-sm text-gray-400">Start distributing tracks to over 200+ DSPs today</p>
                 </div>
 
-                <!-- Alert Notification Banner -->
+                <!-- Alert Notification Banner (Signup Form) -->
                 <div id="alertBox" class="hidden mb-6 p-4 rounded-xl text-xs font-semibold border flex items-start gap-3 transition-all">
                     <i id="alertIcon" class="fa-solid text-base mt-0.5"></i>
                     <span id="alertMessage" class="flex-1 leading-relaxed"></span>
@@ -210,6 +210,81 @@
         </div>
     </main>
 
+    <!-- ==================== PAYMENT MODAL OVERLAY ==================== -->
+    <div id="paymentModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="gradient-border-card max-w-md w-full p-6 sm:p-8 relative glow-effect">
+            <button type="button" id="closeModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="mb-6">
+                <span id="planBadge" class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-brand-accent/20 text-brand-accent border border-brand-accent/30">
+                    Pro Artist Plan
+                </span>
+                <h2 class="text-2xl font-bold font-display text-white mt-3">Complete Checkout</h2>
+                <p class="text-xs text-gray-400 mt-1">Total Due: <span id="modalPrice" class="text-white font-bold">$19.99/year</span></p>
+            </div>
+
+            <!-- In-Modal Dynamic Alert Message -->
+            <div id="modalAlertBox" class="hidden mb-5 p-3 rounded-xl text-xs font-semibold border flex items-start gap-2.5 transition-all">
+                <i id="modalAlertIcon" class="fa-solid text-sm mt-0.5"></i>
+                <span id="modalAlertMessage" class="flex-1 leading-relaxed"></span>
+            </div>
+
+            <!-- Payment Gateway Options -->
+            <div class="space-y-3 mb-6">
+                <!-- M-Pesa Daraja -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-accent cursor-pointer transition-all">
+                    <div class="flex items-center gap-3">
+                        <input type="radio" name="paymentGateway" value="mpesa" checked class="text-brand-accent focus:ring-0">
+                        <div>
+                            <p class="text-sm font-semibold text-white">M-Pesa (Daraja STK Push)</p>
+                            <p class="text-[11px] text-gray-400">Pay directly via mobile money prompt</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-mobile-screen-button text-emerald-400 text-lg"></i>
+                </label>
+
+                <!-- PayPal -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-accent cursor-pointer transition-all">
+                    <div class="flex items-center gap-3">
+                        <input type="radio" name="paymentGateway" value="paypal" class="text-brand-accent focus:ring-0">
+                        <div>
+                            <p class="text-sm font-semibold text-white">PayPal Express Checkout</p>
+                            <p class="text-[11px] text-gray-400">Pay securely with PayPal account or card</p>
+                        </div>
+                    </div>
+                    <i class="fa-brands fa-paypal text-sky-400 text-lg"></i>
+                </label>
+
+                <!-- PesaPal -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-accent cursor-pointer transition-all">
+                    <div class="flex items-center gap-3">
+                        <input type="radio" name="paymentGateway" value="pesapal" class="text-brand-accent focus:ring-0">
+                        <div>
+                            <p class="text-sm font-semibold text-white">PesaPal (Cards & Regional Banking)</p>
+                            <p class="text-[11px] text-gray-400">Visa, Mastercard & Local Bank Transfers</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-credit-card text-purple-400 text-lg"></i>
+                </label>
+            </div>
+
+            <!-- Dynamic Gateway Inputs -->
+            <div id="mpesaField" class="mb-6">
+                <label for="mpesaPhone" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                    M-Pesa Phone Number
+                </label>
+                <input type="tel" id="mpesaPhone" placeholder="e.g. 254712345678" class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-white text-sm focus:outline-none focus:border-brand-accent">
+            </div>
+
+            <button type="button" id="confirmPaymentBtn" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-accent via-brand-600 to-brand-purple hover:shadow-lg hover:shadow-brand-accent/25 text-white font-bold text-sm tracking-wide transition-all flex items-center justify-center gap-2">
+                <span id="paymentBtnText">Pay Now & Create Account</span>
+                <i class="fa-solid fa-lock text-xs"></i>
+            </button>
+        </div>
+    </div>
+
     <!-- ==================== FOOTER ==================== -->
     <footer class="py-6 px-4 text-center text-xs text-gray-500 border-t border-brand-border/40 relative z-10">
         <p>&copy; 2026 Audiory Distribution Inc. All rights reserved.</p>
@@ -217,7 +292,6 @@
 
     <!-- ==================== FIREBASE SDK IMPLEMENTATION ==================== -->
     <script type="module">
-        // 1. Firebase Modular SDK Version 10 Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { 
             getAuth, 
@@ -233,8 +307,6 @@
             serverTimestamp 
         } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // 2. Firebase Project Configuration
-        // NOTE: Replace these values with your Firebase Console Credentials
         const firebaseConfig = {
           apiKey: "AIzaSyBtii4iYkm7ummyi5SHiQMOMUPrOpwhdrk",
           authDomain: "audiory-distribution.firebaseapp.com",
@@ -245,11 +317,16 @@
           measurementId: "G-MXDJH52XX4"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
+
+        const WORKER_ENDPOINT = "https://distro.audiory.site/api";
+
+        // Read Plan from Query String (?plan=starter | ?plan=pro | ?plan=label)
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedPlan = (urlParams.get('plan') || 'starter').toLowerCase();
 
         // UI DOM Elements
         const signupForm = document.getElementById('signupForm');
@@ -264,6 +341,28 @@
         const togglePasswordBtn = document.getElementById('togglePasswordBtn');
         const passwordIcon = document.getElementById('passwordIcon');
 
+        // Modal DOM Elements
+        const paymentModal = document.getElementById('paymentModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+        const mpesaField = document.getElementById('mpesaField');
+        const modalPrice = document.getElementById('modalPrice');
+        const planBadge = document.getElementById('planBadge');
+        const modalAlertBox = document.getElementById('modalAlertBox');
+        const modalAlertIcon = document.getElementById('modalAlertIcon');
+        const modalAlertMessage = document.getElementById('modalAlertMessage');
+
+        const PLAN_DETAILS = {
+            starter: { name: "Starter Plan", price: "0.00", text: "Create Free Account" },
+            pro: { name: "Pro Artist Plan", price: "19.99", text: "Proceed to Checkout ($19.99/yr)" },
+            label: { name: "Label Partner Plan", price: "49.99", text: "Proceed to Checkout ($49.99/yr)" }
+        };
+
+        const currentPlan = PLAN_DETAILS[selectedPlan] || PLAN_DETAILS.starter;
+        btnText.textContent = currentPlan.text;
+        modalPrice.textContent = `$${currentPlan.price}/year`;
+        planBadge.textContent = currentPlan.name;
+
         // Toggle Password Visibility
         togglePasswordBtn.addEventListener('click', () => {
             if (passwordInput.type === 'password') {
@@ -277,10 +376,9 @@
             }
         });
 
-        // Display Alert Banner Utility
+        // Display Main Alert Banner Utility
         function showAlert(message, isError = true) {
             alertBox.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/30', 'text-red-400', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
-            
             if (isError) {
                 alertBox.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-400');
                 alertIcon.className = 'fa-solid fa-circle-exclamation text-base mt-0.5';
@@ -288,8 +386,20 @@
                 alertBox.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
                 alertIcon.className = 'fa-solid fa-circle-check text-base mt-0.5';
             }
-            
             alertMessage.textContent = message;
+        }
+
+        // Display Modal Alert Banner Utility
+        function showModalAlert(message, isError = true) {
+            modalAlertBox.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/30', 'text-red-400', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+            if (isError) {
+                modalAlertBox.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-400');
+                modalAlertIcon.className = 'fa-solid fa-circle-exclamation text-sm mt-0.5';
+            } else {
+                modalAlertBox.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+                modalAlertIcon.className = 'fa-solid fa-circle-check text-sm mt-0.5';
+            }
+            modalAlertMessage.textContent = message;
         }
 
         // Set Loading State Utility
@@ -297,95 +407,145 @@
             submitBtn.disabled = isLoading;
             googleBtn.disabled = isLoading;
             if (isLoading) {
-                btnText.textContent = "Creating Account...";
+                btnText.textContent = "Processing...";
                 btnIcon.className = "fa-solid fa-circle-notch fa-spin text-xs";
             } else {
-                btnText.textContent = "Create Free Account";
+                btnText.textContent = currentPlan.text;
                 btnIcon.className = "fa-solid fa-arrow-right text-xs";
             }
         }
 
-        // Create Database Record in Firestore
-        async function createUserDocument(user, extraData = {}) {
-            const userRef = doc(db, "users", user.uid);
-            const userProfile = {
-                uid: user.uid,
-                email: user.email,
-                displayName: extraData.displayName || user.displayName || "Audiory Creator",
-                accountRole: extraData.accountRole || "artist",
-                subscriptionPlan: "starter",
-                royaltyBalance: 0.00,
-                activeReleases: 0,
-                accountStatus: "active",
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp()
-            };
+        // Radio Gateway Change Handler
+        document.querySelectorAll('input[name="paymentGateway"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                modalAlertBox.classList.add('hidden');
+                if (e.target.value === 'mpesa') {
+                    mpesaField.classList.remove('hidden');
+                } else {
+                    mpesaField.classList.add('hidden');
+                }
+            });
+        });
 
-            await setDoc(userRef, userProfile, { merge: true });
-        }
+        closeModalBtn.addEventListener('click', () => {
+            paymentModal.classList.add('hidden');
+            modalAlertBox.classList.add('hidden');
+        });
 
-        // Handle Email/Password Registration
+        let pendingUserData = null;
+
+        // Handle Signup Form Submission
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const displayName = document.getElementById('displayName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = passwordInput.value;
-            const accountRole = document.getElementById('accountRole').value;
+            pendingUserData = {
+                displayName: document.getElementById('displayName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                password: passwordInput.value,
+                accountRole: document.getElementById('accountRole').value
+            };
 
-            setLoading(true);
-
-            try {
-                // 1. Create Auth Account
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                // 2. Update Auth Profile Display Name
-                await updateProfile(user, { displayName });
-
-                // 3. Create User Document in Firestore
-                await createUserDocument(user, { displayName, accountRole });
-
-                showAlert("Account successfully created! Redirecting to dashboard...", false);
-                
-                // Redirect to dashboard after brief delay
-                setTimeout(() => {
-                    window.location.href = "/dashboard/";
-                }, 1500);
-
-            } catch (error) {
-                console.error("Signup Error:", error);
-                let errorMsg = "Failed to create account. Please try again.";
-                if (error.code === 'auth/email-already-in-use') {
-                    errorMsg = "This email is already registered. Try signing in instead.";
-                } else if (error.code === 'auth/weak-password') {
-                    errorMsg = "Password should be at least 6 characters long.";
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMsg = "Please enter a valid email address.";
+            if (selectedPlan === 'starter' || selectedPlan === 'free') {
+                setLoading(true);
+                try {
+                    await processAccountCreation(pendingUserData, { gateway: 'none' });
+                    showAlert("Account successfully created! Redirecting...", false);
+                    setTimeout(() => { window.location.href = "/dashboard/"; }, 1500);
+                } catch (error) {
+                    showAlert(error.message, true);
+                    setLoading(false);
                 }
-                showAlert(errorMsg, true);
-                setLoading(false);
+            } else {
+                modalAlertBox.classList.add('hidden');
+                paymentModal.classList.remove('hidden');
             }
         });
 
-        // Handle Google Sign-In
+        // Handle Payment Confirmation in Modal
+        confirmPaymentBtn.addEventListener('click', async () => {
+            const selectedGateway = document.querySelector('input[name="paymentGateway"]:checked').value;
+            const phone = document.getElementById('mpesaPhone').value.trim();
+
+            if (selectedGateway === 'mpesa' && !phone) {
+                showModalAlert("Please enter a valid M-Pesa phone number.", true);
+                return;
+            }
+
+            confirmPaymentBtn.disabled = true;
+            document.getElementById('paymentBtnText').textContent = "Processing Payment...";
+
+            try {
+                const authUser = await processAccountCreation(pendingUserData, {
+                    gateway: selectedGateway,
+                    phone: phone
+                });
+
+                const idToken = await authUser.getIdToken();
+                await fetch(`${WORKER_ENDPOINT}/subscription/upgrade`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${idToken}`
+                    },
+                    body: JSON.stringify({
+                        planId: selectedPlan,
+                        paymentMethod: selectedGateway,
+                        phone: phone
+                    })
+                });
+
+                showModalAlert("Payment verified & account activated! Redirecting...", false);
+                setTimeout(() => { 
+                    paymentModal.classList.add('hidden');
+                    window.location.href = "/dashboard/"; 
+                }, 1500);
+
+            } catch (err) {
+                showModalAlert(err.message || "Checkout failed. Please try again.", true);
+                confirmPaymentBtn.disabled = false;
+                document.getElementById('paymentBtnText').textContent = "Pay Now & Create Account";
+            }
+        });
+
+        async function processAccountCreation(userData, paymentInfo) {
+            const userCred = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+            await updateProfile(userCred.user, { displayName: userData.displayName });
+
+            await setDoc(doc(db, "users", userCred.user.uid), {
+                uid: userCred.user.uid,
+                email: userData.email,
+                displayName: userData.displayName,
+                accountRole: userData.accountRole,
+                subscriptionPlan: selectedPlan,
+                paymentGateway: paymentInfo.gateway,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            }, { merge: true });
+
+            return userCred.user;
+        }
+
+        // Google Sign-In Handler
         googleBtn.addEventListener('click', async () => {
             setLoading(true);
             try {
                 const result = await signInWithPopup(auth, googleProvider);
                 const user = result.user;
 
-                // Save or merge user profile in Firestore
-                await createUserDocument(user, { accountRole: "artist" });
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName,
+                    accountRole: "artist",
+                    subscriptionPlan: "starter",
+                    createdAt: serverTimestamp()
+                }, { merge: true });
 
                 showAlert("Google Sign-In successful! Redirecting...", false);
-                setTimeout(() => {
-                    window.location.href = "/dashboard/";
-                }, 1500);
+                setTimeout(() => { window.location.href = "/dashboard/"; }, 1500);
 
             } catch (error) {
-                console.error("Google Auth Error:", error);
-                showAlert("Google authentication was canceled or failed.", true);
+                showAlert("Google authentication failed.", true);
                 setLoading(false);
             }
         });
