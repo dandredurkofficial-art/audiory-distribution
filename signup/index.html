@@ -355,6 +355,8 @@
         window.WORKER_BASE_URL = "https://audiorydistribution.dandredurkofficial.workers.dev";
         const WORKER_BASE_URL = window.WORKER_BASE_URL;
 
+        const WORKER_ENDPOINT = `${WORKER_BASE_URL}/api/subscription/upgrade`;
+
         // Read Plan from Query String (?plan=starter | ?plan=pro | ?plan=label)
         const urlParams = new URLSearchParams(window.location.search);
         const selectedPlan = (urlParams.get('plan') || 'starter').toLowerCase();
