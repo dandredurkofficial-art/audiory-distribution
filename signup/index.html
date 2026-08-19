@@ -355,7 +355,8 @@
         window.WORKER_BASE_URL = "https://audiorydistribution.dandredurkofficial.workers.dev";
         const WORKER_BASE_URL = window.WORKER_BASE_URL;
 
-        const WORKER_ENDPOINT = `${WORKER_BASE_URL}/api/subscription/upgrade`;
+        // FIXED: Set target API path directly without extra trailing path segment
+        const UPGRADE_ENDPOINT = `${WORKER_BASE_URL}/api/subscription/upgrade`;
 
         // Read Plan from Query String (?plan=starter | ?plan=pro | ?plan=label)
         const urlParams = new URLSearchParams(window.location.search);
@@ -529,13 +530,17 @@
             document.getElementById('paymentBtnText').textContent = selectedGateway === 'paypal' ? "Redirecting..." : "Processing Payment...";
 
             try {
+                // 1. Create User in Firebase Auth & Firestore
                 const authUser = await processAccountCreation(pendingUserData, {
                     gateway: selectedGateway,
                     phone: phone
                 });
 
+                // 2. Fetch Firebase ID Token
                 const idToken = await authUser.getIdToken();
-                const response = await fetch(`${WORKER_ENDPOINT}/subscription/upgrade`, {
+
+                // 3. Post to Subscription Upgrade Endpoint
+                const response = await fetch(UPGRADE_ENDPOINT, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -545,20 +550,28 @@
                         planId: selectedPlan,
                         paymentMethod: selectedGateway,
                         phone: phone,
-                        cardDetails: selectedGateway === 'pesapal' ? {
-                            number: document.getElementById('cardNumber').value.trim(),
-                            expiry: document.getElementById('cardExpiry').value.trim(),
-                            cvc: document.getElementById('cardCvc').value.trim()
-                        } : null
+                        email: pendingUserData.email,
+                        displayName: pendingUserData.displayName
                     })
                 });
 
                 const result = await response.json();
 
-                if (selectedGateway === 'paypal' && result.redirectUrl) {
+                if (!response.ok || result.error) {
+                    throw new Error(result.error || "Payment processing failed on gateway server.");
+                }
+
+                // 4. Redirect based on Gateway Response
+                if ((selectedGateway === 'paypal' || selectedGateway === 'pesapal') && result.redirectUrl) {
                     window.location.href = result.redirectUrl;
+                } else if (selectedGateway === 'mpesa') {
+                    showModalAlert("STK Push sent! Check your phone and enter M-Pesa PIN to complete payment.", false);
+                    setTimeout(() => { 
+                        paymentModal.classList.add('hidden');
+                        window.location.href = "/dashboard/?payment=pending"; 
+                    }, 4000);
                 } else {
-                    showModalAlert("Payment verified & account activated! Redirecting...", false);
+                    showModalAlert("Payment processed! Redirecting to dashboard...", false);
                     setTimeout(() => { 
                         paymentModal.classList.add('hidden');
                         window.location.href = "/dashboard/"; 
