@@ -355,10 +355,10 @@
         window.WORKER_BASE_URL = "https://audiorydistribution.dandredurkofficial.workers.dev";
         const WORKER_BASE_URL = window.WORKER_BASE_URL;
 
-        // FIXED: Set target API path directly without extra trailing path segment
         const UPGRADE_ENDPOINT = `${WORKER_BASE_URL}/api/subscription/upgrade`;
+        const STATUS_ENDPOINT = `${WORKER_BASE_URL}/api/subscription/status`;
 
-        // Read Plan from Query String (?plan=starter | ?plan=pro | ?plan=label)
+        // Read Plan from Query String
         const urlParams = new URLSearchParams(window.location.search);
         const selectedPlan = (urlParams.get('plan') || 'starter').toLowerCase();
 
@@ -412,7 +412,6 @@
             }
         });
 
-        // Display Main Alert Banner
         function showAlert(message, isError = true) {
             alertBox.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/30', 'text-red-400', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
             if (isError) {
@@ -425,7 +424,6 @@
             alertMessage.textContent = message;
         }
 
-        // Display Modal Alert Banner
         function showModalAlert(message, isError = true) {
             modalAlertBox.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/30', 'text-red-400', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
             if (isError) {
@@ -438,7 +436,6 @@
             modalAlertMessage.textContent = message;
         }
 
-        // Set Loading State
         function setLoading(isLoading) {
             submitBtn.disabled = isLoading;
             googleBtn.disabled = isLoading;
@@ -451,7 +448,6 @@
             }
         }
 
-        // Radio Gateway Selection Handler
         document.querySelectorAll('input[name="paymentGateway"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
                 modalAlertBox.classList.add('hidden');
@@ -479,7 +475,6 @@
 
         let pendingUserData = null;
 
-        // Form Submit Listener
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -565,11 +560,47 @@
                 if ((selectedGateway === 'paypal' || selectedGateway === 'pesapal') && result.redirectUrl) {
                     window.location.href = result.redirectUrl;
                 } else if (selectedGateway === 'mpesa') {
-                    showModalAlert("STK Push sent! Check your phone and enter M-Pesa PIN to complete payment.", false);
-                    setTimeout(() => { 
-                        paymentModal.classList.add('hidden');
-                        window.location.href = "/dashboard/?payment=pending"; 
-                    }, 4000);
+                    showModalAlert("STK Push sent! Please enter your PIN on your phone...", false);
+                    document.getElementById('paymentBtnText').textContent = "Waiting for PIN...";
+
+                    let attempts = 0;
+                    const maxAttempts = 15; // Poll for 45 seconds max
+
+                    const pollInterval = setInterval(async () => {
+                        attempts++;
+
+                        try {
+                            const statusRes = await fetch(STATUS_ENDPOINT, {
+                                method: 'GET',
+                                headers: { 'Authorization': `Bearer ${idToken}` }
+                            });
+                            const statusData = await statusRes.json();
+
+                            if (statusData.status === "Active") {
+                                clearInterval(pollInterval);
+                                showModalAlert("Payment confirmed! Redirecting to dashboard...", false);
+                                setTimeout(() => {
+                                    paymentModal.classList.add('hidden');
+                                    window.location.href = "/dashboard/";
+                                }, 1500);
+                            } else if (statusData.status === "Failed") {
+                                clearInterval(pollInterval);
+                                showModalAlert("Payment failed, was cancelled, or balance was insufficient.", true);
+                                confirmPaymentBtn.disabled = false;
+                                document.getElementById('paymentBtnText').textContent = "Pay Now & Create Account";
+                            }
+                        } catch (err) {
+                            console.error("Polling status error:", err);
+                        }
+
+                        if (attempts >= maxAttempts) {
+                            clearInterval(pollInterval);
+                            showModalAlert("Payment confirmation timed out. If you entered your PIN, log in shortly.", true);
+                            confirmPaymentBtn.disabled = false;
+                            document.getElementById('paymentBtnText').textContent = "Pay Now & Create Account";
+                        }
+                    }, 3000);
+
                 } else {
                     showModalAlert("Payment processed! Redirecting to dashboard...", false);
                     setTimeout(() => { 
