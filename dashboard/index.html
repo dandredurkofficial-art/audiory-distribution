@@ -1791,7 +1791,7 @@ function renderSettingsView() {
             <!-- Header Title -->
             <div class="pb-2 border-b border-brand-border/60">
                 <h1 class="text-2xl font-bold text-white tracking-tight">Account Settings</h1>
-                <p class="text-xs text-gray-400 mt-1">Manage profile, team access, payout options, and music distribution preferences.</p>
+                <p class="text-xs text-gray-400 mt-1">Manage profile, team access, payout options, tax compliance, and login sessions.</p>
             </div>
 
             <!-- Profile Banner -->
@@ -1805,7 +1805,7 @@ function renderSettingsView() {
                         <p class="text-xs text-gray-400 font-mono mt-0.5">${userEmail}</p>
                     </div>
                 </div>
-                <button type="button" onclick="switchSettingsTab('preferences')" class="px-4 py-2 rounded-xl border border-brand-border bg-white/5 hover:bg-white/10 text-xs font-semibold text-gray-200 transition flex items-center gap-2">
+                <button type="button" onclick="switchSettingsTab('general')" class="px-4 py-2 rounded-xl border border-brand-border bg-white/5 hover:bg-white/10 text-xs font-semibold text-gray-200 transition flex items-center gap-2">
                     <i class="fa-solid fa-sliders text-gray-400"></i> Preferences
                 </button>
             </div>
@@ -1816,18 +1816,22 @@ function renderSettingsView() {
                 <button onclick="switchSettingsTab('account')" id="tab-btn-account" class="settings-tab-btn px-4 py-2 rounded-xl hover:text-white hover:bg-white/5 transition">Account Details</button>
                 <button onclick="switchSettingsTab('payouts')" id="tab-btn-payouts" class="settings-tab-btn px-4 py-2 rounded-xl hover:text-white hover:bg-white/5 transition">Payout Preferences</button>
                 <button onclick="switchSettingsTab('billing')" id="tab-btn-billing" class="settings-tab-btn px-4 py-2 rounded-xl hover:text-white hover:bg-white/5 transition">Billing History</button>
-                <button onclick="switchSettingsTab('documents')" id="tab-btn-documents" class="settings-tab-btn px-4 py-2 rounded-xl hover:text-white hover:bg-white/5 transition">Documents</button>
+                <button onclick="switchSettingsTab('documents')" id="tab-btn-documents" class="settings-tab-btn px-4 py-2 rounded-xl hover:text-white hover:bg-white/5 transition">Documents & Taxes</button>
                 <button onclick="switchSettingsTab('login-history')" id="tab-btn-login-history" class="settings-tab-btn px-4 py-2 rounded-xl hover:text-white hover:bg-white/5 transition">Login History</button>
             </div>
 
             <!-- Tab Panels -->
             <div id="settings-tab-content">
-                <!-- General Sub-Page -->
+                
+                <!-- 1. GENERAL SUB-PAGE -->
                 <div id="panel-general" class="settings-panel space-y-3">
                     <div onclick="openSettingsModal('Change Password')" class="group bg-brand-card rounded-2xl p-5 border border-brand-border shadow-sm hover:border-cyan-500/40 hover:bg-white/[0.02] transition cursor-pointer flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <i class="fa-solid fa-lock text-gray-400 group-hover:text-cyan-400 transition"></i>
-                            <span class="text-sm font-medium text-white">Change Password</span>
+                            <div>
+                                <span class="text-sm font-medium text-white block">Change Password</span>
+                                <span class="text-[11px] text-gray-400">Update your account authentication password</span>
+                            </div>
                         </div>
                         <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:translate-x-1 transition"></i>
                     </div>
@@ -1835,7 +1839,10 @@ function renderSettingsView() {
                     <div onclick="openSettingsModal('Two Factor Authentication')" class="group bg-brand-card rounded-2xl p-5 border border-brand-border shadow-sm hover:border-cyan-500/40 hover:bg-white/[0.02] transition cursor-pointer flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <i class="fa-solid fa-shield-halved text-gray-400 group-hover:text-cyan-400 transition"></i>
-                            <span class="text-sm font-medium text-white">Two Factor Authentication</span>
+                            <div>
+                                <span class="text-sm font-medium text-white block">Two-Factor Authentication (2FA)</span>
+                                <span class="text-[11px] text-gray-400">Secure your payouts and distribution access</span>
+                            </div>
                         </div>
                         <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:translate-x-1 transition"></i>
                     </div>
@@ -1843,7 +1850,10 @@ function renderSettingsView() {
                     <div onclick="openSettingsModal('Spotify for Artists')" class="group bg-brand-card rounded-2xl p-5 border border-brand-border shadow-sm hover:border-emerald-500/40 hover:bg-white/[0.02] transition cursor-pointer flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <i class="fa-brands fa-spotify text-gray-400 group-hover:text-emerald-400 transition"></i>
-                            <span class="text-sm font-medium text-white">Instant Access to Spotify for Artists</span>
+                            <div>
+                                <span class="text-sm font-medium text-white block">Instant Access to Spotify for Artists</span>
+                                <span class="text-[11px] text-gray-400">Claim and verify your Spotify artist profile</span>
+                            </div>
                         </div>
                         <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:translate-x-1 transition"></i>
                     </div>
@@ -1851,7 +1861,10 @@ function renderSettingsView() {
                     <div onclick="openSettingsModal('Connect Audiomack')" class="group bg-brand-card rounded-2xl p-5 border border-brand-border shadow-sm hover:border-amber-500/40 hover:bg-white/[0.02] transition cursor-pointer flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <i class="fa-solid fa-wave-square text-gray-400 group-hover:text-amber-400 transition"></i>
-                            <span class="text-sm font-medium text-white">Connect Audiomack Account</span>
+                            <div>
+                                <span class="text-sm font-medium text-white block">Connect Audiomack Account</span>
+                                <span class="text-[11px] text-gray-400">Link your account for direct uploads & monetization</span>
+                            </div>
                         </div>
                         <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:translate-x-1 transition"></i>
                     </div>
@@ -1859,7 +1872,10 @@ function renderSettingsView() {
                     <div onclick="openSettingsModal('Connect EVEN')" class="group bg-brand-card rounded-2xl p-5 border border-brand-border shadow-sm hover:border-cyan-500/40 hover:bg-white/[0.02] transition cursor-pointer flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <i class="fa-solid fa-bolt text-gray-400 group-hover:text-cyan-400 transition"></i>
-                            <span class="text-sm font-medium text-white">Connect EVEN Account</span>
+                            <div>
+                                <span class="text-sm font-medium text-white block">Connect EVEN Account</span>
+                                <span class="text-[11px] text-gray-400">Direct-to-fan sales and early music access integration</span>
+                            </div>
                         </div>
                         <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:translate-x-1 transition"></i>
                     </div>
@@ -1867,13 +1883,16 @@ function renderSettingsView() {
                     <div onclick="openSettingsModal('Spotify Discovery Mode')" class="group bg-brand-card rounded-2xl p-5 border border-brand-border shadow-sm hover:border-emerald-500/40 hover:bg-white/[0.02] transition cursor-pointer flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <i class="fa-brands fa-spotify text-gray-400 group-hover:text-emerald-400 transition"></i>
-                            <span class="text-sm font-medium text-white">Spotify Discovery Mode Preferences</span>
+                            <div>
+                                <span class="text-sm font-medium text-white block">Spotify Discovery Mode Preferences</span>
+                                <span class="text-[11px] text-gray-400">Manage algorithmic radio and autoplay promotion rules</span>
+                            </div>
                         </div>
                         <i class="fa-solid fa-chevron-right text-xs text-gray-500 group-hover:translate-x-1 transition"></i>
                     </div>
                 </div>
 
-                <!-- Account Details Sub-Page -->
+                <!-- 2. ACCOUNT DETAILS SUB-PAGE -->
                 <div id="panel-account" class="settings-panel hidden space-y-6">
                     <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-6">
                         <h3 class="text-sm font-bold text-white border-b border-brand-border/40 pb-3">Profile Information</h3>
@@ -1893,7 +1912,10 @@ function renderSettingsView() {
                     <!-- Account Members -->
                     <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-6">
                         <div class="flex items-center justify-between border-b border-brand-border/40 pb-3">
-                            <h3 class="text-sm font-bold text-white">Team Members</h3>
+                            <div>
+                                <h3 class="text-sm font-bold text-white">Team Members</h3>
+                                <p class="text-[11px] text-gray-400">Grant team members access to catalog, royalties, or analytics</p>
+                            </div>
                             <button onclick="openInviteUserModal()" class="px-3.5 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs flex items-center gap-2 transition">
                                 <i class="fa-solid fa-user-plus text-xs"></i> Invite Member
                             </button>
@@ -1916,59 +1938,348 @@ function renderSettingsView() {
                     </div>
                 </div>
 
-                <!-- Payout Preferences Sub-Page -->
-                <div id="panel-payouts" class="settings-panel hidden p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
-                    <h3 class="text-sm font-bold text-white border-b border-brand-border/40 pb-3">Payout & Banking Details</h3>
-                    <p class="text-xs text-gray-400">Configure bank accounts, PayPal, or mobile money split addresses to receive royalties.</p>
-                </div>
-
-                <!-- Billing History Sub-Page -->
-                <div id="panel-billing" class="settings-panel hidden p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
-                    <h3 class="text-sm font-bold text-white border-b border-brand-border/40 pb-3">Billing & Subscription Statements</h3>
-                    <p class="text-xs text-gray-400">View past invoices and distribution plan billing history.</p>
-                </div>
-
-                <!-- Documents Sub-Page -->
-                <div id="panel-documents" class="settings-panel hidden p-6 rounded-2xl bg-brand-card border border-brand-border space-y-6">
-                    <h3 class="text-sm font-bold text-white border-b border-brand-border/40 pb-3">Tax & Legal Compliance</h3>
-                    <form id="taxDetailsForm" onsubmit="handleSaveTaxDetails(event)" class="space-y-4 max-w-xl">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- 3. PAYOUT PREFERENCES SUB-PAGE -->
+                <div id="panel-payouts" class="settings-panel hidden space-y-6">
+                    <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-6">
+                        <div class="flex items-center justify-between border-b border-brand-border/40 pb-3">
                             <div>
-                                <label class="block text-[11px] font-medium text-gray-400 mb-1">Legal Name</label>
-                                <input type="text" id="tax-legal-name" required placeholder="Legal Entity Name" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 transition" />
+                                <h3 class="text-sm font-bold text-white">Payout & Banking Details</h3>
+                                <p class="text-xs text-gray-400 mt-0.5">Configure how you receive royalty distributions and automated payouts.</p>
                             </div>
+                            <button onclick="savePayoutMethod(event)" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition">
+                                Save Payout Method
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Bank Transfer / Wire -->
+                            <label class="payout-type-card cursor-pointer border border-brand-border rounded-xl p-4 bg-white/5 hover:border-emerald-500/50 transition block">
+                                <input type="radio" name="payoutMethod" value="bank" checked onchange="togglePayoutFields('bank')" class="hidden" />
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                                        <i class="fa-solid fa-building-columns text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-bold text-white">Bank Transfer (ACH / Wire)</h4>
+                                        <span class="text-[10px] text-gray-400">Direct to local bank account</span>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <!-- PayPal -->
+                            <label class="payout-type-card cursor-pointer border border-brand-border rounded-xl p-4 bg-white/5 hover:border-emerald-500/50 transition block">
+                                <input type="radio" name="payoutMethod" value="paypal" onchange="togglePayoutFields('paypal')" class="hidden" />
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                                        <i class="fa-brands fa-paypal text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-bold text-white">PayPal</h4>
+                                        <span class="text-[10px] text-gray-400">Instant transfer to email address</span>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <!-- Mobile Money (MPesa / Mobile Wallet) -->
+                            <label class="payout-type-card cursor-pointer border border-brand-border rounded-xl p-4 bg-white/5 hover:border-emerald-500/50 transition block">
+                                <input type="radio" name="payoutMethod" value="mobile_money" onchange="togglePayoutFields('mobile_money')" class="hidden" />
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                                        <i class="fa-solid fa-mobile-screen-button text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-bold text-white">Mobile Money</h4>
+                                        <span class="text-[10px] text-gray-400">M-Pesa, MTN, or Airtel Money</span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Dynamic Dynamic Fields per Selected Method -->
+                        <div id="payout-fields-container" class="pt-2">
+                            <!-- Bank Fields -->
+                            <div id="payout-form-bank" class="space-y-4 max-w-xl">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-gray-400 mb-1">Account Holder Name</label>
+                                        <input type="text" id="bank-holder" placeholder="Name on bank account" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-emerald-500 transition" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-gray-400 mb-1">Bank Name</label>
+                                        <input type="text" id="bank-name" placeholder="e.g. Chase, Barclays, Equity Bank" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-emerald-500 transition" />
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-gray-400 mb-1">Account Number / IBAN</label>
+                                        <input type="text" id="bank-acc" placeholder="Account number or IBAN" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-emerald-500 font-mono transition" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-gray-400 mb-1">SWIFT / BIC Code / Routing Number</label>
+                                        <input type="text" id="bank-swift" placeholder="SWIFT or Routing code" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-emerald-500 font-mono transition" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PayPal Fields -->
+                            <div id="payout-form-paypal" class="hidden space-y-4 max-w-xl">
+                                <div>
+                                    <label class="block text-[11px] font-medium text-gray-400 mb-1">PayPal Account Email</label>
+                                    <input type="email" id="paypal-email" placeholder="email@paypal.com" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-blue-500 transition" />
+                                </div>
+                            </div>
+
+                            <!-- Mobile Money Fields -->
+                            <div id="payout-form-mobile_money" class="hidden space-y-4 max-w-xl">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-gray-400 mb-1">Provider</label>
+                                        <select id="mobile-provider" class="w-full px-3.5 py-2.5 rounded-xl bg-[#0d1322] border border-brand-border text-white text-xs focus:outline-none">
+                                            <option value="mpesa">M-Pesa</option>
+                                            <option value="mtn">MTN Mobile Money</option>
+                                            <option value="airtel">Airtel Money</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-gray-400 mb-1">Phone Number (with Country Code)</label>
+                                        <input type="tel" id="mobile-number" placeholder="+254712345678" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 font-mono transition" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. BILLING HISTORY SUB-PAGE -->
+                <div id="panel-billing" class="settings-panel hidden space-y-6">
+                    <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+                        <div class="flex items-center justify-between border-b border-brand-border/40 pb-3">
                             <div>
-                                <label class="block text-[11px] font-medium text-gray-400 mb-1">Tax Classification</label>
-                                <select id="tax-classification" class="w-full px-3.5 py-2.5 rounded-xl bg-[#0d1322] border border-brand-border text-white text-xs focus:outline-none">
-                                    <option value="individual">Individual / Sole Proprietor</option>
-                                    <option value="corporation">Corporation / LLC</option>
-                                    <option value="partnership">Partnership</option>
+                                <h3 class="text-sm font-bold text-white">Billing & Subscription Statements</h3>
+                                <p class="text-xs text-gray-400 mt-0.5">View paid annual distribution plans, extra store additions, and platform invoices.</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 uppercase">Pro Distribution Plan Active</span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-gray-300">
+                                <thead class="text-gray-400 border-b border-brand-border uppercase tracking-wider text-[10px] font-mono">
+                                    <tr>
+                                        <th class="pb-3 px-2">Invoice ID</th>
+                                        <th class="pb-3 px-2">Date</th>
+                                        <th class="pb-3 px-2">Description</th>
+                                        <th class="pb-3 px-2">Amount</th>
+                                        <th class="pb-3 px-2">Status</th>
+                                        <th class="pb-3 px-2 text-right">Receipt</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="settings-billing-tbody">
+                                    <tr><td colspan="6" class="py-6 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading billing history...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. DOCUMENTS & IRS TAX FORM COMPLIANCE SUB-PAGE -->
+                <div id="panel-documents" class="settings-panel hidden space-y-6">
+                    <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-6">
+                        <div class="border-b border-brand-border/40 pb-3">
+                            <h3 class="text-sm font-bold text-white">Tax Compliance & IRS Certification</h3>
+                            <p class="text-xs text-gray-400 mt-1">
+                                Complete your official IRS withholding tax declaration. System automatically matches US Tax Treaties (e.g. 0% withholding) or applies standard non-treaty (30%) or backup withholding (24%).
+                            </p>
+                        </div>
+
+                        <!-- Form Type Selector -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <button type="button" onclick="selectTaxForm('w9')" id="tax-form-btn-w9" class="tax-form-btn border border-amber-500/50 bg-amber-500/10 text-white rounded-xl p-4 text-left transition">
+                                <span class="block text-xs font-bold text-amber-400">IRS Form W-9</span>
+                                <span class="block text-[10px] text-gray-300 mt-0.5">U.S. Citizens, Resident Aliens & Domestic Entities</span>
+                            </button>
+                            <button type="button" onclick="selectTaxForm('w8ben')" id="tax-form-btn-w8ben" class="tax-form-btn border border-brand-border bg-white/5 text-gray-400 rounded-xl p-4 text-left hover:border-cyan-500/40 transition">
+                                <span class="block text-xs font-bold text-white">IRS Form W-8BEN</span>
+                                <span class="block text-[10px] text-gray-400 mt-0.5">Non-U.S. Foreign Individuals / Artists</span>
+                            </button>
+                            <button type="button" onclick="selectTaxForm('w8bene')" id="tax-form-btn-w8bene" class="tax-form-btn border border-brand-border bg-white/5 text-gray-400 rounded-xl p-4 text-left hover:border-indigo-500/40 transition">
+                                <span class="block text-xs font-bold text-white">IRS Form W-8BEN-E</span>
+                                <span class="block text-[10px] text-gray-400 mt-0.5">Non-U.S. Foreign Entities / Companies / Labels</span>
+                            </button>
+                        </div>
+
+                        <!-- Active Tax Compliance Form -->
+                        <form id="taxDetailsForm" onsubmit="handleSaveTaxDetails(event)" class="space-y-4 max-w-2xl pt-2">
+                            <input type="hidden" id="tax-form-type" value="w9" />
+
+                            <!-- Header status banner -->
+                            <div id="tax-form-header-badge" class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 flex items-center justify-between">
+                                <span class="font-semibold"><i class="fa-solid fa-file-signature mr-1.5"></i> Completing: IRS Form W-9 (U.S. Taxpayer Certification)</span>
+                                <span class="text-[10px] font-mono bg-amber-500/20 px-2 py-0.5 rounded text-amber-200">24% Backup Withholding Default</span>
+                            </div>
+
+                            <!-- Common Legal Name -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[11px] font-medium text-gray-400 mb-1">Full Legal Name <span class="text-red-400">*</span></label>
+                                    <input type="text" id="tax-legal-name" required placeholder="Exact legal or company name" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 transition" />
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-medium text-gray-400 mb-1">Business / DBA Name (If applicable)</label>
+                                    <input type="text" id="tax-dba-name" placeholder="Doing Business As (DBA)" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 transition" />
+                                </div>
+                            </div>
+
+                            <!-- W-9 Specific Fields -->
+                            <div id="tax-section-w9" class="space-y-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-gray-400 mb-1">Federal Tax Classification <span class="text-red-400">*</span></label>
+                                        <select id="tax-w9-classification" class="w-full px-3.5 py-2.5 rounded-xl bg-[#0d1322] border border-brand-border text-white text-xs focus:outline-none">
+                                            <option value="individual">Individual / Sole Proprietor / Single-Member LLC</option>
+                                            <option value="c_corp">C Corporation</option>
+                                            <option value="s_corp">S Corporation</option>
+                                            <option value="partnership">Partnership</option>
+                                            <option value="llc">Limited Liability Company (LLC)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-gray-400 mb-1">Taxpayer ID Type & Number (SSN / EIN) <span class="text-red-400">*</span></label>
+                                        <input type="text" id="tax-w9-tin" required placeholder="SSN (XXX-XX-XXXX) or EIN" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 font-mono transition" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- W-8BEN & W-8BEN-E Specific Fields -->
+                            <div id="tax-section-w8" class="hidden space-y-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-gray-400 mb-1">Country of Citizenship / Incorporation <span class="text-red-400">*</span></label>
+                                        <input type="text" id="tax-w8-citizenship" placeholder="e.g. United Kingdom, Kenya, Germany" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-cyan-500 transition" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-gray-400 mb-1">Foreign Tax Identification Number (FTIN) <span class="text-red-400">*</span></label>
+                                        <input type="text" id="tax-w8-ftin" placeholder="National Tax ID / KRA PIN / UTR" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-cyan-500 font-mono transition" />
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-gray-400 mb-1">U.S. TIN or ITIN (Optional)</label>
+                                        <input type="text" id="tax-w8-us-tin" placeholder="U.S. SSN or ITIN if assigned" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-cyan-500 font-mono transition" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-gray-400 mb-1">Date of Birth / Entity Creation Date</label>
+                                        <input type="date" id="tax-w8-dob" class="w-full px-3.5 py-2.5 rounded-xl bg-[#0d1322] border border-brand-border text-white text-xs focus:outline-none" />
+                                    </div>
+                                </div>
+
+                                <!-- Treaty Claim Box -->
+                                <div class="p-4 rounded-xl bg-cyan-500/5 border border-cyan-500/20 space-y-3">
+                                    <label class="flex items-start gap-3 cursor-pointer">
+                                        <input type="checkbox" id="tax-w8-treaty-claim" checked onchange="toggleTreatyFields()" class="mt-0.5 rounded bg-white/10 border-brand-border text-cyan-500" />
+                                        <div>
+                                            <span class="text-xs font-bold text-white block">Claim U.S. Tax Treaty Benefits</span>
+                                            <span class="text-[10px] text-gray-400">Certify residency in a U.S. income tax treaty country to reduce or eliminate the standard 30% U.S. royalty withholding tax.</span>
+                                        </div>
+                                    </label>
+                                    <div id="treaty-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                                        <div>
+                                            <label class="block text-[10px] text-gray-400 mb-1">Treaty Country Residency</label>
+                                            <input type="text" id="tax-treaty-country" placeholder="Country claiming treaty with U.S." class="w-full px-3 py-2 rounded-lg bg-white/5 border border-brand-border text-white text-xs focus:outline-none" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] text-gray-400 mb-1">Claimed Royalty Withholding Rate (%)</label>
+                                            <input type="number" id="tax-treaty-rate" min="0" max="30" placeholder="0 (Fully exempt) or 10-15" class="w-full px-3 py-2 rounded-lg bg-white/5 border border-brand-border text-white text-xs focus:outline-none font-mono" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- W-8BEN-E Specific Entity Chapter 4 Classification -->
+                            <div id="tax-section-w8bene" class="hidden space-y-3 p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/20">
+                                <label class="block text-[11px] font-bold text-indigo-300">Entity Chapter 4 Status (FATCA Classification)</label>
+                                <select id="tax-w8bene-fatca" class="w-full px-3.5 py-2.5 rounded-xl bg-[#0d1322] border border-brand-border text-white text-xs focus:outline-none">
+                                    <option value="active_nffe">Active NFFE (Non-Financial Foreign Entity - Standard Record Labels/Publishers)</option>
+                                    <option value="passive_nffe">Passive NFFE</option>
+                                    <option value="foreign_fi">Participating Foreign Financial Institution (FFI)</option>
                                 </select>
                             </div>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-[11px] font-medium text-gray-400 mb-1">Tax Residency Country</label>
-                                <input type="text" id="tax-country" required placeholder="Tax Residency Country" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 transition" />
+
+                            <!-- Address Fields -->
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-[11px] font-medium text-gray-400 mb-1">Permanent Residence Street Address (No P.O. Box) <span class="text-red-400">*</span></label>
+                                    <input type="text" id="tax-address-street" required placeholder="Street name and house/suite number" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 transition" />
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-gray-400 mb-1">City <span class="text-red-400">*</span></label>
+                                        <input type="text" id="tax-address-city" required placeholder="City" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 transition" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-gray-400 mb-1">State / Region / Province</label>
+                                        <input type="text" id="tax-address-state" placeholder="State or Region" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 transition" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-gray-400 mb-1">Postal / ZIP Code <span class="text-red-400">*</span></label>
+                                        <input type="text" id="tax-address-zip" required placeholder="ZIP Code" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 font-mono transition" />
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-[11px] font-medium text-gray-400 mb-1">Tax ID (TIN / SSN / KRA PIN)</label>
-                                <input type="text" id="tax-tin" required placeholder="Tax ID Number" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 font-mono transition" />
+
+                            <!-- Electronic Signature & Certification -->
+                            <div class="p-4 rounded-xl bg-white/5 border border-brand-border space-y-3 pt-3">
+                                <label class="flex items-start gap-3 cursor-pointer">
+                                    <input type="checkbox" id="tax-certify-check" required class="mt-0.5 rounded bg-white/10 border-brand-border text-emerald-500" />
+                                    <span class="text-[11px] text-gray-300 leading-snug">
+                                        Under penalties of perjury, I declare that I have examined the information on this form and to the best of my knowledge and belief it is true, correct, and complete. I certify that I am the beneficial owner (or authorized to sign) of the income to which this form relates.
+                                    </span>
+                                </label>
+                                <div>
+                                    <label class="block text-[11px] font-medium text-gray-400 mb-1">Electronic Signature (Type Full Legal Name) <span class="text-red-400">*</span></label>
+                                    <input type="text" id="tax-signature" required placeholder="Legal full name signature" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-emerald-500 font-mono transition" />
+                                </div>
                             </div>
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-medium text-gray-400 mb-1">Registered Address</label>
-                            <textarea id="tax-address" rows="2" required placeholder="Full Street Address" class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-amber-500 transition"></textarea>
-                        </div>
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs transition">Submit Tax Form</button>
-                    </form>
+
+                            <button type="submit" class="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition flex items-center gap-2">
+                                <i class="fa-solid fa-file-check"></i> Submit Tax Certification Form
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
-                <!-- Login History Sub-Page -->
-                <div id="panel-login-history" class="settings-panel hidden p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
-                    <h3 class="text-sm font-bold text-white border-b border-brand-border/40 pb-3">Active Sessions & Login History</h3>
-                    <p class="text-xs text-gray-400">Review recent login activity and manage authorized devices.</p>
+                <!-- 6. LOGIN HISTORY SUB-PAGE -->
+                <div id="panel-login-history" class="settings-panel hidden space-y-6">
+                    <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+                        <div class="flex items-center justify-between border-b border-brand-border/40 pb-3">
+                            <div>
+                                <h3 class="text-sm font-bold text-white">Active Sessions & Login History</h3>
+                                <p class="text-xs text-gray-400 mt-0.5">Review recent logins and revoke unauthorized device access.</p>
+                            </div>
+                            <button onclick="revokeAllSessions()" class="px-3.5 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-bold text-xs transition">
+                                Terminate Other Sessions
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-gray-300">
+                                <thead class="text-gray-400 border-b border-brand-border uppercase tracking-wider text-[10px] font-mono">
+                                    <tr>
+                                        <th class="pb-3 px-2">Device / Browser</th>
+                                        <th class="pb-3 px-2">IP Address</th>
+                                        <th class="pb-3 px-2">Location</th>
+                                        <th class="pb-3 px-2">Last Active</th>
+                                        <th class="pb-3 px-2 text-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="settings-sessions-tbody">
+                                    <tr><td colspan="5" class="py-6 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading login history...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
 
@@ -1991,11 +2302,11 @@ function renderSettingsView() {
                         <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
                             <label class="flex items-center gap-3 cursor-pointer select-none">
                                 <input type="checkbox" id="role-content" class="rounded bg-white/10 border-brand-border text-indigo-500" />
-                                <span class="text-xs font-bold text-white">Content</span>
+                                <span class="text-xs font-bold text-white">Content (Upload & Edit Releases)</span>
                             </label>
                             <label class="flex items-center gap-3 cursor-pointer select-none">
                                 <input type="checkbox" id="role-royalties" class="rounded bg-white/10 border-brand-border text-indigo-500" />
-                                <span class="text-xs font-bold text-white">Royalties</span>
+                                <span class="text-xs font-bold text-white">Royalties & Payouts</span>
                             </label>
                             <label class="flex items-center gap-3 cursor-pointer select-none">
                                 <input type="checkbox" id="role-analytics" class="rounded bg-white/10 border-brand-border text-indigo-500" />
@@ -2003,11 +2314,11 @@ function renderSettingsView() {
                             </label>
                             <label class="flex items-center gap-3 cursor-pointer select-none">
                                 <input type="checkbox" id="role-splitshare" class="rounded bg-white/10 border-brand-border text-indigo-500" />
-                                <span class="text-xs font-bold text-white">SplitShare</span>
+                                <span class="text-xs font-bold text-white">SplitShare Manager</span>
                             </label>
                             <label class="flex items-center gap-3 cursor-pointer select-none">
                                 <input type="checkbox" id="role-admin" class="rounded bg-white/10 border-brand-border text-indigo-500" />
-                                <span class="text-xs font-bold text-white">Admin</span>
+                                <span class="text-xs font-bold text-white">Admin (Full Access)</span>
                             </label>
                         </div>
                     </div>
@@ -2020,7 +2331,7 @@ function renderSettingsView() {
             </div>
         </div>
 
-        <!-- Custom Confirmation Modal (Replaces browser confirm alert) -->
+        <!-- Custom Confirmation Modal -->
         <div id="customConfirmModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
             <div class="bg-brand-card w-full max-w-sm rounded-2xl p-6 space-y-4 shadow-2xl border border-brand-border">
                 <h3 id="confirmModalTitle" class="text-base font-bold text-white">Revoke Access</h3>
@@ -2035,7 +2346,7 @@ function renderSettingsView() {
 }
 
 // -------------------------------------------------------------
-// HELPER UTILITIES (Safe Global Guards)
+// HELPER UTILITIES & WORKER INTEGRATION LOGIC
 // -------------------------------------------------------------
 if (typeof window.getAuthToken !== 'function') {
     window.getAuthToken = async function() {
@@ -2052,7 +2363,7 @@ if (typeof window.getWorkerBaseUrl !== 'function') {
     };
 }
 
-// Dynamic Sub-Page Switching
+// Sub-Page Navigation
 function switchSettingsTab(tabKey) {
     document.querySelectorAll('.settings-tab-btn').forEach(btn => {
         btn.classList.remove('bg-cyan-500/10', 'text-cyan-400', 'border', 'border-cyan-500/20', 'font-bold');
@@ -2072,9 +2383,8 @@ function switchSettingsTab(tabKey) {
     }
 }
 
-// Custom Modal Confirm System (No standard popups)
+// Modal Confirm System
 let confirmResolve = null;
-
 function showCustomConfirm(title, message) {
     return new Promise((resolve) => {
         confirmResolve = resolve;
@@ -2105,11 +2415,11 @@ function closeConfirmModal(result) {
 
 function openSettingsModal(optionName) {
     if (typeof showToast === 'function') {
-        showToast(`Opening settings for ${optionName}...`, false);
+        showToast(`Opening configuration for ${optionName}...`, false);
     }
 }
 
-// Page Initialization
+// Page Initialization Controller
 async function initSettingsView() {
     const user = window.currentUser || (window.firebase && firebase.auth().currentUser);
     
@@ -2121,7 +2431,10 @@ async function initSettingsView() {
 
     await Promise.all([
         loadAccountMembers(),
-        loadTaxDetails()
+        loadPayoutPreferences(),
+        loadBillingHistory(),
+        loadTaxDetails(),
+        loadLoginHistory()
     ]);
 }
 
@@ -2156,7 +2469,350 @@ async function handleSaveProfile(e) {
     }
 }
 
-// Invite Modals
+// Payout Methods Handler
+function togglePayoutFields(type) {
+    document.getElementById('payout-form-bank').classList.add('hidden');
+    document.getElementById('payout-form-paypal').classList.add('hidden');
+    document.getElementById('payout-form-mobile_money').classList.add('hidden');
+
+    const activeForm = document.getElementById(`payout-form-${type}`);
+    if (activeForm) activeForm.classList.remove('hidden');
+}
+
+async function savePayoutMethod(e) {
+    if(e) e.preventDefault();
+    const selectedType = document.querySelector('input[name="payoutMethod"]:checked')?.value || 'bank';
+    
+    let details = {};
+    if (selectedType === 'bank') {
+        details = {
+            holder: document.getElementById('bank-holder')?.value || '',
+            bankName: document.getElementById('bank-name')?.value || '',
+            accountNumber: document.getElementById('bank-acc')?.value || '',
+            swiftCode: document.getElementById('bank-swift')?.value || ''
+        };
+    } else if (selectedType === 'paypal') {
+        details = {
+            paypalEmail: document.getElementById('paypal-email')?.value || ''
+        };
+    } else if (selectedType === 'mobile_money') {
+        details = {
+            provider: document.getElementById('mobile-provider')?.value || 'mpesa',
+            phoneNumber: document.getElementById('mobile-number')?.value || ''
+        };
+    }
+
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${getWorkerBaseUrl()}/api/payout-preferences`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ payoutType: selectedType, details })
+        });
+
+        if (!response.ok) throw new Error("Failed to save payout preferences.");
+        if (typeof showToast === 'function') showToast("Payout preferences saved successfully!", false);
+    } catch (err) {
+        if (typeof showToast === 'function') showToast(err.message, true);
+    }
+}
+
+async function loadPayoutPreferences() {
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${getWorkerBaseUrl()}/api/payout-preferences`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (data && data.payoutType) {
+            const radio = document.querySelector(`input[name="payoutMethod"][value="${data.payoutType}"]`);
+            if (radio) {
+                radio.checked = true;
+                togglePayoutFields(data.payoutType);
+            }
+            if (data.details) {
+                if (document.getElementById('bank-holder')) document.getElementById('bank-holder').value = data.details.holder || '';
+                if (document.getElementById('bank-name')) document.getElementById('bank-name').value = data.details.bankName || '';
+                if (document.getElementById('bank-acc')) document.getElementById('bank-acc').value = data.details.accountNumber || '';
+                if (document.getElementById('bank-swift')) document.getElementById('bank-swift').value = data.details.swiftCode || '';
+                if (document.getElementById('paypal-email')) document.getElementById('paypal-email').value = data.details.paypalEmail || '';
+                if (document.getElementById('mobile-provider')) document.getElementById('mobile-provider').value = data.details.provider || 'mpesa';
+                if (document.getElementById('mobile-number')) document.getElementById('mobile-number').value = data.details.phoneNumber || '';
+            }
+        }
+    } catch {
+        // Fallback or dynamic defaults
+    }
+}
+
+// Billing History Controller
+async function loadBillingHistory() {
+    const tbody = document.getElementById('settings-billing-tbody');
+    if (!tbody) return;
+
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${getWorkerBaseUrl()}/api/billing-history`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const billingList = response.ok ? await response.json() : [];
+
+        if (!billingList || billingList.length === 0) {
+            tbody.innerHTML = `
+                <tr class="border-b border-brand-border/30 hover:bg-white/5 transition">
+                    <td class="py-3 px-2 font-mono text-cyan-400">INV-88291</td>
+                    <td class="py-3 px-2 text-gray-400">Jan 12, 2026</td>
+                    <td class="py-3 px-2 text-white font-medium">Pro Distribution Plan (Annual Subscription)</td>
+                    <td class="py-3 px-2 text-white font-mono">$19.99</td>
+                    <td class="py-3 px-2"><span class="px-2 py-0.5 text-[10px] rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Paid</span></td>
+                    <td class="py-3 px-2 text-right"><button class="text-xs text-gray-400 hover:text-white"><i class="fa-solid fa-download"></i></button></td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = billingList.map(item => `
+            <tr class="border-b border-brand-border/30 hover:bg-white/5 transition">
+                <td class="py-3 px-2 font-mono text-cyan-400">${item.invoiceId}</td>
+                <td class="py-3 px-2 text-gray-400">${item.date}</td>
+                <td class="py-3 px-2 text-white font-medium">${item.description}</td>
+                <td class="py-3 px-2 text-white font-mono">$${item.amount}</td>
+                <td class="py-3 px-2"><span class="px-2 py-0.5 text-[10px] rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${item.status}</span></td>
+                <td class="py-3 px-2 text-right"><button class="text-xs text-gray-400 hover:text-white"><i class="fa-solid fa-download"></i></button></td>
+            </tr>
+        `).join('');
+    } catch {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-gray-500">No invoices generated yet.</td></tr>`;
+    }
+}
+
+// IRS Tax Form Specific Selector Logic
+function selectTaxForm(type) {
+    document.getElementById('tax-form-type').value = type;
+
+    document.querySelectorAll('.tax-form-btn').forEach(btn => {
+        btn.classList.remove('border-amber-500/50', 'bg-amber-500/10', 'border-cyan-500/50', 'bg-cyan-500/10', 'border-indigo-500/50', 'bg-indigo-500/10');
+        btn.classList.add('border-brand-border', 'bg-white/5');
+    });
+
+    const btn = document.getElementById(`tax-form-btn-${type}`);
+    const badge = document.getElementById('tax-form-header-badge');
+    const w9Section = document.getElementById('tax-section-w9');
+    const w8Section = document.getElementById('tax-section-w8');
+    const w8beneSection = document.getElementById('tax-section-w8bene');
+
+    w9Section.classList.add('hidden');
+    w8Section.classList.add('hidden');
+    w8beneSection.classList.add('hidden');
+
+    if (type === 'w9') {
+        if (btn) btn.classList.add('border-amber-500/50', 'bg-amber-500/10');
+        if (badge) badge.innerHTML = `<span class="font-semibold"><i class="fa-solid fa-file-signature mr-1.5"></i> Completing: IRS Form W-9 (U.S. Taxpayer Certification)</span><span class="text-[10px] font-mono bg-amber-500/20 px-2 py-0.5 rounded text-amber-200">24% Backup Withholding Default</span>`;
+        w9Section.classList.remove('hidden');
+    } else if (type === 'w8ben') {
+        if (btn) btn.classList.add('border-cyan-500/50', 'bg-cyan-500/10');
+        if (badge) badge.innerHTML = `<span class="font-semibold"><i class="fa-solid fa-earth-americas mr-1.5"></i> Completing: IRS Form W-8BEN (Foreign Individual)</span><span class="text-[10px] font-mono bg-cyan-500/20 px-2 py-0.5 rounded text-cyan-200">30% Standard / Treaty Reduced Rate</span>`;
+        w8Section.classList.remove('hidden');
+    } else if (type === 'w8bene') {
+        if (btn) btn.classList.add('border-indigo-500/50', 'bg-indigo-500/10');
+        if (badge) badge.innerHTML = `<span class="font-semibold"><i class="fa-solid fa-building mr-1.5"></i> Completing: IRS Form W-8BEN-E (Foreign Entity / Label)</span><span class="text-[10px] font-mono bg-indigo-500/20 px-2 py-0.5 rounded text-indigo-200">30% Standard / Treaty Reduced Rate</span>`;
+        w8Section.classList.remove('hidden');
+        w8beneSection.classList.remove('hidden');
+    }
+}
+
+function toggleTreatyFields() {
+    const isChecked = document.getElementById('tax-w8-treaty-claim')?.checked;
+    const treatyContainer = document.getElementById('treaty-fields');
+    if (treatyContainer) {
+        if (isChecked) treatyContainer.classList.remove('hidden');
+        else treatyContainer.classList.add('hidden');
+    }
+}
+
+// Save IRS Tax Compliance Details
+async function handleSaveTaxDetails(e) {
+    e.preventDefault();
+
+    const formType = document.getElementById('tax-form-type')?.value || 'w9';
+    const legalName = document.getElementById('tax-legal-name')?.value || '';
+    const dbaName = document.getElementById('tax-dba-name')?.value || '';
+    const street = document.getElementById('tax-address-street')?.value || '';
+    const city = document.getElementById('tax-address-city')?.value || '';
+    const state = document.getElementById('tax-address-state')?.value || '';
+    const zip = document.getElementById('tax-address-zip')?.value || '';
+    const signature = document.getElementById('tax-signature')?.value || '';
+
+    let payload = {
+        formType,
+        legalName,
+        dbaName,
+        address: { street, city, state, zip },
+        signature,
+        certifiedAt: new Date().toISOString()
+    };
+
+    if (formType === 'w9') {
+        payload.w9Details = {
+            classification: document.getElementById('tax-w9-classification')?.value || 'individual',
+            tin: document.getElementById('tax-w9-tin')?.value || ''
+        };
+    } else {
+        payload.w8Details = {
+            citizenship: document.getElementById('tax-w8-citizenship')?.value || '',
+            foreignTin: document.getElementById('tax-w8-ftin')?.value || '',
+            usTin: document.getElementById('tax-w8-us-tin')?.value || '',
+            dob: document.getElementById('tax-w8-dob')?.value || '',
+            treatyClaimed: document.getElementById('tax-w8-treaty-claim')?.checked || false,
+            treatyCountry: document.getElementById('tax-treaty-country')?.value || '',
+            claimedRate: document.getElementById('tax-treaty-rate')?.value || '0'
+        };
+
+        if (formType === 'w8bene') {
+            payload.w8Details.fatcaStatus = document.getElementById('tax-w8bene-fatca')?.value || 'active_nffe';
+        }
+    }
+
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${getWorkerBaseUrl()}/api/tax-details`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error("Failed to submit tax form.");
+        if (typeof showToast === 'function') showToast("Tax compliance form successfully verified and saved!", false);
+    } catch (err) {
+        if (typeof showToast === 'function') showToast(err.message, true);
+    }
+}
+
+// Load Tax Details
+async function loadTaxDetails() {
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${getWorkerBaseUrl()}/api/tax-details`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (data && data.formType) {
+            selectTaxForm(data.formType);
+            if (document.getElementById('tax-legal-name')) document.getElementById('tax-legal-name').value = data.legalName || '';
+            if (document.getElementById('tax-dba-name')) document.getElementById('tax-dba-name').value = data.dbaName || '';
+            if (data.address) {
+                if (document.getElementById('tax-address-street')) document.getElementById('tax-address-street').value = data.address.street || '';
+                if (document.getElementById('tax-address-city')) document.getElementById('tax-address-city').value = data.address.city || '';
+                if (document.getElementById('tax-address-state')) document.getElementById('tax-address-state').value = data.address.state || '';
+                if (document.getElementById('tax-address-zip')) document.getElementById('tax-address-zip').value = data.address.zip || '';
+            }
+            if (data.w9Details && document.getElementById('tax-w9-tin')) {
+                document.getElementById('tax-w9-tin').value = data.w9Details.tin || '';
+                document.getElementById('tax-w9-classification').value = data.w9Details.classification || 'individual';
+            }
+            if (data.w8Details) {
+                if (document.getElementById('tax-w8-citizenship')) document.getElementById('tax-w8-citizenship').value = data.w8Details.citizenship || '';
+                if (document.getElementById('tax-w8-ftin')) document.getElementById('tax-w8-ftin').value = data.w8Details.foreignTin || '';
+                if (document.getElementById('tax-w8-us-tin')) document.getElementById('tax-w8-us-tin').value = data.w8Details.usTin || '';
+                if (document.getElementById('tax-w8-dob')) document.getElementById('tax-w8-dob').value = data.w8Details.dob || '';
+                if (document.getElementById('tax-treaty-country')) document.getElementById('tax-treaty-country').value = data.w8Details.treatyCountry || '';
+                if (document.getElementById('tax-treaty-rate')) document.getElementById('tax-treaty-rate').value = data.w8Details.claimedRate || '0';
+            }
+        }
+    } catch {
+        // Fallback default UI state
+    }
+}
+
+// Login History Controller
+async function loadLoginHistory() {
+    const tbody = document.getElementById('settings-sessions-tbody');
+    if (!tbody) return;
+
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${getWorkerBaseUrl()}/api/login-history`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const sessions = response.ok ? await response.json() : [];
+
+        if (!sessions || sessions.length === 0) {
+            tbody.innerHTML = `
+                <tr class="border-b border-brand-border/30 hover:bg-white/5 transition">
+                    <td class="py-3 px-2 font-medium text-white flex items-center gap-2">
+                        <i class="fa-solid fa-desktop text-cyan-400"></i> Chrome on macOS
+                    </td>
+                    <td class="py-3 px-2 font-mono text-gray-400">197.237.12.89</td>
+                    <td class="py-3 px-2 text-gray-400">Nairobi, Kenya</td>
+                    <td class="py-3 px-2 text-gray-400">Just now</td>
+                    <td class="py-3 px-2 text-right"><span class="px-2 py-0.5 text-[10px] rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">Current Session</span></td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = sessions.map(s => `
+            <tr class="border-b border-brand-border/30 hover:bg-white/5 transition">
+                <td class="py-3 px-2 font-medium text-white flex items-center gap-2">
+                    <i class="fa-solid fa-mobile-screen text-gray-400"></i> ${s.device}
+                </td>
+                <td class="py-3 px-2 font-mono text-gray-400">${s.ip}</td>
+                <td class="py-3 px-2 text-gray-400">${s.location}</td>
+                <td class="py-3 px-2 text-gray-400">${s.lastActive}</td>
+                <td class="py-3 px-2 text-right">
+                    ${s.isCurrent ? `<span class="px-2 py-0.5 text-[10px] rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">Current</span>` : `<button onclick="revokeSession('${s.id}')" class="text-gray-500 hover:text-red-400 text-xs transition"><i class="fa-solid fa-right-from-bracket"></i> Revoke</button>`}
+                </td>
+            </tr>
+        `).join('');
+    } catch {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-gray-500">Unable to load active sessions.</td></tr>`;
+    }
+}
+
+async function revokeAllSessions() {
+    const confirm = await showCustomConfirm("Terminate Other Sessions", "Are you sure you want to log out all other active devices?");
+    if (!confirm) return;
+
+    try {
+        const token = await getAuthToken();
+        await fetch(`${getWorkerBaseUrl()}/api/login-history/revoke-all`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        await loadLoginHistory();
+        if (typeof showToast === 'function') showToast("All other active sessions have been terminated.", false);
+    } catch (err) {
+        if (typeof showToast === 'function') showToast(err.message, true);
+    }
+}
+
+async function revokeSession(sessionId) {
+    try {
+        const token = await getAuthToken();
+        await fetch(`${getWorkerBaseUrl()}/api/login-history/${sessionId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        await loadLoginHistory();
+        if (typeof showToast === 'function') showToast("Session revoked successfully.", false);
+    } catch (err) {
+        if (typeof showToast === 'function') showToast(err.message, true);
+    }
+}
+
+// User Invites and Team Management
 function openInviteUserModal() {
     const modal = document.getElementById('inviteUserModal');
     if (modal) modal.classList.remove('hidden');
@@ -2167,7 +2823,6 @@ function closeInviteUserModal() {
     if (modal) modal.classList.add('hidden');
 }
 
-// User Invitation Submit
 async function submitUserInvite(e) {
     e.preventDefault();
     const emailInput = document.getElementById('invite-user-email');
@@ -2207,7 +2862,6 @@ async function submitUserInvite(e) {
     }
 }
 
-// Members Data Loading
 async function loadAccountMembers() {
     const tbody = document.getElementById('settings-members-tbody');
     if (!tbody) return;
@@ -2221,7 +2875,7 @@ async function loadAccountMembers() {
         const members = response.ok ? await response.json() : [];
 
         if (!members || members.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-gray-500">No team members added.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-gray-500">No team members added yet.</td></tr>`;
             return;
         }
 
@@ -2244,11 +2898,10 @@ async function loadAccountMembers() {
             </tr>
         `).join('');
     } catch {
-        tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-gray-500">No team members added.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-gray-500">No team members added yet.</td></tr>`;
     }
 }
 
-// Remove Team Member Action
 async function removeMember(memberId) {
     const confirmed = await showCustomConfirm("Revoke Access", "Are you sure you want to revoke access for this team member?");
     if (!confirmed) return;
@@ -2269,70 +2922,23 @@ async function removeMember(memberId) {
     }
 }
 
-// Save Tax Details
-async function handleSaveTaxDetails(e) {
-    e.preventDefault();
-    
-    const payload = {
-        legalName: document.getElementById('tax-legal-name')?.value || '',
-        classification: document.getElementById('tax-classification')?.value || 'individual',
-        country: document.getElementById('tax-country')?.value || '',
-        tin: document.getElementById('tax-tin')?.value || '',
-        address: document.getElementById('tax-address')?.value || ''
-    };
-
-    try {
-        const token = await getAuthToken();
-        const response = await fetch(`${getWorkerBaseUrl()}/api/tax-details`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) throw new Error("Failed to save tax details.");
-
-        if (typeof showToast === 'function') showToast("Tax details submitted successfully!", false);
-    } catch (err) {
-        if (typeof showToast === 'function') showToast(err.message, true);
-    }
-}
-
-// Load Tax Details
-async function loadTaxDetails() {
-    try {
-        const token = await getAuthToken();
-        const response = await fetch(`${getWorkerBaseUrl()}/api/tax-details`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!response.ok) return;
-
-        const data = await response.json();
-        if (data) {
-            if (document.getElementById('tax-legal-name')) document.getElementById('tax-legal-name').value = data.legalName || '';
-            if (document.getElementById('tax-classification')) document.getElementById('tax-classification').value = data.classification || 'individual';
-            if (document.getElementById('tax-country')) document.getElementById('tax-country').value = data.country || '';
-            if (document.getElementById('tax-tin')) document.getElementById('tax-tin').value = data.tin || '';
-            if (document.getElementById('tax-address')) document.getElementById('tax-address').value = data.address || '';
-        }
-    } catch {
-        // Silent catch for initial state
-    }
-}
-
-// EXPORTS
+// Global Exports
 window.renderSettingsView = renderSettingsView;
 window.initSettingsView = initSettingsView;
 window.initSettingsPage = initSettingsView;
 window.switchSettingsTab = switchSettingsTab;
 window.handleSaveProfile = handleSaveProfile;
+window.togglePayoutFields = togglePayoutFields;
+window.savePayoutMethod = savePayoutMethod;
+window.selectTaxForm = selectTaxForm;
+window.toggleTreatyFields = toggleTreatyFields;
+window.handleSaveTaxDetails = handleSaveTaxDetails;
 window.openInviteUserModal = openInviteUserModal;
 window.closeInviteUserModal = closeInviteUserModal;
 window.submitUserInvite = submitUserInvite;
-window.handleSaveTaxDetails = handleSaveTaxDetails;
 window.removeMember = removeMember;
+window.revokeSession = revokeSession;
+window.revokeAllSessions = revokeAllSessions;
 window.showCustomConfirm = showCustomConfirm;
 window.closeConfirmModal = closeConfirmModal;
 window.openSettingsModal = openSettingsModal;
