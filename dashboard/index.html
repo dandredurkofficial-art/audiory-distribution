@@ -2891,6 +2891,7 @@ async function initSettingsView() {
     if (emailInput) emailInput.value = user.email || '';
 
     // 1. First load from KV (The Source of Truth)
+    let kvLoaded = false;
     try {
       const token = await getAuthToken();
       const response = await fetch(`${getWorkerBaseUrl()}/api/profile`, { 
@@ -2907,7 +2908,8 @@ async function initSettingsView() {
           
           // Also sync locally to window.currentUser if present
           if (window.currentUser) window.currentUser.displayName = profile.displayName;
-          return; // Successfully set from KV, exit early
+          
+          kvLoaded = true; // Mark as loaded, do not exit early
         }
       }
     } catch (err) {
@@ -2915,11 +2917,14 @@ async function initSettingsView() {
     }
 
     // 2. Fallback to Firebase user data if KV is empty
-    if (nameInput) {
-      nameInput.value = user.displayName || user.email?.split('@')[0] || '';
+    if (!kvLoaded) {
+      if (nameInput) {
+        nameInput.value = user.displayName || user.email?.split('@')[0] || '';
+      }
+      updateDashboardProfileName(user.displayName || user.email?.split('@')[0]);
     }
-    updateDashboardProfileName(user.displayName || user.email?.split('@')[0]);
 
+    // 3. Always run secondary data queries regardless of KV profile status
     await Promise.all([
         loadAccountMembers(),
         loadPayoutPreferences(),
@@ -2928,7 +2933,7 @@ async function initSettingsView() {
         loadLoginHistory()
     ]);
 }
-
+        
 // Centralized DOM updater for profile display names
 function updateDashboardProfileName(name) {
     if (!name) return;
