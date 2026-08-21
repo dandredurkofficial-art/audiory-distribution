@@ -2859,19 +2859,36 @@ async function initSettingsView() {
     const emailInput = document.getElementById('settings-user-email');
 
     if (emailInput) emailInput.value = user.email || '';
-    if (nameInput) nameInput.value = user.displayName || user.email?.split('@')[0] || '';
 
-    // Audiory profile is the persisted source of truth for the dashboard display name.
+    // 1. First load from KV (The Source of Truth)
     try {
       const token = await getAuthToken();
-      const response = await fetch(`${getWorkerBaseUrl()}/api/profile`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const response = await fetch(`${getWorkerBaseUrl()}/api/profile`, { 
+        headers: { 'Authorization': `Bearer ${token}` } 
+      });
+      
       if (response.ok) {
         const profile = await response.json();
         window.audioryProfile = profile || {};
-        if (nameInput && profile.displayName) nameInput.value = profile.displayName;
-        updateDashboardProfileName(profile.displayName);
+        
+        if (profile.displayName) {
+          if (nameInput) nameInput.value = profile.displayName;
+          updateDashboardProfileName(profile.displayName);
+          
+          // Also sync locally to window.currentUser if present
+          if (window.currentUser) window.currentUser.displayName = profile.displayName;
+          return; // Successfully set from KV, exit early
+        }
       }
-    } catch (_) {}
+    } catch (err) {
+      console.warn("Could not load profile from Worker KV:", err);
+    }
+
+    // 2. Fallback to Firebase user data if KV is empty
+    if (nameInput) {
+      nameInput.value = user.displayName || user.email?.split('@')[0] || '';
+    }
+    updateDashboardProfileName(user.displayName || user.email?.split('@')[0]);
 
     await Promise.all([
         loadAccountMembers(),
@@ -2882,9 +2899,11 @@ async function initSettingsView() {
     ]);
 }
 
-// Profile Save
+// Centralized DOM updater for profile display names
 function updateDashboardProfileName(name) {
     if (!name) return;
+    
+    // Update global state
     window.audioryProfile = window.audioryProfile || {};
     window.audioryProfile.displayName = name;
     if (window.currentUser) window.currentUser.displayName = name;
@@ -2893,15 +2912,18 @@ function updateDashboardProfileName(name) {
       '[data-user-display-name]', '#userDisplayName', '#dashboardUserName',
       '#profileDisplayName', '.dashboard-user-name'
     ];
+    
     selectors.forEach(selector => {
       document.querySelectorAll(selector).forEach(el => { el.textContent = name; });
     });
 }
 
+// Profile Save Handler
 async function handleSaveProfile(e) {
     e.preventDefault();
     const nameInput = document.getElementById('settings-user-name');
     if (!nameInput) return;
+    
     const newName = nameInput.value.trim();
     if (!newName) {
       showToast('Display name is required.', true);
@@ -2911,26 +2933,43 @@ async function handleSaveProfile(e) {
     try {
         const user = window.currentUser || (window.firebase && firebase.auth().currentUser);
         const token = await getAuthToken();
+
+        // 1. Save to Worker KV
         const response = await fetch(`${getWorkerBaseUrl()}/api/profile`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            headers: { 
+              'Authorization': `Bearer ${token}`, 
+              'Content-Type': 'application/json' 
+            },
             body: JSON.stringify({ displayName: newName })
         });
+        
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.error || 'Failed to update profile name.');
 
-        if (user && typeof user.updateProfile === 'function' && user.displayName !== newName) {
-            try { await user.updateProfile({ displayName: newName }); } catch (_) {}
+        // 2. Sync with client Firebase SDK and force refresh user instance
+        if (user && typeof user.updateProfile === 'function') {
+            try { 
+              await user.updateProfile({ displayName: newName });
+              if (typeof user.reload === 'function') {
+                await user.reload(); // Ensures SDK cache is refreshed
+              }
+            } catch (fbErr) {
+              console.warn("Firebase SDK update profile warning:", fbErr);
+            }
         }
+
+        // 3. Update local state & DOM immediately
         window.audioryProfile = data.profile || { displayName: newName };
         updateDashboardProfileName(newName);
         nameInput.value = newName;
+        
         showToast('Profile name updated successfully!');
     } catch (err) {
         showToast(err.message || 'Failed to update profile name.', true);
     }
 }
-
+        
 // Payout Methods Handler
 function togglePayoutFields(type) {
     document.getElementById('payout-form-bank').classList.add('hidden');
