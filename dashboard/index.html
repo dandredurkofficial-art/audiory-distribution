@@ -2003,20 +2003,32 @@ async function handlePasswordChange(event) {
       await user.reauthenticateWithCredential(cred);
       await user.updatePassword(newPassword);
     } else {
-      const res = await fetch('/api/profile/password', {
+      // Get Firebase Auth token if available
+      let token = "";
+      if (typeof firebase !== 'undefined' && firebase.auth().currentUser) {
+        token = await firebase.auth().currentUser.getIdToken();
+      }
+
+      const res = await fetch(`${WORKER_BASE_URL}/api/profile/password`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
         body: JSON.stringify({ currentPassword, newPassword })
       });
-      if (!res.ok) throw new Error('Password change failed.');
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Password change failed.');
     }
+
     showToast('Password updated successfully!');
     closeSettingsModal();
   } catch (err) {
     showModalAlert(err.message || 'Error updating password.', true);
   }
 }
-
+        
 async function load2FAStatus() {
   const badge = document.getElementById('2faStatusBadge');
   const setupArea = document.getElementById('2faSetupArea');
