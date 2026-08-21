@@ -308,7 +308,10 @@
             serverTimestamp 
         } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // Replace with your Firebase credentials
+        // Cloudflare Worker Base URL Endpoint
+        const WORKER_BASE_URL = "https://audiorydistribution.dandredurkofficial.workers.dev";
+
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBtii4iYkm7ummyi5SHiQMOMUPrOpwhdrk",
             authDomain: "audiory-distribution.firebaseapp.com",
@@ -461,8 +464,8 @@
                 await updateLastLogin(user.uid);
                 activeUserToken = await user.getIdToken();
 
-                // Send 2FA challenge to Cloudflare Worker endpoint
-                const res = await fetch("/api/auth/2fa/challenge", {
+                // Call Worker endpoint directly
+                const res = await fetch(`${WORKER_BASE_URL}/api/auth/2fa/challenge`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -473,7 +476,7 @@
 
                 const data = await res.json();
 
-                // 2FA Not Enabled for User -> Go directly to dashboard
+                // 2FA Not Enabled -> Go directly to dashboard
                 if (data.success && !data.required) {
                     showToast("Welcome back! Redirecting to your dashboard...", "success");
                     setTimeout(() => {
@@ -482,7 +485,7 @@
                     return;
                 }
 
-                // 2FA Enabled -> Open Verification Modal
+                // 2FA Enabled -> Show modal
                 if (data.required || res.status === 401) {
                     setLoading(false);
                     twoFactorAlert.classList.add('hidden');
@@ -536,7 +539,8 @@
             verify2faBtnIcon.className = "fa-solid fa-circle-notch fa-spin text-xs";
 
             try {
-                const res = await fetch("/api/auth/2fa/challenge", {
+                // Call Worker endpoint directly
+                const res = await fetch(`${WORKER_BASE_URL}/api/auth/2fa/challenge`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -553,7 +557,7 @@
                 if (res.ok && data.verified) {
                     show2FAAlert("2FA Verified successfully!", false);
                     
-                    // Store server 2FA Session Token if provided
+                    // Store server 2FA Session Token if returned
                     if (data.sessionToken) {
                         const rememberMe = document.getElementById('rememberMe').checked;
                         if (rememberMe) {
@@ -579,7 +583,7 @@
             }
         });
 
-        // Email/Password Login Handlers
+        // Email/Password Login
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -609,7 +613,7 @@
             }
         });
 
-        // Google Sign-In Handler
+        // Google Sign-In
         googleBtn.addEventListener('click', async () => {
             setLoading(true);
             try {
@@ -623,7 +627,7 @@
             }
         });
 
-        // Password Reset Modal Handlers
+        // Password Reset Modal
         openResetModalBtn.addEventListener('click', () => {
             modalAlert.classList.add('hidden');
             resetModal.classList.remove('hidden');
