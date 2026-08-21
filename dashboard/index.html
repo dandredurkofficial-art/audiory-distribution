@@ -1997,23 +1997,29 @@ async function handlePasswordChange(event) {
   }
 
   try {
+    let token = "";
+
+    // Re-authenticate via Firebase SDK directly if present
     if (typeof firebase !== 'undefined' && firebase.auth().currentUser) {
       const user = firebase.auth().currentUser;
       const cred = firebase.auth.EmailAuthProvider.credential(user.email, currentPassword);
       await user.reauthenticateWithCredential(cred);
       await user.updatePassword(newPassword);
     } else {
-      // Get Firebase Auth token if available
-      let token = "";
-      if (typeof firebase !== 'undefined' && firebase.auth().currentUser) {
-        token = await firebase.auth().currentUser.getIdToken();
+      // Fallback: Call Cloudflare Worker endpoint
+      if (typeof auth !== 'undefined' && auth.currentUser) {
+        token = await auth.currentUser.getIdToken();
       }
 
-      const res = await fetch(`${WORKER_BASE_URL}/api/profile/password`, {
+      if (!token) {
+        throw new Error('User session expired. Please sign in again.');
+      }
+
+      const res = await fetch(`${WORKER_BASE_URL}/api/auth/change-password`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ currentPassword, newPassword })
       });
@@ -2022,7 +2028,7 @@ async function handlePasswordChange(event) {
       if (!res.ok) throw new Error(data.error || 'Password change failed.');
     }
 
-    showToast('Password updated successfully!');
+    showToast('Password updated successfully! Please sign in with your new password.');
     closeSettingsModal();
   } catch (err) {
     showModalAlert(err.message || 'Error updating password.', true);
