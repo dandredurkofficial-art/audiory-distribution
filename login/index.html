@@ -200,6 +200,52 @@
         </div>
     </main>
 
+    <!-- ==================== 2FA CHALLENGE MODAL ==================== -->
+    <div id="twoFactorModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="gradient-border-card max-w-sm w-full p-6 relative shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 rounded-full bg-brand-accent/10 border border-brand-accent/30 text-brand-accent flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-shield-halved text-xl"></i>
+                </div>
+                <h3 class="text-lg font-bold font-display text-white">Two-Factor Security</h3>
+                <p class="text-xs text-gray-400 mt-1">Enter the 6-digit code from your authenticator app or use a recovery code.</p>
+            </div>
+
+            <!-- Modal Inline Alert -->
+            <div id="twoFactorAlert" class="hidden mb-4 p-3 rounded-xl text-xs font-semibold border flex items-center gap-2">
+                <i id="twoFactorAlertIcon" class="fa-solid text-sm"></i>
+                <span id="twoFactorAlertMessage" class="flex-1 leading-relaxed"></span>
+            </div>
+
+            <form id="twoFactorForm" class="space-y-4">
+                <div id="totpGroup">
+                    <label for="twoFactorCode" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                        6-Digit Authenticator Code
+                    </label>
+                    <input type="text" id="twoFactorCode" maxlength="6" pattern="[0-9]*" inputmode="numeric" placeholder="123456" class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-white text-center text-lg font-mono tracking-widest focus:outline-none focus:border-brand-accent transition-colors">
+                </div>
+
+                <div id="recoveryGroup" class="hidden">
+                    <label for="recoveryCode" class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                        10-Character Recovery Code
+                    </label>
+                    <input type="text" id="recoveryCode" maxlength="10" placeholder="ABC123XYZ4" class="w-full px-4 py-3 rounded-xl bg-brand-dark border border-brand-border text-white text-center text-lg font-mono tracking-widest focus:outline-none focus:border-brand-accent transition-colors uppercase">
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="button" id="toggleRecoveryBtn" class="text-xs text-brand-accent hover:underline">
+                        Use a recovery code
+                    </button>
+                </div>
+
+                <button type="submit" id="verifyTwoFactorBtn" class="w-full py-3 rounded-xl bg-brand-accent text-brand-dark font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+                    <span id="verify2faBtnText">Verify Code</span>
+                    <i class="fa-solid fa-arrow-right text-xs" id="verify2faBtnIcon"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- ==================== FORGOT PASSWORD MODAL ==================== -->
     <div id="resetModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="gradient-border-card max-w-sm w-full p-6 relative">
@@ -242,7 +288,7 @@
         <p>&copy; 2026 Audiory Distribution Inc. All rights reserved.</p>
     </footer>
 
-    <!-- ==================== FIREBASE SDK IMPLEMENTATION ==================== -->
+    <!-- ==================== FIREBASE & AUTH IMPLEMENTATION ==================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { 
@@ -291,7 +337,7 @@
         const togglePasswordBtn = document.getElementById('togglePasswordBtn');
         const passwordIcon = document.getElementById('passwordIcon');
         
-        // Modal Elements
+        // Reset Password Modal Elements
         const resetModal = document.getElementById('resetModal');
         const openResetModalBtn = document.getElementById('openResetModalBtn');
         const closeResetModalBtn = document.getElementById('closeResetModalBtn');
@@ -300,7 +346,25 @@
         const modalAlertIcon = document.getElementById('modalAlertIcon');
         const modalAlertMessage = document.getElementById('modalAlertMessage');
 
-        // Custom Toast Notification Function
+        // 2FA Modal Elements
+        const twoFactorModal = document.getElementById('twoFactorModal');
+        const twoFactorForm = document.getElementById('twoFactorForm');
+        const twoFactorCodeInput = document.getElementById('twoFactorCode');
+        const recoveryCodeInput = document.getElementById('recoveryCode');
+        const totpGroup = document.getElementById('totpGroup');
+        const recoveryGroup = document.getElementById('recoveryGroup');
+        const toggleRecoveryBtn = document.getElementById('toggleRecoveryBtn');
+        const verifyTwoFactorBtn = document.getElementById('verifyTwoFactorBtn');
+        const verify2faBtnText = document.getElementById('verify2faBtnText');
+        const verify2faBtnIcon = document.getElementById('verify2faBtnIcon');
+        const twoFactorAlert = document.getElementById('twoFactorAlert');
+        const twoFactorAlertIcon = document.getElementById('twoFactorAlertIcon');
+        const twoFactorAlertMessage = document.getElementById('twoFactorAlertMessage');
+
+        let activeUserToken = null;
+        let isUsingRecoveryCode = false;
+
+        // Custom Toast Notification
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -340,7 +404,7 @@
             }
         });
 
-        // Display Alert Banner
+        // Display Main Alert Banner
         function showAlert(message, isError = true) {
             alertBox.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/30', 'text-red-400', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
             
@@ -353,6 +417,19 @@
             }
             
             alertMessage.textContent = message;
+        }
+
+        // Display 2FA Alert
+        function show2FAAlert(message, isError = true) {
+            twoFactorAlert.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/30', 'text-red-400', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+            if (isError) {
+                twoFactorAlert.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-400');
+                twoFactorAlertIcon.className = 'fa-solid fa-circle-exclamation text-sm';
+            } else {
+                twoFactorAlert.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+                twoFactorAlertIcon.className = 'fa-solid fa-circle-check text-sm';
+            }
+            twoFactorAlertMessage.textContent = message;
         }
 
         // Set Loading State
@@ -368,7 +445,7 @@
             }
         }
 
-        // Firestore Update
+        // Update Last Login in Firestore
         async function updateLastLogin(uid) {
             try {
                 const userRef = doc(db, "users", uid);
@@ -378,7 +455,131 @@
             }
         }
 
-        // Email/Password Login
+        // Handle 2FA Challenge Verification with Worker
+        async function handleAuthSuccess(user) {
+            try {
+                await updateLastLogin(user.uid);
+                activeUserToken = await user.getIdToken();
+
+                // Send 2FA challenge to Cloudflare Worker endpoint
+                const res = await fetch("/api/auth/2fa/challenge", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${activeUserToken}`
+                    },
+                    body: JSON.stringify({})
+                });
+
+                const data = await res.json();
+
+                // 2FA Not Enabled for User -> Go directly to dashboard
+                if (data.success && !data.required) {
+                    showToast("Welcome back! Redirecting to your dashboard...", "success");
+                    setTimeout(() => {
+                        window.location.href = "/dashboard/";
+                    }, 1000);
+                    return;
+                }
+
+                // 2FA Enabled -> Open Verification Modal
+                if (data.required || res.status === 401) {
+                    setLoading(false);
+                    twoFactorAlert.classList.add('hidden');
+                    twoFactorCodeInput.value = '';
+                    recoveryCodeInput.value = '';
+                    twoFactorModal.classList.remove('hidden');
+                    twoFactorCodeInput.focus();
+                }
+            } catch (err) {
+                console.error("2FA Challenge Check Error:", err);
+                showAlert("System error during security verification. Please try again.", true);
+                setLoading(false);
+            }
+        }
+
+        // Toggle TOTP Code vs Recovery Code inside 2FA Modal
+        toggleRecoveryBtn.addEventListener('click', () => {
+            isUsingRecoveryCode = !isUsingRecoveryCode;
+            if (isUsingRecoveryCode) {
+                totpGroup.classList.add('hidden');
+                recoveryGroup.classList.remove('hidden');
+                toggleRecoveryBtn.textContent = "Use authenticator code";
+                recoveryCodeInput.focus();
+            } else {
+                totpGroup.classList.remove('hidden');
+                recoveryGroup.classList.add('hidden');
+                toggleRecoveryBtn.textContent = "Use a recovery code";
+                twoFactorCodeInput.focus();
+            }
+        });
+
+        // Submit 2FA Code
+        twoFactorForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const code = twoFactorCodeInput.value.trim();
+            const recoveryCode = recoveryCodeInput.value.trim();
+
+            if (!isUsingRecoveryCode && (!code || code.length !== 6)) {
+                show2FAAlert("Please enter a valid 6-digit authenticator code.");
+                return;
+            }
+
+            if (isUsingRecoveryCode && !recoveryCode) {
+                show2FAAlert("Please enter a valid recovery code.");
+                return;
+            }
+
+            verifyTwoFactorBtn.disabled = true;
+            verify2faBtnText.textContent = "Verifying...";
+            verify2faBtnIcon.className = "fa-solid fa-circle-notch fa-spin text-xs";
+
+            try {
+                const res = await fetch("/api/auth/2fa/challenge", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${activeUserToken}`
+                    },
+                    body: JSON.stringify({
+                        code: isUsingRecoveryCode ? "" : code,
+                        recoveryCode: isUsingRecoveryCode ? recoveryCode : ""
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.verified) {
+                    show2FAAlert("2FA Verified successfully!", false);
+                    
+                    // Store server 2FA Session Token if provided
+                    if (data.sessionToken) {
+                        const rememberMe = document.getElementById('rememberMe').checked;
+                        if (rememberMe) {
+                            localStorage.setItem("2FA_SESSION", data.sessionToken);
+                        } else {
+                            sessionStorage.setItem("2FA_SESSION", data.sessionToken);
+                        }
+                    }
+
+                    setTimeout(() => {
+                        window.location.href = "/dashboard/";
+                    }, 1000);
+                } else {
+                    show2FAAlert(data.error || "Verification failed. Invalid code.");
+                }
+            } catch (err) {
+                console.error("2FA Verification Request Error:", err);
+                show2FAAlert("Network error. Please try again.");
+            } finally {
+                verifyTwoFactorBtn.disabled = false;
+                verify2faBtnText.textContent = "Verify Code";
+                verify2faBtnIcon.className = "fa-solid fa-arrow-right text-xs";
+            }
+        });
+
+        // Email/Password Login Handlers
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -393,13 +594,7 @@
                 await setPersistence(auth, persistence);
 
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                await updateLastLogin(userCredential.user.uid);
-
-                showToast("Welcome back! Redirecting to your dashboard...", "success");
-                
-                setTimeout(() => {
-                    window.location.href = "/dashboard/";
-                }, 1200);
+                await handleAuthSuccess(userCredential.user);
 
             } catch (error) {
                 console.error("Login Error:", error);
@@ -414,17 +609,12 @@
             }
         });
 
-        // Google Sign-In
+        // Google Sign-In Handler
         googleBtn.addEventListener('click', async () => {
             setLoading(true);
             try {
                 const result = await signInWithPopup(auth, googleProvider);
-                await updateLastLogin(result.user.uid);
-
-                showToast("Authenticated with Google! Redirecting...", "success");
-                setTimeout(() => {
-                    window.location.href = "/dashboard/";
-                }, 1200);
+                await handleAuthSuccess(result.user);
 
             } catch (error) {
                 console.error("Google Auth Error:", error);
@@ -433,7 +623,7 @@
             }
         });
 
-        // Password Reset Handlers
+        // Password Reset Modal Handlers
         openResetModalBtn.addEventListener('click', () => {
             modalAlert.classList.add('hidden');
             resetModal.classList.remove('hidden');
@@ -456,15 +646,11 @@
 
             try {
                 await sendPasswordResetEmail(auth, resetEmail);
-                
-                // Show custom toast notification
                 showToast(`Password reset link sent to ${resetEmail}! Check your inbox.`, "success");
-                
                 resetModal.classList.add('hidden');
                 resetForm.reset();
             } catch (error) {
                 console.error("Password Reset Error:", error);
-                
                 modalAlert.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
                 modalAlert.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-400');
                 modalAlertIcon.className = "fa-solid fa-circle-exclamation text-sm";
