@@ -243,10 +243,18 @@
             'Australia', 'Kenya', 'Nigeria', 'South Africa', 'Brazil', 'India'
         ];
 
-        // Auth Observer Hook
+        let lastRecordedUserId = null;
+
+// Auth Observer Hook
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         window.currentUser = user;
+
+        // --- RECORD LOGIN SESSION (ONLY ONCE PER USER SESSION) ---
+        if (lastRecordedUserId !== user.uid) {
+            lastRecordedUserId = user.uid;
+            recordLoginSession(); // Fire-and-forget so UI rendering isn't blocked
+        }
 
         const nameEl = document.getElementById('userName');
         const emailEl = document.getElementById('userEmail');
@@ -287,6 +295,7 @@ onAuthStateChanged(auth, async (user) => {
         await loadLiveCatalog();
         window.switchView('home');
     } else {
+        lastRecordedUserId = null; // Reset tracker on sign out
         window.location.href = '/login/';
     }
 });
@@ -3300,6 +3309,23 @@ async function loadTaxDetails() {
     } catch {
         // Fallback default UI state
     }
+}
+
+async function recordLoginSession() {
+  try {
+    const token = await getAuthToken();
+    if (!token) return;
+
+    await fetch(`${getWorkerBaseUrl()}/api/login-history/record`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+  } catch (err) {
+    console.warn("Failed to record login session:", err);
+  }
 }
 
 // Login History Controller
