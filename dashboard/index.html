@@ -244,52 +244,22 @@
         ];
 
         // Auth Observer Hook
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                window.currentUser = user;
-
-                const nameEl = document.getElementById('userName');
-                const emailEl = document.getElementById('userEmail');
-                const initEl = document.getElementById('userInitials');
-
-                if (emailEl) emailEl.innerText = user.email || '';
-
-                // Determine initial fallback name from Firebase
-                let displayName = user.displayName || user.email?.split('@')[0] || '';
-
-                // 1. Fetch source of truth from Cloudflare Worker KV
-                try {
-                    const token = await user.getIdToken();
-                    const res = await fetch(`${getWorkerBaseUrl()}/api/profile`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-
-                    if (res.ok) {
-                        const profile = await res.json();
-                        if (profile && profile.displayName) {
-                            displayName = profile.displayName;
-                            window.audioryProfile = profile;
-                        }
-                    }
-                } catch (err) {
-                    console.warn("Auth observer profile fetch failed, using Firebase fallback:", err);
-                }
-
-                // 2. Update UI DOM Elements
-                if (nameEl) nameEl.innerText = displayName;
-                if (initEl) initEl.innerText = displayName.substring(0, 2).toUpperCase();
-
-                // 3. Update any other display name elements in the dashboard
-                if (typeof updateDashboardProfileName === 'function') {
-                    updateDashboardProfileName(displayName);
-                }
-
-                await loadLiveCatalog();
-                window.switchView('home');
-            } else {
-                window.location.href = '/login/';
-            }
-        });
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                window.currentUser = user;
+                const nameEl = document.getElementById('userName');
+                const emailEl = document.getElementById('userEmail');
+                const initEl = document.getElementById('userInitials');
+                if (nameEl) nameEl.innerText = user.displayName || user.email.split('@')[0];
+                if (emailEl) emailEl.innerText = user.email;
+                if (initEl) initEl.innerText = (user.displayName || user.email).substring(0, 2).toUpperCase();
+        
+                await loadLiveCatalog();
+                window.switchView('home');
+            } else {
+                window.location.href = '/login/';
+            }
+        });
 
         window.handleSignOut = () => signOut(auth).then(() => window.location.href = '/login/');
 
