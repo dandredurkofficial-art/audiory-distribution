@@ -3547,7 +3547,7 @@ window.submitAppleClaim = submitAppleClaim;
 window.startOAuthFlow = startOAuthFlow;
 window.showToast = showToast;
 
-// Safely declare escapeHtml only if it hasn't been declared yet
+// Safely declare escapeHtml
 if (typeof window.escapeHtml !== 'function') {
     window.escapeHtml = function(str) {
         if (!str) return '';
@@ -3560,8 +3560,26 @@ if (typeof window.escapeHtml !== 'function') {
     };
 }
 
+// Toast notification helper (safely bound to window)
+window.showToast = window.showToast || function(message, isError = false) {
+    const existing = document.getElementById('custom-toast');
+    if (existing) existing.remove();
+
+    const toastHtml = `
+        <div id="custom-toast" class="fixed bottom-5 right-5 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium text-white shadow-lg backdrop-blur-md transition-all animate-bounce ${isError ? 'bg-red-500/90' : 'bg-emerald-600/90'}">
+            <i class="fa-solid ${isError ? 'fa-circle-exclamation' : 'fa-circle-check'} text-sm"></i>
+            <span>${window.escapeHtml(message)}</span>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', toastHtml);
+    setTimeout(() => {
+        document.getElementById('custom-toast')?.remove();
+    }, 3000);
+};
+
 // Render HTML View for Smart Links
-function renderSmartLinksView() {
+window.renderSmartLinksView = window.renderSmartLinksView || function() {
     return `
         <div class="space-y-6 max-w-6xl mx-auto px-2 sm:px-0">
             <div class="flex items-center justify-between gap-3">
@@ -3569,7 +3587,6 @@ function renderSmartLinksView() {
                     <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Smart Links</h1>
                     <p class="text-xs text-gray-400 mt-1 hidden sm:block">Create landing pages to stream and share your releases across platforms.</p>
                 </div>
-                <!-- Matched exact styling of + New Release (Cyan Accent) -->
                 <button onclick="createNewSmartLinkModal()" class="px-3.5 py-2 sm:px-4 sm:py-2 bg-[#00f2fe] hover:bg-[#00f2fe]/90 text-black font-semibold rounded-xl text-xs flex items-center gap-1.5 sm:gap-2 transition shrink-0 shadow-sm">
                     <i class="fa-solid fa-plus text-xs"></i>
                     <span>Create Smart Link</span>
@@ -3602,10 +3619,10 @@ function renderSmartLinksView() {
             </div>
         </div>
     `;
-}
+};
 
 // Initialize & Load Smart Links Data
-async function initSmartLinksPage() {
+window.initSmartLinksPage = async function() {
     const tbody = document.getElementById('smartlinks-tbody');
     const countEl = document.getElementById('smartlink-count');
     if (!tbody) return;
@@ -3661,8 +3678,7 @@ async function initSmartLinksPage() {
         console.error(err);
         tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-red-400">Unable to load Smart Links.</td></tr>`;
     }
-}
-window.initSmartLinksPage = initSmartLinksPage;
+};
 
 // Open Create Smart Link Custom Modal
 window.createNewSmartLinkModal = function() {
@@ -3716,7 +3732,7 @@ window.createNewSmartLinkModal = function() {
 };
 
 // Form Handler for Smart Link Submission
-async function handleCreateSmartLink(e) {
+window.handleCreateSmartLink = async function(e) {
     e.preventDefault();
     const title = document.getElementById('sl_title').value;
     const slug = document.getElementById('sl_slug').value;
@@ -3737,12 +3753,12 @@ async function handleCreateSmartLink(e) {
         if (!res.ok) throw new Error("Failed to save smart link");
 
         document.getElementById('smartlink-modal')?.remove();
-        showToast("Smart Link created successfully!");
+        window.showToast("Smart Link created successfully!");
         window.initSmartLinksPage();
     } catch (err) {
-        showToast(err.message || "Failed to create smart link", true);
+        window.showToast(err.message || "Failed to create smart link", true);
     }
-}
+};
 
 // Custom Delete Modal replacing native confirm() browser popup
 window.confirmDeleteSmartLink = function(id) {
@@ -3768,7 +3784,7 @@ window.confirmDeleteSmartLink = function(id) {
 };
 
 // Execute Delete Request
-async function executeDeleteSmartLink(id) {
+window.executeDeleteSmartLink = async function(id) {
     document.getElementById('delete-modal')?.remove();
     try {
         const token = await getAuthToken();
@@ -3779,40 +3795,22 @@ async function executeDeleteSmartLink(id) {
 
         if (!res.ok) throw new Error("Failed to delete link");
 
-        showToast("Smart Link deleted successfully.");
+        window.showToast("Smart Link deleted successfully.");
         window.initSmartLinksPage();
     } catch (err) {
-        showToast(err.message || "Could not delete Smart Link", true);
+        window.showToast(err.message || "Could not delete Smart Link", true);
     }
-}
+};
 
-// Custom Copy Action replacing native browser popups
+// Custom Copy Action
 window.copySmartLink = function(url) {
     if (!url) return;
     navigator.clipboard.writeText(url).then(() => {
-        showToast("Link copied to clipboard!");
+        window.showToast("Link copied to clipboard!");
     }).catch(() => {
-        showToast("Failed to copy link.", true);
+        window.showToast("Failed to copy link.", true);
     });
 };
-
-// Toast notification helper
-function showToast(message, isError = false) {
-    const existing = document.getElementById('custom-toast');
-    if (existing) existing.remove();
-
-    const toastHtml = `
-        <div id="custom-toast" class="fixed bottom-5 right-5 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium text-white shadow-lg backdrop-blur-md transition-all animate-bounce ${isError ? 'bg-red-500/90' : 'bg-emerald-600/90'}">
-            <i class="fa-solid ${isError ? 'fa-circle-exclamation' : 'fa-circle-check'} text-sm"></i>
-            <span>${window.escapeHtml(message)}</span>
-        </div>
-    `;
-
-    document.body.insertAdjacentHTML('beforeend', toastHtml);
-    setTimeout(() => {
-        document.getElementById('custom-toast')?.remove();
-    }, 3000);
-}
 
         
         // Render Create Release Form Container
