@@ -3560,7 +3560,18 @@ if (typeof window.escapeHtml !== 'function') {
     };
 }
 
-// Toast notification helper (safely bound to window)
+// Helper to format text into URL-safe slugs
+if (typeof window.slugify !== 'function') {
+    window.slugify = function(text) {
+        if (!text) return '';
+        return text.toString().toLowerCase().trim()
+            .replace(/\s+/g, '-')
+            .replace(/[^\w\-]+/g, '')
+            .replace(/\-\-+/g, '-');
+    };
+}
+
+// Toast notification helper
 window.showToast = window.showToast || function(message, isError = false) {
     const existing = document.getElementById('custom-toast');
     if (existing) existing.remove();
@@ -3603,7 +3614,7 @@ window.renderSmartLinksView = window.renderSmartLinksView || function() {
                         <thead>
                             <tr class="text-gray-500 border-b border-brand-border/40 bg-white/[0.02]">
                                 <th class="py-3 px-4">Title / Slug</th>
-                                <th class="py-3 px-4">Short URL</th>
+                                <th class="py-3 px-4">Smart URL</th>
                                 <th class="py-3 px-4">Total Clicks</th>
                                 <th class="py-3 px-4">Status</th>
                                 <th class="py-3 px-4 text-right">Actions</th>
@@ -3651,7 +3662,7 @@ window.initSmartLinksPage = async function() {
                         <img src="${link.coverUrl || '/placeholder.png'}" class="w-8 h-8 rounded object-cover bg-brand-dark shrink-0" />
                         <div class="truncate max-w-[180px] sm:max-w-xs">
                             <div class="truncate text-white">${window.escapeHtml(link.title || 'Untitled Link')}</div>
-                            <div class="text-[10px] text-gray-500 truncate">/${window.escapeHtml(link.slug || '')}</div>
+                            <div class="text-[10px] text-gray-500 truncate">/s/${window.escapeHtml(link.slug || '')}</div>
                         </div>
                     </div>
                 </td>
@@ -3680,64 +3691,261 @@ window.initSmartLinksPage = async function() {
     }
 };
 
-// Open Create Smart Link Custom Modal
-window.createNewSmartLinkModal = function() {
+// Open Create Smart Link Modal (Step 1: Release Selection)
+window.createNewSmartLinkModal = async function() {
     const existing = document.getElementById('smartlink-modal');
     if (existing) existing.remove();
 
-    const modalHtml = `
+    const loadingModalHtml = `
         <div id="smartlink-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
-            <div class="bg-[#121824] border border-brand-border/80 rounded-2xl max-w-lg w-full p-5 sm:p-6 space-y-4 text-white relative shadow-2xl">
-                <div class="flex items-center justify-between border-b border-brand-border/40 pb-3">
-                    <h3 class="text-sm sm:text-base font-bold text-white">Create Smart Link</h3>
-                    <button onclick="document.getElementById('smartlink-modal').remove()" class="text-gray-400 hover:text-white p-1">
-                        <i class="fa-solid fa-xmark text-lg"></i>
-                    </button>
-                </div>
-
-                <form id="create-smartlink-form" onsubmit="handleCreateSmartLink(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Release Title</label>
-                        <input type="text" id="sl_title" required placeholder="e.g. Midnight Dreams" class="w-full bg-brand-dark border border-brand-border/60 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#00f2fe]" />
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Custom Slug (URL suffix)</label>
-                        <div class="flex items-center bg-brand-dark border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-gray-500">
-                            <span class="shrink-0">audiory.link/</span>
-                            <input type="text" id="sl_slug" required placeholder="midnight-dreams" class="w-full bg-transparent text-white focus:outline-none ml-1" />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Spotify URL</label>
-                        <input type="url" id="sl_spotify" placeholder="https://open.spotify.com/track/..." class="w-full bg-brand-dark border border-brand-border/60 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#00f2fe]" />
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Apple Music URL</label>
-                        <input type="url" id="sl_apple" placeholder="https://music.apple.com/..." class="w-full bg-brand-dark border border-brand-border/60 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#00f2fe]" />
-                    </div>
-
-                    <div class="flex items-center justify-end gap-2 pt-3 border-t border-brand-border/40">
-                        <button type="button" onclick="document.getElementById('smartlink-modal').remove()" class="px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white">Cancel</button>
-                        <button type="submit" class="px-4 py-2 bg-[#00f2fe] hover:bg-[#00f2fe]/90 text-black font-semibold rounded-xl text-xs transition">Save & Publish</button>
-                    </div>
-                </form>
+            <div class="bg-[#121824] border border-brand-border/80 rounded-2xl max-w-lg w-full p-6 text-white shadow-2xl flex flex-col items-center justify-center gap-3">
+                <i class="fa-solid fa-spinner fa-spin text-2xl text-[#00f2fe]"></i>
+                <p class="text-xs text-gray-400">Fetching your releases...</p>
             </div>
         </div>
     `;
+    document.body.insertAdjacentHTML('beforeend', loadingModalHtml);
 
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    let releases = [];
+    try {
+        const token = await getAuthToken();
+        const res = await fetch(`${getWorkerBaseUrl()}/api/releases`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            releases = Array.isArray(data) ? data : (data.releases || []);
+        }
+    } catch (err) {
+        console.error("Failed to fetch releases:", err);
+    }
+
+    const modal = document.getElementById('smartlink-modal');
+    if (!modal) return;
+
+    window._availableReleases = releases;
+
+    const releaseOptions = releases.length > 0
+        ? releases.map(r => `<option value="${r.id}">${window.escapeHtml(r.title || 'Untitled')} — ${window.escapeHtml(r.artistName || 'Artist')}</option>`).join('')
+        : `<option value="" disabled selected>No releases found</option>`;
+
+    modal.innerHTML = `
+        <div class="bg-[#121824] border border-brand-border/80 rounded-2xl max-w-lg w-full p-5 sm:p-6 space-y-4 text-white relative shadow-2xl">
+            <div class="flex items-center justify-between border-b border-brand-border/40 pb-3">
+                <div>
+                    <h3 class="text-sm sm:text-base font-bold text-white">Generate Smart Link</h3>
+                    <p class="text-[11px] text-gray-400">Select a release to scan store links across platforms.</p>
+                </div>
+                <button onclick="document.getElementById('smartlink-modal').remove()" class="text-gray-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="scan-smartlink-form" onsubmit="executeScanReleaseLinks(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Select Release</label>
+                    <select id="sl_release_id" required onchange="updateSmartLinkPreviewSlug()" class="w-full bg-brand-dark border border-brand-border/60 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#00f2fe]">
+                        <option value="" disabled selected>-- Choose a release --</option>
+                        ${releaseOptions}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Generated Smart URL Preview</label>
+                    <div class="p-3 bg-brand-dark/80 border border-brand-border/40 rounded-xl font-mono text-xs text-gray-400 break-all flex items-center gap-1">
+                        <span class="text-gray-500 shrink-0">distro.audiory.site/s/</span>
+                        <span id="sl_url_preview" class="text-[#00f2fe] font-semibold">artist-name/release-name</span>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-brand-card/50 border border-brand-border/30 rounded-xl text-[11px] text-gray-400 flex items-start gap-2.5">
+                    <i class="fa-solid fa-wand-magic-sparkles text-[#00f2fe] text-sm shrink-0 mt-0.5"></i>
+                    <span>Our backend worker will scan direct store APIs for streaming links. You can review and manually override missing links before saving.</span>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-brand-border/40">
+                    <button type="button" onclick="document.getElementById('smartlink-modal').remove()" class="px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white">Cancel</button>
+                    <button type="submit" id="sl_scan_btn" ${releases.length === 0 ? 'disabled' : ''} class="px-4 py-2 bg-[#00f2fe] hover:bg-[#00f2fe]/90 disabled:opacity-50 text-black font-semibold rounded-xl text-xs flex items-center gap-2 transition">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                        <span>Scan Platform Links</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
 };
 
-// Form Handler for Smart Link Submission
-window.handleCreateSmartLink = async function(e) {
+// Update preview URL slug based on chosen release
+window.updateSmartLinkPreviewSlug = function() {
+    const releaseId = document.getElementById('sl_release_id')?.value;
+    const previewEl = document.getElementById('sl_url_preview');
+    if (!releaseId || !previewEl || !window._availableReleases) return;
+
+    const selected = window._availableReleases.find(r => String(r.id) === String(releaseId));
+    if (selected) {
+        const artistSlug = window.slugify(selected.artistName || 'artist');
+        const releaseSlug = window.slugify(selected.title || 'release');
+        previewEl.innerText = `${artistSlug}/${releaseSlug}`;
+    }
+};
+
+// Execute Backend Scan & Render Manual Override Form (Step 2)
+window.executeScanReleaseLinks = async function(e) {
     e.preventDefault();
-    const title = document.getElementById('sl_title').value;
-    const slug = document.getElementById('sl_slug').value;
-    const spotify = document.getElementById('sl_spotify').value;
-    const apple = document.getElementById('sl_apple').value;
+    const releaseId = document.getElementById('sl_release_id').value;
+    const scanBtn = document.getElementById('sl_scan_btn');
+    const selectedRelease = window._availableReleases?.find(r => String(r.id) === String(releaseId));
+
+    if (scanBtn) {
+        scanBtn.disabled = true;
+        scanBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-xs"></i> <span>Scanning DSPs...</span>`;
+    }
+
+    let scannedPlatforms = { spotify: '', apple: '', deezer: '', youtube: '', tidal: '', amazon: '' };
+
+    try {
+        const token = await getAuthToken();
+        const res = await fetch(`${getWorkerBaseUrl()}/api/smart-links/scan`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ releaseId })
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            if (data.platforms) {
+                scannedPlatforms = { ...scannedPlatforms, ...data.platforms };
+            }
+        }
+    } catch (err) {
+        console.warn("Auto-scan failed, opening manual entry fallback:", err);
+    }
+
+    renderSmartLinkReviewStep(selectedRelease, scannedPlatforms);
+};
+
+// Render Step 2: Review & Manual Override Form
+window.renderSmartLinkReviewStep = function(release, platforms) {
+    const modal = document.getElementById('smartlink-modal');
+    if (!modal) return;
+
+    const artistName = release?.artistName || 'Artist';
+    const releaseTitle = release?.title || 'Release';
+    const artistSlug = window.slugify(artistName);
+    const releaseSlug = window.slugify(releaseTitle);
+    const fullSlug = `${artistSlug}/${releaseSlug}`;
+
+    modal.innerHTML = `
+        <div class="bg-[#121824] border border-brand-border/80 rounded-2xl max-w-lg w-full p-5 sm:p-6 space-y-4 text-white relative shadow-2xl">
+            <div class="flex items-center justify-between border-b border-brand-border/40 pb-3">
+                <div>
+                    <h3 class="text-sm sm:text-base font-bold text-white">Review & Save Smart Link</h3>
+                    <p class="text-[11px] text-gray-400">Review scanned store links or fill in missing URLs manually.</p>
+                </div>
+                <button onclick="document.getElementById('smartlink-modal').remove()" class="text-gray-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="save-smartlink-form" onsubmit="handleSaveSmartLink(event)" class="space-y-3.5 max-h-[60vh] overflow-y-auto pr-1">
+                <input type="hidden" id="sl_final_release_id" value="${release?.id || ''}" />
+                <input type="hidden" id="sl_final_slug" value="${fullSlug}" />
+                <input type="hidden" id="sl_final_title" value="${window.escapeHtml(releaseTitle)}" />
+                <input type="hidden" id="sl_final_cover" value="${release?.coverUrl || ''}" />
+
+                <div class="p-3 bg-brand-dark/80 border border-brand-border/40 rounded-xl font-mono text-xs text-gray-400 break-all flex items-center gap-1">
+                    <span class="text-gray-500 shrink-0">distro.audiory.site/s/</span>
+                    <span class="text-[#00f2fe] font-semibold">${fullSlug}</span>
+                </div>
+
+                <div class="space-y-3 pt-1">
+                    <div>
+                        <label class="block text-[11px] font-medium text-gray-400 mb-1 flex items-center gap-1.5">
+                            <i class="fa-brands fa-spotify text-emerald-400 text-xs"></i> Spotify
+                        </label>
+                        <input type="url" id="sl_spotify" value="${platforms.spotify || ''}" placeholder="https://open.spotify.com/track/..." class="w-full bg-brand-dark border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00f2fe]" />
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-medium text-gray-400 mb-1 flex items-center gap-1.5">
+                            <i class="fa-brands fa-apple text-gray-300 text-xs"></i> Apple Music
+                        </label>
+                        <input type="url" id="sl_apple" value="${platforms.apple || ''}" placeholder="https://music.apple.com/..." class="w-full bg-brand-dark border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00f2fe]" />
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-medium text-gray-400 mb-1 flex items-center gap-1.5">
+                            <i class="fa-brands fa-deezer text-purple-400 text-xs"></i> Deezer
+                        </label>
+                        <input type="url" id="sl_deezer" value="${platforms.deezer || ''}" placeholder="https://www.deezer.com/album/..." class="w-full bg-brand-dark border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00f2fe]" />
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-medium text-gray-400 mb-1 flex items-center gap-1.5">
+                            <i class="fa-brands fa-youtube text-red-500 text-xs"></i> YouTube Music
+                        </label>
+                        <input type="url" id="sl_youtube" value="${platforms.youtube || ''}" placeholder="https://music.youtube.com/..." class="w-full bg-brand-dark border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00f2fe]" />
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-medium text-gray-400 mb-1 flex items-center gap-1.5">
+                            <i class="fa-solid fa-compact-disc text-cyan-400 text-xs"></i> Tidal
+                        </label>
+                        <input type="url" id="sl_tidal" value="${platforms.tidal || ''}" placeholder="https://tidal.com/browse/track/..." class="w-full bg-brand-dark border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00f2fe]" />
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-medium text-gray-400 mb-1 flex items-center gap-1.5">
+                            <i class="fa-brands fa-amazon text-amber-400 text-xs"></i> Amazon Music
+                        </label>
+                        <input type="url" id="sl_amazon" value="${platforms.amazon || ''}" placeholder="https://music.amazon.com/..." class="w-full bg-brand-dark border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00f2fe]" />
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-brand-border/40">
+                    <button type="button" onclick="createNewSmartLinkModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white">Back</button>
+                    <button type="submit" id="sl_save_btn" class="px-4 py-2 bg-[#00f2fe] hover:bg-[#00f2fe]/90 text-black font-semibold rounded-xl text-xs flex items-center gap-2 transition">
+                        <i class="fa-solid fa-check text-xs"></i>
+                        <span>Save & Publish</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+};
+
+// Handle Final Creation & Saving
+window.handleSaveSmartLink = async function(e) {
+    e.preventDefault();
+    const saveBtn = document.getElementById('sl_save_btn');
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-xs"></i> <span>Saving...</span>`;
+    }
+
+    const releaseId = document.getElementById('sl_final_release_id').value;
+    const slug = document.getElementById('sl_final_slug').value;
+    const title = document.getElementById('sl_final_title').value;
+    const coverUrl = document.getElementById('sl_final_cover').value;
+
+    const payload = {
+        releaseId,
+        title,
+        slug,
+        coverUrl,
+        shortUrl: `https://distro.audiory.site/s/${slug}`,
+        platforms: {
+            spotify: document.getElementById('sl_spotify')?.value || '',
+            apple: document.getElementById('sl_apple')?.value || '',
+            deezer: document.getElementById('sl_deezer')?.value || '',
+            youtube: document.getElementById('sl_youtube')?.value || '',
+            tidal: document.getElementById('sl_tidal')?.value || '',
+            amazon: document.getElementById('sl_amazon')?.value || ''
+        }
+    };
 
     try {
         const token = await getAuthToken();
@@ -3747,7 +3955,7 @@ window.handleCreateSmartLink = async function(e) {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ title, slug, platforms: { spotify, apple } })
+            body: JSON.stringify(payload)
         });
 
         if (!res.ok) throw new Error("Failed to save smart link");
@@ -3756,7 +3964,11 @@ window.handleCreateSmartLink = async function(e) {
         window.showToast("Smart Link created successfully!");
         window.initSmartLinksPage();
     } catch (err) {
-        window.showToast(err.message || "Failed to create smart link", true);
+        window.showToast(err.message || "Failed to save smart link", true);
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = `<i class="fa-solid fa-check text-xs"></i> <span>Save & Publish</span>`;
+        }
     }
 };
 
