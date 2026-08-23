@@ -3571,22 +3571,38 @@ if (typeof window.slugify !== 'function') {
     };
 }
 
-// Helper to resolve artist name across various backend object schemas
-if (typeof window.getArtistName !== 'function') {
-    window.getArtistName = function(release) {
-        if (!release) return 'Unknown Artist';
-        if (typeof release.artistName === 'string' && release.artistName.trim()) return release.artistName;
-        if (typeof release.artist === 'string' && release.artist.trim()) return release.artist;
-        if (typeof release.primaryArtist === 'string' && release.primaryArtist.trim()) return release.primaryArtist;
-        if (typeof release.artist_name === 'string' && release.artist_name.trim()) return release.artist_name;
+// Exact artist resolver matching catalog logic
+if (typeof window.resolveArtistName !== 'function') {
+    window.resolveArtistName = function(rel) {
+        if (!rel) return 'Unknown Artist';
+
+        // 1. Check participants array
+        if (Array.isArray(rel.participants) && rel.participants.length > 0) {
+            const names = rel.participants
+                .map(p => typeof p === 'string' ? p : (p.name || ''))
+                .filter(Boolean);
+            if (names.length > 0) return names.join(', ');
+        } 
         
-        // Handle array of artists e.g. release.artists = [{ name: 'Artist Name' }]
-        if (Array.isArray(release.artists) && release.artists.length > 0) {
-            const first = release.artists[0];
-            if (typeof first === 'string') return first;
-            if (first && first.name) return first.name;
+        // 2. Check artists array
+        if (Array.isArray(rel.artists) && rel.artists.length > 0) {
+            const names = rel.artists
+                .map(a => typeof a === 'string' ? a : (a.name || ''))
+                .filter(Boolean);
+            if (names.length > 0) return names.join(', ');
+        } 
+        
+        // 3. Check single artist field (string or object)
+        if (rel.artist) {
+            if (typeof rel.artist === 'string' && rel.artist.trim()) return rel.artist;
+            if (typeof rel.artist === 'object' && rel.artist.name) return rel.artist.name;
         }
-        
+
+        // 4. Check fallback string properties
+        if (typeof rel.artistName === 'string' && rel.artistName.trim()) return rel.artistName;
+        if (typeof rel.primaryArtist === 'string' && rel.primaryArtist.trim()) return rel.primaryArtist;
+        if (typeof rel.artist_name === 'string' && rel.artist_name.trim()) return rel.artist_name;
+
         return 'Unknown Artist';
     };
 }
@@ -3726,18 +3742,22 @@ window.createNewSmartLinkModal = async function() {
     `;
     document.body.insertAdjacentHTML('beforeend', loadingModalHtml);
 
-    let releases = [];
-    try {
-        const token = await getAuthToken();
-        const res = await fetch(`${getWorkerBaseUrl()}/api/releases`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-            const data = await res.json();
-            releases = Array.isArray(data) ? data : (data.releases || []);
+    let releases = window.releasesCatalog || [];
+
+    // If catalog is not preloaded in memory, fetch directly from API
+    if (releases.length === 0) {
+        try {
+            const token = await getAuthToken();
+            const res = await fetch(`${getWorkerBaseUrl()}/api/releases`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                releases = Array.isArray(data) ? data : (data.data || data.releases || []);
+            }
+        } catch (err) {
+            console.error("Failed to fetch releases:", err);
         }
-    } catch (err) {
-        console.error("Failed to fetch releases:", err);
     }
 
     const modal = document.getElementById('smartlink-modal');
@@ -3747,10 +3767,10 @@ window.createNewSmartLinkModal = async function() {
 
     const releaseOptions = releases.length > 0
         ? releases.map((r, idx) => {
-            const artistName = window.getArtistName(r);
-            const title = r.title || 'Untitled';
+            const artistName = window.resolveArtistName(r);
+            const title = r.title || r.metadata?.title || 'Untitled';
             const selectedAttr = idx === 0 ? 'selected' : '';
-            return `<option value="${r.id}" ${selectedAttr}>${window.escapeHtml(title)} — ${window.escapeHtml(artistName)}</option>`;
+            return `<option value="${r.id || idx}" ${selectedAttr}>${window.escapeHtml(artistName)} — ${window.escapeHtml(title)}</option>`;
         }).join('')
         : `<option value="" disabled selected>No releases found</option>`;
 
@@ -3798,7 +3818,7 @@ window.createNewSmartLinkModal = async function() {
         </div>
     `;
 
-    // Immediately trigger preview update for the initially selected release
+    // Immediately trigger preview update for the first release
     updateSmartLinkPreviewSlug();
 };
 
@@ -3808,21 +3828,22 @@ window.updateSmartLinkPreviewSlug = function() {
     const previewEl = document.getElementById('sl_url_preview');
     if (!releaseId || !previewEl || !window._availableReleases) return;
 
-    const selected = window._availableReleases.find(r => String(r.id) === String(releaseId));
+    const selected = window._availableReleases.find((r, idx) => String(r.id || idx) === String(releaseId));
     if (selected) {
-        const artistName = window.getArtistName(selected);
+        const artistName = window.resolveArtistName(selected);
+        const title = selected.title || selected.metadata?.title || 'release';
         const artistSlug = window.slugify(artistName);
-        const releaseSlug = window.slugify(selected.title || 'release');
+        const releaseSlug = window.slugify(title);
         previewEl.innerText = `${artistSlug}/${releaseSlug}`;
     }
 };
 
-// Execute Backend Scan & Render Manual Override Form (Step 2)
+// Execute Backend Scan & Render Review Step (Step 2)
 window.executeScanReleaseLinks = async function(e) {
     e.preventDefault();
     const releaseId = document.getElementById('sl_release_id').value;
     const scanBtn = document.getElementById('sl_scan_btn');
-    const selectedRelease = window._availableReleases?.find(r => String(r.id) === String(releaseId));
+    const selectedRelease = window._availableReleases?.find((r, idx) => String(r.id || idx) === String(releaseId));
 
     if (scanBtn) {
         scanBtn.disabled = true;
@@ -3860,11 +3881,13 @@ window.renderSmartLinkReviewStep = function(release, platforms) {
     const modal = document.getElementById('smartlink-modal');
     if (!modal) return;
 
-    const artistName = window.getArtistName(release);
-    const releaseTitle = release?.title || 'Release';
+    const artistName = window.resolveArtistName(release);
+    const releaseTitle = release?.title || release?.metadata?.title || 'Release';
     const artistSlug = window.slugify(artistName);
     const releaseSlug = window.slugify(releaseTitle);
     const fullSlug = `${artistSlug}/${releaseSlug}`;
+    
+    const coverUrl = window.resolveCoverUrl ? window.resolveCoverUrl(release) : (release?.coverUrl || '');
 
     modal.innerHTML = `
         <div class="bg-[#121824] border border-brand-border/80 rounded-2xl max-w-lg w-full p-5 sm:p-6 space-y-4 text-white relative shadow-2xl">
@@ -3882,7 +3905,7 @@ window.renderSmartLinkReviewStep = function(release, platforms) {
                 <input type="hidden" id="sl_final_release_id" value="${release?.id || ''}" />
                 <input type="hidden" id="sl_final_slug" value="${fullSlug}" />
                 <input type="hidden" id="sl_final_title" value="${window.escapeHtml(releaseTitle)}" />
-                <input type="hidden" id="sl_final_cover" value="${release?.coverUrl || ''}" />
+                <input type="hidden" id="sl_final_cover" value="${coverUrl}" />
 
                 <div class="p-3 bg-brand-dark/80 border border-brand-border/40 rounded-xl font-mono text-xs text-gray-400 break-all flex items-center gap-1">
                     <span class="text-gray-500 shrink-0">distro.audiory.site/s/</span>
@@ -4000,7 +4023,7 @@ window.handleSaveSmartLink = async function(e) {
     }
 };
 
-// Custom Delete Modal replacing native confirm() browser popup
+// Custom Delete Modal
 window.confirmDeleteSmartLink = function(id) {
     const existing = document.getElementById('delete-modal');
     if (existing) existing.remove();
