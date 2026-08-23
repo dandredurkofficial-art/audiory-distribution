@@ -3547,15 +3547,17 @@ window.submitAppleClaim = submitAppleClaim;
 window.startOAuthFlow = startOAuthFlow;
 window.showToast = showToast;
 
-// Helper for safely escaping HTML strings
-function escapeHtml(str) {
-    if (!str) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+// Safely declare escapeHtml only if it hasn't been declared yet
+if (typeof window.escapeHtml !== 'function') {
+    window.escapeHtml = function(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    };
 }
 
 // Render HTML View for Smart Links
@@ -3631,13 +3633,13 @@ async function initSmartLinksPage() {
                     <div class="flex items-center gap-3">
                         <img src="${link.coverUrl || '/placeholder.png'}" class="w-8 h-8 rounded object-cover bg-brand-dark shrink-0" />
                         <div class="truncate max-w-[180px] sm:max-w-xs">
-                            <div class="truncate text-white">${escapeHtml(link.title || 'Untitled Link')}</div>
-                            <div class="text-[10px] text-gray-500 truncate">/${escapeHtml(link.slug || '')}</div>
+                            <div class="truncate text-white">${window.escapeHtml(link.title || 'Untitled Link')}</div>
+                            <div class="text-[10px] text-gray-500 truncate">/${window.escapeHtml(link.slug || '')}</div>
                         </div>
                     </div>
                 </td>
                 <td class="py-3.5 px-4 font-mono text-[#00f2fe]">
-                    <a href="${link.shortUrl}" target="_blank" class="hover:underline">${escapeHtml(link.shortUrl || '')}</a>
+                    <a href="${link.shortUrl}" target="_blank" class="hover:underline">${window.escapeHtml(link.shortUrl || '')}</a>
                 </td>
                 <td class="py-3.5 px-4 font-mono text-gray-300">${link.clicks || 0}</td>
                 <td class="py-3.5 px-4">
@@ -3662,7 +3664,7 @@ async function initSmartLinksPage() {
 }
 window.initSmartLinksPage = initSmartLinksPage;
 
-// Open Create Smart Link Custom Modal (No Native Popups)
+// Open Create Smart Link Custom Modal
 window.createNewSmartLinkModal = function() {
     const existing = document.getElementById('smartlink-modal');
     if (existing) existing.remove();
@@ -3794,7 +3796,7 @@ window.copySmartLink = function(url) {
     });
 };
 
-// Toast notification helper (Custom non-blocking alert replace)
+// Toast notification helper
 function showToast(message, isError = false) {
     const existing = document.getElementById('custom-toast');
     if (existing) existing.remove();
@@ -3802,7 +3804,7 @@ function showToast(message, isError = false) {
     const toastHtml = `
         <div id="custom-toast" class="fixed bottom-5 right-5 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium text-white shadow-lg backdrop-blur-md transition-all animate-bounce ${isError ? 'bg-red-500/90' : 'bg-emerald-600/90'}">
             <i class="fa-solid ${isError ? 'fa-circle-exclamation' : 'fa-circle-check'} text-sm"></i>
-            <span>${escapeHtml(message)}</span>
+            <span>${window.escapeHtml(message)}</span>
         </div>
     `;
 
