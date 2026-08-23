@@ -3571,6 +3571,26 @@ if (typeof window.slugify !== 'function') {
     };
 }
 
+// Helper to resolve artist name across various backend object schemas
+if (typeof window.getArtistName !== 'function') {
+    window.getArtistName = function(release) {
+        if (!release) return 'Unknown Artist';
+        if (typeof release.artistName === 'string' && release.artistName.trim()) return release.artistName;
+        if (typeof release.artist === 'string' && release.artist.trim()) return release.artist;
+        if (typeof release.primaryArtist === 'string' && release.primaryArtist.trim()) return release.primaryArtist;
+        if (typeof release.artist_name === 'string' && release.artist_name.trim()) return release.artist_name;
+        
+        // Handle array of artists e.g. release.artists = [{ name: 'Artist Name' }]
+        if (Array.isArray(release.artists) && release.artists.length > 0) {
+            const first = release.artists[0];
+            if (typeof first === 'string') return first;
+            if (first && first.name) return first.name;
+        }
+        
+        return 'Unknown Artist';
+    };
+}
+
 // Toast notification helper
 window.showToast = window.showToast || function(message, isError = false) {
     const existing = document.getElementById('custom-toast');
@@ -3726,7 +3746,12 @@ window.createNewSmartLinkModal = async function() {
     window._availableReleases = releases;
 
     const releaseOptions = releases.length > 0
-        ? releases.map(r => `<option value="${r.id}">${window.escapeHtml(r.title || 'Untitled')} — ${window.escapeHtml(r.artistName || 'Artist')}</option>`).join('')
+        ? releases.map((r, idx) => {
+            const artistName = window.getArtistName(r);
+            const title = r.title || 'Untitled';
+            const selectedAttr = idx === 0 ? 'selected' : '';
+            return `<option value="${r.id}" ${selectedAttr}>${window.escapeHtml(title)} — ${window.escapeHtml(artistName)}</option>`;
+        }).join('')
         : `<option value="" disabled selected>No releases found</option>`;
 
     modal.innerHTML = `
@@ -3745,7 +3770,6 @@ window.createNewSmartLinkModal = async function() {
                 <div>
                     <label class="block text-xs font-medium text-gray-400 mb-1">Select Release</label>
                     <select id="sl_release_id" required onchange="updateSmartLinkPreviewSlug()" class="w-full bg-brand-dark border border-brand-border/60 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#00f2fe]">
-                        <option value="" disabled selected>-- Choose a release --</option>
                         ${releaseOptions}
                     </select>
                 </div>
@@ -3773,6 +3797,9 @@ window.createNewSmartLinkModal = async function() {
             </form>
         </div>
     `;
+
+    // Immediately trigger preview update for the initially selected release
+    updateSmartLinkPreviewSlug();
 };
 
 // Update preview URL slug based on chosen release
@@ -3783,7 +3810,8 @@ window.updateSmartLinkPreviewSlug = function() {
 
     const selected = window._availableReleases.find(r => String(r.id) === String(releaseId));
     if (selected) {
-        const artistSlug = window.slugify(selected.artistName || 'artist');
+        const artistName = window.getArtistName(selected);
+        const artistSlug = window.slugify(artistName);
         const releaseSlug = window.slugify(selected.title || 'release');
         previewEl.innerText = `${artistSlug}/${releaseSlug}`;
     }
@@ -3832,7 +3860,7 @@ window.renderSmartLinkReviewStep = function(release, platforms) {
     const modal = document.getElementById('smartlink-modal');
     if (!modal) return;
 
-    const artistName = release?.artistName || 'Artist';
+    const artistName = window.getArtistName(release);
     const releaseTitle = release?.title || 'Release';
     const artistSlug = window.slugify(artistName);
     const releaseSlug = window.slugify(releaseTitle);
