@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Audiory Distribution Hub</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -27,22 +27,29 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0B0F17; color: #F8FAFC; }
+        html, body {
+            height: 100%;
+            height: -webkit-fill-available;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0B0F17;
+            color: #F8FAFC;
+        }
         .too-lost-input { width: 100%; background-color: #0B0F17; border: 1px solid #1E293B; border-radius: 0.75rem; padding: 0.65rem 1rem; color: #ffffff; font-size: 0.875rem; outline: none; transition: all 0.2s; }
         .too-lost-input:focus { border-color: #00F2FE; box-shadow: 0 0 0 2px rgba(0, 242, 254, 0.15); }
         .too-lost-form-label { display: block; font-size: 0.75rem; font-weight: 600; color: #94A3B8; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.05em; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0B0F17; }
-        ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #00F2FE; }
+        
+        /* Smooth Scrollbar Styling */
+        #mainViewport::-webkit-scrollbar { width: 6px; height: 6px; }
+        #mainViewport::-webkit-scrollbar-track { background: transparent; }
+        #mainViewport::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 9999px; }
+        #mainViewport::-webkit-scrollbar-thumb:hover { background: #00F2FE; }
     </style>
 </head>
-<body class="h-screen w-screen flex flex-col bg-brand-dark text-slate-100 overflow-hidden">
+<body class="h-full w-full flex flex-col bg-brand-dark text-slate-100 overflow-hidden">
     
-    <!-- Mobile Header Navigation -->
+    <!-- Mobile Top Header -->
     <header class="lg:hidden flex items-center justify-between p-4 bg-brand-card border-b border-brand-border flex-shrink-0 z-30">
         <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-black shadow-lg shadow-cyan-500/20">
@@ -60,15 +67,15 @@
         </div>
     </header>
     
-    <!-- App Container -->
-    <div class="flex flex-1 h-full min-h-0 overflow-hidden relative">
+    <!-- Main App Body Shell -->
+    <div class="flex flex-1 h-full min-h-0 w-full overflow-hidden relative">
         
-        <!-- Mobile Sidebar Overlay Backdrop -->
+        <!-- Mobile Sidebar Backdrop Overlay -->
         <div id="sidebarBackdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden backdrop-blur-sm"></div>
 
-        <!-- Sidebar Navigation -->
+        <!-- Left Sidebar Navigation -->
         <aside id="sidebarNav" class="fixed lg:static inset-y-0 left-0 z-50 w-64 h-full bg-brand-card border-r border-brand-border flex flex-col flex-shrink-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
-            <!-- Brand Logo -->
+            <!-- Brand Logo Header -->
             <div class="p-5 border-b border-brand-border flex items-center justify-between flex-shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-black shadow-lg shadow-cyan-500/20">
@@ -84,7 +91,7 @@
                 </button>
             </div>
 
-            <!-- Dynamic Authenticated User Profile -->
+            <!-- Profile Widget -->
             <div class="p-4 mx-3 my-3 rounded-xl bg-brand-dark border border-brand-border flex-shrink-0">
                 <div class="flex items-center gap-3 overflow-hidden">
                     <div id="userInitials" class="w-8 h-8 rounded-lg bg-cyan-500/20 text-brand-accent font-bold flex items-center justify-center text-xs border border-cyan-500/30 flex-shrink-0">--</div>
@@ -124,7 +131,7 @@
                 </button>
             </nav>
 
-            <!-- Bottom Footer -->
+            <!-- Bottom Actions -->
             <div class="p-4 border-t border-brand-border bg-brand-card/50 flex items-center justify-between flex-shrink-0 text-xs">
                 <div class="flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
@@ -139,9 +146,9 @@
             </div>
         </aside>
 
-        <!-- Main Content Viewport -->
+        <!-- Right Main View Area -->
         <main class="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-brand-dark">
-            <!-- Desktop Top Bar Header -->
+            <!-- Desktop Header Bar -->
             <header class="hidden lg:flex items-center justify-between px-8 py-4 bg-brand-card border-b border-brand-border flex-shrink-0">
                 <div class="flex items-center gap-3 max-w-md w-full relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 text-xs text-gray-500"></i>
@@ -154,10 +161,11 @@
                 </div>
             </header>
 
-            <!-- Dynamic Viewport Area -->
-            <div id="mainViewport" class="flex-1 p-4 sm:p-8 overflow-y-auto w-full max-w-7xl mx-auto flex flex-col">
-                <!-- Centered Wave Loader -->
-                <div class="flex-1 flex items-center justify-center min-h-[300px]">
+            <!-- Main Viewport Scrollable Area -->
+            <!-- Note: pb-28 on mobile gives ample clearance so bottom elements are never swallowed -->
+            <div id="mainViewport" class="flex-1 p-4 sm:p-8 pb-28 sm:pb-12 overflow-y-auto w-full">
+                <!-- Inner views load smoothly here without clipping -->
+                <div class="flex items-center justify-center min-h-[300px]">
                     <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-xl shadow-cyan-500/30 animate-pulse">
                         <i class="fa-solid fa-wave-square text-lg"></i>
                     </div>
@@ -165,7 +173,6 @@
             </div>
         </main>
     </div> 
-
 
     <!-- JavaScript Module Hooking Firebase, Worker & R2 -->
     <script type="module">
