@@ -3604,7 +3604,7 @@ window.startOAuthFlow = startOAuthFlow;
 window.showToast = showToast;
 
 /* ==========================================================================
-   UPGRADE & SUBSCRIPTION MODULE (NO BROWSER POPUPS)
+   UPGRADE & SUBSCRIPTION MODULE (STRICT PAYMENT VERIFICATION)
    ========================================================================== */
 
 function renderUpgradeView() {
@@ -3621,7 +3621,7 @@ function renderUpgradeView() {
                 </div>
             </div>
 
-            <!-- Current Active Plan Banner -->
+            <!-- Current Verified Active Plan Banner -->
             <div id="current-plan-card" class="bg-brand-dark/80 border border-brand-border/80 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-xl bg-brand-accent/10 border border-brand-accent/30 flex items-center justify-center text-brand-accent text-xl">
@@ -3632,7 +3632,7 @@ function renderUpgradeView() {
                             <span class="text-xs text-gray-400 uppercase font-semibold">Active Plan:</span>
                             <span id="active-plan-name" class="text-sm font-bold text-white">Loading...</span>
                         </div>
-                        <p id="active-plan-status" class="text-xs text-gray-400 mt-0.5">Fetching subscription status...</p>
+                        <p id="active-plan-status" class="text-xs text-gray-400 mt-0.5">Fetching verified status...</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -3640,6 +3640,20 @@ function renderUpgradeView() {
                         Checking...
                     </span>
                 </div>
+            </div>
+
+            <!-- Pending Transaction Banner (Appears when awaiting M-Pesa PIN confirmation) -->
+            <div id="pending-transaction-banner" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-clock text-amber-400 text-lg"></i>
+                    <div>
+                        <h4 class="text-xs font-bold text-amber-300">Payment Pending Confirmation</h4>
+                        <p class="text-[11px] text-gray-400">An M-Pesa push was sent to your phone. Enter your PIN to activate your tier.</p>
+                    </div>
+                </div>
+                <button onclick="fetchSubscriptionAndHistory()" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-right"></i> Check Payment Status
+                </button>
             </div>
 
             <!-- Pricing Cards Grid -->
@@ -3793,7 +3807,7 @@ function renderUpgradeView() {
             </div>
         </div>
 
-        <!-- Checkout Payment Modal (In-App Overlay - Replaces Old Popups) -->
+        <!-- Checkout Payment Modal -->
         <div id="checkoutModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
             <div class="bg-brand-dark border border-brand-border rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
                 <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">
@@ -3808,7 +3822,7 @@ function renderUpgradeView() {
                 <form id="upgrade-payment-form" onsubmit="handleUpgradeSubmit(event)" class="space-y-4">
                     <input type="hidden" id="selected_plan_id" value="" />
 
-                    <!-- Payment Method Selector -->
+                    <!-- Payment Gateway Option Selector -->
                     <div>
                         <label class="block text-xs font-semibold text-gray-300 mb-2">Payment Gateway</label>
                         <div class="grid grid-cols-3 gap-2">
@@ -3830,7 +3844,7 @@ function renderUpgradeView() {
                         </div>
                     </div>
 
-                    <!-- M-Pesa Phone Input Field -->
+                    <!-- M-Pesa Input -->
                     <div id="mpesa-field" class="space-y-1">
                         <label class="text-xs font-semibold text-gray-300">M-Pesa Phone Number</label>
                         <input type="tel" id="checkout_phone" placeholder="254712345678" class="w-full px-3.5 py-2.5 rounded-xl bg-gray-900 border border-brand-border text-xs text-white focus:outline-none focus:border-brand-accent" />
@@ -3867,34 +3881,56 @@ async function fetchSubscriptionAndHistory() {
         const sub = data.subscription;
         const history = data.history || [];
 
-        // Update active subscription badge
+        // STRICT VERIFICATION: Verify if subscription status is truly Active
+        const isVerifiedActive = sub?.status === 'Active';
+        const activePlanId = isVerifiedActive ? (sub?.planId || 'starter') : 'starter';
+
+        // Check if user has an ongoing pending invoice
+        const hasPendingInvoice = history.some(item => item.status === 'Pending');
+
+        // Update Top Active Plan Card
         const planNameEl = document.getElementById('active-plan-name');
         const planStatusEl = document.getElementById('active-plan-status');
         const planBadgeEl = document.getElementById('active-plan-badge');
 
         if (planNameEl) planNameEl.innerText = sub?.planName || 'Starter Plan';
-        if (planStatusEl) planStatusEl.innerText = `Status: ${sub?.status || 'Active'} • Amount: $${sub?.amount || '0.00'}`;
+        if (planStatusEl) planStatusEl.innerText = `Verified Status: ${sub?.status || 'Active'}`;
         if (planBadgeEl) {
             planBadgeEl.innerText = sub?.status || 'Active';
-            planBadgeEl.className = sub?.status === 'Active' 
+            planBadgeEl.className = isVerifiedActive
                 ? 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                 : 'px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20';
         }
 
-        // Highlight current plan buttons
-        const currentPlanId = sub?.planId || 'starter';
+        // Toggle Pending Banner visibility
+        const pendingBanner = document.getElementById('pending-transaction-banner');
+        if (pendingBanner) {
+            if (hasPendingInvoice) {
+                pendingBanner.classList.remove('hidden');
+            } else {
+                pendingBanner.classList.add('hidden');
+            }
+        }
+
+        // Highlight Plan Selection Buttons based ONLY on active verified plan
         ['starter', 'pro', 'label'].forEach(planKey => {
             const btn = document.getElementById(`btn-plan-${planKey}`);
             if (btn) {
-                if (planKey === currentPlanId) {
+                if (planKey === activePlanId) {
                     btn.innerText = 'Current Plan';
                     btn.disabled = true;
                     btn.className = 'mt-6 w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-gray-800 text-gray-500 cursor-not-allowed';
+                } else {
+                    btn.disabled = false;
+                    btn.innerText = (planKey === 'pro') ? 'Upgrade to Pro' : (planKey === 'label' ? 'Upgrade to Label' : 'Select Free Plan');
+                    btn.className = (planKey === 'pro') 
+                        ? 'mt-6 w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-brand-accent text-black hover:brightness-110 transition-all font-bold'
+                        : 'mt-6 w-full py-2.5 px-4 rounded-xl text-xs font-semibold border border-brand-border text-gray-300 hover:text-white hover:bg-brand-border/40 transition-all';
                 }
             }
         });
 
-        // Render Billing History
+        // Render Billing History Table
         const tbody = document.getElementById('billing-history-tbody');
         if (tbody) {
             if (history.length === 0) {
@@ -3904,11 +3940,15 @@ async function fetchSubscriptionAndHistory() {
                     <tr>
                         <td class="py-3 px-4 font-mono font-bold text-white">${item.invoiceId || 'N/A'}</td>
                         <td class="py-3 px-4">${item.date || '-'}</td>
-                        <td class="py-3 px-4">${item.description || 'Subscription Upgrade'}</td>
+                        <td class="py-3 px-4 capitalize">${item.description || 'Subscription Upgrade'}</td>
                         <td class="py-3 px-4 uppercase font-bold text-gray-400">${item.gateway || 'Card'}</td>
                         <td class="py-3 px-4 font-bold text-white">$${item.amount || '0.00'}</td>
                         <td class="py-3 px-4">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
+                                item.status === 'Paid' 
+                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                                    : (item.status === 'Pending' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20')
+                            }">
                                 ${item.status}
                             </span>
                         </td>
@@ -3967,7 +4007,7 @@ window.handleUpgradeSubmit = async function(e) {
 
     if (submitBtn) submitBtn.disabled = true;
     if (msgEl) {
-        msgEl.innerText = 'Communicating with payment gateway...';
+        msgEl.innerText = 'Subscribing...';
         msgEl.classList.remove('hidden');
     }
 
@@ -3996,27 +4036,27 @@ window.handleUpgradeSubmit = async function(e) {
             throw new Error(data?.error || 'Upgrade request failed');
         }
 
-        // Handle Redirects (PayPal/PesaPal)
+        // Redirects (PayPal/PesaPal)
         if (data.redirectUrl) {
             if (msgEl) msgEl.innerText = 'Redirecting to payment portal...';
             window.location.href = data.redirectUrl;
             return;
         }
 
-        // Handle M-Pesa STK Push Prompt
+        // M-Pesa STK Push
         if (data.requiresManualAction) {
             if (msgEl) {
-                msgEl.innerText = 'STK Push sent! Please check your phone and enter your M-Pesa PIN to complete.';
+                msgEl.innerText = 'STK Push sent! Please enter your M-Pesa PIN on your phone.';
             }
             setTimeout(() => {
                 closeCheckoutModal();
                 fetchSubscriptionAndHistory();
-            }, 4000);
+            }, 3000);
             return;
         }
 
-        // Free Plan or Instant Upgrade
-        if (msgEl) msgEl.innerText = 'Plan updated successfully!';
+        // Free Plan or Direct Confirmations
+        if (msgEl) msgEl.innerText = 'Request processed successfully!';
         setTimeout(() => {
             closeCheckoutModal();
             fetchSubscriptionAndHistory();
