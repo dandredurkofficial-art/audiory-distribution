@@ -40,13 +40,9 @@
         ::-webkit-scrollbar-thumb:hover { background: #00F2FE; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col bg-brand-dark text-slate-100 overflow-x-hidden">
-
-
-
+<body class="h-screen flex flex-col bg-brand-dark text-slate-100 overflow-hidden">
     <!-- Mobile Header Navigation -->
-
-    <header class="lg:hidden flex items-center justify-between p-4 bg-brand-card border-b border-brand-border sticky top-0 z-50">
+    <header class="lg:hidden flex items-center justify-between p-4 bg-brand-card border-b border-brand-border flex-shrink-0 z-50">
         <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-black shadow-lg shadow-cyan-500/20">
                 <i class="fa-solid fa-wave-square text-xs"></i>
@@ -63,12 +59,12 @@
         </div>
     </header>
     
-    <div class="flex flex-1 relative">
+    <div class="flex flex-1 h-full overflow-hidden relative">
         
         <!-- Sidebar Navigation -->
-        <aside id="sidebarNav" class="fixed lg:static inset-y-0 left-0 z-40 w-64 bg-brand-card border-r border-brand-border flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+        <aside id="sidebarNav" class="fixed lg:static inset-y-0 left-0 z-40 w-64 h-full bg-brand-card border-r border-brand-border flex flex-col flex-shrink-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
             <!-- Brand Logo -->
-            <div class="p-5 border-b border-brand-border flex items-center justify-between">
+            <div class="p-5 border-b border-brand-border flex items-center justify-between flex-shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-black shadow-lg shadow-cyan-500/20">
                         <i class="fa-solid fa-wave-square text-sm"></i>
@@ -82,7 +78,7 @@
             </div>
             <!-- Dynamic Authenticated User Profile -->
 
-            <div class="p-4 mx-3 my-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between">
+            <div class="p-4 mx-3 my-3 rounded-xl bg-brand-dark border border-brand-border flex-shrink-0">
                 <div class="flex items-center gap-3 overflow-hidden">
                     <div id="userInitials" class="w-8 h-8 rounded-lg bg-cyan-500/20 text-brand-accent font-bold flex items-center justify-center text-xs border border-cyan-500/30 flex-shrink-0">--</div>
                     <div class="overflow-hidden">
@@ -123,15 +119,15 @@
                     <i class="fa-solid fa-sliders w-4"></i> Settings
                 </button>
             </nav>
-            <div class="p-4 border-t border-brand-border bg-brand-card/50 flex items-center justify-between text-[11px] text-gray-400">
+            <div class="p-4 border-t border-brand-border bg-brand-card/50 flex-shrink-0">
                 <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> AUDIORY HUB</span>
                 <i class="fa-solid fa-gear text-gray-500 hover:text-white cursor-pointer" onclick="switchView('settings')"></i>
             </div>
         </aside>
 
         <!-- Main Content Viewport -->
-        <main class="flex-1 flex flex-col min-w-0 bg-brand-dark">
-            <header class="hidden lg:flex items-center justify-between px-8 py-4 bg-brand-card border-b border-brand-border">
+        <main class="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-brand-dark">
+            <header class="hidden lg:flex items-center justify-between px-8 py-4 bg-brand-card border-b border-brand-border flex-shrink-0">
                 <div class="flex items-center gap-3 max-w-md w-full relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 text-xs text-gray-500"></i>
                     <input type="text" placeholder="Search live catalog, UPCs, ISRCs..." class="too-lost-input pl-9 py-2 text-xs bg-brand-dark/60">
@@ -142,7 +138,7 @@
                     </button>
                 </div>
             </header>
-            <div id="mainViewport" class="flex-1 p-4 sm:p-8 overflow-y-auto">
+            <div id="mainViewport" class="flex-1 p-4 sm:p-8 overflow-y-auto h-full">
                 <div class="flex items-center justify-center h-64">
                     <i class="fa-solid fa-spinner fa-spin text-2xl text-brand-accent"></i>
                 </div>
