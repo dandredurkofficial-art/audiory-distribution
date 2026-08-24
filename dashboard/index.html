@@ -4136,7 +4136,7 @@ function renderTransferView() {
       <h3 class="text-base font-bold text-white border-b border-white/10 pb-3">1. Select Previous Distributor</h3>
       
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-        ${['DistroKid', 'TuneCore', 'CD Baby', 'UnitedMasters', 'Amuse', 'Other'].map(distro => `
+        ${['DistroKid', 'TuneCore', 'CD Baby', 'UnitedMasters', 'Amuse', 'Dapstrem'].map(distro => `
           <label class="flex flex-col items-center justify-center p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:border-amber-400/50 transition group">
             <input type="radio" name="previous_distributor" value="${distro}" class="hidden peer" ${distro === 'DistroKid' ? 'checked' : ''}>
             <span class="text-xs font-bold text-gray-300 peer-checked:text-amber-400 transition">${distro}</span>
@@ -4148,78 +4148,129 @@ function renderTransferView() {
       <h3 class="text-base font-bold text-white border-b border-white/10 pb-3 pt-2">2. Release & Ownership Metadata</h3>
       
       <form id="manualTransferForm" onsubmit="submitManualTransfer(event)" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label class="block text-xs font-medium text-gray-400 mb-1">Release Title *</label>
             <input type="text" name="title" required placeholder="e.g. Midnight Memories" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
           </div>
-
           <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1">Version (Optional)</label>
-            <input type="text" name="version" placeholder="e.g. Remastered / Deluxe" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
+            <label class="block text-xs font-medium text-gray-400 mb-1">Release Type *</label>
+            <select name="type" required class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
+                <option value="Single">Single</option>
+                <option value="EP">EP</option>
+                <option value="Album">Album</option>
+            </select>
           </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1">Primary Language *</label>
+            <select name="language" required class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
+                <option value="English">English</option>
+                <option value="Swahili">Swahili</option>
+                <option value="French">French</option>
+                <option value="Spanish">Spanish</option>
+                <option value="Portuguese">Portuguese</option>
+                <option value="Instrumental">Instrumental (No Lyrics)</option>
+            </select>
+          </div>
+        </div>
 
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-medium text-gray-400 mb-1">Primary Artist Name *</label>
             <input type="text" name="artist_name" required placeholder="e.g. Bigi Mikkah" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
           </div>
-
           <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1">Featured Artists (Comma Separated)</label>
-            <input type="text" name="featured_artists" placeholder="e.g. Drake, Wizkid" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
+            <label class="block text-xs font-medium text-gray-400 mb-1">Featured Artists / Remixers</label>
+            <input type="text" name="featured_artists" placeholder="e.g. Drake (Featuring), Wizkid (Remixer)" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
           </div>
+        </div>
 
-          <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1">UPC Code * (Must match previous distributor)</label>
-            <input type="text" name="upc" required placeholder="12-digit UPC" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
-          </div>
-
-          <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1">ISRC Code * (Main Track ISRC)</label>
-            <input type="text" name="isrc" required placeholder="e.g. US-S1Z-24-00001" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
-          </div>
-
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label class="block text-xs font-medium text-gray-400 mb-1">Original Release Date *</label>
             <input type="date" name="release_date" required class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
           </div>
-
           <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1">Genre *</label>
+            <label class="block text-xs font-medium text-gray-400 mb-1">Release Timezone *</label>
+            <select name="timezone" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
+                <option value="Africa/Nairobi">Africa/Nairobi (EAT)</option>
+                <option value="UTC">UTC</option>
+                <option value="America/New_York">America/New York (EST)</option>
+                <option value="Europe/London">Europe/London (GMT)</option>
+            </select>
+          </div>
+          <div>
+             <label class="block text-xs font-medium text-gray-400 mb-1">UPC Code *</label>
+             <input type="text" name="upc" required placeholder="12-digit UPC" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1">Primary Genre *</label>
             <select name="genre" required class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
               <option value="">Select Genre</option>
               <option value="Afrobeats">Afrobeats</option>
               <option value="Hip Hop">Hip Hop</option>
               <option value="Pop">Pop</option>
               <option value="R&B">R&B</option>
-              <option value="Reggae">Reggae</option>
-              <option value="Electronic">Electronic</option>
             </select>
           </div>
-
           <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1">Record Label</label>
-            <input type="text" name="label" placeholder="e.g. Audiory Records" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
-          </div>
-
-          <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1">Copyright Line (C & P)</label>
-            <input type="text" name="copyright" placeholder="© 2026 Audiory Music" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
+            <label class="block text-xs font-medium text-gray-400 mb-1">Subgenre (Optional)</label>
+            <input type="text" name="subgenre" placeholder="e.g. Afropop" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
           </div>
         </div>
 
-        <h3 class="text-base font-bold text-white border-b border-white/10 pb-3 pt-4">3. Media Assets</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1">Record Label *</label>
+            <input type="text" name="label" required placeholder="e.g. Audiory Records" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1">(C) Line Copyright *</label>
+            <input type="text" name="c_line" required placeholder="© 2026 Audiory" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1">(P) Line Phonogram *</label>
+            <input type="text" name="p_line" required placeholder="℗ 2026 Audiory" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
+          </div>
+        </div>
+
+        <h3 class="text-base font-bold text-white border-b border-white/10 pb-3 pt-4">3. Track Data & Media Assets</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium text-gray-400 mb-1">Track ISRC Code *</label>
+            <input type="text" name="isrc" required placeholder="e.g. US-S1Z-24-00001" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1">Explicit Status *</label>
+            <select name="explicit" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
+                <option value="false">Clean / Non-Explicit</option>
+                <option value="true">Explicit</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1">TikTok Start (MM:SS)</label>
+            <input type="text" name="tiktok_start" placeholder="00:30" value="00:30" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none">
+          </div>
+        </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-medium text-gray-400 mb-1">Master Audio File (WAV/FLAC) *</label>
             <input type="file" name="audio_file" accept=".wav,.flac" required class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-400 file:text-black hover:file:bg-amber-300">
           </div>
-
           <div>
             <label class="block text-xs font-medium text-gray-400 mb-1">Cover Artwork (3000x3000px JPG/PNG) *</label>
             <input type="file" name="artwork" accept=".jpg,.jpeg,.png" required class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-400 file:text-black hover:file:bg-amber-300">
           </div>
+        </div>
+        
+        <div>
+           <label class="block text-xs font-medium text-gray-400 mb-1">Plain Lyrics (Optional)</label>
+           <textarea name="lyrics" rows="2" class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-amber-400 outline-none" placeholder="Paste lyrics here..."></textarea>
         </div>
 
         <h3 class="text-base font-bold text-white border-b border-white/10 pb-3 pt-4">4. DSP Store URLs (Optional - Preserves Playlists)</h3>
