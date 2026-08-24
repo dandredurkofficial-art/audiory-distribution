@@ -3863,10 +3863,10 @@ function renderUpgradeView() {
 }
 
 window.initUpgradePage = async function() {
-    await fetchSubscriptionAndHistory();
+    await window.fetchSubscriptionAndHistory();
 };
 
-async function fetchSubscriptionAndHistory() {
+window.fetchSubscriptionAndHistory = async function() {
     const token = window.currentUser?.getIdToken ? await window.currentUser.getIdToken() : '';
     const baseUrl = window.WORKER_BASE_URL || '';
 
@@ -3959,17 +3959,23 @@ async function fetchSubscriptionAndHistory() {
     } catch (err) {
         console.error('Error fetching subscription history:', err);
     }
-}
+};
 
 window.openCheckoutModal = function(planId) {
     const modal = document.getElementById('checkoutModal');
     const planInput = document.getElementById('selected_plan_id');
     const planDesc = document.getElementById('checkout-plan-desc');
+    const msgEl = document.getElementById('checkout-status-msg');
 
     if (planInput) planInput.value = planId;
     if (planDesc) {
         const names = { starter: 'Starter Plan ($0.00)', pro: 'Pro Artist Plan ($19.99/yr)', label: 'Label Partner Plan ($49.99/yr)' };
         planDesc.innerText = `Upgrading to ${names[planId] || planId}`;
+    }
+
+    if (msgEl) {
+        msgEl.innerText = '';
+        msgEl.classList.add('hidden');
     }
 
     if (modal) modal.classList.remove('hidden');
@@ -3990,7 +3996,7 @@ window.togglePaymentInputs = function(method) {
 window.handleUpgradeSubmit = async function(e) {
     e.preventDefault();
 
-    const planId = document.getElementById('selected_plan_id').value;
+    const planId = document.getElementById('selected_plan_id')?.value;
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'mpesa';
     const phone = document.getElementById('checkout_phone')?.value?.trim();
 
@@ -4049,8 +4055,8 @@ window.handleUpgradeSubmit = async function(e) {
                 msgEl.innerText = 'STK Push sent! Please enter your M-Pesa PIN on your phone.';
             }
             setTimeout(() => {
-                closeCheckoutModal();
-                fetchSubscriptionAndHistory();
+                window.closeCheckoutModal();
+                window.fetchSubscriptionAndHistory();
             }, 3000);
             return;
         }
@@ -4058,8 +4064,8 @@ window.handleUpgradeSubmit = async function(e) {
         // Free Plan or Direct Confirmations
         if (msgEl) msgEl.innerText = 'Request processed successfully!';
         setTimeout(() => {
-            closeCheckoutModal();
-            fetchSubscriptionAndHistory();
+            window.closeCheckoutModal();
+            window.fetchSubscriptionAndHistory();
         }, 1500);
 
     } catch (err) {
