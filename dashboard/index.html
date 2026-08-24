@@ -3607,6 +3607,9 @@ window.showToast = showToast;
    UPGRADE & SUBSCRIPTION MODULE (STRICT PAYMENT VERIFICATION)
    ========================================================================== */
 
+// Tracks plan targeted for retries
+window.lastAttemptedPlanId = 'pro';
+
 function renderUpgradeView() {
     return `
         <div class="max-w-6xl mx-auto space-y-8 pb-12">
@@ -3642,17 +3645,18 @@ function renderUpgradeView() {
                 </div>
             </div>
 
-            <!-- Pending Transaction Banner (Appears when awaiting M-Pesa PIN confirmation) -->
-            <div id="pending-transaction-banner" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between gap-4">
+            <!-- Pending Transaction Banner (Appears when awaiting M-Pesa PIN confirmation or upon failure) -->
+            <div id="pending-transaction-banner" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between gap-4 transition-all">
                 <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-clock text-amber-400 text-lg"></i>
+                    <i id="pending-banner-icon" class="fa-solid fa-clock text-amber-400 text-lg"></i>
                     <div>
-                        <h4 class="text-xs font-bold text-amber-300">Payment Pending Confirmation</h4>
-                        <p class="text-[11px] text-gray-400">An M-Pesa push was sent to your phone. Enter your PIN to activate your tier.</p>
+                        <h4 id="pending-banner-title" class="text-xs font-bold text-amber-300">Payment Pending Confirmation</h4>
+                        <p id="pending-banner-desc" class="text-[11px] text-gray-400">An M-Pesa push was sent to your phone. Enter your PIN to activate your tier.</p>
                     </div>
                 </div>
-                <button onclick="fetchSubscriptionAndHistory()" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5">
-                    <i class="fa-solid fa-rotate-right"></i> Check Payment Status
+                <button id="btn-check-payment-status" onclick="fetchSubscriptionAndHistory()" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5">
+                    <i id="check-status-icon" class="fa-solid fa-rotate-right"></i> 
+                    <span id="check-status-text">Check Payment Status</span>
                 </button>
             </div>
 
@@ -3867,6 +3871,15 @@ window.initUpgradePage = async function() {
 };
 
 window.fetchSubscriptionAndHistory = async function() {
+    const btnCheck = document.getElementById('btn-check-payment-status');
+    const iconCheck = document.getElementById('check-status-icon');
+    const textCheck = document.getElementById('check-status-text');
+
+    // Set Loading State for "Check Payment Status"
+    if (btnCheck) btnCheck.disabled = true;
+    if (iconCheck) iconCheck.className = 'fa-solid fa-spinner fa-spin';
+    if (textCheck) textCheck.innerText = 'Checking payment status...';
+
     const token = window.currentUser?.getIdToken ? await window.currentUser.getIdToken() : '';
     const baseUrl = window.WORKER_BASE_URL || '';
 
@@ -3885,8 +3898,14 @@ window.fetchSubscriptionAndHistory = async function() {
         const isVerifiedActive = sub?.status === 'Active';
         const activePlanId = isVerifiedActive ? (sub?.planId || 'starter') : 'starter';
 
-        // Check if user has an ongoing pending invoice
+        // Evaluate transaction statuses
         const hasPendingInvoice = history.some(item => item.status === 'Pending');
+        const latestTx = history[0];
+        const isLatestFailed = latestTx && (latestTx.status === 'Failed' || latestTx.status === 'Cancelled' || latestTx.status === 'Declined');
+
+        if (latestTx && latestTx.planId) {
+            window.lastAttemptedPlanId = latestTx.planId;
+        }
 
         // Update Top Active Plan Card
         const planNameEl = document.getElementById('active-plan-name');
@@ -3902,10 +3921,44 @@ window.fetchSubscriptionAndHistory = async function() {
                 : 'px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20';
         }
 
-        // Toggle Pending Banner visibility
+        // Handle Pending / Failed Transaction Banner State
         const pendingBanner = document.getElementById('pending-transaction-banner');
+        const bannerIcon = document.getElementById('pending-banner-icon');
+        const bannerTitle = document.getElementById('pending-banner-title');
+        const bannerDesc = document.getElementById('pending-banner-desc');
+
         if (pendingBanner) {
             if (hasPendingInvoice) {
+                pendingBanner.className = 'bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between gap-4 transition-all';
+                if (bannerIcon) bannerIcon.className = 'fa-solid fa-clock text-amber-400 text-lg';
+                if (bannerTitle) {
+                    bannerTitle.innerText = 'Payment Pending Confirmation';
+                    bannerTitle.className = 'text-xs font-bold text-amber-300';
+                }
+                if (bannerDesc) bannerDesc.innerText = 'An M-Pesa push was sent to your phone. Enter your PIN to activate your tier.';
+                
+                if (iconCheck) iconCheck.className = 'fa-solid fa-rotate-right';
+                if (textCheck) textCheck.innerText = 'Check Payment Status';
+                if (btnCheck) {
+                    btnCheck.onclick = function() { window.fetchSubscriptionAndHistory(); };
+                    btnCheck.className = 'px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5';
+                }
+                pendingBanner.classList.remove('hidden');
+            } else if (isLatestFailed && !isVerifiedActive) {
+                pendingBanner.className = 'bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex items-center justify-between gap-4 transition-all';
+                if (bannerIcon) bannerIcon.className = 'fa-solid fa-circle-xmark text-red-400 text-lg';
+                if (bannerTitle) {
+                    bannerTitle.innerText = 'Payment Failed';
+                    bannerTitle.className = 'text-xs font-bold text-red-300';
+                }
+                if (bannerDesc) bannerDesc.innerText = 'Transaction was cancelled or declined. Please retry to upgrade.';
+                
+                if (iconCheck) iconCheck.className = 'fa-solid fa-rotate-right';
+                if (textCheck) textCheck.innerText = 'Payment Failed - Retry';
+                if (btnCheck) {
+                    btnCheck.onclick = function() { window.openCheckoutModal(window.lastAttemptedPlanId || 'pro'); };
+                    btnCheck.className = 'px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5';
+                }
                 pendingBanner.classList.remove('hidden');
             } else {
                 pendingBanner.classList.add('hidden');
@@ -3958,6 +4011,8 @@ window.fetchSubscriptionAndHistory = async function() {
         }
     } catch (err) {
         console.error('Error fetching subscription history:', err);
+    } finally {
+        if (btnCheck) btnCheck.disabled = false;
     }
 };
 
