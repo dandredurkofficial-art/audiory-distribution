@@ -86,9 +86,6 @@
                         <p id="userEmail" class="text-[10px] text-gray-400 truncate">Connecting...</p>
                     </div>
                 </div>
-                <button onclick="handleSignOut()" title="Sign Out" class="text-gray-500 hover:text-red-400 transition-colors">
-                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
-                </button>
             </div>
 
             <!-- Navigation Links -->
@@ -119,9 +116,21 @@
                     <i class="fa-solid fa-sliders w-4"></i> Settings
                 </button>
             </nav>
-            <div class="p-4 border-t border-brand-border bg-brand-card/50 flex-shrink-0">
-                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> AUDIORY HUB</span>
-                <i class="fa-solid fa-gear text-gray-500 hover:text-white cursor-pointer" onclick="switchView('settings')"></i>
+            <!-- Bottom Footer: Combined AUDIORY HUB, Settings gear, and Sign Out -->
+            <div class="p-4 border-t border-brand-border bg-brand-card/50 flex items-center justify-between flex-shrink-0 text-xs">
+                <!-- Left Side: Status Dot, AUDIORY HUB text, and Gear icon -->
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                    <span class="font-bold tracking-wide text-gray-300 text-[11px]">AUDIORY HUB</span>
+                    <button onclick="switchView('settings')" title="Settings" class="text-gray-500 hover:text-white transition-colors ml-1">
+                        <i class="fa-solid fa-gear text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Right Side: Sign Out Icon Button -->
+                <button onclick="handleSignOut()" title="Sign Out" class="text-gray-500 hover:text-red-400 transition-colors p-1">
+                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                </button>
             </div>
         </aside>
 
@@ -140,7 +149,7 @@
             </header>
             <div id="mainViewport" class="flex-1 p-4 sm:p-8 pb-28 sm:pb-12 overflow-y-auto h-full">
                 <div class="flex items-center justify-center h-64">
-                    <i class="fa-solid fa-spinner fa-spin text-2xl text-brand-accent"></i>
+                    <i class="fa-solid fa-wave-square text-sm text-brand-accent animate-pulse"></i>
                 </div>
             </div>
         </main>
