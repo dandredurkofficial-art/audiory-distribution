@@ -4685,105 +4685,252 @@ window.copySmartLink = function(url) {
     };
 
     /* ==========================================================================
-       SUBMISSION HANDLER
-       ========================================================================== */
-    window.handleTransferSubmission = async function(e) {
-        if (e) e.preventDefault();
+   SUBMISSION HANDLER (TRANSFER CATALOG)
+   ========================================================================== */
+window.handleTransferSubmission = async function(e) {
+    if (e) e.preventDefault();
 
-        if (!window.transferState.confirmedRights) {
-            return window.showToast ? window.showToast('Please confirm rights ownership before submitting.') : alert('Please confirm rights ownership before submitting.');
+    if (!window.transferState?.confirmedRights) {
+        const msg = 'Please confirm rights ownership before submitting.';
+        return typeof window.showToast === 'function' ? window.showToast(msg) : alert(msg);
+    }
+
+    const hasArtworkFile = Boolean(window.transferState?.artwork?.file);
+    const existingArtworkUrl = window.transferState?.artwork?.url || '';
+
+    if (!hasArtworkFile && !existingArtworkUrl) {
+        const msg = 'Please upload cover artwork before submitting.';
+        return typeof window.showToast === 'function' ? window.showToast(msg) : alert(msg);
+    }
+
+    const submitBtn = document.getElementById('btn_submit_transfer') || document.querySelector('button[type="submit"]');
+    const progressCard = document.getElementById('submission-progress-card');
+    const statusText = document.getElementById('progress-status-text');
+    const percentageText = document.getElementById('progress-percentage');
+    const progressFill = document.getElementById('progress-bar-fill');
+
+    const updateProgress = (percent, message) => {
+        if (progressFill) progressFill.style.width = `${percent}%`;
+        if (percentageText) percentageText.innerText = `${Math.round(percent)}%`;
+        if (statusText) statusText.innerText = message;
+    };
+
+    let originalBtnHTML = '';
+    if (submitBtn) {
+        originalBtnHTML = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.style.cursor = 'not-allowed';
+        submitBtn.style.opacity = '0.7';
+        submitBtn.innerHTML = `
+            <span style="display: inline-flex; align-items: center; gap: 8px;">
+                <svg style="animation: spin 1s linear infinite; width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"></circle>
+                </svg>
+                Transferring Release...
+            </span>
+        `;
+    }
+
+    if (progressCard) progressCard.style.display = 'block';
+    updateProgress(5, 'Initializing transfer pipeline...');
+
+    try {
+        const tracks = window.transferState.tracks || [];
+        const totalTracks = tracks.length;
+        const totalUploadSteps = (hasArtworkFile ? 1 : 0) + totalTracks;
+        let completedSteps = 0;
+
+        // 1. Upload Artwork
+        let finalCoverUrl = existingArtworkUrl;
+        if (hasArtworkFile) {
+            updateProgress(10, 'Uploading Cover Artwork to R2...');
+            const artRes = await uploadFileToR2(window.transferState.artwork.file, 'artwork');
+            finalCoverUrl = typeof artRes === 'string' 
+                ? artRes 
+                : (artRes?.url || artRes?.location || artRes?.path || '');
+
+            if (!finalCoverUrl) throw new Error('Artwork upload succeeded but returned an invalid URL.');
+
+            completedSteps++;
+            const stepPercent = 10 + Math.floor((completedSteps / (totalUploadSteps || 1)) * 60);
+            updateProgress(stepPercent, 'Cover Artwork uploaded successfully!');
+        } else {
+            updateProgress(20, 'Using existing cover artwork...');
         }
 
-        if (!window.transferState.artwork.file) {
-            return window.showToast ? window.showToast('Please select a valid artwork file.') : alert('Please select a valid artwork file.');
-        }
-
-        const btn = document.getElementById('btn_submit_transfer');
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin mr-2"></i> Uploading & Transferring Release...`;
-        }
-
-        try {
-            // Upload Artwork File
-            let coverUrl = '';
-            if (typeof uploadFileToR2 === 'function') {
-                const artRes = await uploadFileToR2(window.transferState.artwork.file, 'artwork');
-                coverUrl = typeof artRes === 'string' ? artRes : (artRes?.url || '');
+        // 2. Upload Track Audio Files
+        for (let i = 0; i < totalTracks; i++) {
+            const track = tracks[i];
+            if (track.audioFile) {
+                updateProgress(
+                    20 + Math.floor((completedSteps / (totalUploadSteps || 1)) * 60),
+                    `Uploading Audio Track ${i + 1} of ${totalTracks}: "${track.title || 'Master Audio'}"...`
+                );
+                const trackRes = await uploadFileToR2(track.audioFile, 'audio');
+                const trackUrl = typeof trackRes === 'string' ? trackRes : (trackRes?.url || trackRes?.location || '');
+                tracks[i].audioUrl = trackUrl;
             }
+            completedSteps++;
+        }
 
-            // Upload Audio File(s)
-            for (let i = 0; i < window.transferState.tracks.length; i++) {
-                const t = window.transferState.tracks[i];
-                if (t.audioFile && typeof uploadFileToR2 === 'function') {
-                    const trackRes = await uploadFileToR2(t.audioFile, 'audio');
-                    window.transferState.tracks[i].audioUrl = typeof trackRes === 'string' ? trackRes : (trackRes?.url || '');
-                }
-            }
+        updateProgress(80, 'Formatting metadata & artist roles...');
 
-            // Build Transfer Payload
-            const payload = {
-                isTransfer: true,
-                previousDistributor: window.transferState.previousDistributor,
-                title: window.transferState.title,
-                type: window.transferState.type,
-                language: window.transferState.language,
-                genre: window.transferState.primaryGenre,
-                subgenre: window.transferState.secondaryGenre,
-                artists: window.transferState.artists,
-                releaseDate: window.transferState.releaseDate,
-                timezone: window.transferState.timezone,
-                upc: window.transferState.upc,
-                label: window.transferState.label,
-                cLine: window.transferState.cLine,
-                pLine: window.transferState.pLine,
-                coverUrl: coverUrl,
-                tracks: window.transferState.tracks.map(t => ({
-                    title: t.title,
-                    version: t.version,
-                    discNumber: t.discNumber,
-                    isrc: t.isrc,
-                    explicit: t.explicit,
-                    audioUrl: t.audioUrl || '',
-                    tiktokStartTime: t.tiktokStartTime,
-                    lyrics: t.lyrics
-                })),
-                dspUrls: {
-                    spotify: window.transferState.dspSpotify,
-                    apple: window.transferState.dspApple
-                },
-                submittedBy: window.currentUser ? window.currentUser.uid : 'anonymous',
-                createdAt: new Date().toISOString()
-            };
+        // Format Label Name
+        const labelInput = typeof window.transferState.label === 'object'
+            ? (window.transferState.label?.name || window.transferState.label?.label)
+            : window.transferState.label;
+        const labelString = (labelInput && labelInput.trim()) ? labelInput.trim() : 'Independent';
 
-            const token = window.currentUser?.getIdToken ? await window.currentUser.getIdToken() : '';
-            const endpoint = `${WORKER_BASE_URL}/api/releases`;
+        // Format Participants / Artists
+        const ALLOWED_ROLES = ['primary', 'featuring', 'remixer'];
+        const rawArtists = Array.isArray(window.transferState.artists) ? window.transferState.artists : [];
+        const mappedParticipants = rawArtists
+            .map(artist => {
+                let rawRoles = Array.isArray(artist.role) ? artist.role : [artist.role || 'primary'];
+                const cleanedRoles = rawRoles.map(r => {
+                    const norm = String(r).toLowerCase().trim();
+                    if (norm.includes('feat')) return 'featuring';
+                    if (norm.includes('remix')) return 'remixer';
+                    if (ALLOWED_ROLES.includes(norm)) return norm;
+                    return 'primary';
+                });
 
-            const res = await fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(payload)
-            });
+                const artistName = typeof artist === 'string' ? artist : (artist.name || artist.artist_name || '');
+                return {
+                    name: artistName.trim(),
+                    role: Array.from(new Set(cleanedRoles)),
+                    spotify_id: artist.spotify_id || '',
+                    apple_id: artist.apple_id || ''
+                };
+            })
+            .filter(p => p.name !== '');
 
-            if (!res.ok) throw new Error('Failed to submit transfer release to API');
+        if (mappedParticipants.length === 0) {
+            throw new Error('Please specify at least one Primary Artist name.');
+        }
 
-            if (window.showToast) window.showToast('Transfer request submitted successfully!');
+        // Build Release Payload matching main release schema
+        const payload = {
+            isTransfer: true,
+            previousDistributor: window.transferState.previousDistributor || 'Unknown',
+            upc: window.transferState.upc || '',
+            cLine: window.transferState.cLine || '',
+            pLine: window.transferState.pLine || '',
+            title: window.transferState.title,
+            type: window.transferState.type || 'Single',
+            language: window.transferState.language || 'English',
+            genre: window.transferState.primaryGenre,
+            subgenre: window.transferState.secondaryGenre || '',
+            label: labelString,
+            participants: mappedParticipants,
+            artists: mappedParticipants,
+            releaseDate: window.transferState.releaseDate,
+            timezone: window.transferState.timezone || 'UTC',
+            coverUrl: finalCoverUrl,
+            cover_url: finalCoverUrl,
+            cover_art: finalCoverUrl,
+            artwork: finalCoverUrl,
+            tracks: tracks.map(t => ({
+                title: t.title,
+                version: t.version || '',
+                discNumber: t.discNumber || 1,
+                explicit: Boolean(t.explicit),
+                isrc: t.isrc || '',
+                audio_url: t.audioUrl || '',
+                audioUrl: t.audioUrl || '',
+                tiktok_start_time: t.tiktokStartTime || 0,
+                lyrics: typeof t.lyrics === 'object' ? t.lyrics?.plain : (t.lyrics || '')
+            })),
+            dspUrls: {
+                spotify: window.transferState.dspSpotify || '',
+                apple: window.transferState.dspApple || ''
+            },
+            submittedBy: window.currentUser ? window.currentUser.uid : 'anonymous',
+            createdAt: new Date().toISOString()
+        };
+
+        updateProgress(90, 'Dispatching transfer metadata to Gateway...');
+
+        const token = window.currentUser?.getIdToken ? await window.currentUser.getIdToken() : '';
+        const endpoint = `${WORKER_BASE_URL}/api/releases`;
+
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const serverResponse = await res.json().catch(() => null);
+
+        if (!res.ok) {
+            const errorMsg = serverResponse?.message || serverResponse?.error || 'Failed to submit transfer release to API';
+            throw new Error(errorMsg);
+        }
+
+        updateProgress(100, 'Catalog transfer submitted successfully! Redirecting...');
+
+        const currentUid = window.currentUser ? window.currentUser.uid : 'anonymous';
+        const userLocalStorageKey = `audiory_releases_${currentUid}`;
+
+        const newReleaseItem = {
+            id: serverResponse?.id || serverResponse?.data?.id || Date.now(),
+            title: payload.title,
+            type: payload.type,
+            status: serverResponse?.status || 'Submitted',
+            coverUrl: finalCoverUrl,
+            compressedArtwork: finalCoverUrl,
+            participants: mappedParticipants,
+            upc: payload.upc || serverResponse?.upc || 'Pending',
+            isTransfer: true,
+            submittedBy: currentUid
+        };
+
+        let localSavedReleases = JSON.parse(
+            localStorage.getItem(userLocalStorageKey) || 
+            localStorage.getItem('audiory_local_releases') || 
+            '[]'
+        );
+        localSavedReleases.unshift(newReleaseItem);
+        localStorage.setItem(userLocalStorageKey, JSON.stringify(localSavedReleases));
+
+        if (!Array.isArray(window.releasesCatalog)) window.releasesCatalog = [];
+        window.releasesCatalog.unshift(newReleaseItem);
+
+        setTimeout(() => {
+            if (typeof window.loadLiveCatalog === 'function') window.loadLiveCatalog();
+            if (typeof window.renderDashboardHome === 'function') window.renderDashboardHome();
             if (typeof window.switchView === 'function') window.switchView('catalog');
 
-        } catch (err) {
-            console.error('Transfer submission error:', err);
-            if (window.showToast) window.showToast(`Transfer failed: ${err.message}`);
-        } finally {
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up mr-2"></i> Submit Release Transfer`;
+            if (progressCard) progressCard.style.display = 'none';
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.style.cursor = 'pointer';
+                submitBtn.style.opacity = '1';
+                submitBtn.innerHTML = originalBtnHTML;
             }
+        }, 1200);
+
+    } catch (err) {
+        console.error('Transfer Submission Error:', err);
+        const msg = `Transfer failed: ${err.message}`;
+        if (typeof window.showToast === 'function') {
+            window.showToast(msg);
+        } else {
+            alert(msg);
         }
-    };
-})();
+
+        if (progressCard) progressCard.style.display = 'none';
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.style.cursor = 'pointer';
+            submitBtn.style.opacity = '1';
+            submitBtn.innerHTML = originalBtnHTML;
+        }
+    }
+};
         
         // Render Create Release Form Container
         window.renderCreateReleaseView = function() {
