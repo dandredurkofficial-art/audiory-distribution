@@ -5126,7 +5126,7 @@ window.savePreferences = async function() {
     } catch (err) {
         console.error('Error saving preferences:', err);
         window.showPrefToast('Error connecting to the server.', 'error');
-    } fontFinally {
+    } finally { // <-- Fixed typo here
         btn.disabled = false;
         btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save Preferences`;
     }
