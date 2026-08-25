@@ -898,7 +898,7 @@ function renderEarningsView() {
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-border/60">
                 <div>
                     <h1 class="text-2xl font-bold text-white tracking-tight">Earnings & Royalty Payouts</h1>
-                    <p class="text-xs text-gray-400 mt-1">Track platform revenue split and request monthly withdrawals.</p>
+                    <p class="text-xs text-gray-400 mt-1">Track platform revenue, stream rates, territory sales, and request monthly withdrawals.</p>
                 </div>
                 <button onclick="handleWithdrawClick()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-brand-dark font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/10 transition-all">
                     <i class="fa-solid fa-money-bill-transfer text-xs"></i> Request Withdrawal
@@ -933,28 +933,107 @@ function renderEarningsView() {
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="bg-brand-card border border-brand-border p-6 rounded-2xl space-y-4 lg:col-span-1">
-                    <h2 class="text-sm font-semibold text-white">Revenue by Store</h2>
+                    <h2 class="text-sm font-semibold text-white">Top Territories Breakdown</h2>
                     <div class="relative w-full h-56 flex items-center justify-center">
-                        <canvas id="platformEarningsPieChart"></canvas>
+                        <canvas id="territoryEarningsPieChart"></canvas>
                     </div>
                 </div>
 
                 <div class="bg-brand-card border border-brand-border p-6 rounded-2xl space-y-4 lg:col-span-2">
-                    <h2 class="text-sm font-semibold text-white">Platform Revenue Details</h2>
+                    <h2 class="text-sm font-semibold text-white">Geographic Revenue (Territories)</h2>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs text-gray-300">
                             <thead class="text-gray-400 border-b border-brand-border uppercase tracking-wider">
                                 <tr>
-                                    <th class="pb-3 px-2">DSP Platform</th>
-                                    <th class="pb-3 px-2 text-right">Streams</th>
+                                    <th class="pb-3 px-2">Territory / Country</th>
+                                    <th class="pb-3 px-2 text-right">Units / Quantity</th>
                                     <th class="pb-3 px-2 text-right">Revenue</th>
                                 </tr>
                             </thead>
-                            <tbody id="earnings-dsp-tbody">
-                                <tr><td colspan="3" class="py-6 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading store breakdown...</td></tr>
+                            <tbody id="earnings-territory-tbody">
+                                <tr><td colspan="3" class="py-6 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading territories breakdown...</td></tr>
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl space-y-4">
+                    <h2 class="text-sm font-semibold text-white">DSP Stream Rates</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-gray-300">
+                            <thead class="text-gray-400 border-b border-brand-border uppercase tracking-wider">
+                                <tr>
+                                    <th class="pb-3 px-2">Store / Service</th>
+                                    <th class="pb-3 px-2 text-right">Rate Per Stream</th>
+                                </tr>
+                            </thead>
+                            <tbody id="earnings-streamrates-tbody">
+                                <tr><td colspan="2" class="py-6 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading stream rates...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl space-y-4">
+                    <h2 class="text-sm font-semibold text-white">Artist Direct Sales Summary</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-gray-300">
+                            <thead class="text-gray-400 border-b border-brand-border uppercase tracking-wider">
+                                <tr>
+                                    <th class="pb-3 px-2">Artist Name</th>
+                                    <th class="pb-3 px-2 text-right">Units Sold</th>
+                                    <th class="pb-3 px-2 text-right">Total Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody id="earnings-artists-tbody">
+                                <tr><td colspan="3" class="py-6 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading artist sales...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-brand-card border border-brand-border p-6 rounded-2xl space-y-4">
+                <h2 class="text-sm font-semibold text-white">Release Sales Performance</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-gray-300">
+                        <thead class="text-gray-400 border-b border-brand-border uppercase tracking-wider">
+                            <tr>
+                                <th class="pb-3 px-2">Release ID / Name</th>
+                                <th class="pb-3 px-2 text-right">Total Units</th>
+                                <th class="pb-3 px-2 text-right">Gross Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody id="earnings-releases-tbody">
+                            <tr><td colspan="3" class="py-6 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading release sales...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-brand-card border border-brand-border p-6 rounded-2xl space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <h2 class="text-sm font-semibold text-white">Track Channels Analytics (By ISRC)</h2>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="track-isrc-input" placeholder="Enter Track ISRC..." class="px-3 py-1.5 rounded-xl bg-white/5 border border-brand-border text-white text-xs focus:outline-none focus:border-emerald-500 font-mono w-48" />
+                        <button onclick="loadTrackChannels()" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-brand-dark font-bold text-xs transition-all">Lookup</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-gray-300">
+                        <thead class="text-gray-400 border-b border-brand-border uppercase tracking-wider">
+                            <tr>
+                                <th class="pb-3 px-2">Channel / Store</th>
+                                <th class="pb-3 px-2 text-right">Quantity</th>
+                                <th class="pb-3 px-2 text-right">Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody id="earnings-channels-tbody">
+                            <tr><td colspan="3" class="py-6 text-center text-gray-500">Provide a track ISRC above to search specific channel earnings.</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -1021,7 +1100,6 @@ function renderEarningsView() {
 
 let pieChartInstance = null;
 
-// Helper: Safely retrieve active Firebase Token or stored token
 async function getAuthToken() {
     const activeUser = window.currentUser || (window.auth && window.auth.currentUser);
     if (activeUser && typeof activeUser.getIdToken === 'function') {
@@ -1034,7 +1112,6 @@ async function getAuthToken() {
     return localStorage.getItem('auth_token') || '';
 }
 
-// Modal Handlers
 function handleWithdrawClick() {
     const modal = document.getElementById('withdrawModal');
     const balInput = document.getElementById('modal-available-balance');
@@ -1104,7 +1181,6 @@ function getWorkerBaseUrl() {
     return (window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev').replace(/\/$/, "");
 }
 
-// 1. Submit Withdrawal Request
 async function submitWithdrawal(e) {
     e.preventDefault();
 
@@ -1163,7 +1239,6 @@ async function submitWithdrawal(e) {
     }
 }
 
-// 2. Fetch User Withdrawals
 async function fetchUserWithdrawals() {
     try {
         const token = await getAuthToken();
@@ -1179,41 +1254,99 @@ async function fetchUserWithdrawals() {
     }
 }
 
-// 3. Fetch Live Too Lost Sales Data Endpoint
 async function fetchTooLostSalesData() {
     try {
         const token = await getAuthToken();
-        if (!token) return { overview: null, platformBreakdown: [] };
+        if (!token) return { overview: null, territories: [], streamRates: [], artistSales: [], releaseSales: [] };
 
-        const [overviewRes, channelsRes] = await Promise.all([
+        const [overviewRes, territoriesRes, ratesRes, artistsRes, releasesRes] = await Promise.all([
             fetch(`${getWorkerBaseUrl()}/api/toolost/sales/overview`, {
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
             }),
-            fetch(`${getWorkerBaseUrl()}/api/toolost/sales/channels`, {
+            fetch(`${getWorkerBaseUrl()}/api/toolost/sales/territories`, {
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            }),
+            fetch(`${getWorkerBaseUrl()}/api/toolost/sales/stream-rates`, {
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            }),
+            fetch(`${getWorkerBaseUrl()}/api/toolost/sales/artists`, {
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            }),
+            fetch(`${getWorkerBaseUrl()}/api/toolost/sales/releases`, {
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
             })
         ]);
 
         const overview = overviewRes.ok ? await overviewRes.json() : null;
-        const rawChannels = channelsRes.ok ? await channelsRes.json() : [];
+        const rawTerritories = territoriesRes.ok ? await territoriesRes.json() : [];
+        const rawRates = ratesRes.ok ? await ratesRes.json() : [];
+        const rawArtists = artistsRes.ok ? await artistsRes.json() : [];
+        const rawReleases = releasesRes.ok ? await releasesRes.json() : [];
 
-        // Normalize array structure
-        const platformBreakdown = Array.isArray(rawChannels) 
-            ? rawChannels 
-            : (rawChannels.data || rawChannels.channels || []);
+        const normalize = (res) => Array.isArray(res) ? res : (res?.data || res?.results || []);
 
-        return { overview, platformBreakdown };
+        return {
+            overview,
+            territories: normalize(rawTerritories),
+            streamRates: normalize(rawRates),
+            artistSales: normalize(rawArtists),
+            releaseSales: normalize(rawReleases)
+        };
     } catch (err) {
         console.error("Error fetching Too Lost sales data:", err);
-        return { overview: null, platformBreakdown: [] };
+        return { overview: null, territories: [], streamRates: [], artistSales: [], releaseSales: [] };
     }
 }
 
-// Main Dashboard Initializer
+async function loadTrackChannels() {
+    const input = document.getElementById('track-isrc-input');
+    const tbody = document.getElementById('earnings-channels-tbody');
+    if (!input || !tbody) return;
+
+    const isrc = input.value.trim();
+    if (!isrc) {
+        tbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-amber-400">Please enter a valid Track ISRC code.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Fetching channels for ISRC: ${isrc}...</td></tr>`;
+
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${getWorkerBaseUrl()}/api/toolost/sales/tracks/${encodeURIComponent(isrc)}/channels`, {
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) throw new Error("Failed to load channels for this ISRC.");
+
+        const resData = await response.json();
+        const channels = Array.isArray(resData) ? resData : (resData?.data || resData?.channels || []);
+
+        if (channels.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-gray-500">No channel sales found for ISRC: ${isrc}</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = channels.map(c => {
+            const channelName = c.name || c.channel || c.dsp || 'Store';
+            const quantity = Number(c.quantity || c.streams || c.count || 0);
+            const total = Number(c.total || c.revenue || c.amount || 0);
+
+            return `
+                <tr class="border-b border-brand-border/50 hover:bg-white/5">
+                    <td class="py-3 px-2 font-semibold text-white">${channelName}</td>
+                    <td class="py-3 px-2 text-right font-mono text-gray-300">${quantity.toLocaleString()}</td>
+                    <td class="py-3 px-2 text-right font-mono font-bold text-emerald-400">$${total.toFixed(2)}</td>
+                </tr>
+            `;
+        }).join('');
+
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-red-400">${err.message}</td></tr>`;
+    }
+}
+
 async function initEarningsDashboard() {
-    // -------------------------------------------------------------
-    // 1. Fetch User Withdrawal History & Calculate Totals
-    // -------------------------------------------------------------
     const requests = await fetchUserWithdrawals();
     const tbody = document.getElementById('earnings-withdrawals-tbody');
     
@@ -1253,34 +1386,28 @@ async function initEarningsDashboard() {
         tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-gray-500">No withdrawal records found.</td></tr>`;
     }
 
-    // Update Pending Payouts & Lifetime Paid KPI elements directly
     const pendingEl = document.getElementById('earnings-pending-amount');
     const paidEl = document.getElementById('earnings-lifetime-paid');
     if (pendingEl) pendingEl.innerText = `$${pendingSum.toFixed(2)}`;
     if (paidEl) paidEl.innerText = `$${paidSum.toFixed(2)}`;
 
-    // -------------------------------------------------------------
-    // 2. Fetch Live Too Lost Sales Data
-    // -------------------------------------------------------------
-    const { overview, platformBreakdown } = await fetchTooLostSalesData();
+    const { overview, territories, streamRates, artistSales, releaseSales } = await fetchTooLostSalesData();
 
-    // -------------------------------------------------------------
-    // 3. Render DSP Breakdown Table
-    // -------------------------------------------------------------
-    const dspTbody = document.getElementById('earnings-dsp-tbody');
-    if (dspTbody) {
-        if (!platformBreakdown || platformBreakdown.length === 0) {
-            dspTbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-gray-500">No store revenue data available.</td></tr>`;
+    // 1. Render Territories Table
+    const territoryTbody = document.getElementById('earnings-territory-tbody');
+    if (territoryTbody) {
+        if (territories.length === 0) {
+            territoryTbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-gray-500">No territory revenue data available.</td></tr>`;
         } else {
-            dspTbody.innerHTML = platformBreakdown.map(p => {
-                const name = p.name || p.dsp || p.channel || 'Store';
-                const streams = Number(p.streams || p.quantity || p.count || 0);
-                const revenue = Number(p.total || p.revenue || p.amount || 0);
+            territoryTbody.innerHTML = territories.map(t => {
+                const country = t.country || t.territory || t.name || 'Unknown';
+                const quantity = Number(t.quantity || t.streams || t.count || 0);
+                const revenue = Number(t.total || t.revenue || t.amount || 0);
 
                 return `
                     <tr class="border-b border-brand-border/50 hover:bg-white/5">
-                        <td class="py-3 px-2 font-semibold text-white">${name}</td>
-                        <td class="py-3 px-2 text-right font-mono text-gray-300">${streams.toLocaleString()}</td>
+                        <td class="py-3 px-2 font-semibold text-white">${country}</td>
+                        <td class="py-3 px-2 text-right font-mono text-gray-300">${quantity.toLocaleString()}</td>
                         <td class="py-3 px-2 text-right font-mono font-bold text-emerald-400">$${revenue.toFixed(2)}</td>
                     </tr>
                 `;
@@ -1288,27 +1415,87 @@ async function initEarningsDashboard() {
         }
     }
 
-    // -------------------------------------------------------------
-    // 4. Compute Available Total Balance
-    // -------------------------------------------------------------
-    const grossRevenue = overview?.totalBalance ?? overview?.total_earnings ?? overview?.total ?? 
-        platformBreakdown.reduce((acc, curr) => acc + Number(curr.total || curr.revenue || curr.amount || 0), 0);
+    // 2. Render Stream Rates Table
+    const ratesTbody = document.getElementById('earnings-streamrates-tbody');
+    if (ratesTbody) {
+        if (streamRates.length === 0) {
+            ratesTbody.innerHTML = `<tr><td colspan="2" class="py-6 text-center text-gray-500">No stream rate information available.</td></tr>`;
+        } else {
+            ratesTbody.innerHTML = streamRates.map(s => {
+                const store = s.store || s.service || s.name || 'DSP';
+                const rate = Number(s.rate || s.price || s.amount || 0);
 
-    // Available Balance = Gross Revenue minus Pending & Paid withdrawals
-    const availableBalance = Math.max(0, Number(grossRevenue) - (pendingSum + paidSum));
+                return `
+                    <tr class="border-b border-brand-border/50 hover:bg-white/5">
+                        <td class="py-3 px-2 font-semibold text-white">${store}</td>
+                        <td class="py-3 px-2 text-right font-mono font-bold text-cyan-400">$${rate.toFixed(6)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    }
+
+    // 3. Render Artist Sales Table
+    const artistsTbody = document.getElementById('earnings-artists-tbody');
+    if (artistsTbody) {
+        if (artistSales.length === 0) {
+            artistsTbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-gray-500">No artist sales records available.</td></tr>`;
+        } else {
+            artistsTbody.innerHTML = artistSales.map(a => {
+                const artistName = a.artist || a.name || 'Artist';
+                const units = Number(a.quantity || a.units || a.count || 0);
+                const revenue = Number(a.total || a.revenue || a.amount || 0);
+
+                return `
+                    <tr class="border-b border-brand-border/50 hover:bg-white/5">
+                        <td class="py-3 px-2 font-semibold text-white">${artistName}</td>
+                        <td class="py-3 px-2 text-right font-mono text-gray-300">${units.toLocaleString()}</td>
+                        <td class="py-3 px-2 text-right font-mono font-bold text-emerald-400">$${revenue.toFixed(2)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    }
+
+    // 4. Render Release Sales Table
+    const releasesTbody = document.getElementById('earnings-releases-tbody');
+    if (releasesTbody) {
+        if (releaseSales.length === 0) {
+            releasesTbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-gray-500">No release sales records available.</td></tr>`;
+        } else {
+            releasesTbody.innerHTML = releaseSales.map(r => {
+                const releaseName = r.title || r.release || r.id || 'Release';
+                const units = Number(r.quantity || r.units || r.count || 0);
+                const revenue = Number(r.total || r.revenue || r.amount || 0);
+
+                return `
+                    <tr class="border-b border-brand-border/50 hover:bg-white/5">
+                        <td class="py-3 px-2 font-semibold text-white">${releaseName}</td>
+                        <td class="py-3 px-2 text-right font-mono text-gray-300">${units.toLocaleString()}</td>
+                        <td class="py-3 px-2 text-right font-mono font-bold text-emerald-400">$${revenue.toFixed(2)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    }
+
+    // 5. Calculate Total Balance via /sales/overview array schema fix
+    const grossRevenue = Array.isArray(overview?.data)
+        ? overview.data.reduce((acc, curr) => acc + Number(curr.total || 0), 0)
+        : (Number(overview?.total) || territories.reduce((acc, curr) => acc + Number(curr.total || 0), 0));
+
+    const availableBalance = Math.max(0, grossRevenue - (pendingSum + paidSum));
     window.currentBalance = availableBalance;
 
     const totalBalEl = document.getElementById('earnings-total-balance');
     if (totalBalEl) totalBalEl.innerText = `$${window.currentBalance.toFixed(2)}`;
 
-    // -------------------------------------------------------------
-    // 5. Render Platform Revenue Chart
-    // -------------------------------------------------------------
-    const canvas = document.getElementById('platformEarningsPieChart');
+    // 6. Render Territory Chart
+    const canvas = document.getElementById('territoryEarningsPieChart');
     const chartContainer = canvas ? canvas.parentElement : null;
 
     if (canvas) {
-        const hasData = platformBreakdown.length > 0 && platformBreakdown.some(p => Number(p.total || p.revenue || p.amount || 0) > 0);
+        const hasData = territories.length > 0 && territories.some(t => Number(t.total || t.revenue || t.amount || 0) > 0);
 
         if (hasData) {
             const existingMsg = chartContainer?.querySelector('.empty-chart-msg');
@@ -1321,9 +1508,9 @@ async function initEarningsDashboard() {
             pieChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: platformBreakdown.map(p => p.name || p.dsp || p.channel),
+                    labels: territories.map(t => t.country || t.territory || t.name),
                     datasets: [{
-                        data: platformBreakdown.map(p => Number(p.total || p.revenue || p.amount || 0)),
+                        data: territories.map(t => Number(t.total || t.revenue || t.amount || 0)),
                         backgroundColor: ['#1db954', '#fc3c44', '#ff0000', '#00a8e1', '#a238ff', '#6b7280', '#e1306c', '#0084ff'],
                         borderWidth: 0
                     }]
@@ -1341,18 +1528,18 @@ async function initEarningsDashboard() {
             if (chartContainer && !chartContainer.querySelector('.empty-chart-msg')) {
                 const emptyMsg = document.createElement('div');
                 emptyMsg.className = 'empty-chart-msg h-full w-full flex items-center justify-center text-gray-500 text-xs font-medium py-12';
-                emptyMsg.innerText = 'No store revenue data available.';
+                emptyMsg.innerText = 'No territory revenue data available.';
                 chartContainer.appendChild(emptyMsg);
             }
         }
     }
 }
 
-// Global Exports
 window.handleWithdrawClick = handleWithdrawClick;
 window.closeWithdrawModal = closeWithdrawModal;
 window.renderPayoutFields = renderPayoutFields;
 window.submitWithdrawal = submitWithdrawal;
+window.loadTrackChannels = loadTrackChannels;
 window.initEarningsDashboard = initEarningsDashboard;
         
         function renderCatalogView() {
