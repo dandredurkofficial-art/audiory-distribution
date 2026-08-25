@@ -1910,380 +1910,379 @@ window.deleteReleaseCatalog = async function(releaseId) {
     }
 };
 
-let currentAnalyticsPeriod = 'lastThirtyDays';
-let analyticsChartInstance = null;
+(function () {
+    // Private module state (scoped to avoid redeclaration errors)
+    let currentAnalyticsPeriod = 'lastThirtyDays';
+    let activeAnalyticsTab = 'overview';
+    let analyticsChartInstance = null;
 
-// Expose handlePeriodChange to global scope as a fallback
-window.handlePeriodChange = function(newPeriod) {
-    initAnalyticsDashboard(newPeriod);
-};
-
-let currentAnalyticsPeriod = 'lastThirtyDays';
-let activeAnalyticsTab = 'overview';
-let analyticsChartInstance = null;
-
-function renderAnalyticsView() {
-    return `
-        <div class="max-w-7xl mx-auto space-y-6">
-            <!-- Header & Filters -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 class="text-2xl font-bold text-white">Analytics & Performance</h1>
-                    <p class="text-xs text-gray-400 mt-1">Real-time performance across DSPs and smart links</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <select id="analytics-period-select" class="bg-brand-card border border-brand-border text-white text-xs rounded-xl px-3 py-2 outline-none focus:border-brand-primary">
-                        <option value="lastSevenDays">Last 7 Days</option>
-                        <option value="lastThirtyDays" selected>Last 30 Days</option>
-                        <option value="lastThreeMonths">Last 3 Months</option>
-                        <option value="lastSixMonths">Last 6 Months</option>
-                        <option value="lastYear">Last Year</option>
-                        <option value="allTime">All Time</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Sub-Navigation Bar -->
-            <div class="flex items-center gap-2 border-b border-brand-border pb-2 overflow-x-auto">
-                <button onclick="switchAnalyticsTab('overview')" id="tab-btn-overview" class="analytics-tab-btn text-xs font-semibold px-4 py-2 rounded-lg text-white bg-brand-primary">Overview</button>
-                <button onclick="switchAnalyticsTab('platforms')" id="tab-btn-platforms" class="analytics-tab-btn text-xs font-semibold px-4 py-2 rounded-lg text-gray-400 hover:text-white">Platforms</button>
-                <button onclick="switchAnalyticsTab('demographics')" id="tab-btn-demographics" class="analytics-tab-btn text-xs font-semibold px-4 py-2 rounded-lg text-gray-400 hover:text-white">Demographics</button>
-                <button onclick="switchAnalyticsTab('links')" id="tab-btn-links" class="analytics-tab-btn text-xs font-semibold px-4 py-2 rounded-lg text-gray-400 hover:text-white">Smart Links</button>
-            </div>
-
-            <!-- Inline Alert Message Area -->
-            <div id="analytics-alert-area" class="hidden"></div>
-
-            <!-- Tab Content Viewport -->
-            <div id="analytics-tab-viewport"></div>
-        </div>
-    `;
-}
-
-async function initAnalyticsDashboard(period = 'lastThirtyDays') {
-    currentAnalyticsPeriod = period;
-
-    const periodSelect = document.getElementById('analytics-period-select');
-    if (periodSelect) {
-        periodSelect.value = period;
-        if (!periodSelect.dataset.listenerAttached) {
-            periodSelect.dataset.listenerAttached = "true";
-            periodSelect.addEventListener('change', (e) => initAnalyticsDashboard(e.target.value));
-        }
-    }
-
-    renderActiveTabContent();
-}
-
-function switchAnalyticsTab(tabName) {
-    activeAnalyticsTab = tabName;
-    document.querySelectorAll('.analytics-tab-btn').forEach(btn => {
-        btn.classList.remove('bg-brand-primary', 'text-white');
-        btn.classList.add('text-gray-400');
-    });
-    const selectedBtn = document.getElementById(`tab-btn-${tabName}`);
-    if (selectedBtn) {
-        selectedBtn.classList.add('bg-brand-primary', 'text-white');
-        selectedBtn.classList.remove('text-gray-400');
-    }
-    renderActiveTabContent();
-}
-
-async function renderActiveTabContent() {
-    const viewport = document.getElementById('analytics-tab-viewport');
-    if (!viewport) return;
-
-    if (activeAnalyticsTab === 'overview') {
-        viewport.innerHTML = `
-            <div class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="analytics-kpi-container">
-                    <div class="bg-brand-card border border-brand-border p-5 rounded-2xl animate-pulse h-20"></div>
-                    <div class="bg-brand-card border border-brand-border p-5 rounded-2xl animate-pulse h-20"></div>
-                    <div class="bg-brand-card border border-brand-border p-5 rounded-2xl animate-pulse h-20"></div>
-                    <div class="bg-brand-card border border-brand-border p-5 rounded-2xl animate-pulse h-20"></div>
-                </div>
-                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl">
-                    <h2 class="text-sm font-semibold text-white mb-4">Streams Over Time</h2>
-                    <div class="relative w-full h-72"><canvas id="analyticsOverviewChart"></canvas></div>
-                </div>
-                <div class="bg-brand-card border border-brand-border rounded-2xl p-6">
-                    <h2 class="text-sm font-semibold text-white mb-4">Top Performing Tracks</h2>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs text-gray-300">
-                            <thead class="text-gray-400 border-b border-brand-border uppercase">
-                                <tr>
-                                    <th class="pb-3 px-2">Track</th>
-                                    <th class="pb-3 px-2">ISRC</th>
-                                    <th class="pb-3 px-2 text-right">Streams</th>
-                                    <th class="pb-3 px-2 text-right">Saves</th>
-                                    <th class="pb-3 px-2 text-right">Engagement</th>
-                                </tr>
-                            </thead>
-                            <tbody id="analytics-tracks-tbody">
-                                <tr><td colspan="5" class="py-8 text-center text-gray-500">Loading tracks...</td></tr>
-                            </tbody>
-                        </table>
+    function renderAnalyticsView() {
+        return `
+            <div class="max-w-7xl mx-auto space-y-6">
+                <!-- Header & Filters -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Analytics & Performance</h1>
+                        <p class="text-xs text-gray-400 mt-1">Real-time performance across DSPs and smart links</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="analytics-period-select" class="bg-brand-card border border-brand-border text-white text-xs rounded-xl px-3 py-2 outline-none focus:border-brand-primary">
+                            <option value="lastSevenDays">Last 7 Days</option>
+                            <option value="lastThirtyDays" selected>Last 30 Days</option>
+                            <option value="lastThreeMonths">Last 3 Months</option>
+                            <option value="lastSixMonths">Last 6 Months</option>
+                            <option value="lastYear">Last Year</option>
+                            <option value="allTime">All Time</option>
+                        </select>
                     </div>
                 </div>
-            </div>
-        `;
-        await fetchOverviewData();
-    } else if (activeAnalyticsTab === 'platforms') {
-        viewport.innerHTML = `
-            <div class="bg-brand-card border border-brand-border rounded-2xl p-6 space-y-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-sm font-semibold text-white">Platform Breakdown</h2>
-                    <select id="platform-filter-select" onchange="fetchPlatformData(this.value)" class="bg-brand-border text-white text-xs px-3 py-1.5 rounded-lg outline-none">
-                        <option value="spotify">Spotify</option>
-                        <option value="apple_music">Apple Music</option>
-                    </select>
+
+                <!-- Sub-Navigation Bar -->
+                <div class="flex items-center gap-2 border-b border-brand-border pb-2 overflow-x-auto">
+                    <button onclick="switchAnalyticsTab('overview')" id="tab-btn-overview" class="analytics-tab-btn text-xs font-semibold px-4 py-2 rounded-lg text-white bg-brand-primary">Overview</button>
+                    <button onclick="switchAnalyticsTab('platforms')" id="tab-btn-platforms" class="analytics-tab-btn text-xs font-semibold px-4 py-2 rounded-lg text-gray-400 hover:text-white">Platforms</button>
+                    <button onclick="switchAnalyticsTab('demographics')" id="tab-btn-demographics" class="analytics-tab-btn text-xs font-semibold px-4 py-2 rounded-lg text-gray-400 hover:text-white">Demographics</button>
+                    <button onclick="switchAnalyticsTab('links')" id="tab-btn-links" class="analytics-tab-btn text-xs font-semibold px-4 py-2 rounded-lg text-gray-400 hover:text-white">Smart Links</button>
                 </div>
-                <div id="platform-content-area" class="text-xs text-gray-400">Select a platform to inspect detailed streams.</div>
+
+                <!-- Inline Alert Message Area -->
+                <div id="analytics-alert-area" class="hidden"></div>
+
+                <!-- Tab Content Viewport -->
+                <div id="analytics-tab-viewport"></div>
             </div>
         `;
-        fetchPlatformData('spotify');
-    } else if (activeAnalyticsTab === 'demographics') {
-        viewport.innerHTML = `
-            <div class="bg-brand-card border border-brand-border rounded-2xl p-6 space-y-4">
-                <h2 class="text-sm font-semibold text-white">Demographic & Tier Breakdown</h2>
-                <div id="demographics-content-area" class="text-xs text-gray-400">Loading demographic data...</div>
-            </div>
-        `;
-        fetchDemographicData();
-    } else if (activeAnalyticsTab === 'links') {
-        viewport.innerHTML = `
-            <div class="bg-brand-card border border-brand-border rounded-2xl p-6 space-y-4">
-                <h2 class="text-sm font-semibold text-white">Smart Link Analytics</h2>
-                <div id="smartlinks-content-area" class="text-xs text-gray-400">Loading Smart Link metrics...</div>
-            </div>
-        `;
-        fetchSmartLinkData();
-    }
-}
-
-async function getAuthToken() {
-    if (!window.currentUser) return null;
-    return typeof window.currentUser.getIdToken === 'function'
-        ? await window.currentUser.getIdToken(true)
-        : window.currentUser.accessToken || null;
-}
-
-async function fetchOverviewData() {
-    const token = await getAuthToken();
-    if (!token) return showAlert("Authentication required. Please sign in again.", "error");
-
-    const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
-
-    try {
-        const [overviewRes, tracksRes] = await Promise.all([
-            fetch(`${workerUrl}/api/analytics/overview?period=${currentAnalyticsPeriod}`, { headers: { 'Authorization': `Bearer ${token}` } }),
-            fetch(`${workerUrl}/api/analytics/tracks?period=${currentAnalyticsPeriod}&page=1&perPage=10`, { headers: { 'Authorization': `Bearer ${token}` } })
-        ]);
-
-        if (overviewRes.ok) {
-            const overviewJson = await overviewRes.json();
-            const data = overviewJson.data || overviewJson;
-            renderKPIs(data);
-            renderChart(data.chart || []);
-        }
-
-        if (tracksRes.ok) {
-            const tracksJson = await tracksRes.json();
-            renderTracksTable(tracksJson.data || []);
-        }
-    } catch (err) {
-        showAlert("Failed to load analytics overview.", "error");
-    }
-}
-
-async function fetchPlatformData(platform) {
-    const token = await getAuthToken();
-    const container = document.getElementById('platform-content-area');
-    if (!token || !container) return;
-
-    const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
-
-    try {
-        const res = await fetch(`${workerUrl}/api/analytics/platforms/total-streams?platform=${platform}&period=${currentAnalyticsPeriod}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-            const json = await res.json();
-            const payload = json.data || json;
-            container.innerHTML = `
-                <div class="p-4 bg-brand-border/30 rounded-xl">
-                    <span class="text-gray-400 uppercase tracking-wider text-[10px]">Total Platform Streams</span>
-                    <p class="text-xl font-bold text-white mt-1">${Number(payload.totalStreams || 0).toLocaleString()}</p>
-                </div>
-            `;
-        }
-    } catch (err) {
-        showAlert("Error loading platform streams.", "error");
-    }
-}
-
-async function fetchDemographicData() {
-    const token = await getAuthToken();
-    const container = document.getElementById('demographics-content-area');
-    if (!token || !container) return;
-
-    const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
-
-    try {
-        const res = await fetch(`${workerUrl}/api/analytics/platforms/additional?platform=spotify&type=gender&period=${currentAnalyticsPeriod}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-            const json = await res.json();
-            const items = json.data || [];
-            container.innerHTML = items.length ? items.map(i => `
-                <div class="flex justify-between py-2 border-b border-brand-border/40">
-                    <span class="capitalize text-white">${i.type || 'Unknown'}</span>
-                    <span class="font-semibold text-emerald-400">${Number(i.totalStreams || 0).toLocaleString()} streams</span>
-                </div>
-            `).join('') : `<p>No demographic stats found for this period.</p>`;
-        }
-    } catch (err) {
-        showAlert("Error fetching demographic stats.", "error");
-    }
-}
-
-async function fetchSmartLinkData() {
-    const token = await getAuthToken();
-    const container = document.getElementById('smartlinks-content-area');
-    if (!token || !container) return;
-
-    const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
-
-    try {
-        const res = await fetch(`${workerUrl}/api/analytics/release-links/top-releases?page=1&perPage=10`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-            const json = await res.json();
-            const links = json.data || [];
-            container.innerHTML = links.length ? `
-                <table class="w-full text-left text-xs text-gray-300">
-                    <thead class="text-gray-400 border-b border-brand-border uppercase">
-                        <tr>
-                            <th class="pb-2">Link</th>
-                            <th class="pb-2 text-right">Total Clicks</th>
-                            <th class="pb-2 text-right">Previews</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${links.map(l => `
-                            <tr class="border-b border-brand-border/40">
-                                <td class="py-2 text-indigo-400 font-mono">${l.link || l.shortId}</td>
-                                <td class="py-2 text-right font-semibold text-white">${Number(l.clicks || 0).toLocaleString()}</td>
-                                <td class="py-2 text-right text-gray-400">${Number(l.songPreviews || 0).toLocaleString()}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            ` : `<p>No Smart Link performance records found.</p>`;
-        }
-    } catch (err) {
-        showAlert("Error loading smart link stats.", "error");
-    }
-}
-
-function showAlert(message, type = "info") {
-    const alertArea = document.getElementById('analytics-alert-area');
-    if (!alertArea) return;
-    alertArea.classList.remove('hidden');
-    alertArea.innerHTML = `
-        <div class="p-3 text-xs rounded-xl ${type === 'error' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-indigo-500/10 text-indigo-300 border border-indigo-500/20'}">
-            ${message}
-        </div>
-    `;
-}
-
-function renderKPIs(data) {
-    const kpiContainer = document.getElementById('analytics-kpi-container');
-    if (!kpiContainer) return;
-    kpiContainer.innerHTML = `
-        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
-            <span class="text-xs font-medium text-gray-400">Total Streams</span>
-            <div class="text-2xl font-bold text-white mt-1">${Number(data.totalStreams || 0).toLocaleString()}</div>
-        </div>
-        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
-            <span class="text-xs font-medium text-gray-400">Total Saves</span>
-            <div class="text-2xl font-bold text-emerald-400 mt-1">${Number(data.totalSaves || 0).toLocaleString()}</div>
-        </div>
-        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
-            <span class="text-xs font-medium text-gray-400">Total Skips</span>
-            <div class="text-2xl font-bold text-rose-400 mt-1">${Number(data.totalSkips || 0).toLocaleString()}</div>
-        </div>
-        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
-            <span class="text-xs font-medium text-gray-400">Engagement</span>
-            <div class="text-2xl font-bold text-indigo-400 mt-1">${data.engagement ? Number(data.engagement).toFixed(2) + '%' : '0.00%'}</div>
-        </div>
-    `;
-}
-
-function renderChart(chartData) {
-    const canvas = document.getElementById('analyticsOverviewChart');
-    if (!canvas) return;
-
-    if (analyticsChartInstance) {
-        analyticsChartInstance.destroy();
     }
 
-    const labels = chartData.map(point => point.date);
-    const streams = chartData.map(point => point.totalStreams);
+    async function initAnalyticsDashboard(period = 'lastThirtyDays') {
+        currentAnalyticsPeriod = period;
 
-    const ctx = canvas.getContext('2d');
-    analyticsChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Streams',
-                data: streams,
-                borderColor: '#6366f1',
-                backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.35,
-                pointRadius: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#9ca3af', font: { size: 10 } } },
-                y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#9ca3af', font: { size: 10 } } }
+        const periodSelect = document.getElementById('analytics-period-select');
+        if (periodSelect) {
+            periodSelect.value = period;
+            if (!periodSelect.dataset.listenerAttached) {
+                periodSelect.dataset.listenerAttached = "true";
+                periodSelect.addEventListener('change', (e) => initAnalyticsDashboard(e.target.value));
             }
         }
-    });
-}
 
-function renderTracksTable(tracks) {
-    const tbody = document.getElementById('analytics-tracks-tbody');
-    if (!tbody) return;
-
-    if (!tracks.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-500">No track metrics found for this period.</td></tr>`;
-        return;
+        renderActiveTabContent();
     }
 
-    tbody.innerHTML = tracks.map(t => `
-        <tr class="border-b border-brand-border/50 hover:bg-white/5 transition-colors">
-            <td class="py-3 px-2 font-medium text-white">${t.track || 'Unknown Title'}</td>
-            <td class="py-3 px-2 text-gray-400 font-mono">${t.isrc || '-'}</td>
-            <td class="py-3 px-2 text-right font-semibold text-white">${Number(t.totalStreams || 0).toLocaleString()}</td>
-            <td class="py-3 px-2 text-right text-emerald-400">${Number(t.totalSaves || 0).toLocaleString()}</td>
-            <td class="py-3 px-2 text-right text-indigo-400">${t.engagement ? Number(t.engagement).toFixed(2) + '%' : '-'}</td>
-        </tr>
-    `).join('');
-}
+    function switchAnalyticsTab(tabName) {
+        activeAnalyticsTab = tabName;
+        document.querySelectorAll('.analytics-tab-btn').forEach(btn => {
+            btn.classList.remove('bg-brand-primary', 'text-white');
+            btn.classList.add('text-gray-400');
+        });
+        const selectedBtn = document.getElementById(`tab-btn-${tabName}`);
+        if (selectedBtn) {
+            selectedBtn.classList.add('bg-brand-primary', 'text-white');
+            selectedBtn.classList.remove('text-gray-400');
+        }
+        renderActiveTabContent();
+    }
 
-window.initAnalyticsDashboard = initAnalyticsDashboard;
-window.switchAnalyticsTab = switchAnalyticsTab;
-window.fetchPlatformData = fetchPlatformData;
+    async function renderActiveTabContent() {
+        const viewport = document.getElementById('analytics-tab-viewport');
+        if (!viewport) return;
+
+        if (activeAnalyticsTab === 'overview') {
+            viewport.innerHTML = `
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="analytics-kpi-container">
+                        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl animate-pulse h-20"></div>
+                        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl animate-pulse h-20"></div>
+                        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl animate-pulse h-20"></div>
+                        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl animate-pulse h-20"></div>
+                    </div>
+                    <div class="bg-brand-card border border-brand-border p-6 rounded-2xl">
+                        <h2 class="text-sm font-semibold text-white mb-4">Streams Over Time</h2>
+                        <div class="relative w-full h-72"><canvas id="analyticsOverviewChart"></canvas></div>
+                    </div>
+                    <div class="bg-brand-card border border-brand-border rounded-2xl p-6">
+                        <h2 class="text-sm font-semibold text-white mb-4">Top Performing Tracks</h2>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-gray-300">
+                                <thead class="text-gray-400 border-b border-brand-border uppercase">
+                                    <tr>
+                                        <th class="pb-3 px-2">Track</th>
+                                        <th class="pb-3 px-2">ISRC</th>
+                                        <th class="pb-3 px-2 text-right">Streams</th>
+                                        <th class="pb-3 px-2 text-right">Saves</th>
+                                        <th class="pb-3 px-2 text-right">Engagement</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="analytics-tracks-tbody">
+                                    <tr><td colspan="5" class="py-8 text-center text-gray-500">Loading tracks...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            await fetchOverviewData();
+        } else if (activeAnalyticsTab === 'platforms') {
+            viewport.innerHTML = `
+                <div class="bg-brand-card border border-brand-border rounded-2xl p-6 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-sm font-semibold text-white">Platform Breakdown</h2>
+                        <select id="platform-filter-select" onchange="fetchPlatformData(this.value)" class="bg-brand-border text-white text-xs px-3 py-1.5 rounded-lg outline-none">
+                            <option value="spotify">Spotify</option>
+                            <option value="apple_music">Apple Music</option>
+                        </select>
+                    </div>
+                    <div id="platform-content-area" class="text-xs text-gray-400">Select a platform to inspect detailed streams.</div>
+                </div>
+            `;
+            fetchPlatformData('spotify');
+        } else if (activeAnalyticsTab === 'demographics') {
+            viewport.innerHTML = `
+                <div class="bg-brand-card border border-brand-border rounded-2xl p-6 space-y-4">
+                    <h2 class="text-sm font-semibold text-white">Demographic & Tier Breakdown</h2>
+                    <div id="demographics-content-area" class="text-xs text-gray-400">Loading demographic data...</div>
+                </div>
+            `;
+            fetchDemographicData();
+        } else if (activeAnalyticsTab === 'links') {
+            viewport.innerHTML = `
+                <div class="bg-brand-card border border-brand-border rounded-2xl p-6 space-y-4">
+                    <h2 class="text-sm font-semibold text-white">Smart Link Analytics</h2>
+                    <div id="smartlinks-content-area" class="text-xs text-gray-400">Loading Smart Link metrics...</div>
+                </div>
+            `;
+            fetchSmartLinkData();
+        }
+    }
+
+    async function getAuthToken() {
+        if (!window.currentUser) return null;
+        return typeof window.currentUser.getIdToken === 'function'
+            ? await window.currentUser.getIdToken(true)
+            : window.currentUser.accessToken || null;
+    }
+
+    async function fetchOverviewData() {
+        const token = await getAuthToken();
+        if (!token) return showAlert("Authentication required. Please sign in again.", "error");
+
+        const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
+
+        try {
+            const [overviewRes, tracksRes] = await Promise.all([
+                fetch(`${workerUrl}/api/analytics/overview?period=${currentAnalyticsPeriod}`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${workerUrl}/api/analytics/tracks?period=${currentAnalyticsPeriod}&page=1&perPage=10`, { headers: { 'Authorization': `Bearer ${token}` } })
+            ]);
+
+            if (overviewRes.ok) {
+                const overviewJson = await overviewRes.json();
+                const data = overviewJson.data || overviewJson;
+                renderKPIs(data);
+                renderChart(data.chart || []);
+            }
+
+            if (tracksRes.ok) {
+                const tracksJson = await tracksRes.json();
+                renderTracksTable(tracksJson.data || []);
+            }
+        } catch (err) {
+            showAlert("Failed to load analytics overview.", "error");
+        }
+    }
+
+    async function fetchPlatformData(platform) {
+        const token = await getAuthToken();
+        const container = document.getElementById('platform-content-area');
+        if (!token || !container) return;
+
+        const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
+
+        try {
+            const res = await fetch(`${workerUrl}/api/analytics/platforms/total-streams?platform=${platform}&period=${currentAnalyticsPeriod}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const json = await res.json();
+                const payload = json.data || json;
+                container.innerHTML = `
+                    <div class="p-4 bg-brand-border/30 rounded-xl">
+                        <span class="text-gray-400 uppercase tracking-wider text-[10px]">Total Platform Streams</span>
+                        <p class="text-xl font-bold text-white mt-1">${Number(payload.totalStreams || 0).toLocaleString()}</p>
+                    </div>
+                `;
+            }
+        } catch (err) {
+            showAlert("Error loading platform streams.", "error");
+        }
+    }
+
+    async function fetchDemographicData() {
+        const token = await getAuthToken();
+        const container = document.getElementById('demographics-content-area');
+        if (!token || !container) return;
+
+        const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
+
+        try {
+            const res = await fetch(`${workerUrl}/api/analytics/platforms/additional?platform=spotify&type=gender&period=${currentAnalyticsPeriod}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const json = await res.json();
+                const items = json.data || [];
+                container.innerHTML = items.length ? items.map(i => `
+                    <div class="flex justify-between py-2 border-b border-brand-border/40">
+                        <span class="capitalize text-white">${i.type || 'Unknown'}</span>
+                        <span class="font-semibold text-emerald-400">${Number(i.totalStreams || 0).toLocaleString()} streams</span>
+                    </div>
+                `).join('') : `<p>No demographic stats found for this period.</p>`;
+            }
+        } catch (err) {
+            showAlert("Error fetching demographic stats.", "error");
+        }
+    }
+
+    async function fetchSmartLinkData() {
+        const token = await getAuthToken();
+        const container = document.getElementById('smartlinks-content-area');
+        if (!token || !container) return;
+
+        const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
+
+        try {
+            const res = await fetch(`${workerUrl}/api/analytics/release-links/top-releases?page=1&perPage=10`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const json = await res.json();
+                const links = json.data || [];
+                container.innerHTML = links.length ? `
+                    <table class="w-full text-left text-xs text-gray-300">
+                        <thead class="text-gray-400 border-b border-brand-border uppercase">
+                            <tr>
+                                <th class="pb-2">Link</th>
+                                <th class="pb-2 text-right">Total Clicks</th>
+                                <th class="pb-2 text-right">Previews</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${links.map(l => `
+                                <tr class="border-b border-brand-border/40">
+                                    <td class="py-2 text-indigo-400 font-mono">${l.link || l.shortId}</td>
+                                    <td class="py-2 text-right font-semibold text-white">${Number(l.clicks || 0).toLocaleString()}</td>
+                                    <td class="py-2 text-right text-gray-400">${Number(l.songPreviews || 0).toLocaleString()}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                ` : `<p>No Smart Link performance records found.</p>`;
+            }
+        } catch (err) {
+            showAlert("Error loading smart link stats.", "error");
+        }
+    }
+
+    function showAlert(message, type = "info") {
+        const alertArea = document.getElementById('analytics-alert-area');
+        if (!alertArea) return;
+        alertArea.classList.remove('hidden');
+        alertArea.innerHTML = `
+            <div class="p-3 text-xs rounded-xl ${type === 'error' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-indigo-500/10 text-indigo-300 border border-indigo-500/20'}">
+                ${message}
+            </div>
+        `;
+    }
+
+    function renderKPIs(data) {
+        const kpiContainer = document.getElementById('analytics-kpi-container');
+        if (!kpiContainer) return;
+        kpiContainer.innerHTML = `
+            <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
+                <span class="text-xs font-medium text-gray-400">Total Streams</span>
+                <div class="text-2xl font-bold text-white mt-1">${Number(data.totalStreams || 0).toLocaleString()}</div>
+            </div>
+            <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
+                <span class="text-xs font-medium text-gray-400">Total Saves</span>
+                <div class="text-2xl font-bold text-emerald-400 mt-1">${Number(data.totalSaves || 0).toLocaleString()}</div>
+            </div>
+            <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
+                <span class="text-xs font-medium text-gray-400">Total Skips</span>
+                <div class="text-2xl font-bold text-rose-400 mt-1">${Number(data.totalSkips || 0).toLocaleString()}</div>
+            </div>
+            <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
+                <span class="text-xs font-medium text-gray-400">Engagement</span>
+                <div class="text-2xl font-bold text-indigo-400 mt-1">${data.engagement ? Number(data.engagement).toFixed(2) + '%' : '0.00%'}</div>
+            </div>
+        `;
+    }
+
+    function renderChart(chartData) {
+        const canvas = document.getElementById('analyticsOverviewChart');
+        if (!canvas) return;
+
+        if (analyticsChartInstance) {
+            analyticsChartInstance.destroy();
+        }
+
+        const labels = chartData.map(point => point.date);
+        const streams = chartData.map(point => point.totalStreams);
+
+        const ctx = canvas.getContext('2d');
+        analyticsChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Streams',
+                    data: streams,
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#9ca3af', font: { size: 10 } } },
+                    y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#9ca3af', font: { size: 10 } } }
+                }
+            }
+        });
+    }
+
+    function renderTracksTable(tracks) {
+        const tbody = document.getElementById('analytics-tracks-tbody');
+        if (!tbody) return;
+
+        if (!tracks.length) {
+            tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-500">No track metrics found for this period.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = tracks.map(t => `
+            <tr class="border-b border-brand-border/50 hover:bg-white/5 transition-colors">
+                <td class="py-3 px-2 font-medium text-white">${t.track || 'Unknown Title'}</td>
+                <td class="py-3 px-2 text-gray-400 font-mono">${t.isrc || '-'}</td>
+                <td class="py-3 px-2 text-right font-semibold text-white">${Number(t.totalStreams || 0).toLocaleString()}</td>
+                <td class="py-3 px-2 text-right text-emerald-400">${Number(t.totalSaves || 0).toLocaleString()}</td>
+                <td class="py-3 px-2 text-right text-indigo-400">${t.engagement ? Number(t.engagement).toFixed(2) + '%' : '-'}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Attach necessary functions to the global window scope
+    window.renderAnalyticsView = renderAnalyticsView;
+    window.initAnalyticsDashboard = initAnalyticsDashboard;
+    window.switchAnalyticsTab = switchAnalyticsTab;
+    window.fetchPlatformData = fetchPlatformData;
+    window.fetchDemographicData = fetchDemographicData;
+    window.fetchSmartLinkData = fetchSmartLinkData;
+})();
         
 // =============================================================
 // UI NOTIFICATION SYSTEM (No Native Alerts or Popups)
