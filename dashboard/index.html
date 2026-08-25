@@ -932,10 +932,20 @@ function renderEarningsView() {
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl space-y-4 lg:col-span-1">
-                    <h2 class="text-sm font-semibold text-white">Top Territories Breakdown</h2>
-                    <div class="relative w-full h-56 flex items-center justify-center">
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl space-y-4 lg:col-span-1 flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-sm font-semibold text-white">Top Territories Breakdown</h2>
+                        <p class="text-[11px] text-gray-400 mt-0.5">Revenue distribution across regions</p>
+                    </div>
+
+                    <!-- Doughnut Chart Container -->
+                    <div class="relative w-full h-48 flex items-center justify-center my-2">
                         <canvas id="territoryEarningsPieChart"></canvas>
+                    </div>
+
+                    <!-- Dynamic Country Flags & Earnings List -->
+                    <div id="territory-legend-list" class="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar pt-2 border-t border-brand-border/40">
+                        <!-- Populated via JavaScript -->
                     </div>
                 </div>
 
@@ -1490,8 +1500,24 @@ async function initEarningsDashboard() {
     const totalBalEl = document.getElementById('earnings-total-balance');
     if (totalBalEl) totalBalEl.innerText = `$${window.currentBalance.toFixed(2)}`;
 
-    // 6. Render Territory Chart
+    // 6. Render Territory Chart & Country Flag List
+    const countryCodeMap = {
+        'united states': 'us', 'usa': 'us', 'us': 'us',
+        'united kingdom': 'gb', 'uk': 'gb', 'great britain': 'gb',
+        'canada': 'ca', 'germany': 'de', 'australia': 'au', 'japan': 'jp',
+        'france': 'fr', 'netherlands': 'nl', 'sweden': 'se', 'norway': 'no',
+        'brazil': 'br', 'new zealand': 'nz', 'switzerland': 'ch', 'mexico': 'mx',
+        'italy': 'it', 'spain': 'es', 'kenya': 'ke', 'south africa': 'za', 'nigeria': 'ng'
+    };
+
+    const colorPalette = [
+        '#1db954', '#fc3c44', '#ff0000', '#00a8e1', '#a238ff', 
+        '#e1306c', '#0084ff', '#ff9900', '#10b981', '#f59e0b', 
+        '#8b5cf6', '#ec4899', '#14b8a6', '#6366f1', '#6b7280'
+    ];
+
     const canvas = document.getElementById('territoryEarningsPieChart');
+    const legendContainer = document.getElementById('territory-legend-list');
     const chartContainer = canvas ? canvas.parentElement : null;
 
     if (canvas) {
@@ -1504,27 +1530,70 @@ async function initEarningsDashboard() {
             canvas.style.display = 'block';
             if (pieChartInstance) pieChartInstance.destroy();
 
+            const chartDataValues = territories.map(t => Number(t.total || t.revenue || t.amount || 0));
+            const totalSum = chartDataValues.reduce((a, b) => a + b, 0);
+
             const ctx = canvas.getContext('2d');
             pieChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: territories.map(t => t.country || t.territory || t.name),
+                    labels: territories.map(t => t.country || t.territory || t.name || 'Unknown'),
                     datasets: [{
-                        data: territories.map(t => Number(t.total || t.revenue || t.amount || 0)),
-                        backgroundColor: ['#1db954', '#fc3c44', '#ff0000', '#00a8e1', '#a238ff', '#6b7280', '#e1306c', '#0084ff'],
-                        borderWidth: 0
+                        data: chartDataValues,
+                        backgroundColor: colorPalette.slice(0, territories.length),
+                        borderWidth: 0,
+                        hoverOffset: 6
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    cutout: '70%',
                     plugins: {
-                        legend: { position: 'bottom', labels: { color: '#9ca3af', font: { size: 10 } } }
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const val = context.raw || 0;
+                                    const pct = totalSum > 0 ? ((val / totalSum) * 100).toFixed(1) : 0;
+                                    return ` $${val.toFixed(2)} (${pct}%)`;
+                                }
+                            }
+                        }
                     }
                 }
             });
+
+            // Render custom flag + earnings list under pie chart
+            if (legendContainer) {
+                legendContainer.innerHTML = territories.map((t, idx) => {
+                    const countryName = t.country || t.territory || t.name || 'Unknown';
+                    const rev = Number(t.total || t.revenue || t.amount || 0);
+                    const pct = totalSum > 0 ? ((rev / totalSum) * 100).toFixed(1) : '0.0';
+                    const color = colorPalette[idx % colorPalette.length];
+                    
+                    const code = countryCodeMap[countryName.toLowerCase()] || 'un';
+                    const flagUrl = `https://flagcdn.com/w40/${code}.png`;
+
+                    return `
+                        <div class="flex items-center justify-between text-xs py-1 px-1 rounded-lg hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-2 truncate pr-2">
+                                <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: ${color}"></span>
+                                <img src="${flagUrl}" alt="${countryName}" class="w-4 h-3 rounded-sm object-cover flex-shrink-0" onerror="this.style.display='none'" />
+                                <span class="font-medium text-gray-200 truncate">${countryName}</span>
+                            </div>
+                            <div class="text-right flex-shrink-0 font-mono">
+                                <span class="font-bold text-white">$${rev.toFixed(2)}</span>
+                                <span class="text-[10px] text-gray-400 ml-1">(${pct}%)</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
         } else {
             canvas.style.display = 'none';
+            if (legendContainer) legendContainer.innerHTML = '';
             if (chartContainer && !chartContainer.querySelector('.empty-chart-msg')) {
                 const emptyMsg = document.createElement('div');
                 emptyMsg.className = 'empty-chart-msg h-full w-full flex items-center justify-center text-gray-500 text-xs font-medium py-12';
@@ -1534,7 +1603,7 @@ async function initEarningsDashboard() {
         }
     }
 }
-
+        
 window.handleWithdrawClick = handleWithdrawClick;
 window.closeWithdrawModal = closeWithdrawModal;
 window.renderPayoutFields = renderPayoutFields;
