@@ -931,21 +931,22 @@ function renderEarningsView() {
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl space-y-4 lg:col-span-1 flex flex-col justify-between">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+                <!-- Left Breakdown Card -->
+                <div class="bg-brand-card border border-brand-border p-6 rounded-2xl flex flex-col justify-between h-full lg:col-span-1">
                     <div>
                         <h2 class="text-sm font-semibold text-white">Top Territories Breakdown</h2>
                         <p class="text-[11px] text-gray-400 mt-0.5">Revenue distribution across regions</p>
                     </div>
 
                     <!-- Doughnut Chart Container -->
-                    <div class="relative w-full h-48 flex items-center justify-center my-2">
+                    <div class="relative w-full flex-1 min-h-[220px] flex items-center justify-center my-4">
                         <canvas id="territoryEarningsPieChart"></canvas>
                     </div>
 
-                    <!-- Dynamic Country Flags & Earnings List -->
-                    <div id="territory-legend-list" class="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar pt-2 border-t border-brand-border/40">
-                        <!-- Populated via JavaScript -->
+                    <!-- Sleek Custom Flag List (No Scrollbar, Clean Spacing) -->
+                    <div id="territory-legend-list" class="space-y-2.5 pt-4 border-t border-brand-border/40 overflow-hidden">
+                        <!-- Rendered dynamically -->
                     </div>
                 </div>
 
@@ -1500,7 +1501,7 @@ async function initEarningsDashboard() {
     const totalBalEl = document.getElementById('earnings-total-balance');
     if (totalBalEl) totalBalEl.innerText = `$${window.currentBalance.toFixed(2)}`;
 
-    // 6. Render Territory Chart & Country Flag List
+    // 6. Render Territory Chart & Top 5 Country Flag List (Prevents overflow scrollbar & massive vertical gaps)
     const countryCodeMap = {
         'united states': 'us', 'usa': 'us', 'us': 'us',
         'united kingdom': 'gb', 'uk': 'gb', 'great britain': 'gb',
@@ -1512,8 +1513,7 @@ async function initEarningsDashboard() {
 
     const colorPalette = [
         '#1db954', '#fc3c44', '#ff0000', '#00a8e1', '#a238ff', 
-        '#e1306c', '#0084ff', '#ff9900', '#10b981', '#f59e0b', 
-        '#8b5cf6', '#ec4899', '#14b8a6', '#6366f1', '#6b7280'
+        '#e1306c', '#0084ff', '#ff9900', '#10b981', '#f59e0b'
     ];
 
     const canvas = document.getElementById('territoryEarningsPieChart');
@@ -1530,17 +1530,24 @@ async function initEarningsDashboard() {
             canvas.style.display = 'block';
             if (pieChartInstance) pieChartInstance.destroy();
 
-            const chartDataValues = territories.map(t => Number(t.total || t.revenue || t.amount || 0));
+            // Sort territories by highest revenue
+            const sortedTerritories = [...territories].sort((a, b) => 
+                Number(b.total || b.revenue || b.amount || 0) - Number(a.total || a.revenue || a.amount || 0)
+            );
+
+            // Sliced to Top 5 for clean card display
+            const topTerritories = sortedTerritories.slice(0, 5);
+            const chartDataValues = sortedTerritories.map(t => Number(t.total || t.revenue || t.amount || 0));
             const totalSum = chartDataValues.reduce((a, b) => a + b, 0);
 
             const ctx = canvas.getContext('2d');
             pieChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: territories.map(t => t.country || t.territory || t.name || 'Unknown'),
+                    labels: sortedTerritories.map(t => t.country || t.territory || t.name || 'Unknown'),
                     datasets: [{
                         data: chartDataValues,
-                        backgroundColor: colorPalette.slice(0, territories.length),
+                        backgroundColor: colorPalette.slice(0, sortedTerritories.length),
                         borderWidth: 0,
                         hoverOffset: 6
                     }]
@@ -1548,7 +1555,7 @@ async function initEarningsDashboard() {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '70%',
+                    cutout: '72%',
                     plugins: {
                         legend: { display: false },
                         tooltip: {
@@ -1564,9 +1571,9 @@ async function initEarningsDashboard() {
                 }
             });
 
-            // Render custom flag + earnings list under pie chart
+            // Render top 5 sleek rows with flags & no scrollbar
             if (legendContainer) {
-                legendContainer.innerHTML = territories.map((t, idx) => {
+                legendContainer.innerHTML = topTerritories.map((t, idx) => {
                     const countryName = t.country || t.territory || t.name || 'Unknown';
                     const rev = Number(t.total || t.revenue || t.amount || 0);
                     const pct = totalSum > 0 ? ((rev / totalSum) * 100).toFixed(1) : '0.0';
@@ -1576,15 +1583,15 @@ async function initEarningsDashboard() {
                     const flagUrl = `https://flagcdn.com/w40/${code}.png`;
 
                     return `
-                        <div class="flex items-center justify-between text-xs py-1 px-1 rounded-lg hover:bg-white/5 transition-colors">
-                            <div class="flex items-center gap-2 truncate pr-2">
-                                <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: ${color}"></span>
+                        <div class="flex items-center justify-between text-xs py-1 px-2 rounded-lg hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-2.5 truncate pr-2">
+                                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${color}"></span>
                                 <img src="${flagUrl}" alt="${countryName}" class="w-4 h-3 rounded-sm object-cover flex-shrink-0" onerror="this.style.display='none'" />
-                                <span class="font-medium text-gray-200 truncate">${countryName}</span>
+                                <span class="font-medium text-gray-200 truncate text-[13px]">${countryName}</span>
                             </div>
                             <div class="text-right flex-shrink-0 font-mono">
-                                <span class="font-bold text-white">$${rev.toFixed(2)}</span>
-                                <span class="text-[10px] text-gray-400 ml-1">(${pct}%)</span>
+                                <span class="font-bold text-white text-[13px]">$${rev.toFixed(2)}</span>
+                                <span class="text-[11px] text-gray-400 ml-1">(${pct}%)</span>
                             </div>
                         </div>
                     `;
