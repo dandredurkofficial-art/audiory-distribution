@@ -2128,8 +2128,8 @@ window.deleteReleaseCatalog = async function(releaseId) {
     const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
 
     try {
-        // 'gender' is the exact supported breakdown type for Spotify on this endpoint
-        const res = await fetch(`${workerUrl}/api/analytics/platforms/additional?platform=spotify&type=gender&period=${currentAnalyticsPeriod}`, {
+        // Changed type to 'listeners' (supported by Spotify additional metrics)
+        const res = await fetch(`${workerUrl}/api/analytics/platforms/additional?platform=spotify&type=listeners&period=${currentAnalyticsPeriod}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const json = await res.json();
@@ -2138,10 +2138,10 @@ window.deleteReleaseCatalog = async function(releaseId) {
             const items = json.data || json;
             container.innerHTML = Array.isArray(items) && items.length ? items.map(i => `
                 <div class="flex justify-between py-2 border-b border-brand-border/40">
-                    <span class="capitalize text-white">${i.gender || i.type || i.name || 'Unknown'}</span>
-                    <span class="font-semibold text-emerald-400">${Number(i.totalStreams || i.streams || 0).toLocaleString()} streams</span>
+                    <span class="capitalize text-white">${i.name || i.type || 'Unknown'}</span>
+                    <span class="font-semibold text-emerald-400">${Number(i.value || i.totalStreams || 0).toLocaleString()}</span>
                 </div>
-            `).join('') : `<p class="text-gray-400">No demographic stats available for this period.</p>`;
+            `).join('') : `<p class="text-gray-400">No listener metric breakdown available for this period.</p>`;
         } else {
             container.innerHTML = `<p class="text-rose-400 text-xs">${json.message || 'Demographic metrics unavailable for this selection.'}</p>`;
         }
