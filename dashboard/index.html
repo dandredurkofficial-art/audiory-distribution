@@ -129,6 +129,9 @@
                 <button onclick="switchView('upgrade')" id="nav_upgrade" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-brand-dark/50 transition-all">
                     <i class="fa-solid fa-rocket w-4 text-pink-500"></i> Upgrade Plan
                 </button>
+                <button onclick="switchView('preferences')" id="nav_preferences" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-brand-dark/50 transition-all">
+                    <i class="fa-solid fa-user-gear w-4 text-blue-400"></i> Preferences
+                </button>
                 <button onclick="switchView('settings')" id="nav_settings" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-brand-dark/50 transition-all">
                     <i class="fa-solid fa-sliders w-4"></i> Settings
                 </button>
@@ -627,6 +630,16 @@ window.switchView = function(viewName) {
             window.initUpgradePage();
         } else {
             console.error("window.initUpgradePage is not defined.");
+        }
+    }
+
+    // NEW: Render Preferences View
+    if (viewName === 'preferences') {
+        viewport.innerHTML = renderPreferencesView();
+        if (typeof window.initPreferencesPage === 'function') {
+            window.initPreferencesPage();
+        } else {
+            console.error("window.initPreferencesPage is not defined.");
         }
     }
 
@@ -4666,6 +4679,241 @@ window.copySmartLink = function(url) {
     }).catch(() => {
         window.showToast("Failed to copy link.", true);
     });
+};
+
+window.renderPreferencesView = function() {
+    return `
+    <div class="p-6 max-w-6xl mx-auto space-y-8 relative">
+        <!-- Toast Notification Container -->
+        <div id="pref-toast" class="hidden fixed top-5 right-5 z-50 px-4 py-3 rounded-xl text-xs font-semibold shadow-lg transition-all transform duration-300 flex items-center gap-2"></div>
+
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b border-brand-border/40 pb-5">
+            <div>
+                <h1 class="text-2xl font-bold text-white tracking-tight">Artist & Label Preferences</h1>
+                <p class="text-xs text-gray-400 mt-1">Manage platform profiles, metadata defaults, social links, and delivery settings.</p>
+            </div>
+            <button onclick="window.savePreferences()" id="btn-save-preferences" class="px-4 py-2 bg-brand-accent hover:brightness-110 text-black font-bold text-xs rounded-xl transition-all flex items-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i> Save Preferences
+            </button>
+        </div>
+
+        <!-- Tab Controls -->
+        <div class="flex gap-4 border-b border-brand-border/40 pb-3">
+            <button id="tab-btn-artist" onclick="switchPrefTab('artist')" class="px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80">Artist Profile</button>
+            <button id="tab-btn-label" onclick="switchPrefTab('label')" class="px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all">Label Settings</button>
+        </div>
+
+        <!-- Artist Profile Form Section -->
+        <div id="pref-section-artist" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Main Info Card -->
+                <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-5 space-y-4">
+                    <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">Basic Info</h3>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Artist Name</label>
+                        <input type="text" id="pref-artistName" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-accent">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Primary Genre</label>
+                            <input type="text" id="pref-primaryGenre" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Secondary Genre</label>
+                            <input type="text" id="pref-secondaryGenre" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Language</label>
+                        <input type="text" id="pref-language" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Bio / About</label>
+                        <textarea id="pref-about" rows="3" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
+                    </div>
+                </div>
+
+                <!-- Platform IDs / Links Card -->
+                <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-5 space-y-4">
+                    <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">Platform Identifiers</h3>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify Link</label>
+                        <input type="text" id="pref-platform-spotify" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1"><i class="fa-brands fa-apple text-gray-300"></i> Apple Music Link</label>
+                        <input type="text" id="pref-platform-appleMusic" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1"><i class="fa-brands fa-youtube text-red-400"></i> VEVO Channel</label>
+                        <input type="text" id="pref-platform-vevo" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1"><i class="fa-solid fa-globe text-blue-400"></i> Official Website</label>
+                        <input type="text" id="pref-platform-website" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Defaults & Copyright Info -->
+            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Default Label</label>
+                    <input type="text" id="pref-label" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">C-Line Copyright</label>
+                    <input type="text" id="pref-cLine" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">P-Line Copyright</label>
+                    <input type="text" id="pref-pLine" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                </div>
+            </div>
+        </div>
+
+        <!-- Label Settings Form Section -->
+        <div id="pref-section-label" class="space-y-6 hidden">
+            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-5 space-y-4 max-w-2xl">
+                <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">Record Label Info</h3>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Label Name</label>
+                    <input type="text" id="pref-label-name" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">About Label</label>
+                    <textarea id="pref-label-about" rows="3" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Label Website</label>
+                    <input type="text" id="pref-label-website" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+};
+
+// UI Toast Notification Helper (replaces browser alerts)
+window.showPrefToast = function(message, type = 'success') {
+    const toast = document.getElementById('pref-toast');
+    if (!toast) return;
+
+    if (type === 'success') {
+        toast.className = "fixed top-5 right-5 z-50 px-4 py-3 rounded-xl text-xs font-semibold shadow-lg bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 flex items-center gap-2";
+        toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${message}`;
+    } else {
+        toast.className = "fixed top-5 right-5 z-50 px-4 py-3 rounded-xl text-xs font-semibold shadow-lg bg-rose-500/20 border border-rose-500/50 text-rose-300 flex items-center gap-2";
+        toast.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${message}`;
+    }
+
+    toast.classList.remove('hidden');
+    setTimeout(() => {
+        toast.classList.add('hidden');
+    }, 4000);
+};
+
+window.switchPrefTab = function(tab) {
+    const artistTab = document.getElementById('tab-btn-artist');
+    const labelTab = document.getElementById('tab-btn-label');
+    const artistSec = document.getElementById('pref-section-artist');
+    const labelSec = document.getElementById('pref-section-label');
+
+    if (tab === 'artist') {
+        artistTab.className = "px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80";
+        labelTab.className = "px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all";
+        artistSec.classList.remove('hidden');
+        labelSec.classList.add('hidden');
+    } else {
+        labelTab.className = "px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80";
+        artistTab.className = "px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all";
+        labelSec.classList.remove('hidden');
+        artistSec.classList.add('hidden');
+    }
+};
+
+window.initPreferencesPage = async function() {
+    const token = window.currentUser?.getIdToken ? await window.currentUser.getIdToken() : '';
+    const baseUrl = window.WORKER_BASE_URL || '';
+
+    try {
+        const res = await fetch(`${baseUrl}/api/preferences/artist`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const body = await res.json();
+            const artist = body.data?.artist || {};
+            
+            document.getElementById('pref-artistName').value = artist.artistName || '';
+            document.getElementById('pref-primaryGenre').value = artist.primaryGenre || '';
+            document.getElementById('pref-secondaryGenre').value = artist.secondaryGenre || '';
+            document.getElementById('pref-language').value = artist.language || '';
+            document.getElementById('pref-about').value = artist.about || '';
+            document.getElementById('pref-label').value = artist.label || '';
+            document.getElementById('pref-cLine').value = artist.cLine || artist.c_line || '';
+            document.getElementById('pref-pLine').value = artist.pLine || artist.p_line || '';
+
+            if (artist.platforms) {
+                document.getElementById('pref-platform-spotify').value = artist.platforms.spotify || '';
+                document.getElementById('pref-platform-appleMusic').value = artist.platforms.appleMusic || '';
+                document.getElementById('pref-platform-vevo').value = artist.platforms.vevo || '';
+                document.getElementById('pref-platform-website').value = artist.platforms.website || '';
+            }
+        }
+    } catch (err) {
+        console.error('Failed to load preferences:', err);
+        window.showPrefToast('Failed to load preferences from server.', 'error');
+    }
+};
+
+window.savePreferences = async function() {
+    const btn = document.getElementById('btn-save-preferences');
+    btn.disabled = true;
+    btn.innerText = 'Saving...';
+
+    const token = window.currentUser?.getIdToken ? await window.currentUser.getIdToken() : '';
+    const baseUrl = window.WORKER_BASE_URL || '';
+
+    const payload = {
+        artistName: document.getElementById('pref-artistName').value,
+        primaryGenre: document.getElementById('pref-primaryGenre').value,
+        secondaryGenre: document.getElementById('pref-secondaryGenre').value,
+        language: document.getElementById('pref-language').value,
+        about: document.getElementById('pref-about').value,
+        label: document.getElementById('pref-label').value,
+        cLine: document.getElementById('pref-cLine').value,
+        pLine: document.getElementById('pref-pLine').value,
+        platforms: {
+            spotify: document.getElementById('pref-platform-spotify').value,
+            appleMusic: document.getElementById('pref-platform-appleMusic').value,
+            vevo: document.getElementById('pref-platform-vevo').value,
+            website: document.getElementById('pref-platform-website').value
+        }
+    };
+
+    try {
+        const res = await fetch(`${baseUrl}/api/preferences/artist/submit`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        if (res.ok) {
+            window.showPrefToast('Preferences saved successfully!', 'success');
+        } else {
+            window.showPrefToast('Failed to save preferences.', 'error');
+        }
+    } catch (err) {
+        console.error('Error saving preferences:', err);
+        window.showPrefToast('Error connecting to the server.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save Preferences`;
+    }
 };
 
 (function() {
