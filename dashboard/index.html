@@ -3903,8 +3903,13 @@ window.fetchSubscriptionAndHistory = async function() {
         const latestTx = history[0];
         const isLatestFailed = latestTx && (latestTx.status === 'Failed' || latestTx.status === 'Cancelled' || latestTx.status === 'Declined');
 
-        if (latestTx && latestTx.planId) {
-            window.lastAttemptedPlanId = latestTx.planId;
+        // Extract planId from description or current sub target if available
+        if (latestTx) {
+            if (latestTx.planId) {
+                window.lastAttemptedPlanId = latestTx.planId;
+            } else if (sub && sub.planId && sub.status === 'Failed') {
+                window.lastAttemptedPlanId = sub.planId;
+            }
         }
 
         // Update Top Active Plan Card
@@ -3954,7 +3959,7 @@ window.fetchSubscriptionAndHistory = async function() {
                 if (bannerDesc) bannerDesc.innerText = 'Transaction was cancelled or declined. Please retry to upgrade.';
                 
                 if (iconCheck) iconCheck.className = 'fa-solid fa-rotate-right';
-                if (textCheck) textCheck.innerText = 'Payment Failed - Retry';
+                if (textCheck) textCheck.innerText = 'Please retry to upgrade';
                 if (btnCheck) {
                     btnCheck.onclick = function() { window.openCheckoutModal(window.lastAttemptedPlanId || 'pro'); };
                     btnCheck.className = 'px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5';
@@ -4013,6 +4018,9 @@ window.fetchSubscriptionAndHistory = async function() {
         console.error('Error fetching subscription history:', err);
     } finally {
         if (btnCheck) btnCheck.disabled = false;
+        if (iconCheck && iconCheck.className.includes('fa-spinner')) {
+            iconCheck.className = 'fa-solid fa-rotate-right';
+        }
     }
 };
 
