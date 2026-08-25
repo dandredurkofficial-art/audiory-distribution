@@ -2029,7 +2029,7 @@ window.deleteReleaseCatalog = async function(releaseId) {
                         <h2 class="text-sm font-semibold text-white">Platform Breakdown</h2>
                         <select id="platform-filter-select" onchange="fetchPlatformData(this.value)" class="bg-brand-border text-white text-xs px-3 py-1.5 rounded-lg outline-none">
                             <option value="spotify">Spotify</option>
-                            <option value="apple_music">Apple Music</option>
+                            <option value="apple">Apple Music</option>
                         </select>
                     </div>
                     <div id="platform-content-area" class="text-xs text-gray-400">Select a platform to inspect detailed streams.</div>
@@ -2124,7 +2124,8 @@ window.deleteReleaseCatalog = async function(releaseId) {
         const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
 
         try {
-            const res = await fetch(`${workerUrl}/api/analytics/platforms/additional?platform=spotify&type=gender&period=${currentAnalyticsPeriod}`, {
+            // Updated type parameter from 'gender' to 'demographics'
+            const res = await fetch(`${workerUrl}/api/analytics/platforms/additional?platform=spotify&type=demographics&period=${currentAnalyticsPeriod}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -2136,6 +2137,9 @@ window.deleteReleaseCatalog = async function(releaseId) {
                         <span class="font-semibold text-emerald-400">${Number(i.totalStreams || 0).toLocaleString()} streams</span>
                     </div>
                 `).join('') : `<p>No demographic stats found for this period.</p>`;
+            } else {
+                const errJson = await res.json();
+                container.innerHTML = `<p class="text-rose-400">${errJson.message || 'Failed to fetch demographics.'}</p>`;
             }
         } catch (err) {
             showAlert("Error fetching demographic stats.", "error");
