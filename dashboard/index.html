@@ -656,7 +656,7 @@ function renderHomeView() {
 
     return `
         <div class="max-w-7xl mx-auto space-y-6">
-            <!-- Header (Removed duplicate New Release button) -->
+            <!-- Header -->
             <div class="pb-4 border-b border-brand-border/60">
                 <h1 class="text-2xl font-bold text-white tracking-tight">Welcome back, <span class="text-brand-accent">${window.currentUser?.displayName || 'Partner'}</span></h1>
                 <p class="text-xs text-gray-400 mt-1">Grow, manage, and monetize your music catalog.</p>
@@ -735,15 +735,15 @@ function renderHomeView() {
                 </div>
             </div>
 
-            <!-- Recent Releases Table with Cover Art & Artist Property Fallbacks -->
-            <div class="bg-brand-card border border-brand-border rounded-2xl p-6 space-y-4">
+            <!-- Recent Releases Section -->
+            <div class="bg-brand-card border border-brand-border rounded-2xl p-4 sm:p-6 space-y-4">
                 <div class="flex items-center justify-between">
                     <h2 class="text-sm font-semibold text-white">Recent Releases</h2>
                     <button onclick="switchView('catalog')" class="text-xs text-brand-accent hover:underline">View Catalog &rarr;</button>
                 </div>
-                <div class="overflow-x-auto">
+                <div>
                     <table class="w-full text-left text-xs text-gray-300">
-                        <thead class="text-gray-400 border-b border-brand-border uppercase tracking-wider">
+                        <thead class="hidden md:table-header-group text-gray-400 border-b border-brand-border uppercase tracking-wider">
                             <tr>
                                 <th class="pb-3 px-2">Release</th>
                                 <th class="pb-3 px-2">Artist</th>
@@ -751,7 +751,7 @@ function renderHomeView() {
                                 <th class="pb-3 px-2 text-right">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="home-recent-catalog-tbody">
+                        <tbody id="home-recent-catalog-tbody" class="divide-y divide-brand-border/50 md:divide-y-0">
                             <tr>
                                 <td colspan="4" class="py-6 text-center text-gray-500">Loading catalog...</td>
                             </tr>
@@ -762,7 +762,7 @@ function renderHomeView() {
         </div>
     `;
 }
-
+        
 let homeChartInstance = null;
 
 // Updated Dashboard Initialization Function
@@ -777,33 +777,38 @@ async function initHomeDashboard() {
                 const title = rel.title || rel.metadata?.title || 'Untitled Release';
                 const artistName = resolveArtistName(rel);
 
-                // Exact cover resolver from renderCatalogView
                 let rawCover = rel.coverUrl || rel.compressedArtwork || rel.artworkUrl || rel.cover_url;
                 if (!rawCover && rel.artwork) {
                     rawCover = typeof rel.artwork === 'string' ? rel.artwork : (rel.artwork.url || rel.artwork.cover_art);
                 }
                 const coverArt = (typeof rawCover === 'string' && rawCover.trim() !== '') ? rawCover : '';
 
-                // Normalize status
                 let status = rel.status || 'Submitted';
                 if (status.toLowerCase() === 'draft' || status.toLowerCase().includes('gateway')) {
                     status = 'Submitted';
                 }
 
                 return `
-                    <tr class="border-b border-brand-border/50 hover:bg-white/5 transition-colors">
-                        <td class="py-3 px-2">
-                            <div class="flex items-center gap-3">
+                    <tr class="flex flex-col md:table-row border-b border-brand-border/50 hover:bg-white/5 transition-colors p-3 md:p-0 space-y-2 md:space-y-0">
+                        <td class="py-1 md:py-3 px-0 md:px-2">
+                            <div class="flex items-center gap-3 min-w-0">
                                 ${coverArt 
                                     ? `<img src="${coverArt}" class="w-10 h-10 rounded-lg object-cover border border-brand-border/60 shrink-0" alt="Cover" />`
                                     : `<div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0"><i class="fa-solid fa-music text-gray-400"></i></div>`
                                 }
-                                <span class="font-semibold text-white">${title}</span>
+                                <div class="min-w-0 flex-1">
+                                    <span class="font-semibold text-white block truncate">${title}</span>
+                                    <span class="text-gray-400 text-[11px] block md:hidden truncate">${artistName}</span>
+                                </div>
                             </div>
                         </td>
-                        <td class="py-3 px-2 text-gray-300">${artistName}</td>
-                        <td class="py-3 px-2 text-gray-400 font-mono">${rel.upc || 'Pending'}</td>
-                        <td class="py-3 px-2 text-right">
+                        <td class="hidden md:table-cell py-3 px-2 text-gray-300 max-w-[150px] truncate">${artistName}</td>
+                        <td class="py-1 md:py-3 px-0 md:px-2 text-gray-400 font-mono text-[11px] md:text-xs flex md:table-cell justify-between items-center">
+                            <span class="md:hidden text-gray-500">UPC:</span>
+                            <span>${rel.upc || 'Pending'}</span>
+                        </td>
+                        <td class="py-1 md:py-3 px-0 md:px-2 md:text-right flex md:table-cell justify-between items-center">
+                            <span class="md:hidden text-gray-500">Status:</span>
                             <span class="px-2 py-0.5 text-[10px] font-medium rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 capitalize">${status}</span>
                         </td>
                     </tr>
