@@ -2128,8 +2128,8 @@ window.deleteReleaseCatalog = async function(releaseId) {
         const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
 
         try {
-            // Use 'country' or 'device' instead of 'demographics' or 'gender' for Spotify
-            const res = await fetch(`${workerUrl}/api/analytics/platforms/additional?platform=spotify&type=country&period=${currentAnalyticsPeriod}`, {
+            // Changed type to 'demographic' (singular) for Spotify platform specs
+            const res = await fetch(`${workerUrl}/api/analytics/platforms/additional?platform=spotify&type=demographic&period=${currentAnalyticsPeriod}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const json = await res.json();
@@ -2138,10 +2138,10 @@ window.deleteReleaseCatalog = async function(releaseId) {
                 const items = json.data || json;
                 container.innerHTML = Array.isArray(items) && items.length ? items.map(i => `
                     <div class="flex justify-between py-2 border-b border-brand-border/40">
-                        <span class="capitalize text-white">${i.country || i.name || i.type || 'Unknown'}</span>
+                        <span class="capitalize text-white">${i.demographic || i.type || i.name || 'Unknown'}</span>
                         <span class="font-semibold text-emerald-400">${Number(i.totalStreams || i.streams || 0).toLocaleString()} streams</span>
                     </div>
-                `).join('') : `<p class="text-gray-400">No country data found for this period.</p>`;
+                `).join('') : `<p class="text-gray-400">No demographic stats available for this period.</p>`;
             } else {
                 container.innerHTML = `<p class="text-rose-400 text-xs">${json.message || 'Failed to fetch demographic data.'}</p>`;
             }
@@ -2158,8 +2158,8 @@ window.deleteReleaseCatalog = async function(releaseId) {
         const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
 
         try {
-            // Fallback endpoint route for release smart links
-            const res = await fetch(`${workerUrl}/api/analytics/release-links?page=1&perPage=10`, {
+            // Pointing directly to /release-links/top-releases (valid endpoint)
+            const res = await fetch(`${workerUrl}/api/analytics/release-links/top-releases?page=1&perPage=10`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const json = await res.json();
@@ -2170,15 +2170,17 @@ window.deleteReleaseCatalog = async function(releaseId) {
                     <table class="w-full text-left text-xs text-gray-300">
                         <thead class="text-gray-400 border-b border-brand-border uppercase">
                             <tr>
-                                <th class="pb-2">Link</th>
+                                <th class="pb-2">Release Link</th>
                                 <th class="pb-2 text-right">Total Clicks</th>
+                                <th class="pb-2 text-right">Previews</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${links.map(l => `
                                 <tr class="border-b border-brand-border/40">
-                                    <td class="py-2 text-indigo-400 font-mono">${l.link || l.shortId || l.id}</td>
+                                    <td class="py-2 text-indigo-400 font-mono">${l.link || l.url || l.shortId || 'Link'}</td>
                                     <td class="py-2 text-right font-semibold text-white">${Number(l.clicks || l.totalClicks || 0).toLocaleString()}</td>
+                                    <td class="py-2 text-right text-gray-400">${Number(l.songPreviews || l.previews || 0).toLocaleString()}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -2191,7 +2193,7 @@ window.deleteReleaseCatalog = async function(releaseId) {
             showAlert("Error loading smart link stats.", "error");
         }
     }
-
+    
     function showAlert(message, type = "info") {
         const alertArea = document.getElementById('analytics-alert-area');
         if (!alertArea) return;
