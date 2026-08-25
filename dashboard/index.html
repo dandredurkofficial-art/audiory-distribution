@@ -2128,8 +2128,8 @@ window.deleteReleaseCatalog = async function(releaseId) {
     const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
 
     try {
-        // Changed type to 'listeners' (supported by Spotify additional metrics)
-        const res = await fetch(`${workerUrl}/api/analytics/platforms/additional?platform=spotify&type=listeners&period=${currentAnalyticsPeriod}`, {
+        // Updated type to 'source_type' (valid Spotify additional analytics type)
+        const res = await fetch(`${workerUrl}/api/analytics/platforms/additional?platform=spotify&type=source_type&period=${currentAnalyticsPeriod}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const json = await res.json();
@@ -2138,12 +2138,14 @@ window.deleteReleaseCatalog = async function(releaseId) {
             const items = json.data || json;
             container.innerHTML = Array.isArray(items) && items.length ? items.map(i => `
                 <div class="flex justify-between py-2 border-b border-brand-border/40">
-                    <span class="capitalize text-white">${i.name || i.type || 'Unknown'}</span>
-                    <span class="font-semibold text-emerald-400">${Number(i.value || i.totalStreams || 0).toLocaleString()}</span>
+                    <span class="capitalize text-white">${i.name || i.source || i.type || 'Unknown'}</span>
+                    <span class="font-semibold text-emerald-400">${Number(i.streams || i.totalStreams || 0).toLocaleString()} streams</span>
                 </div>
-            `).join('') : `<p class="text-gray-400">No listener metric breakdown available for this period.</p>`;
+            `).join('') : `<p class="text-gray-400">No source breakdown data available for this period.</p>`;
         } else {
-            container.innerHTML = `<p class="text-rose-400 text-xs">${json.message || 'Demographic metrics unavailable for this selection.'}</p>`;
+            // Renders 422 error object gracefully from Too Lost format: { message, errors }
+            const errDetails = json.errors ? Object.values(json.errors).flat().join(', ') : json.message;
+            container.innerHTML = `<p class="text-rose-400 text-xs">${errDetails || 'Demographic metrics unavailable.'}</p>`;
         }
     } catch (err) {
         showAlert("Error fetching demographic stats.", "error");
@@ -2158,34 +2160,43 @@ async function fetchSmartLinkData() {
     const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
 
     try {
-        // Appended the missing 'period' parameter required by upstream smart link analytics
-        const res = await fetch(`${workerUrl}/api/analytics/release-links/top-releases?period=${currentAnalyticsPeriod}&page=1&perPage=10`, {
+        // Querying top-releases with pagination parameters
+        const res = await fetch(`${workerUrl}/api/analytics/release-links/top-releases?page=1&perPage=10`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const json = await res.json();
 
         if (res.ok) {
-            const links = json.data || json;
+            const links = json.data || [];
             container.innerHTML = Array.isArray(links) && links.length ? `
                 <table class="w-full text-left text-xs text-gray-300">
                     <thead class="text-gray-400 border-b border-brand-border uppercase">
                         <tr>
-                            <th class="pb-2">Release Link</th>
-                            <th class="pb-2 text-right">Total Clicks</th>
+                            <th class="pb-2">Release</th>
+                            <th class="pb-2 text-right">Clicks</th>
                             <th class="pb-2 text-right">Previews</th>
+                            <th class="pb-2 text-right">Service Clicks</th>
+                            <th class="pb-2 text-right">Unique Users</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${links.map(l => `
                             <tr class="border-b border-brand-border/40">
-                                <td class="py-2 text-indigo-400 font-mono">${l.link || l.url || l.shortId || 'Link'}</td>
-                                <td class="py-2 text-right font-semibold text-white">${Number(l.clicks || l.totalClicks || 0).toLocaleString()}</td>
-                                <td class="py-2 text-right text-gray-400">${Number(l.songPreviews || l.previews || 0).toLocaleString()}</td>
+                                <td class="py-2">
+                                    <div class="flex items-center gap-2">
+                                        ${l.coverUrl ? `<img src="${l.coverUrl}" class="w-6 h-6 rounded object-cover" />` : ''}
+                                        <span class="font-medium text-white">${l.title || 'Untitled'}</span>
+                                    </div>
+                                </td>
+                                <td class="py-2 text-right font-semibold text-white">${Number(l.clicks || 0).toLocaleString()}</td>
+                                <td class="py-2 text-right text-gray-400">${Number(l.songPreviews || 0).toLocaleString()}</td>
+                                <td class="py-2 text-right text-indigo-400">${Number(l.clicksToService || 0).toLocaleString()}</td>
+                                <td class="py-2 text-right text-emerald-400">${Number(l.uniqueUsers || 0).toLocaleString()}</td>
                             </tr>
                         `).join('')}
                     </tbody>
                 </table>
-            ` : `<p class="text-gray-400">No Smart Link performance records found.</p>`;
+            ` : `<p class="text-gray-400">No Smart Link release records found.</p>`;
         } else {
             container.innerHTML = `<p class="text-rose-400 text-xs">${json.message || 'Smart links analytics unavailable.'}</p>`;
         }
