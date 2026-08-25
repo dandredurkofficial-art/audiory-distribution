@@ -4681,11 +4681,36 @@ window.copySmartLink = function(url) {
     });
 };
 
+// State management
+window.prefState = {
+    mode: 'view', // 'view' | 'edit'
+    artistData: null
+};
+
 window.renderPreferencesView = function() {
     return `
     <div class="p-6 max-w-6xl mx-auto space-y-8 relative">
         <!-- Toast Notification Container -->
         <div id="pref-toast" class="hidden fixed top-5 right-5 z-50 px-4 py-3 rounded-xl text-xs font-semibold shadow-lg transition-all transform duration-300 flex items-center gap-2"></div>
+
+        <!-- Delete Confirmation Modal (Replaces browser pop-up) -->
+        <div id="pref-delete-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-brand-dark border border-brand-border/80 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+                <div class="flex items-center gap-3 text-rose-400">
+                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                    <h3 class="text-base font-bold text-white">Delete Artist Preferences?</h3>
+                </div>
+                <p class="text-xs text-gray-300 leading-relaxed">This action will clear your saved artist preferences. This cannot be undone.</p>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button onclick="window.closeDeleteModal()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold text-xs rounded-xl transition-all">
+                        Cancel
+                    </button>
+                    <button onclick="window.confirmDeletePreferences()" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- Header -->
         <div class="flex items-center justify-between border-b border-brand-border/40 pb-5">
@@ -4693,15 +4718,66 @@ window.renderPreferencesView = function() {
                 <h1 class="text-2xl font-bold text-white tracking-tight">Artist & Label Preferences</h1>
                 <p class="text-xs text-gray-400 mt-1">Manage platform profiles, metadata defaults, social links, and delivery settings.</p>
             </div>
-            <button onclick="window.savePreferences()" id="btn-save-preferences" class="px-4 py-2 bg-brand-accent hover:brightness-110 text-black font-bold text-xs rounded-xl transition-all flex items-center gap-2">
-                <i class="fa-solid fa-floppy-disk"></i> Save Preferences
-            </button>
+            <div id="pref-header-actions">
+                <button onclick="window.savePreferences()" id="btn-save-preferences" class="px-4 py-2 bg-brand-accent hover:brightness-110 text-black font-bold text-xs rounded-xl transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Preferences
+                </button>
+            </div>
         </div>
 
         <!-- Tab Controls -->
         <div class="flex gap-4 border-b border-brand-border/40 pb-3">
             <button id="tab-btn-artist" onclick="switchPrefTab('artist')" class="px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80">Artist Profile</button>
             <button id="tab-btn-label" onclick="switchPrefTab('label')" class="px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all">Label Settings</button>
+        </div>
+
+        <!-- Submitted Summary Card (Shown after submission / when data exists) -->
+        <div id="pref-submitted-view" class="hidden bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-6 space-y-6">
+            <div class="flex items-center justify-between border-b border-brand-border/30 pb-4">
+                <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <h2 class="text-base font-bold text-white">Submitted Artist Profile</h2>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="window.openEditMode()" class="px-3.5 py-1.5 bg-brand-dark hover:bg-black/40 text-brand-accent border border-brand-border/80 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                    </button>
+                    <button onclick="window.promptDeleteModal()" class="px-3.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-trash-can"></i> Delete
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-3">
+                    <h3 class="text-xs uppercase font-bold text-gray-400 tracking-wider">Basic Information</h3>
+                    <div class="bg-black/30 rounded-xl p-4 space-y-2 border border-brand-border/30 text-xs">
+                        <p class="text-gray-300"><strong class="text-white">Artist Name:</strong> <span id="summary-artistName" class="ml-1 text-gray-200"></span></p>
+                        <p class="text-gray-300"><strong class="text-white">Genres:</strong> <span id="summary-genres" class="ml-1 text-gray-200"></span></p>
+                        <p class="text-gray-300"><strong class="text-white">Language:</strong> <span id="summary-language" class="ml-1 text-gray-200"></span></p>
+                        <p class="text-gray-300"><strong class="text-white">Bio:</strong> <span id="summary-about" class="ml-1 text-gray-200 block mt-1 italic"></span></p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="text-xs uppercase font-bold text-gray-400 tracking-wider">Platform Links</h3>
+                    <div class="bg-black/30 rounded-xl p-4 space-y-2 border border-brand-border/30 text-xs">
+                        <p class="text-gray-300"><i class="fa-brands fa-spotify text-emerald-400 w-4"></i> <span id="summary-spotify"></span></p>
+                        <p class="text-gray-300"><i class="fa-brands fa-apple text-gray-300 w-4"></i> <span id="summary-appleMusic"></span></p>
+                        <p class="text-gray-300"><i class="fa-brands fa-youtube text-red-400 w-4"></i> <span id="summary-vevo"></span></p>
+                        <p class="text-gray-300"><i class="fa-solid fa-globe text-blue-400 w-4"></i> <span id="summary-website"></span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <h3 class="text-xs uppercase font-bold text-gray-400 tracking-wider">Copyright & Record Label</h3>
+                <div class="bg-black/30 rounded-xl p-4 grid grid-cols-1 md:grid-cols-3 gap-3 border border-brand-border/30 text-xs">
+                    <p class="text-gray-300"><strong class="text-white">Label:</strong> <span id="summary-label" class="ml-1"></span></p>
+                    <p class="text-gray-300"><strong class="text-white">C-Line:</strong> <span id="summary-cLine" class="ml-1"></span></p>
+                    <p class="text-gray-300"><strong class="text-white">P-Line:</strong> <span id="summary-pLine" class="ml-1"></span></p>
+                </div>
+            </div>
         </div>
 
         <!-- Artist Profile Form Section -->
@@ -4795,7 +4871,7 @@ window.renderPreferencesView = function() {
     `;
 };
 
-// UI Toast Notification Helper (replaces browser alerts)
+// UI Toast Notification Helper
 window.showPrefToast = function(message, type = 'success') {
     const toast = document.getElementById('pref-toast');
     if (!toast) return;
@@ -4814,22 +4890,131 @@ window.showPrefToast = function(message, type = 'success') {
     }, 4000);
 };
 
+// Toggle UI Modes between Form and Submitted View
+window.updateUIMode = function() {
+    const submittedView = document.getElementById('pref-submitted-view');
+    const formView = document.getElementById('pref-section-artist');
+    const headerActions = document.getElementById('pref-header-actions');
+
+    if (window.prefState.mode === 'view' && window.prefState.artistData && window.prefState.artistData.artistName) {
+        submittedView.classList.remove('hidden');
+        formView.classList.add('hidden');
+        headerActions.classList.add('hidden');
+        window.populateSummary(window.prefState.artistData);
+    } else {
+        submittedView.classList.add('hidden');
+        formView.classList.remove('hidden');
+        headerActions.classList.remove('hidden');
+    }
+};
+
+window.populateSummary = function(data) {
+    document.getElementById('summary-artistName').innerText = data.artistName || 'Not specified';
+    const primary = data.primaryGenre || '';
+    const secondary = data.secondaryGenre ? ` / ${data.secondaryGenre}` : '';
+    document.getElementById('summary-genres').innerText = (primary + secondary) || 'Not specified';
+    document.getElementById('summary-language').innerText = data.language || 'Not specified';
+    document.getElementById('summary-about').innerText = data.about || 'No bio submitted.';
+    
+    document.getElementById('summary-label').innerText = data.label || 'None';
+    document.getElementById('summary-cLine').innerText = data.cLine || data.c_line || 'None';
+    document.getElementById('summary-pLine').innerText = data.pLine || data.p_line || 'None';
+
+    const p = data.platforms || {};
+    document.getElementById('summary-spotify').innerText = p.spotify || 'Not linked';
+    document.getElementById('summary-appleMusic').innerText = p.appleMusic || 'Not linked';
+    document.getElementById('summary-vevo').innerText = p.vevo || 'Not linked';
+    document.getElementById('summary-website').innerText = p.website || 'Not linked';
+};
+
+window.openEditMode = function() {
+    window.prefState.mode = 'edit';
+    window.updateUIMode();
+};
+
+window.promptDeleteModal = function() {
+    document.getElementById('pref-delete-modal').classList.remove('hidden');
+};
+
+window.closeDeleteModal = function() {
+    document.getElementById('pref-delete-modal').classList.add('hidden');
+};
+
+window.confirmDeletePreferences = async function() {
+    window.closeDeleteModal();
+    const token = window.currentUser?.getIdToken ? await window.currentUser.getIdToken() : '';
+    const baseUrl = window.WORKER_BASE_URL || '';
+
+    // Clear values on server/worker
+    try {
+        const emptyPayload = {
+            artistName: "",
+            primaryGenre: "",
+            secondaryGenre: "",
+            language: "",
+            about: "",
+            label: "",
+            cLine: "",
+            pLine: "",
+            platforms: { spotify: "", appleMusic: "", vevo: "", website: "" }
+        };
+
+        const res = await fetch(`${baseUrl}/api/preferences/artist/submit`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(emptyPayload)
+        });
+
+        if (res.ok) {
+            window.prefState.artistData = null;
+            window.prefState.mode = 'edit';
+            
+            // Clear inputs
+            document.getElementById('pref-artistName').value = '';
+            document.getElementById('pref-primaryGenre').value = '';
+            document.getElementById('pref-secondaryGenre').value = '';
+            document.getElementById('pref-language').value = '';
+            document.getElementById('pref-about').value = '';
+            document.getElementById('pref-label').value = '';
+            document.getElementById('pref-cLine').value = '';
+            document.getElementById('pref-pLine').value = '';
+            document.getElementById('pref-platform-spotify').value = '';
+            document.getElementById('pref-platform-appleMusic').value = '';
+            document.getElementById('pref-platform-vevo').value = '';
+            document.getElementById('pref-platform-website').value = '';
+
+            window.updateUIMode();
+            window.showPrefToast('Artist preferences deleted successfully.', 'success');
+        } else {
+            window.showPrefToast('Failed to clear preferences.', 'error');
+        }
+    } catch (err) {
+        console.error('Delete error:', err);
+        window.showPrefToast('Server connection error.', 'error');
+    }
+};
+
 window.switchPrefTab = function(tab) {
     const artistTab = document.getElementById('tab-btn-artist');
     const labelTab = document.getElementById('tab-btn-label');
     const artistSec = document.getElementById('pref-section-artist');
     const labelSec = document.getElementById('pref-section-label');
+    const submittedView = document.getElementById('pref-submitted-view');
 
     if (tab === 'artist') {
         artistTab.className = "px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80";
         labelTab.className = "px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all";
-        artistSec.classList.remove('hidden');
         labelSec.classList.add('hidden');
+        window.updateUIMode();
     } else {
         labelTab.className = "px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80";
         artistTab.className = "px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all";
         labelSec.classList.remove('hidden');
         artistSec.classList.add('hidden');
+        submittedView.classList.add('hidden');
     }
 };
 
@@ -4845,6 +5030,8 @@ window.initPreferencesPage = async function() {
             const body = await res.json();
             const artist = body.data?.artist || {};
             
+            window.prefState.artistData = artist;
+
             document.getElementById('pref-artistName').value = artist.artistName || '';
             document.getElementById('pref-primaryGenre').value = artist.primaryGenre || '';
             document.getElementById('pref-secondaryGenre').value = artist.secondaryGenre || '';
@@ -4860,6 +5047,13 @@ window.initPreferencesPage = async function() {
                 document.getElementById('pref-platform-vevo').value = artist.platforms.vevo || '';
                 document.getElementById('pref-platform-website').value = artist.platforms.website || '';
             }
+
+            if (artist.artistName) {
+                window.prefState.mode = 'view';
+            } else {
+                window.prefState.mode = 'edit';
+            }
+            window.updateUIMode();
         }
     } catch (err) {
         console.error('Failed to load preferences:', err);
@@ -4903,6 +5097,9 @@ window.savePreferences = async function() {
         });
         
         if (res.ok) {
+            window.prefState.artistData = payload;
+            window.prefState.mode = 'view';
+            window.updateUIMode();
             window.showPrefToast('Preferences saved successfully!', 'success');
         } else {
             window.showPrefToast('Failed to save preferences.', 'error');
