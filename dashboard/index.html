@@ -4693,43 +4693,49 @@ window.prefState = {
     artistData: null
 };
 
+// State management
+window.prefState = {
+    mode: 'view', // 'view' | 'edit'
+    artistData: null
+};
+
 window.renderPreferencesView = function() {
     return `
-    <div class="p-6 max-w-6xl mx-auto space-y-8 relative">
+    <div class="p-4 sm:p-6 max-w-6xl mx-auto space-y-6 sm:space-y-8 relative overflow-x-hidden">
         <!-- Toast Notification Container -->
         <div id="pref-toast" class="hidden fixed top-5 right-5 z-50 px-4 py-3 rounded-xl text-xs font-semibold shadow-lg transition-all transform duration-300 flex items-center gap-2"></div>
 
         <!-- Header -->
-        <div class="flex items-center justify-between border-b border-brand-border/40 pb-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-brand-border/40 pb-5 gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-white tracking-tight">Artist & Label Preferences</h1>
+                <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Artist & Label Preferences</h1>
                 <p class="text-xs text-gray-400 mt-1">Manage platform profiles, metadata defaults, social links, and delivery settings.</p>
             </div>
-            <div id="pref-header-actions">
-                <button onclick="window.savePreferences()" id="btn-save-preferences" class="px-4 py-2 bg-brand-accent hover:brightness-110 text-black font-bold text-xs rounded-xl transition-all flex items-center gap-2">
+            <div id="pref-header-actions" class="shrink-0">
+                <button onclick="window.savePreferences()" id="btn-save-preferences" class="w-full sm:w-auto px-4 py-2 bg-brand-accent hover:brightness-110 text-black font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2">
                     <i class="fa-solid fa-floppy-disk"></i> Save Preferences
                 </button>
             </div>
         </div>
 
         <!-- Tab Controls -->
-        <div class="flex gap-4 border-b border-brand-border/40 pb-3">
-            <button id="tab-btn-artist" onclick="switchPrefTab('artist')" class="px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80">Artist Profile</button>
-            <button id="tab-btn-label" onclick="switchPrefTab('label')" class="px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all">Label Settings</button>
+        <div class="flex gap-2 sm:gap-4 border-b border-brand-border/40 pb-3">
+            <button id="tab-btn-artist" onclick="switchPrefTab('artist')" class="px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80">Artist Profile</button>
+            <button id="tab-btn-label" onclick="switchPrefTab('label')" class="px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all">Label Settings</button>
         </div>
 
-        <!-- Submitted Summary Card (Shown after submission / when data exists) -->
-        <div id="pref-submitted-view" class="hidden bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-6 space-y-6">
-            <div class="flex items-center justify-between border-b border-brand-border/30 pb-4">
-                <div class="flex items-center gap-3">
-                    <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <h2 class="text-base font-bold text-white">Submitted Artist Profile</h2>
+        <!-- Submitted Summary Card -->
+        <div id="pref-submitted-view" class="hidden bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-6 space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-brand-border/30 pb-4 gap-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                    <h2 class="text-sm sm:text-base font-bold text-white">Submitted Artist Profile</h2>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="window.openEditMode()" class="px-3.5 py-1.5 bg-brand-dark hover:bg-black/40 text-brand-accent border border-brand-border/80 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5">
+                <div class="flex items-center gap-2 self-start sm:self-auto">
+                    <button onclick="window.openEditMode()" class="px-3 py-1.5 bg-brand-dark hover:bg-black/40 text-brand-accent border border-brand-border/80 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5">
                         <i class="fa-solid fa-pen-to-square"></i> Edit
                     </button>
-                    <button onclick="window.promptDeleteModal()" class="px-3.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5">
+                    <button onclick="window.promptDeleteModal()" class="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5">
                         <i class="fa-solid fa-trash-can"></i> Delete
                     </button>
                 </div>
@@ -4741,7 +4747,7 @@ window.renderPreferencesView = function() {
                     <i class="fa-solid fa-triangle-exclamation text-base text-rose-400 shrink-0"></i>
                     <span>This action will clear your saved artist preferences. This cannot be undone.</span>
                 </div>
-                <div class="flex gap-2 shrink-0">
+                <div class="flex gap-2 shrink-0 w-full sm:w-auto justify-end">
                     <button onclick="window.closeDeleteModal()" class="px-3.5 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold text-xs rounded-xl transition-all">
                         Cancel
                     </button>
@@ -4758,17 +4764,29 @@ window.renderPreferencesView = function() {
                         <p class="text-gray-300"><strong class="text-white">Artist Name:</strong> <span id="summary-artistName" class="ml-1 text-gray-200"></span></p>
                         <p class="text-gray-300"><strong class="text-white">Genres:</strong> <span id="summary-genres" class="ml-1 text-gray-200"></span></p>
                         <p class="text-gray-300"><strong class="text-white">Language:</strong> <span id="summary-language" class="ml-1 text-gray-200"></span></p>
-                        <p class="text-gray-300"><strong class="text-white">Bio:</strong> <span id="summary-about" class="ml-1 text-gray-200 block mt-1 italic"></span></p>
+                        <p class="text-gray-300"><strong class="text-white">Bio:</strong> <span id="summary-about" class="ml-1 text-gray-200 block mt-1 italic break-words"></span></p>
                     </div>
                 </div>
 
                 <div class="space-y-3">
                     <h3 class="text-xs uppercase font-bold text-gray-400 tracking-wider">Platform Links</h3>
                     <div class="bg-black/30 rounded-xl p-4 space-y-2 border border-brand-border/30 text-xs">
-                        <p class="text-gray-300"><i class="fa-brands fa-spotify text-emerald-400 w-4"></i> <span id="summary-spotify"></span></p>
-                        <p class="text-gray-300"><i class="fa-brands fa-apple text-gray-300 w-4"></i> <span id="summary-appleMusic"></span></p>
-                        <p class="text-gray-300"><i class="fa-brands fa-youtube text-red-400 w-4"></i> <span id="summary-vevo"></span></p>
-                        <p class="text-gray-300"><i class="fa-solid fa-globe text-blue-400 w-4"></i> <span id="summary-website"></span></p>
+                        <p class="text-gray-300 flex items-start gap-2">
+                            <i class="fa-brands fa-spotify text-emerald-400 text-sm shrink-0 mt-0.5"></i>
+                            <span id="summary-spotify" class="break-all text-gray-200"></span>
+                        </p>
+                        <p class="text-gray-300 flex items-start gap-2">
+                            <i class="fa-brands fa-apple text-gray-300 text-sm shrink-0 mt-0.5"></i>
+                            <span id="summary-appleMusic" class="break-all text-gray-200"></span>
+                        </p>
+                        <p class="text-gray-300 flex items-start gap-2">
+                            <i class="fa-brands fa-youtube text-red-400 text-sm shrink-0 mt-0.5"></i>
+                            <span id="summary-vevo" class="break-all text-gray-200"></span>
+                        </p>
+                        <p class="text-gray-300 flex items-start gap-2">
+                            <i class="fa-solid fa-globe text-blue-400 text-sm shrink-0 mt-0.5"></i>
+                            <span id="summary-website" class="break-all text-gray-200"></span>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -4776,9 +4794,9 @@ window.renderPreferencesView = function() {
             <div class="space-y-3">
                 <h3 class="text-xs uppercase font-bold text-gray-400 tracking-wider">Copyright & Record Label</h3>
                 <div class="bg-black/30 rounded-xl p-4 grid grid-cols-1 md:grid-cols-3 gap-3 border border-brand-border/30 text-xs">
-                    <p class="text-gray-300"><strong class="text-white">Label:</strong> <span id="summary-label" class="ml-1"></span></p>
-                    <p class="text-gray-300"><strong class="text-white">C-Line:</strong> <span id="summary-cLine" class="ml-1"></span></p>
-                    <p class="text-gray-300"><strong class="text-white">P-Line:</strong> <span id="summary-pLine" class="ml-1"></span></p>
+                    <p class="text-gray-300"><strong class="text-white">Label:</strong> <span id="summary-label" class="ml-1 break-words"></span></p>
+                    <p class="text-gray-300"><strong class="text-white">C-Line:</strong> <span id="summary-cLine" class="ml-1 break-words"></span></p>
+                    <p class="text-gray-300"><strong class="text-white">P-Line:</strong> <span id="summary-pLine" class="ml-1 break-words"></span></p>
                 </div>
             </div>
         </div>
@@ -4787,13 +4805,13 @@ window.renderPreferencesView = function() {
         <div id="pref-section-artist" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Main Info Card -->
-                <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-5 space-y-4">
+                <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
                     <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">Basic Info</h3>
                     <div>
                         <label class="block text-xs text-gray-400 mb-1">Artist Name</label>
                         <input type="text" id="pref-artistName" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-accent">
                     </div>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs text-gray-400 mb-1">Primary Genre</label>
                             <input type="text" id="pref-primaryGenre" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
@@ -4814,7 +4832,7 @@ window.renderPreferencesView = function() {
                 </div>
 
                 <!-- Platform IDs / Links Card -->
-                <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-5 space-y-4">
+                <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
                     <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">Platform Identifiers</h3>
                     <div>
                         <label class="block text-xs text-gray-400 mb-1"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify Link</label>
@@ -4836,7 +4854,7 @@ window.renderPreferencesView = function() {
             </div>
 
             <!-- Defaults & Copyright Info -->
-            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-xs text-gray-400 mb-1">Default Label</label>
                     <input type="text" id="pref-label" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
@@ -4854,7 +4872,7 @@ window.renderPreferencesView = function() {
 
         <!-- Label Settings Form Section -->
         <div id="pref-section-label" class="space-y-6 hidden">
-            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-5 space-y-4 max-w-2xl">
+            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4 max-w-2xl">
                 <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">Record Label Info</h3>
                 <div>
                     <label class="block text-xs text-gray-400 mb-1">Label Name</label>
@@ -4948,7 +4966,6 @@ window.confirmDeletePreferences = async function() {
     const token = window.currentUser?.getIdToken ? await window.currentUser.getIdToken() : '';
     const baseUrl = window.WORKER_BASE_URL || '';
 
-    // Clear values on server/worker
     try {
         const emptyPayload = {
             artistName: "",
@@ -4975,7 +4992,6 @@ window.confirmDeletePreferences = async function() {
             window.prefState.artistData = null;
             window.prefState.mode = 'edit';
             
-            // Clear inputs
             document.getElementById('pref-artistName').value = '';
             document.getElementById('pref-primaryGenre').value = '';
             document.getElementById('pref-secondaryGenre').value = '';
@@ -5008,13 +5024,13 @@ window.switchPrefTab = function(tab) {
     const submittedView = document.getElementById('pref-submitted-view');
 
     if (tab === 'artist') {
-        artistTab.className = "px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80";
-        labelTab.className = "px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all";
+        artistTab.className = "px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80";
+        labelTab.className = "px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all";
         labelSec.classList.add('hidden');
         window.updateUIMode();
     } else {
-        labelTab.className = "px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80";
-        artistTab.className = "px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all";
+        labelTab.className = "px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80";
+        artistTab.className = "px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all";
         labelSec.classList.remove('hidden');
         artistSec.classList.add('hidden');
         submittedView.classList.add('hidden');
@@ -5110,7 +5126,7 @@ window.savePreferences = async function() {
     } catch (err) {
         console.error('Error saving preferences:', err);
         window.showPrefToast('Error connecting to the server.', 'error');
-    } finally {
+    } fontFinally {
         btn.disabled = false;
         btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save Preferences`;
     }
