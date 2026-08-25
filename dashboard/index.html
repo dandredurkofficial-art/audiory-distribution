@@ -2121,78 +2121,78 @@ window.deleteReleaseCatalog = async function(releaseId) {
     }
 
     async function fetchDemographicData() {
-        const token = await getAuthToken();
-        const container = document.getElementById('demographics-content-area');
-        if (!token || !container) return;
+    const token = await getAuthToken();
+    const container = document.getElementById('demographics-content-area');
+    if (!token || !container) return;
 
-        const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
+    const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
 
-        try {
-            // Changed type to 'demographic' (singular) for Spotify platform specs
-            const res = await fetch(`${workerUrl}/api/analytics/platforms/additional?platform=spotify&type=demographic&period=${currentAnalyticsPeriod}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const json = await res.json();
+    try {
+        // 'gender' is the exact supported breakdown type for Spotify on this endpoint
+        const res = await fetch(`${workerUrl}/api/analytics/platforms/additional?platform=spotify&type=gender&period=${currentAnalyticsPeriod}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const json = await res.json();
 
-            if (res.ok) {
-                const items = json.data || json;
-                container.innerHTML = Array.isArray(items) && items.length ? items.map(i => `
-                    <div class="flex justify-between py-2 border-b border-brand-border/40">
-                        <span class="capitalize text-white">${i.demographic || i.type || i.name || 'Unknown'}</span>
-                        <span class="font-semibold text-emerald-400">${Number(i.totalStreams || i.streams || 0).toLocaleString()} streams</span>
-                    </div>
-                `).join('') : `<p class="text-gray-400">No demographic stats available for this period.</p>`;
-            } else {
-                container.innerHTML = `<p class="text-rose-400 text-xs">${json.message || 'Failed to fetch demographic data.'}</p>`;
-            }
-        } catch (err) {
-            showAlert("Error fetching demographic stats.", "error");
+        if (res.ok) {
+            const items = json.data || json;
+            container.innerHTML = Array.isArray(items) && items.length ? items.map(i => `
+                <div class="flex justify-between py-2 border-b border-brand-border/40">
+                    <span class="capitalize text-white">${i.gender || i.type || i.name || 'Unknown'}</span>
+                    <span class="font-semibold text-emerald-400">${Number(i.totalStreams || i.streams || 0).toLocaleString()} streams</span>
+                </div>
+            `).join('') : `<p class="text-gray-400">No demographic stats available for this period.</p>`;
+        } else {
+            container.innerHTML = `<p class="text-rose-400 text-xs">${json.message || 'Demographic metrics unavailable for this selection.'}</p>`;
         }
+    } catch (err) {
+        showAlert("Error fetching demographic stats.", "error");
     }
+}
 
-    async function fetchSmartLinkData() {
-        const token = await getAuthToken();
-        const container = document.getElementById('smartlinks-content-area');
-        if (!token || !container) return;
+async function fetchSmartLinkData() {
+    const token = await getAuthToken();
+    const container = document.getElementById('smartlinks-content-area');
+    if (!token || !container) return;
 
-        const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
+    const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
 
-        try {
-            // Pointing directly to /release-links/top-releases (valid endpoint)
-            const res = await fetch(`${workerUrl}/api/analytics/release-links/top-releases?page=1&perPage=10`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const json = await res.json();
+    try {
+        // Appended the missing 'period' parameter required by upstream smart link analytics
+        const res = await fetch(`${workerUrl}/api/analytics/release-links/top-releases?period=${currentAnalyticsPeriod}&page=1&perPage=10`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const json = await res.json();
 
-            if (res.ok) {
-                const links = json.data || json;
-                container.innerHTML = Array.isArray(links) && links.length ? `
-                    <table class="w-full text-left text-xs text-gray-300">
-                        <thead class="text-gray-400 border-b border-brand-border uppercase">
-                            <tr>
-                                <th class="pb-2">Release Link</th>
-                                <th class="pb-2 text-right">Total Clicks</th>
-                                <th class="pb-2 text-right">Previews</th>
+        if (res.ok) {
+            const links = json.data || json;
+            container.innerHTML = Array.isArray(links) && links.length ? `
+                <table class="w-full text-left text-xs text-gray-300">
+                    <thead class="text-gray-400 border-b border-brand-border uppercase">
+                        <tr>
+                            <th class="pb-2">Release Link</th>
+                            <th class="pb-2 text-right">Total Clicks</th>
+                            <th class="pb-2 text-right">Previews</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${links.map(l => `
+                            <tr class="border-b border-brand-border/40">
+                                <td class="py-2 text-indigo-400 font-mono">${l.link || l.url || l.shortId || 'Link'}</td>
+                                <td class="py-2 text-right font-semibold text-white">${Number(l.clicks || l.totalClicks || 0).toLocaleString()}</td>
+                                <td class="py-2 text-right text-gray-400">${Number(l.songPreviews || l.previews || 0).toLocaleString()}</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            ${links.map(l => `
-                                <tr class="border-b border-brand-border/40">
-                                    <td class="py-2 text-indigo-400 font-mono">${l.link || l.url || l.shortId || 'Link'}</td>
-                                    <td class="py-2 text-right font-semibold text-white">${Number(l.clicks || l.totalClicks || 0).toLocaleString()}</td>
-                                    <td class="py-2 text-right text-gray-400">${Number(l.songPreviews || l.previews || 0).toLocaleString()}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                ` : `<p class="text-gray-400">No Smart Link records found.</p>`;
-            } else {
-                container.innerHTML = `<p class="text-rose-400 text-xs">${json.message || 'Smart links analytics unavailable.'}</p>`;
-            }
-        } catch (err) {
-            showAlert("Error loading smart link stats.", "error");
+                        `).join('')}
+                    </tbody>
+                </table>
+            ` : `<p class="text-gray-400">No Smart Link performance records found.</p>`;
+        } else {
+            container.innerHTML = `<p class="text-rose-400 text-xs">${json.message || 'Smart links analytics unavailable.'}</p>`;
         }
+    } catch (err) {
+        showAlert("Error loading smart link stats.", "error");
     }
+}
     
     function showAlert(message, type = "info") {
         const alertArea = document.getElementById('analytics-alert-area');
