@@ -7032,7 +7032,7 @@ window.handleTransferSubmission = async function(e) {
                                         <div id="audio_preview_container_${idx}" class="flex items-center h-10 px-3 rounded-xl bg-brand-dark border border-brand-border">
                                             ${track.previewUrl || track.audioUrl ? `
                                                 <audio controls class="w-full h-8">
-                                                    <source src="${track.previewUrl || track.audioUrl}" type="audio/mpeg">
+                                                    <source src="${track.previewUrl || track.audioUrl}" type="${track.audioFile?.type || 'audio/wav'}">
                                                     Your browser does not support audio playback.
                                                 </audio>
                                             ` : '<span class="text-xs text-gray-500">No audio uploaded yet</span>'}
