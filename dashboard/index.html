@@ -7423,6 +7423,30 @@ window.syncTrackArtistsFromReleaseArtists = function() {
 
 window.syncTrackArtistsFromReleaseArtists();
 
+window.validateAudioFile = function(file, label = 'Audio') {
+
+    if (!file) {
+        throw new Error(`${label} file is required.`);
+    }
+
+    const validExtension = /\.(wav|flac)$/i.test(file.name);
+
+    const validMime = [
+        'audio/wav',
+        'audio/x-wav',
+        'audio/flac',
+        'audio/x-flac'
+    ].includes(file.type);
+
+    if (!validExtension && !validMime) {
+        throw new Error(
+            `${label} must be a WAV or FLAC file.`
+        );
+    }
+
+    return true;
+};
+
         window.handleTrackGenreChange = function(idx, genre) {
             window.releaseState.tracks[idx].metadata.genre = genre;
             window.releaseState.tracks[idx].metadata.subgenre = '';
