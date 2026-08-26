@@ -8148,7 +8148,7 @@ window.handleFormSubmission = async function(event) {
         const token = window.currentUser?.getIdToken ? await window.currentUser.getIdToken() : '';
         
         // First create/update the release via base endpoint
-        const releaseEndpoint = `${WORKER_BASE_URL}/api/releases`;
+        const releaseEndpoint = `${WORKER_BASE_URL}/api/releases/${releaseId}/submit`;
         const res = await fetch(releaseEndpoint, {
             method: 'POST',
             headers: {
