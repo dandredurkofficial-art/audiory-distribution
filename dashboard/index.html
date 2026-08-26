@@ -7203,9 +7203,16 @@ window.handleFormSubmission = async function(event) {
     if (event) event.preventDefault();
 
     if (!window.releaseState.agreements?.termsAccepted) {
-        return window.showToast('Please confirm rights affirmation in Step 5 before submitting.');
+        return window.showToast(
+            'Please confirm that you are authorized to distribute this release.'
+        );
     }
 
+    if (!window.releaseState.agreements?.rightsConfirmed) {
+        return window.showToast(
+            'Please confirm that all samples, interpolations and performances are cleared.'
+        );
+    }
     const hasArtworkFile = Boolean(window.releaseState.artwork?.file);
     const existingArtworkUrl = window.releaseState.artwork?.url || '';
     
