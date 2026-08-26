@@ -6519,6 +6519,91 @@ window.handleTransferSubmission = async function(e) {
 };
 })();
 
+// Initial Release State with expanded tracks and delivery structure
+window.releaseState = window.releaseState || {
+    editingId: null,
+    metadata: {
+        title: '',
+        type: 'Single',
+        language: 'en',
+        primaryGenre: '',
+        secondaryGenre: '',
+        explicit: false
+    },
+    dates: {
+        releaseDate: '',
+        timezone: 'Africa/Nairobi'
+    },
+    label: {
+        name: '',
+        cLine: '',
+        pLine: ''
+    },
+    artwork: {
+        file: null,
+        url: '',
+        inspected: null
+    },
+    artists: [
+        { name: '', role: 'Primary' }
+    ],
+    dsps: [],
+    delivery: {
+        platforms: [],
+        territories: ['Worldwide'],
+        youtube: true,
+        facebook: true,
+        soundcloud: true,
+        soundExchange: true,
+        beatPort: false,
+        beatPortHasAccount: false,
+        beatPortLink: '',
+        beatPortLabelLogo: '',
+        trackLibs: false,
+        hook: false,
+        lyricfind: false,
+        even: false,
+        video: {
+            appleMusic: false,
+            vevo: false
+        }
+    },
+    tracks: [{
+        metadata: {
+            title: '',
+            version: '',
+            genre: '',
+            subgenre: '',
+            explicit: false
+        },
+        discNumber: 1,
+        isrc: '',
+        tiktokStartTime: '00:30',
+        audioFile: null,
+        audioUrl: '',
+        previewUrl: '',
+        instrumentalFile: null,
+        instrumentalUrl: '',
+        lyrics: {
+            content: '',
+            explicit: false,
+            cleanVersion: false
+        },
+        artists: [],
+        writers: [
+            {
+                name: '',
+                role: 'instrumentalist'
+            }
+        ],
+        credits: ''
+    }],
+    agreements: {
+        termsAccepted: false,
+        rightsConfirmed: false
+    }
+};
+
 // Render Create Release Form Container
 window.renderCreateReleaseView = function() {
     return `
@@ -7323,6 +7408,15 @@ window.validateReleaseForSubmission = function() {
     return errors;
 };
 
+window.validateDelivery = function() {
+    const s = window.releaseState;
+    const errors = [];
+    if (!s.delivery) {
+        errors.push('Delivery configuration is missing.');
+    }
+    return errors;
+};
+
 window.handleTrackGenreChange = function(idx, genre) {
     window.releaseState.tracks[idx].metadata.genre = genre;
     window.releaseState.tracks[idx].metadata.subgenre = '';
@@ -7420,12 +7514,76 @@ function renderStep5Content() {
 function renderStep6Content() {
     const s = window.releaseState;
     const validationErrors = window.validateReleaseForSubmission();
+    const deliveryErrors = window.validateDelivery();
+    const allErrors = [
+        ...validationErrors,
+        ...deliveryErrors
+    ];
+    const canSubmit = allErrors.length === 0;
+
     const validationHtml = validationErrors.length === 0
-        ? '<p class="text-emerald-400 font-bold">✓ All submission checks passed successfully!</p>'
-        : `<ul class="list-disc pl-4 text-red-400 space-y-1">${validationErrors.map(err => `<li>${err}</li>`).join('')}</ul>`;
+        ? `
+            <div class="text-emerald-400 font-bold">
+                ✓ Release is ready for Too Lost submission.
+            </div>
+          `
+        : `
+            <div class="text-red-400 font-bold mb-2">
+                ✗ Release cannot be submitted yet.
+            </div>
+
+            <ul class="space-y-1 text-red-300">
+                ${validationErrors.map(error => `
+                    <li>• ${escapeHtml(error)}</li>
+                `).join('')}
+            </ul>
+          `;
+
+    // Ensure submit button state updates when step 6 renders
+    setTimeout(() => {
+        const submitBtn = document.getElementById('submitReleaseBtn');
+        if (submitBtn) {
+            submitBtn.disabled = !canSubmit;
+            submitBtn.className = canSubmit 
+                ? "hidden px-6 py-2.5 rounded-xl bg-emerald-400 text-black font-bold text-xs hover:bg-emerald-300 transition"
+                : "hidden px-6 py-2.5 rounded-xl bg-emerald-400 text-black font-bold text-xs opacity-40 cursor-not-allowed";
+            submitBtn.innerText = canSubmit
+                ? 'Upload & Submit Release'
+                : 'Fix Validation Errors First';
+        }
+    }, 50);
 
     return `
         <div class="space-y-4">
+            <!-- Distribution Delivery Summary Block -->
+            <div class="p-5 rounded-2xl bg-brand-dark border border-brand-border space-y-3">
+                <h3 class="text-sm font-bold text-white">
+                    Distribution Delivery
+                </h3>
+                <div class="text-xs text-gray-400">
+                    <p>
+                        <strong class="text-gray-300">DSPs:</strong>
+                        ${s.dsps?.length || 0} selected
+                    </p>
+                    <p>
+                        <strong class="text-gray-300">Territories:</strong>
+                        Worldwide
+                    </p>
+                    <p>
+                        <strong class="text-gray-300">Beatport:</strong>
+                        ${s.delivery?.beatPort ? 'Enabled' : 'Disabled'}
+                    </p>
+                    <p>
+                        <strong class="text-gray-300">YouTube:</strong>
+                        ${s.delivery?.youtube ? 'Enabled' : 'Disabled'}
+                    </p>
+                    <p>
+                        <strong class="text-gray-300">Facebook:</strong>
+                        ${s.delivery?.facebook ? 'Enabled' : 'Disabled'}
+                    </p>
+                </div>
+            </div>
+
             <!-- Summary Card -->
             <div class="p-6 rounded-2xl bg-brand-dark border border-brand-border space-y-4 text-xs font-mono text-gray-300">
                 <h3 class="text-sm font-bold text-white">Release Submission Summary</h3>
@@ -7464,8 +7622,62 @@ function renderStep6Content() {
     `;
 }
 
+function extractApiError(response) {
+    if (!response) {
+        return 'No response received from the distribution gateway.';
+    }
+
+    if (typeof response === 'string') {
+        return response;
+    }
+
+    if (response.errors) {
+        if (Array.isArray(response.errors)) {
+            return response.errors
+                .map(error => {
+                    if (typeof error === 'string') {
+                        return error;
+                    }
+                    return (
+                        error.message ||
+                        error.detail ||
+                        JSON.stringify(error)
+                    );
+                })
+                .join('\n');
+        }
+
+        if (typeof response.errors === 'object') {
+            return Object.entries(response.errors)
+                .map(([field, value]) =>
+                    `${field}: ${
+                        typeof value === 'string'
+                            ? value
+                            : JSON.stringify(value)
+                    }`
+                )
+                .join('\n');
+        }
+    }
+
+    return (
+        response.message ||
+        response.error ||
+        response.detail ||
+        'Unknown distribution API error.'
+    );
+}
+
 window.handleFormSubmission = async function(event) {
     if (event) event.preventDefault();
+
+    const validationErrors = window.validateReleaseForSubmission();
+    const deliveryErrors = window.validateDelivery();
+    const allErrors = [...validationErrors, ...deliveryErrors];
+
+    if (allErrors.length > 0) {
+        return window.showToast(`Cannot submit: ${allErrors[0]}`);
+    }
 
     if (!window.releaseState.agreements?.termsAccepted) {
         return window.showToast('Please confirm that you are authorized to distribute this release.');
@@ -7605,6 +7817,7 @@ window.handleFormSubmission = async function(event) {
             releaseDate: window.releaseState.dates.releaseDate,
             timezone: window.releaseState.dates.timezone,
             dsps: window.releaseState.dsps,
+            delivery: window.releaseState.delivery,
             coverUrl: finalCoverUrl,
             cover_url: finalCoverUrl,
             cover_art: finalCoverUrl,
@@ -7636,17 +7849,12 @@ window.handleFormSubmission = async function(event) {
             createdAt: new Date().toISOString()
         };
 
-        if (isEditing) {
-            payload.id = editingId;
-            payload.releaseId = editingId;
-            payload.isUpdate = true;
-        }
-
         updateProgress(90, 'Dispatching metadata to Gateway...');
         const token = window.currentUser?.getIdToken ? await window.currentUser.getIdToken() : '';
-        const endpoint = `${WORKER_BASE_URL}/api/releases`;
-
-        const res = await fetch(endpoint, {
+        
+        // First create/update the release via base endpoint
+        const releaseEndpoint = `${WORKER_BASE_URL}/api/releases`;
+        const res = await fetch(releaseEndpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -7657,7 +7865,27 @@ window.handleFormSubmission = async function(event) {
 
         const serverResponse = await res.json().catch(() => null);
         if (!res.ok) {
-            throw new Error(serverResponse?.message || serverResponse?.error || 'Failed to submit release');
+            throw new Error(extractApiError(serverResponse));
+        }
+
+        const releaseId = serverResponse?.id || serverResponse?.data?.id || editingId;
+
+        // Now submit using the explicit Too Lost endpoint /releases/${releaseId}/submit
+        if (releaseId) {
+            updateProgress(95, 'Submitting release package to Too Lost...');
+            const submitEndpoint = `${WORKER_BASE_URL}/releases/${releaseId}/submit`;
+            const submitRes = await fetch(submitEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const submitResponseData = await submitRes.json().catch(() => null);
+            if (!submitRes.ok) {
+                throw new Error(extractApiError(submitResponseData));
+            }
         }
 
         updateProgress(100, `Release successfully ${isEditing ? 'updated' : 'submitted'}! Redirecting...`);
@@ -7667,7 +7895,7 @@ window.handleFormSubmission = async function(event) {
             validStatus = serverResponse.status;
         }
 
-        const finalId = isEditing ? editingId : (serverResponse?.id || serverResponse?.data?.id || Date.now());
+        const finalId = isEditing ? editingId : (releaseId || Date.now());
         const newReleaseItem = {
             id: finalId,
             title: payload.title,
@@ -7734,7 +7962,8 @@ window.handleFormSubmission = async function(event) {
             submitBtn.innerHTML = originalBtnHTML;
         }
     }
-};      
+};
+        
     </script>
 </body>
 </html>
