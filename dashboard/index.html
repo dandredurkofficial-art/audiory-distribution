@@ -6600,6 +6600,12 @@ window.handleTransferSubmission = async function(e) {
         };
 
         window.navigateDirectStep = function(step) {
+            if (step > window.currentStep) {
+                for (let i = window.currentStep; i < step; i++) {
+                    if (!validateReleaseStep(i)) return;
+                }
+            }
+
             window.renderStepContent(step);
         };
 
