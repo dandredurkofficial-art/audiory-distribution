@@ -6790,7 +6790,7 @@ window.handleTransferSubmission = async function(e) {
         // Modal Handlers for DSP Selection
         window.openDspModal = function() {
             if (!window.releaseState.dsps) {
-                window.releaseState.dsps = MASTER_DSP_LIST.map(d => d.id);
+                window.releaseState.dsps = [];
             }
 
             const modalHtml = `
@@ -7584,6 +7584,48 @@ window.validateReleaseForSubmission = function() {
     return errors;
 };
 
+window.validateDelivery = function() {
+
+    const delivery = window.releaseState.delivery || {};
+
+    const errors = [];
+
+    const selectedPlatforms =
+        window.releaseState.dsps || [];
+
+    if (!selectedPlatforms.length) {
+        errors.push(
+            'Select at least one DSP/store.'
+        );
+    }
+
+    if (
+        delivery.beatPort === true ||
+        selectedPlatforms.includes('beatport')
+    ) {
+
+        if (!delivery.beatPortHasAccount) {
+            errors.push(
+                'Beatport account confirmation is required.'
+            );
+        }
+
+        if (!delivery.beatPortLink?.trim()) {
+            errors.push(
+                'Beatport link is required when Beatport is selected.'
+            );
+        }
+
+        if (!delivery.beatPortLabelLogo?.trim()) {
+            errors.push(
+                'Beatport label logo is required when Beatport is selected.'
+            );
+        }
+    }
+
+    return errors;
+};
+
         window.handleTrackGenreChange = function(idx, genre) {
             window.releaseState.tracks[idx].metadata.genre = genre;
             window.releaseState.tracks[idx].metadata.subgenre = '';
@@ -7731,8 +7773,8 @@ function renderStep6Content() {
                         <p><strong class="text-gray-400">Total Tracks:</strong> ${s.tracks.length}</p>
                     </div>
                 </div>
-                <div class="text-[11px] text-cyan-400">
-                    ✓ All required fields compiled.
+                <div class="text-[11px]">
+                    ${validationHtml}
                 </div>
             </div>
 
@@ -7776,7 +7818,8 @@ window.handleFormSubmission = async function(event) {
         return window.showToast('Please upload cover artwork before submitting.');
     }
 
-    const submitBtn = document.getElementById('submit-release-btn') || document.querySelector('button[type="submit"]');
+    const submitBtn =
+        document.getElementById('submitReleaseBtn');
     const progressCard = document.getElementById('submission-progress-card');
     const statusText = document.getElementById('progress-status-text');
     const percentageText = document.getElementById('progress-percentage');
@@ -7809,7 +7852,15 @@ window.handleFormSubmission = async function(event) {
 
     try {
         const totalTracks = window.releaseState.tracks?.length || 0;
-        const totalUploadSteps = (hasArtworkFile ? 1 : 0) + totalTracks;
+        const instrumentalCount =
+            window.releaseState.tracks.filter(
+                t => Boolean(t.instrumentalFile)
+            ).length;
+
+        const totalUploadSteps =
+            (hasArtworkFile ? 1 : 0) +
+            totalTracks +
+            instrumentalCount;
         let completedSteps = 0;
 
         // 1. Upload Cover Artwork
@@ -7842,6 +7893,38 @@ window.handleFormSubmission = async function(event) {
                 const trackRes = await uploadFileToR2(track.audioFile, 'audio');
                 const trackUrl = typeof trackRes === 'string' ? trackRes : (trackRes?.url || trackRes?.location || '');
                 window.releaseState.tracks[i].audioUrl = trackUrl;
+            }
+
+            if (track.instrumentalFile) {
+
+                updateProgress(
+                    40,
+                    `Uploading Track ${i + 1} Instrumental...`
+                );
+
+                const instrumentalRes = await uploadFileToR2(
+                    track.instrumentalFile,
+                    'instrumental'
+                );
+
+                const instrumentalUrl =
+                    typeof instrumentalRes === 'string'
+                        ? instrumentalRes
+                        : (
+                            instrumentalRes?.url ||
+                            instrumentalRes?.location ||
+                            instrumentalRes?.path ||
+                            ''
+                        );
+
+                if (!instrumentalUrl) {
+                    throw new Error(
+                        `Track ${i + 1} instrumental upload returned no URL.`
+                    );
+                }
+
+                window.releaseState.tracks[i].instrumentalUrl =
+                    instrumentalUrl;
             }
             completedSteps++;
         }
@@ -7900,14 +7983,44 @@ window.handleFormSubmission = async function(event) {
             cover_art: finalCoverUrl,
             artwork: finalCoverUrl,
             tracks: window.releaseState.tracks.map(t => ({
-                title: t.metadata.title,
-                version: t.metadata.version,
-                explicit: t.metadata.explicit,
-                isrc: t.isrc,
-                audio_url: t.audioUrl,
-                tiktok_start_time: t.tiktokStartTime,
-                lyrics: t.lyrics?.plain
-            })),
+                title: t.metadata?.title?.trim() || '',
+                version: t.metadata?.version?.trim() || null,
+
+                explicit: Boolean(t.metadata?.explicit),
+
+                isrc: t.isrc?.trim() || null,
+
+                audioUrl: t.audioUrl || null,
+
+                instrumentalUrl: t.instrumentalUrl || null,
+
+                tiktokStartTime:
+                    t.tiktokStartTime?.trim() || null,
+
+                lyrics: {
+                    content: t.lyrics?.content || null,
+                    explicit: Boolean(t.lyrics?.explicit),
+                    cleanVersion: Boolean(t.lyrics?.cleanVersion)
+                },
+
+                artists: (t.artists || [])
+                    .filter(a => a.name?.trim())
+                    .map(a => ({
+                        name: a.name.trim(),
+                        role: a.role || 'primary'
+                    })),
+
+                writers: (t.writers || [])
+                    .filter(w => w.name?.trim())
+                    .map(w => ({
+                        name: w.name.trim(),
+                        role: w.role === 'lyricist'
+                            ? 'lyricist'
+                            : 'instrumentalist'
+                    })),
+
+                credits: t.credits?.trim() || null
+            }))
             submittedBy: window.currentUser ? window.currentUser.uid : 'anonymous',
             createdAt: new Date().toISOString()
         };
