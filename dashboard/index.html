@@ -7447,6 +7447,143 @@ window.validateAudioFile = function(file, label = 'Audio') {
     return true;
 };
 
+window.validateReleaseForSubmission = function() {
+
+    const s = window.releaseState;
+
+    const errors = [];
+
+    if (!s.metadata?.title?.trim()) {
+        errors.push('Release title is required.');
+    }
+
+    if (!s.metadata?.type) {
+        errors.push('Release type is required.');
+    }
+
+    if (!s.metadata?.language) {
+        errors.push('Release language is required.');
+    }
+
+    if (!s.metadata?.primaryGenre) {
+        errors.push('Primary genre is required.');
+    }
+
+    if (!s.metadata?.secondaryGenre) {
+        errors.push('Secondary genre is required.');
+    }
+
+    if (!s.dates?.releaseDate) {
+        errors.push('Release date is required.');
+    }
+
+    if (!s.dates?.timezone) {
+        errors.push('Release timezone is required.');
+    }
+
+    if (!s.label?.name?.trim()) {
+        errors.push('Record label is required.');
+    }
+
+    if (!s.label?.cLine?.trim()) {
+        errors.push('(C) line is required.');
+    }
+
+    if (!s.label?.pLine?.trim()) {
+        errors.push('(P) line is required.');
+    }
+
+    if (!s.artwork?.file && !s.artwork?.url) {
+        errors.push('Cover artwork is required.');
+    }
+
+    if (!s.artists?.length) {
+        errors.push('At least one release artist is required.');
+    }
+
+    if (!s.tracks?.length) {
+        errors.push('At least one track is required.');
+    }
+
+    s.tracks.forEach((track, index) => {
+
+        const n = index + 1;
+
+        if (!track.metadata?.title?.trim()) {
+            errors.push(`Track ${n}: title is required.`);
+        }
+
+        if (!track.audioFile && !track.audioUrl) {
+            errors.push(`Track ${n}: master audio is required.`);
+        }
+
+        if (!track.artists?.length) {
+            errors.push(`Track ${n}: at least one artist is required.`);
+        }
+
+        const validArtists = (track.artists || [])
+            .filter(a => a.name?.trim());
+
+        if (!validArtists.length) {
+            errors.push(`Track ${n}: artist name is required.`);
+        }
+
+        const writers = (track.writers || [])
+            .filter(w => w.name?.trim());
+
+        if (!writers.length) {
+            errors.push(`Track ${n}: at least one writer is required.`);
+        }
+
+        const hasInstrumentalist = writers.some(
+            writer =>
+                String(writer.role).toLowerCase() === 'instrumentalist'
+        );
+
+        if (!hasInstrumentalist) {
+            errors.push(
+                `Track ${n}: at least one writer must have role Instrumentalist.`
+            );
+        }
+
+        if (track.audioFile) {
+            try {
+                validateAudioFile(
+                    track.audioFile,
+                    `Track ${n} master audio`
+                );
+            } catch (err) {
+                errors.push(err.message);
+            }
+        }
+
+        if (track.instrumentalFile) {
+            try {
+                validateAudioFile(
+                    track.instrumentalFile,
+                    `Track ${n} instrumental`
+                );
+            } catch (err) {
+                errors.push(err.message);
+            }
+        }
+    });
+
+    if (!s.agreements?.termsAccepted) {
+        errors.push(
+            'Distribution rights confirmation is required.'
+        );
+    }
+
+    if (!s.agreements?.rightsConfirmed) {
+        errors.push(
+            'Rights clearance confirmation is required.'
+        );
+    }
+
+    return errors;
+};
+
         window.handleTrackGenreChange = function(idx, genre) {
             window.releaseState.tracks[idx].metadata.genre = genre;
             window.releaseState.tracks[idx].metadata.subgenre = '';
