@@ -7056,12 +7056,244 @@ window.handleTransferSubmission = async function(e) {
                                     </div>
                                 </div>
 
-                                <!-- Lyrics -->
-                                <div>
-                                    <label class="too-lost-form-label">Plain Lyrics</label>
-                                    <textarea oninput="window.releaseState.tracks[${idx}].lyrics = { plain: this.value }" 
-                                              class="too-lost-input h-20" placeholder="Type plain text lyrics here...">${track.lyrics?.plain || ''}</textarea>
-                                </div>
+                                <!-- TRACK ARTISTS -->
+<div class="space-y-3 border-t border-brand-border pt-4">
+    <div class="flex items-center justify-between">
+        <div>
+            <label class="too-lost-form-label">Track Artists *</label>
+            <p class="text-[10px] text-gray-500">
+                Artists appearing on this specific track.
+            </p>
+        </div>
+
+        <button
+            type="button"
+            onclick="addTrackArtist(${idx})"
+            class="text-xs text-cyan-400 hover:underline">
+            + Add Artist
+        </button>
+    </div>
+
+    <div class="space-y-2">
+        ${(track.artists || []).map((artist, artistIdx) => `
+            <div class="grid grid-cols-1 sm:grid-cols-[1fr_180px_auto] gap-2">
+
+                <input
+                    type="text"
+                    required
+                    value="${escapeHtml(artist.name || '')}"
+                    oninput="window.releaseState.tracks[${idx}].artists[${artistIdx}].name = this.value"
+                    class="too-lost-input"
+                    placeholder="Artist Name *">
+
+                <select
+                    onchange="window.releaseState.tracks[${idx}].artists[${artistIdx}].role = this.value"
+                    class="too-lost-input">
+
+                    <option value="primary" ${artist.role === 'primary' ? 'selected' : ''}>
+                        Primary Artist
+                    </option>
+
+                    <option value="featuring" ${artist.role === 'featuring' ? 'selected' : ''}>
+                        Featured Artist
+                    </option>
+
+                    <option value="remixer" ${artist.role === 'remixer' ? 'selected' : ''}>
+                        Remixer
+                    </option>
+
+                </select>
+
+                <button
+                    type="button"
+                    onclick="removeTrackArtist(${idx}, ${artistIdx})"
+                    class="px-3 text-red-400">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        `).join('')}
+    </div>
+
+    ${(track.artists || []).length === 0 ? `
+        <div class="p-3 rounded-xl bg-brand-dark border border-dashed border-red-500/40 text-xs text-red-400">
+            Add at least one artist to this track.
+        </div>
+    ` : ''}
+</div>
+
+
+<!-- WRITERS -->
+<div class="space-y-3 border-t border-brand-border pt-4">
+
+    <div class="flex items-center justify-between">
+        <div>
+            <label class="too-lost-form-label">
+                Writers / Composer Credits *
+            </label>
+
+            <p class="text-[10px] text-gray-500">
+                Too Lost currently requires at least one writer with role
+                <strong class="text-cyan-400">Instrumentalist</strong>.
+            </p>
+        </div>
+
+        <button
+            type="button"
+            onclick="addTrackWriter(${idx})"
+            class="text-xs text-cyan-400 hover:underline">
+            + Add Writer
+        </button>
+    </div>
+
+    <div class="space-y-2">
+
+        ${(track.writers || []).map((writer, writerIdx) => `
+            <div class="grid grid-cols-1 sm:grid-cols-[1fr_200px_auto] gap-2">
+
+                <input
+                    type="text"
+                    required
+                    value="${escapeHtml(writer.name || '')}"
+                    oninput="window.releaseState.tracks[${idx}].writers[${writerIdx}].name = this.value"
+                    class="too-lost-input"
+                    placeholder="Writer Name *">
+
+                <select
+                    onchange="window.releaseState.tracks[${writerIdx}].role = this.value"
+                    class="too-lost-input">
+
+                    <option value="instrumentalist"
+                        ${writer.role === 'instrumentalist' ? 'selected' : ''}>
+                        Instrumentalist / Composer
+                    </option>
+
+                    <option value="lyricist"
+                        ${writer.role === 'lyricist' ? 'selected' : ''}>
+                        Lyricist
+                    </option>
+
+                </select>
+
+                <button
+                    type="button"
+                    onclick="removeTrackWriter(${idx}, ${writerIdx})"
+                    class="px-3 text-red-400">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+
+            </div>
+        `).join('')}
+
+    </div>
+
+    <div class="p-3 rounded-xl bg-cyan-500/5 border border-cyan-500/20 text-[11px] text-gray-400">
+        <i class="fa-solid fa-circle-info text-cyan-400 mr-1"></i>
+        Audiory will automatically send the required
+        <strong class="text-cyan-400">instrumentalist</strong>
+        writer role to Too Lost. Do not use the API value
+        <strong>composer</strong>.
+    </div>
+
+</div>
+
+
+<!-- INSTRUMENTAL AUDIO -->
+<div class="space-y-3 border-t border-brand-border pt-4">
+
+    <div>
+        <label class="too-lost-form-label">
+            Instrumental / Backing Track
+        </label>
+
+        <p class="text-[10px] text-gray-500 mb-2">
+            Optional unless your distribution workflow requires an instrumental.
+        </p>
+
+        <input
+            type="file"
+            accept=".wav,.flac,audio/wav,audio/flac"
+            onchange="handleInstrumentalSelection(${idx}, this)"
+            class="too-lost-input text-xs">
+
+        <div
+            id="instrumental_preview_container_${idx}"
+            class="mt-2 flex items-center h-10 px-3 rounded-xl bg-brand-dark border border-brand-border">
+
+            ${track.instrumentalFile || track.instrumentalUrl ? `
+                <audio controls class="w-full h-8">
+                    <source
+                        src="${track.instrumentalFile ? URL.createObjectURL(track.instrumentalFile) : track.instrumentalUrl}">
+                </audio>
+            ` : `
+                <span class="text-xs text-gray-500">
+                    No instrumental uploaded
+                </span>
+            `}
+
+        </div>
+    </div>
+
+</div>
+
+
+<!-- LYRICS -->
+<div class="space-y-3 border-t border-brand-border pt-4">
+
+    <label class="too-lost-form-label">
+        Lyrics
+    </label>
+
+    <textarea
+        oninput="
+            window.releaseState.tracks[${idx}].lyrics.content = this.value
+        "
+        class="too-lost-input h-32"
+        placeholder="Enter plain text lyrics. Leave empty for instrumental tracks."
+    >${escapeHtml(track.lyrics?.content || '')}</textarea>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+        <label class="flex items-center gap-2 text-xs text-gray-300">
+            <input
+                type="checkbox"
+                ${track.lyrics?.explicit ? 'checked' : ''}
+                onchange="
+                    window.releaseState.tracks[${idx}].lyrics.explicit = this.checked
+                ">
+            Lyrics contain explicit content
+        </label>
+
+        <label class="flex items-center gap-2 text-xs text-gray-300">
+            <input
+                type="checkbox"
+                ${track.lyrics?.cleanVersion ? 'checked' : ''}
+                onchange="
+                    window.releaseState.tracks[${idx}].lyrics.cleanVersion = this.checked
+                ">
+            Clean version available
+        </label>
+
+    </div>
+
+</div>
+
+
+<!-- TRACK CREDITS -->
+<div class="border-t border-brand-border pt-4">
+
+    <label class="too-lost-form-label">
+        Track Credits / Notes
+    </label>
+
+    <textarea
+        oninput="
+            window.releaseState.tracks[${idx}].credits = this.value
+        "
+        class="too-lost-input h-20"
+        placeholder="Producer, engineer, mixing, mastering, musicians, additional credits..."
+    >${escapeHtml(track.credits || '')}</textarea>
+
+</div>
                             </div>
                         `).join('')}
                     </div>
@@ -7109,16 +7341,51 @@ window.handleTransferSubmission = async function(e) {
         // Add Track for EP/Album
         window.addTrackToRelease = function() {
             window.releaseState.tracks.push({
-                metadata: { title: '', version: '', genre: window.releaseState.metadata.primaryGenre || '', subgenre: window.releaseState.metadata.secondaryGenre || '', explicit: false },
+                metadata: {
+                    title: '',
+                    version: '',
+                    genre: window.releaseState.metadata.primaryGenre || '',
+                    subgenre: window.releaseState.metadata.secondaryGenre || '',
+                    explicit: false
+                },
+
                 discNumber: 1,
+
                 isrc: '',
-                audioFile: null,
-                previewUrl: '',
+
                 tiktokStartTime: '00:30',
-                lyrics: { plain: '' }
+
+                audioFile: null,
+                audioUrl: '',
+                previewUrl: '',
+
+                instrumentalFile: null,
+                instrumentalUrl: '',
+
+                lyrics: {
+                    content: '',
+                    explicit: false,
+                    cleanVersion: false
+                },
+
+                artists: [],
+
+                // REQUIRED BY TOO LOST
+                writers: [
+                    {
+                        name: '',
+                        role: 'instrumentalist'
+                    }
+                ],
+
+                credits: ''
             });
+
             const container = document.getElementById('wizardStepContainer');
-            if (container && window.currentStep === 4) container.innerHTML = renderStep4Content();
+
+            if (container && window.currentStep === 4) {
+                container.innerHTML = renderStep4Content();
+            }
         };
 
         // Remove Track
