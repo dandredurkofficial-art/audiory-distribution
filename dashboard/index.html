@@ -7398,6 +7398,31 @@ window.handleInstrumentalSelection = function(trackIndex, input) {
     }
 };
 
+window.syncTrackArtistsFromReleaseArtists = function() {
+
+    const releaseArtists = window.releaseState.artists || [];
+
+    window.releaseState.tracks.forEach(track => {
+
+        if (!Array.isArray(track.artists)) {
+            track.artists = [];
+        }
+
+        if (track.artists.length === 0) {
+
+            track.artists = releaseArtists
+                .filter(a => a.name)
+                .map(a => ({
+                    name: a.name,
+                    role: String(a.role || 'primary').toLowerCase()
+                }));
+        }
+
+    });
+};
+
+window.syncTrackArtistsFromReleaseArtists();
+
         window.handleTrackGenreChange = function(idx, genre) {
             window.releaseState.tracks[idx].metadata.genre = genre;
             window.releaseState.tracks[idx].metadata.subgenre = '';
