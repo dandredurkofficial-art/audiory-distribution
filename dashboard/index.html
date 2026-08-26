@@ -8020,7 +8020,7 @@ window.handleFormSubmission = async function(event) {
                     })),
 
                 credits: t.credits?.trim() || null
-            }))
+            })),
             submittedBy: window.currentUser ? window.currentUser.uid : 'anonymous',
             createdAt: new Date().toISOString()
         };
