@@ -8427,43 +8427,78 @@ window.handleFormSubmission = async function(event) {
         };
 
         updateProgress(90, 'Dispatching metadata to Gateway...');
-        const token = window.currentUser?.getIdToken ? await window.currentUser.getIdToken() : '';
-        
-        // First create/update the release via base endpoint
-        const releaseEndpoint = `${WORKER_BASE_URL}/api/releases/${releaseId}/submit`;
-        const res = await fetch(releaseEndpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(payload)
-        });
 
-        const serverResponse = await res.json().catch(() => null);
-        if (!res.ok) {
-            throw new Error(extractApiError(serverResponse));
-        }
+const token = window.currentUser?.getIdToken
+    ? await window.currentUser.getIdToken()
+    : '';
 
-        const releaseId = serverResponse?.id || serverResponse?.data?.id || editingId;
+let releaseId = editingId || null;
+let submitResponseData = null;
 
-        // Now submit using the explicit Too Lost endpoint /releases/${releaseId}/submit
-        if (releaseId) {
-            updateProgress(95, 'Submitting release package to Too Lost...');
-            const submitEndpoint = `${WORKER_BASE_URL}/api/releases/${releaseId}/submit`;
-            const submitRes = await fetch(submitEndpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+// =========================================================
+// CREATE OR UPDATE RELEASE
+// =========================================================
 
-            const submitResponseData = await submitRes.json().catch(() => null);
-            if (!submitRes.ok) {
-                throw new Error(extractApiError(submitResponseData));
-            }
-        }
+const releaseEndpoint = releaseId
+    ? `${WORKER_BASE_URL}/api/releases/${releaseId}`
+    : `${WORKER_BASE_URL}/api/releases`;
+
+const res = await fetch(releaseEndpoint, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+});
+
+const serverResponse = await res.json().catch(() => null);
+
+if (!res.ok) {
+    throw new Error(extractApiError(serverResponse));
+}
+
+// Server-generated ID for new releases
+releaseId =
+    serverResponse?.id ||
+    serverResponse?.data?.id ||
+    releaseId;
+
+if (!releaseId) {
+    throw new Error(
+        'Release was created but the server did not return a release ID.'
+    );
+}
+
+// =========================================================
+// SUBMIT RELEASE TO TOO LOST
+// =========================================================
+
+updateProgress(
+    95,
+    'Submitting release package to Too Lost...'
+);
+
+const submitEndpoint =
+    `${WORKER_BASE_URL}/api/releases/${releaseId}/submit`;
+
+const submitRes = await fetch(submitEndpoint, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    }
+});
+
+submitResponseData =
+    await submitRes.json().catch(() => null);
+
+if (!submitRes.ok) {
+    throw new Error(
+        extractApiError(submitResponseData)
+    );
+}
+
 
         updateProgress(100, `Release successfully ${isEditing ? 'updated' : 'submitted'}! Redirecting...`);
         const currentUid = window.currentUser ? window.currentUser.uid : 'anonymous';
