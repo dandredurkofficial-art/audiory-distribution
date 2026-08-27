@@ -8379,6 +8379,24 @@ window.handleFormSubmission = async function(event) {
 
         if (mappedParticipants.length === 0) throw new Error('Please specify at least one Primary Artist name.');
 
+        const primaryGenre = (
+            window.releaseState.metadata?.primaryGenre || 
+            window.releaseState.metadata?.genre || 
+            window.releaseState.genre || 
+            ''
+        ).trim();
+
+        const secondaryGenre = (
+            window.releaseState.metadata?.secondaryGenre || 
+            window.releaseState.metadata?.subgenre || 
+            window.releaseState.subgenre || 
+            ''
+        ).trim();
+
+        if (!primaryGenre) {
+            throw new Error('Please select a Primary Genre for this release before submitting.');
+        }
+
         const editingId = window.releaseState.editingId;
         const isEditing = Boolean(editingId);
 
@@ -8386,8 +8404,9 @@ window.handleFormSubmission = async function(event) {
             title: window.releaseState.metadata.title,
             type: window.releaseState.metadata.type,
             language: window.releaseState.metadata.language,
-            genre: window.releaseState.metadata.primaryGenre,
-            subgenre: window.releaseState.metadata.secondaryGenre,
+            genre: primaryGenre,          // Main genre field expected by worker
+            primaryGenre: primaryGenre,   // Fallback field key for API compatibility
+            subgenre: secondaryGenre,
             label: labelString,
             participants: mappedParticipants,
             artists: mappedParticipants,
