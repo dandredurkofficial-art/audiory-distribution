@@ -6819,7 +6819,9 @@ window.releaseState = window.releaseState || {
     label: {
         name: '',
         cLine: '',
-        pLine: ''
+        pLine: '',
+        cYear: new Date().getFullYear().toString(),
+        pYear: new Date().getFullYear().toString()
     },
     artwork: {
         file: null,
@@ -8442,6 +8444,16 @@ window.handleFormSubmission = async function(event) {
         const editingId = window.releaseState.editingId;
         const isEditing = Boolean(editingId);
 
+        const currentYear = new Date().getFullYear().toString();
+        const rawCLine = window.releaseState.label.cLine || '';
+        const rawPLine = window.releaseState.label.pLine || '';
+
+        const cYearMatch = rawCLine.match(/\b(19|20)\d{2}\b/);
+        const pYearMatch = rawPLine.match(/\b(19|20)\d{2}\b/);
+
+        const extractedCYear = cYearMatch ? cYearMatch[0] : (window.releaseState.label.cYear || currentYear);
+        const extractedPYear = pYearMatch ? pYearMatch[0] : (window.releaseState.label.pYear || currentYear);
+
         // Standardized Payload with both Too Lost snake_case and camelCase keys
         const payload = {
             title: window.releaseState.metadata.title,
@@ -8450,15 +8462,13 @@ window.handleFormSubmission = async function(event) {
 
             primaryGenre: primaryGenre,
             secondaryGenre: secondaryGenre || null,
-            
-            // Too Lost Primary Genre Required Spec
-            primary_genre: primaryGenre,
-            secondary_genre: secondaryGenre,
-            genre: primaryGenre,
-            subgenre: secondaryGenre,
-            primaryGenre: primaryGenre,
 
             label: labelString,
+            cLine: rawCLine,
+            cYear: extractedCYear,
+            pLine: rawPLine,
+            pYear: extractedPYear,
+            
             participants: mappedParticipants,
             artists: mappedParticipants,
             
