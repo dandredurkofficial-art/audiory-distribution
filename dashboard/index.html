@@ -8487,7 +8487,7 @@ const submitRes = await fetch(submitEndpoint, {
     headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
-    }
+    },
     // Pass the required agreement flags in the submit payload body
     body: JSON.stringify({
         acceptTerms: Boolean(window.releaseState.agreements?.termsAccepted),
