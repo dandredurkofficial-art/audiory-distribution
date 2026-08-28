@@ -8314,18 +8314,22 @@ window.handleFormSubmission = async function(event) {
 
     // Extract & Validate Primary Genre (Too Lost requires primary_genre)
     const primaryGenre = String(
-        window.releaseState.metadata?.primaryGenre || 
-        window.releaseState.metadata?.genre || 
-        window.releaseState.primaryGenre || 
-        window.releaseState.genre || 
+        window.releaseState.metadata?.primaryGenre ??
+        window.releaseState.metadata?.primary_genre ??
+        window.releaseState.metadata?.genre ??
+        window.releaseState.primaryGenre ??
+        window.releaseState.primary_genre ??
+        window.releaseState.genre ??
         ''
     ).trim();
 
     const secondaryGenre = String(
-        window.releaseState.metadata?.secondaryGenre || 
-        window.releaseState.metadata?.subgenre || 
-        window.releaseState.secondaryGenre || 
-        window.releaseState.subgenre || 
+        window.releaseState.metadata?.secondaryGenre ??
+        window.releaseState.metadata?.secondary_genre ??
+        window.releaseState.metadata?.subgenre ??
+        window.releaseState.secondaryGenre ??
+        window.releaseState.secondary_genre ??
+        window.releaseState.subgenre ??
         ''
     ).trim();
 
@@ -8485,9 +8489,16 @@ window.handleFormSubmission = async function(event) {
             participants: mappedParticipants,
             artists: mappedParticipants,
             
-            release_date: window.releaseState.dates.releaseDate,
-            releaseDate: window.releaseState.dates.releaseDate,
-            timezone: window.releaseState.dates.timezone,
+            releaseDate:
+                window.releaseState.dates?.releaseDate || null,
+
+            releaseTime:
+                window.releaseState.dates?.timezone
+                    ? {
+                          time: null,
+                          timeZone: window.releaseState.dates.timezone
+                    }
+                    : null,
             
             dsps: window.releaseState.dsps,
             delivery: window.releaseState.delivery,
@@ -8564,40 +8575,138 @@ window.handleFormSubmission = async function(event) {
         }
 
         // =========================================================
-        // SUBMIT RELEASE TO TOO LOST
-        // =========================================================
-        updateProgress(95, 'Submitting release package to Too Lost...');
+// SUBMIT RELEASE TO TOO LOST
+// =========================================================
 
-        const submitEndpoint = `${WORKER_BASE_URL}/api/releases/${releaseId}/submit`;
+updateProgress(95, 'Submitting release package to Too Lost...');
 
-        const submitRes = await fetch(submitEndpoint, {
-    method: 'POST',
+const submitEndpoint =
+    `${WORKER_BASE_URL}/api/releases/${releaseId}/submit`;
 
-    headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-    },
+// ---------------------------------------------------------
+// IMPORTANT DEBUGGING
+// ---------------------------------------------------------
+// Show exactly what Audiory is sending/storing for the genre.
+// ---------------------------------------------------------
 
-    body: JSON.stringify({
-        acceptTerms:
-            window.releaseState.agreements?.termsAccepted
-                ? "true"
-                : "",
+console.log('========== AUDIORY SUBMISSION DEBUG ==========');
 
-        confirmRights:
-            window.releaseState.agreements?.rightsConfirmed
-                ? "true"
-                : "",
+console.log('Release ID:', releaseId);
 
-        confirmYoutubeRights:
-            Boolean(
-                window.releaseState.agreements?.youtubeRightsConfirmed
-            ),
+console.log('Primary Genre:', primaryGenre);
 
-        idempotencyKey:
-            `${releaseId}-${Date.now()}`
-    })
-});
+console.log('Secondary Genre:', secondaryGenre);
+
+console.log('Full release payload:', payload);
+
+console.log('Terms accepted:',
+    window.releaseState.agreements?.termsAccepted
+);
+
+console.log('Rights confirmed:',
+    window.releaseState.agreements?.rightsConfirmed
+);
+
+console.log('YouTube rights confirmed:',
+    window.releaseState.agreements?.youtubeRightsConfirmed
+);
+
+console.log('==============================================');
+
+
+// ---------------------------------------------------------
+// Too Lost SubmitReleaseRequest
+// Based on the schema you provided.
+// ---------------------------------------------------------
+
+const submitPayload = {
+    acceptTerms:
+        window.releaseState.agreements?.termsAccepted
+            ? "true"
+            : "false",
+
+    confirmRights:
+        window.releaseState.agreements?.rightsConfirmed
+            ? "true"
+            : "false",
+
+    confirmYoutubeRights:
+        Boolean(
+            window.releaseState.agreements?.youtubeRightsConfirmed
+        ),
+
+    idempotencyKey:
+        `${releaseId}-${Date.now()}`
+};
+
+console.log(
+    'Too Lost submit body:',
+    submitPayload
+);
+
+
+// ---------------------------------------------------------
+// Send submit request
+// ---------------------------------------------------------
+
+const submitRes = await fetch(
+    submitEndpoint,
+    {
+        method: 'POST',
+
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+
+        body: JSON.stringify(submitPayload)
+    }
+);
+
+
+// ---------------------------------------------------------
+// Read response safely
+// ---------------------------------------------------------
+
+const submitResponseText =
+    await submitRes.text();
+
+let submitResponseData = null;
+
+try {
+    submitResponseData =
+        JSON.parse(submitResponseText);
+} catch (e) {
+    submitResponseData = {
+        raw: submitResponseText
+    };
+}
+
+console.log(
+    'Too Lost submit response:',
+    submitResponseData
+);
+
+
+// ---------------------------------------------------------
+// Handle Too Lost error
+// ---------------------------------------------------------
+
+if (!submitRes.ok) {
+
+    const apiMessage =
+        submitResponseData?.message ||
+        submitResponseData?.error ||
+        submitResponseData?.detail ||
+        submitResponseData?.data?.message ||
+        submitResponseText ||
+        `HTTP ${submitRes.status}`;
+
+    throw new Error(
+        `Too Lost submit failed (${submitRes.status}): ${apiMessage}`
+    );
+}
 
         submitResponseData = await submitRes.json().catch(() => null);
 
