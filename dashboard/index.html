@@ -8579,23 +8579,23 @@ window.handleFormSubmission = async function(event) {
     },
 
     body: JSON.stringify({
-
         acceptTerms:
             window.releaseState.agreements?.termsAccepted
-                ? 'true'
-                : 'false',
+                ? "true"
+                : "",
 
         confirmRights:
             window.releaseState.agreements?.rightsConfirmed
-                ? 'true'
-                : 'false',
+                ? "true"
+                : "",
 
         confirmYoutubeRights:
-            window.releaseState.agreements?.youtubeRightsConfirmed
-                ?? null,
+            Boolean(
+                window.releaseState.agreements?.youtubeRightsConfirmed
+            ),
 
         idempotencyKey:
-            `audiory-${releaseId}-${Date.now()}`
+            `${releaseId}-${Date.now()}`
     })
 });
 
