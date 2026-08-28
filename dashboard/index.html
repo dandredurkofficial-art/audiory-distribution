@@ -8445,8 +8445,21 @@ window.handleFormSubmission = async function(event) {
         const isEditing = Boolean(editingId);
 
         const currentYear = new Date().getFullYear().toString();
-        const rawCLine = window.releaseState.label.cLine || '';
-        const rawPLine = window.releaseState.label.pLine || '';
+        const labelObject =
+            window.releaseState.label &&
+            typeof window.releaseState.label === 'object'
+                ? window.releaseState.label
+                : {};
+
+        const rawCLine =
+            labelObject.cLine ||
+            window.releaseState.cLine ||
+            '';
+
+        const rawPLine =
+            labelObject.pLine ||
+            window.releaseState.pLine ||
+            '';
 
         const cYearMatch = rawCLine.match(/\b(19|20)\d{2}\b/);
         const pYearMatch = rawPLine.match(/\b(19|20)\d{2}\b/);
@@ -8558,18 +8571,33 @@ window.handleFormSubmission = async function(event) {
         const submitEndpoint = `${WORKER_BASE_URL}/api/releases/${releaseId}/submit`;
 
         const submitRes = await fetch(submitEndpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                acceptTerms: Boolean(window.releaseState.agreements?.termsAccepted),
-                confirmRights: Boolean(window.releaseState.agreements?.rightsConfirmed),
-                accept_terms: Boolean(window.releaseState.agreements?.termsAccepted),
-                confirm_rights: Boolean(window.releaseState.agreements?.rightsConfirmed)
-            })
-        });
+    method: 'POST',
+
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    },
+
+    body: JSON.stringify({
+
+        acceptTerms:
+            window.releaseState.agreements?.termsAccepted
+                ? 'true'
+                : 'false',
+
+        confirmRights:
+            window.releaseState.agreements?.rightsConfirmed
+                ? 'true'
+                : 'false',
+
+        confirmYoutubeRights:
+            window.releaseState.agreements?.youtubeRightsConfirmed
+                ?? null,
+
+        idempotencyKey:
+            `audiory-${releaseId}-${Date.now()}`
+    })
+});
 
         submitResponseData = await submitRes.json().catch(() => null);
 
