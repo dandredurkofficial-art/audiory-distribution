@@ -8672,8 +8672,6 @@ const submitRes = await fetch(
 const submitResponseText =
     await submitRes.text();
 
-let submitResponseData = null;
-
 try {
     submitResponseData =
         JSON.parse(submitResponseText);
