@@ -8302,8 +8302,8 @@ function extractApiError(response) {
 window.handleFormSubmission = async function(event) {
     if (event) event.preventDefault();
 
-    const validationErrors = window.validateReleaseForSubmission();
-    const deliveryErrors = window.validateDelivery();
+    const validationErrors = window.validateReleaseForSubmission ? window.validateReleaseForSubmission() : [];
+    const deliveryErrors = window.validateDelivery ? window.validateDelivery() : [];
     const allErrors = [...validationErrors, ...deliveryErrors];
 
     if (allErrors.length > 0) {
@@ -8326,10 +8326,15 @@ window.handleFormSubmission = async function(event) {
     }
 
     // =========================================================
-    // 1. FAIL-SAFE GENRE EXTRACTION (DOM + STATE FALLBACK)
+    // 1. FAIL-SAFE GENRE & METADATA EXTRACTION (DOM + STATE FALLBACK)
     // =========================================================
-    const primaryGenreSelect = document.getElementById('primaryGenreSelect') || document.querySelector('[name="primaryGenre"]');
-    const secondaryGenreSelect = document.getElementById('secondaryGenreSelect') || document.querySelector('[name="secondaryGenre"]');
+    const primaryGenreSelect = document.getElementById('primaryGenreSelect') || 
+                               document.getElementById('primaryGenre') || 
+                               document.querySelector('[name="primaryGenre"]');
+                               
+    const secondaryGenreSelect = document.getElementById('secondaryGenreSelect') || 
+                                 document.getElementById('secondaryGenre') || 
+                                 document.querySelector('[name="secondaryGenre"]');
 
     const domPrimaryGenre = primaryGenreSelect ? primaryGenreSelect.value : '';
     const domSecondaryGenre = secondaryGenreSelect ? secondaryGenreSelect.value : '';
@@ -8398,7 +8403,7 @@ window.handleFormSubmission = async function(event) {
 
     try {
         const totalTracks = window.releaseState.tracks?.length || 0;
-        const instrumentalCount = window.releaseState.tracks.filter(t => Boolean(t.instrumentalFile)).length;
+        const instrumentalCount = (window.releaseState.tracks || []).filter(t => Boolean(t.instrumentalFile)).length;
         const totalUploadSteps = (hasArtworkFile ? 1 : 0) + totalTracks + instrumentalCount;
         let completedSteps = 0;
 
@@ -8478,8 +8483,7 @@ window.handleFormSubmission = async function(event) {
 
         const currentYear = new Date().getFullYear().toString();
         const labelObject =
-            window.releaseState.label &&
-            typeof window.releaseState.label === 'object'
+            window.releaseState.label && typeof window.releaseState.label === 'object'
                 ? window.releaseState.label
                 : {};
 
@@ -8489,8 +8493,11 @@ window.handleFormSubmission = async function(event) {
         const cYearMatch = rawCLine.match(/\b(19|20)\d{2}\b/);
         const pYearMatch = rawPLine.match(/\b(19|20)\d{2}\b/);
 
-        const extractedCYear = cYearMatch ? cYearMatch[0] : (window.releaseState.label.cYear || currentYear);
-        const extractedPYear = pYearMatch ? pYearMatch[0] : (window.releaseState.label.pYear || currentYear);
+        const extractedCYear = cYearMatch ? cYearMatch[0] : (window.releaseState.label?.cYear || currentYear);
+        const extractedPYear = pYearMatch ? pYearMatch[0] : (window.releaseState.label?.pYear || currentYear);
+
+        const primaryGenreId = !isNaN(Number(primaryGenre)) && primaryGenre !== '' ? Number(primaryGenre) : null;
+        const secondaryGenreId = !isNaN(Number(secondaryGenre)) && secondaryGenre !== '' ? Number(secondaryGenre) : null;
 
         // Standardized Payload with all fallback keys
         const payload = {
@@ -8498,13 +8505,15 @@ window.handleFormSubmission = async function(event) {
             type: window.releaseState.metadata?.type || 'Single',
             language: window.releaseState.metadata?.language || 'en',
 
-            // Canonical Genre Keys
+            // Canonical Genre Keys (Strings & Numeric IDs)
             primaryGenre: primaryGenre,
             primary_genre: primaryGenre,
+            primary_genre_id: primaryGenreId,
             genre: primaryGenre,
 
             secondaryGenre: secondaryGenre || null,
             secondary_genre: secondaryGenre || null,
+            secondary_genre_id: secondaryGenreId,
             subgenre: secondaryGenre || null,
 
             label: labelString,
@@ -8523,13 +8532,12 @@ window.handleFormSubmission = async function(event) {
             releaseDate: window.releaseState.dates?.releaseDate || null,
             release_date: window.releaseState.dates?.releaseDate || null,
 
-            releaseTime:
-                window.releaseState.dates?.timezone
-                    ? {
-                          time: null,
-                          timeZone: window.releaseState.dates.timezone
-                      }
-                    : null,
+            releaseTime: window.releaseState.dates?.timezone
+                ? {
+                    time: null,
+                    timeZone: window.releaseState.dates.timezone
+                  }
+                : null,
             
             dsps: window.releaseState.dsps || [],
             platforms: window.releaseState.dsps || [],
@@ -8607,13 +8615,13 @@ window.handleFormSubmission = async function(event) {
             throw new Error('Release was created but the server did not return a release ID.');
         }
 
-        // SUBMIT RELEASE TO TOO LOST (Include full metadata payload in submission body)
+        // SUBMIT RELEASE TO TOO LOST API
         updateProgress(95, 'Submitting release package to Too Lost...');
 
         const submitEndpoint = `${WORKER_BASE_URL}/api/releases/${releaseId}/submit`;
 
         const submitPayload = {
-            ...payload, // Include complete payload metadata to prevent backend missing field drops
+            ...payload,
             acceptTerms: String(Boolean(window.releaseState.agreements?.termsAccepted)),
             accept_terms: Boolean(window.releaseState.agreements?.termsAccepted),
             confirmRights: String(Boolean(window.releaseState.agreements?.rightsConfirmed)),
