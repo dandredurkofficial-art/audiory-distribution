@@ -7010,7 +7010,7 @@ window.navigateDirectStep = function(step) {
     window.renderStepContent(step);
 };
 
-// STEP 1 CONTENT
+// STEP 1 CONTENT - Standardized for Too Lost API Schema
 function renderStep1Content() {
     return `
         <div class="space-y-4">
@@ -7030,12 +7030,12 @@ function renderStep1Content() {
                 <div>
                     <label class="too-lost-form-label">Primary Language *</label>
                     <select onchange="window.releaseState.metadata.language = this.value" class="too-lost-input">
-                        <option value="en">English</option>
-                        <option value="sw">Swahili</option>
-                        <option value="fr">French</option>
-                        <option value="es">Spanish</option>
-                        <option value="pt">Portuguese</option>
-                        <option value="Instrumental">Instrumental (No Lyrics)</option>
+                        <option value="en" ${window.releaseState.metadata.language === 'en' ? 'selected' : ''}>English</option>
+                        <option value="sw" ${window.releaseState.metadata.language === 'sw' ? 'selected' : ''}>Swahili</option>
+                        <option value="fr" ${window.releaseState.metadata.language === 'fr' ? 'selected' : ''}>French</option>
+                        <option value="es" ${window.releaseState.metadata.language === 'es' ? 'selected' : ''}>Spanish</option>
+                        <option value="pt" ${window.releaseState.metadata.language === 'pt' ? 'selected' : ''}>Portuguese</option>
+                        <option value="zxx">Instrumental (No Lyrics)</option>
                     </select>
                 </div>
             </div>
@@ -7044,15 +7044,15 @@ function renderStep1Content() {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="too-lost-form-label">Primary Genre *</label>
-                    <select onchange="handlePrimaryGenreChange(this.value)" class="too-lost-input" required>
+                    <select id="primaryGenreSelect" onchange="handlePrimaryGenreChange(this.value)" class="too-lost-input" required>
                         <option value="">Select Primary Genre</option>
                         ${Object.keys(GENRE_MAP).map(g => `<option value="${g}" ${window.releaseState.metadata.primaryGenre === g ? 'selected' : ''}>${g}</option>`).join('')}
                     </select>
                 </div>
                 <div>
-                    <label class="too-lost-form-label">Subgenre / Secondary Genre *</label>
+                    <label class="too-lost-form-label">Subgenre / Secondary Genre</label>
                     <select id="secondaryGenreSelect" onchange="window.releaseState.metadata.secondaryGenre = this.value" class="too-lost-input" ${!window.releaseState.metadata.primaryGenre ? 'disabled' : ''}>
-                        <option value="">${window.releaseState.metadata.primaryGenre ? 'Select Subgenre' : '-- Select Primary Genre First --'}</option>
+                        <option value="">${window.releaseState.metadata.primaryGenre ? 'Select Subgenre (Optional)' : '-- Select Primary Genre First --'}</option>
                         ${window.releaseState.metadata.primaryGenre && GENRE_MAP[window.releaseState.metadata.primaryGenre] 
                             ? GENRE_MAP[window.releaseState.metadata.primaryGenre].map(sub => `<option value="${sub}" ${window.releaseState.metadata.secondaryGenre === sub ? 'selected' : ''}>${sub}</option>`).join('')
                             : ''}
@@ -7075,32 +7075,45 @@ function renderStep1Content() {
                 </div>
                 <div>
                     <label class="too-lost-form-label">(C) Line Copyright *</label>
-                    <input type="text" required placeholder="e.g. 2026 Record Label" value="${window.releaseState.label.cLine || ''}" oninput="window.releaseState.label.cLine = this.value" class="too-lost-input">
+                    <input type="text" required placeholder="e.g. 2026 Record Label" value="${window.releaseState.label.cLine || ''}" oninput="handleCLineInput(this.value)" class="too-lost-input">
                 </div>
                 <div>
                     <label class="too-lost-form-label">(P) Line Phonogram *</label>
-                    <input type="text" required placeholder="e.g. 2026 Record Label" value="${window.releaseState.label.pLine || ''}" oninput="window.releaseState.label.pLine = this.value" class="too-lost-input">
+                    <input type="text" required placeholder="e.g. 2026 Record Label" value="${window.releaseState.label.pLine || ''}" oninput="handlePLineInput(this.value)" class="too-lost-input">
                 </div>
             </div>
         </div>
     `;
 }
 
+// Handler functions to keep window.releaseState consistently synchronized
 window.handlePrimaryGenreChange = function(genre) {
-    window.releaseState.metadata.primaryGenre = genre;
-    window.releaseState.metadata.secondaryGenre = '';
+    window.releaseState.metadata.primaryGenre = genre || null;
+    window.releaseState.metadata.secondaryGenre = null;
     
     const subSelect = document.getElementById('secondaryGenreSelect');
     if (!subSelect) return;
 
     if (genre && GENRE_MAP[genre]) {
         subSelect.disabled = false;
-        subSelect.innerHTML = `<option value="">Select Subgenre</option>` + 
+        subSelect.innerHTML = `<option value="">Select Subgenre (Optional)</option>` + 
             GENRE_MAP[genre].map(sub => `<option value="${sub}">${sub}</option>`).join('');
     } else {
         subSelect.disabled = true;
         subSelect.innerHTML = `<option value="">-- Select Primary Genre First --</option>`;
     }
+};
+
+window.handleCLineInput = function(val) {
+    window.releaseState.label.cLine = val;
+    const yearMatch = val.match(/\b(19|20)\d{2}\b/);
+    window.releaseState.label.cYear = yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
+};
+
+window.handlePLineInput = function(val) {
+    window.releaseState.label.pLine = val;
+    const yearMatch = val.match(/\b(19|20)\d{2}\b/);
+    window.releaseState.label.pYear = yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
 };
 
 window.renderArtistInputs = function() {
@@ -7115,9 +7128,9 @@ window.renderArtistInputs = function() {
             </div>
             <div class="w-full sm:w-40">
                 <select onchange="window.releaseState.artists[${idx}].role = this.value" class="too-lost-input">
-                    <option value="Primary" ${artist.role === 'Primary' ? 'selected' : ''}>Primary Artist</option>
-                    <option value="Featuring" ${artist.role === 'Featuring' ? 'selected' : ''}>Featured Artist</option>
-                    <option value="Remixer" ${artist.role === 'Remixer' ? 'selected' : ''}>Remixer</option>
+                    <option value="primary" ${artist.role === 'primary' ? 'selected' : ''}>Primary Artist</option>
+                    <option value="featured" ${artist.role === 'featured' ? 'selected' : ''}>Featured Artist</option>
+                    <option value="remixer" ${artist.role === 'remixer' ? 'selected' : ''}>Remixer</option>
                 </select>
             </div>
             ${window.releaseState.artists.length > 1 ? `
@@ -7130,7 +7143,7 @@ window.renderArtistInputs = function() {
 };
 
 window.addArtistToState = function() {
-    window.releaseState.artists.push({ name: '', role: 'Primary' });
+    window.releaseState.artists.push({ name: '', role: 'primary' });
     window.renderArtistInputs();
 };
 
@@ -7138,7 +7151,7 @@ window.removeArtistFromState = function(idx) {
     window.releaseState.artists.splice(idx, 1);
     window.renderArtistInputs();
 };
-
+        
 // STEP 2 CONTENT
 function renderStep2Content() {
     if (!window.releaseState.delivery) {
@@ -8312,30 +8325,45 @@ window.handleFormSubmission = async function(event) {
         return window.showToast('Please upload cover artwork before submitting.');
     }
 
-    // Extract & Validate Primary Genre (Ensure fallback to all state paths)
+    // =========================================================
+    // 1. FAIL-SAFE GENRE EXTRACTION (DOM + STATE FALLBACK)
+    // =========================================================
+    const primaryGenreSelect = document.getElementById('primaryGenreSelect') || document.querySelector('[name="primaryGenre"]');
+    const secondaryGenreSelect = document.getElementById('secondaryGenreSelect') || document.querySelector('[name="secondaryGenre"]');
+
+    const domPrimaryGenre = primaryGenreSelect ? primaryGenreSelect.value : '';
+    const domSecondaryGenre = secondaryGenreSelect ? secondaryGenreSelect.value : '';
+
     const primaryGenre = String(
-        window.releaseState.metadata?.primaryGenre ??
-        window.releaseState.metadata?.primary_genre ??
-        window.releaseState.metadata?.genre ??
-        window.releaseState.primaryGenre ??
-        window.releaseState.primary_genre ??
-        window.releaseState.genre ??
+        window.releaseState.metadata?.primaryGenre ||
+        window.releaseState.metadata?.primary_genre ||
+        window.releaseState.metadata?.genre ||
+        window.releaseState.primaryGenre ||
+        window.releaseState.primary_genre ||
+        window.releaseState.genre ||
+        domPrimaryGenre ||
         ''
     ).trim();
 
     const secondaryGenre = String(
-        window.releaseState.metadata?.secondaryGenre ??
-        window.releaseState.metadata?.secondary_genre ??
-        window.releaseState.metadata?.subgenre ??
-        window.releaseState.secondaryGenre ??
-        window.releaseState.secondary_genre ??
-        window.releaseState.subgenre ??
+        window.releaseState.metadata?.secondaryGenre ||
+        window.releaseState.metadata?.secondary_genre ||
+        window.releaseState.metadata?.subgenre ||
+        window.releaseState.secondaryGenre ||
+        window.releaseState.secondary_genre ||
+        window.releaseState.subgenre ||
+        domSecondaryGenre ||
         ''
     ).trim();
 
     if (!primaryGenre) {
         return window.showToast('Please select a Primary Genre for this release.');
     }
+
+    // Synchronize resolved values back into state to prevent downstream drops
+    if (!window.releaseState.metadata) window.releaseState.metadata = {};
+    window.releaseState.metadata.primaryGenre = primaryGenre;
+    window.releaseState.metadata.secondaryGenre = secondaryGenre;
 
     const submitBtn = document.getElementById('submitReleaseBtn');
     const progressCard = document.getElementById('submission-progress-card');
@@ -8455,15 +8483,8 @@ window.handleFormSubmission = async function(event) {
                 ? window.releaseState.label
                 : {};
 
-        const rawCLine =
-            labelObject.cLine ||
-            window.releaseState.cLine ||
-            '';
-
-        const rawPLine =
-            labelObject.pLine ||
-            window.releaseState.pLine ||
-            '';
+        const rawCLine = labelObject.cLine || window.releaseState.cLine || '';
+        const rawPLine = labelObject.pLine || window.releaseState.pLine || '';
 
         const cYearMatch = rawCLine.match(/\b(19|20)\d{2}\b/);
         const pYearMatch = rawPLine.match(/\b(19|20)\d{2}\b/);
@@ -8471,13 +8492,13 @@ window.handleFormSubmission = async function(event) {
         const extractedCYear = cYearMatch ? cYearMatch[0] : (window.releaseState.label.cYear || currentYear);
         const extractedPYear = pYearMatch ? pYearMatch[0] : (window.releaseState.label.pYear || currentYear);
 
-        // Standardized Payload: Both snake_case and camelCase included for upstream safety
+        // Standardized Payload with all fallback keys
         const payload = {
             title: window.releaseState.metadata?.title || '',
             type: window.releaseState.metadata?.type || 'Single',
             language: window.releaseState.metadata?.language || 'en',
 
-            // Key Fix: Send both camelCase and snake_case genre fields
+            // Canonical Genre Keys
             primaryGenre: primaryGenre,
             primary_genre: primaryGenre,
             genre: primaryGenre,
@@ -8559,9 +8580,7 @@ window.handleFormSubmission = async function(event) {
         let releaseId = editingId || null;
         let submitResponseData = null;
 
-        // =========================================================
         // CREATE OR UPDATE RELEASE DRAFT
-        // =========================================================
         const releaseEndpoint = releaseId
             ? `${WORKER_BASE_URL}/api/releases/${releaseId}`
             : `${WORKER_BASE_URL}/api/releases`;
@@ -8588,14 +8607,13 @@ window.handleFormSubmission = async function(event) {
             throw new Error('Release was created but the server did not return a release ID.');
         }
 
-        // =========================================================
-        // SUBMIT RELEASE TO TOO LOST
-        // =========================================================
+        // SUBMIT RELEASE TO TOO LOST (Include full metadata payload in submission body)
         updateProgress(95, 'Submitting release package to Too Lost...');
 
         const submitEndpoint = `${WORKER_BASE_URL}/api/releases/${releaseId}/submit`;
 
         const submitPayload = {
+            ...payload, // Include complete payload metadata to prevent backend missing field drops
             acceptTerms: String(Boolean(window.releaseState.agreements?.termsAccepted)),
             accept_terms: Boolean(window.releaseState.agreements?.termsAccepted),
             confirmRights: String(Boolean(window.releaseState.agreements?.rightsConfirmed)),
