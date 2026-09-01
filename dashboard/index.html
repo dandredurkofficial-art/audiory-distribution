@@ -6814,6 +6814,7 @@ window.releaseState = window.releaseState || {
     },
     dates: {
         releaseDate: '',
+        releaseTime: '',
         timezone: 'Africa/Nairobi'
     },
     label: {
@@ -7162,21 +7163,62 @@ function renderStep2Content() {
     return `
         <div class="space-y-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="too-lost-form-label">Digital Release Date *</label>
-                    <input type="date" value="${window.releaseState.dates.releaseDate || ''}" 
-                           onchange="window.releaseState.dates.releaseDate = this.value" class="too-lost-input" required>
-                </div>
-                <div>
-                    <label class="too-lost-form-label">Release Timezone *</label>
-                    <select onchange="window.releaseState.dates.timezone = this.value" class="too-lost-input">
-                        <option value="Africa/Nairobi" ${window.releaseState.dates.timezone === 'Africa/Nairobi' ? 'selected' : ''}>Africa/Nairobi (EAT)</option>
-                        <option value="UTC" ${window.releaseState.dates.timezone === 'UTC' ? 'selected' : ''}>UTC</option>
-                        <option value="America/New_York" ${window.releaseState.dates.timezone === 'America/New_York' ? 'selected' : ''}>America/New York (EST)</option>
-                        <option value="Europe/London" ${window.releaseState.dates.timezone === 'Europe/London' ? 'selected' : ''}>Europe/London (GMT)</option>
-                    </select>
-                </div>
-            </div>
+
+    <div>
+        <label class="too-lost-form-label">Digital Release Date *</label>
+        <input
+            type="date"
+            value="${window.releaseState.dates.releaseDate || ''}"
+            onchange="window.releaseState.dates.releaseDate = this.value"
+            class="too-lost-input"
+            required
+        >
+    </div>
+
+    <div>
+        <label class="too-lost-form-label">Release Time *</label>
+        <input
+            type="time"
+            value="${window.releaseState.dates.releaseTime || ''}"
+            onchange="window.releaseState.dates.releaseTime = this.value"
+            class="too-lost-input"
+            required
+        >
+        <p class="text-[10px] text-gray-500 mt-1">
+            The time your release should become available.
+        </p>
+    </div>
+
+    <div class="sm:col-span-2">
+        <label class="too-lost-form-label">Release Timezone *</label>
+        <select
+            onchange="window.releaseState.dates.timezone = this.value"
+            class="too-lost-input"
+            required
+        >
+            <option value="Africa/Nairobi" ${window.releaseState.dates.timezone === 'Africa/Nairobi' ? 'selected' : ''}>
+                Africa/Nairobi (EAT)
+            </option>
+
+            <option value="UTC" ${window.releaseState.dates.timezone === 'UTC' ? 'selected' : ''}>
+                UTC
+            </option>
+
+            <option value="America/New_York" ${window.releaseState.dates.timezone === 'America/New_York' ? 'selected' : ''}>
+                America/New York (EST)
+            </option>
+
+            <option value="Europe/London" ${window.releaseState.dates.timezone === 'Europe/London' ? 'selected' : ''}>
+                Europe/London (GMT)
+            </option>
+        </select>
+
+        <p class="text-[10px] text-gray-500 mt-1">
+            This determines the timezone used with the release time.
+        </p>
+    </div>
+
+</div>
 
             <!-- Delivery Feature Flags / DSP Toggles -->
             <div class="border-t border-brand-border pt-4 space-y-4">
@@ -7978,8 +8020,17 @@ window.validateReleaseForSubmission = function() {
     if (!s.metadata?.language) errors.push('Release language is required.');
     if (!s.metadata?.primaryGenre) errors.push('Primary genre is required.');
     if (!s.metadata?.secondaryGenre) errors.push('Secondary genre is required.');
-    if (!s.dates?.releaseDate) errors.push('Release date is required.');
-    if (!s.dates?.timezone) errors.push('Release timezone is required.');
+    if (!s.dates?.releaseDate) {
+        errors.push('Release date is required.');
+    }
+
+    if (!s.dates?.releaseTime) {
+        errors.push('Release time is required.');
+    }
+
+    if (!s.dates?.timezone) {
+        errors.push('Release timezone is required.');
+    }
     if (!s.label?.name?.trim()) errors.push('Record label is required.');
     if (!s.label?.cLine?.trim()) errors.push('(C) line is required.');
     if (!s.label?.pLine?.trim()) errors.push('(P) line is required.');
@@ -8532,12 +8583,8 @@ window.handleFormSubmission = async function(event) {
             releaseDate: window.releaseState.dates?.releaseDate || null,
             release_date: window.releaseState.dates?.releaseDate || null,
 
-            releaseTime: window.releaseState.dates?.timezone
-                ? {
-                    time: null,
-                    timeZone: window.releaseState.dates.timezone
-                  }
-                : null,
+            releaseTime: window.releaseState.dates?.releaseTime || null,
+            timeZone: window.releaseState.dates?.timezone || 'Africa/Nairobi',
             
             dsps: window.releaseState.dsps || [],
             platforms: window.releaseState.dsps || [],
