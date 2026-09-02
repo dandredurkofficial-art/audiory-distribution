@@ -7240,371 +7240,988 @@ window.removeArtistFromState = function(idx) {
         
 // STEP 2 CONTENT
 function renderStep2Content() {
-    if (!window.releaseState.delivery) {
-        window.releaseState.delivery = { beatPort: false, youtube: true, facebook: true };
+
+    const s = window.releaseState;
+
+    // =========================================================
+    // SAFETY MIGRATION / DEFAULT STATE
+    // =========================================================
+
+    s.dates = s.dates || {};
+
+    s.dates.releaseDate =
+        s.dates.releaseDate || '';
+
+    s.dates.originalReleaseDate =
+        s.dates.originalReleaseDate || '';
+
+    s.dates.releaseTime =
+        s.dates.releaseTime || '';
+
+    s.dates.timezone =
+        s.dates.timezone || 'Africa/Nairobi';
+
+
+    s.applePreorder =
+        s.applePreorder || {
+            enabled: false,
+            date: ''
+        };
+
+
+    s.applePreorder.enabled =
+        !!s.applePreorder.enabled;
+
+    s.applePreorder.date =
+        s.applePreorder.date || '';
+
+
+    s.license =
+        s.license || {
+            type: 'Copyright',
+            info: ''
+        };
+
+    s.license.type =
+        s.license.type || 'Copyright';
+
+    s.license.info =
+        s.license.info || '';
+
+
+    s.delivery =
+        s.delivery || {};
+
+
+    // Delivery defaults
+    if (!Array.isArray(s.delivery.platforms)) {
+        s.delivery.platforms = [];
     }
-    const selectedCount = window.releaseState.dsps ? window.releaseState.dsps.length : MASTER_DSP_LIST.length;
+
+    if (!Array.isArray(s.delivery.territories)) {
+        s.delivery.territories = ['Worldwide'];
+    }
+
+
+    if (typeof s.delivery.beatPort !== 'boolean') {
+        s.delivery.beatPort = false;
+    }
+
+    if (typeof s.delivery.beatPortHasAccount !== 'boolean') {
+        s.delivery.beatPortHasAccount = false;
+    }
+
+    s.delivery.beatPortLink =
+        s.delivery.beatPortLink || '';
+
+    s.delivery.beatPortLabelLogo =
+        s.delivery.beatPortLabelLogo || '';
+
+
+    if (typeof s.delivery.youtube !== 'boolean') {
+        s.delivery.youtube = true;
+    }
+
+    if (typeof s.delivery.facebook !== 'boolean') {
+        s.delivery.facebook = true;
+    }
+
+    if (typeof s.delivery.soundcloud !== 'boolean') {
+        s.delivery.soundcloud = true;
+    }
+
+    if (typeof s.delivery.soundExchange !== 'boolean') {
+        s.delivery.soundExchange = true;
+    }
+
+    if (typeof s.delivery.trackLibs !== 'boolean') {
+        s.delivery.trackLibs = false;
+    }
+
+    if (typeof s.delivery.hook !== 'boolean') {
+        s.delivery.hook = false;
+    }
+
+    if (typeof s.delivery.lyricfind !== 'boolean') {
+        s.delivery.lyricfind = false;
+    }
+
+    if (typeof s.delivery.even !== 'boolean') {
+        s.delivery.even = false;
+    }
+
+
+    // =========================================================
+    // SELECTED DSP COUNT
+    // =========================================================
+
+    const selectedCount =
+        Array.isArray(s.dsps)
+            ? s.dsps.length
+            : MASTER_DSP_LIST.length;
+
+
+    // =========================================================
+    // RETURN STEP 2
+    // =========================================================
 
     return `
         <div class="space-y-6">
 
-    <!-- RELEASE DATES -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- =================================================
+                 RELEASE DATES & TIMING
+            ================================================== -->
 
-        <div>
-            <label class="too-lost-form-label">
-                Digital Release Date *
-            </label>
+            <div class="p-5 rounded-2xl bg-brand-dark border border-brand-border space-y-4">
 
-            <input
-                type="date"
-                value="${window.releaseState.dates.releaseDate || ''}"
-                onchange="window.releaseState.dates.releaseDate = this.value"
-                class="too-lost-input"
-                required
-            >
-        </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white">
+                        Release Dates & Timing
+                    </h3>
 
-        <div>
-            <label class="too-lost-form-label">
-                Original Release Date
-            </label>
-
-            <input
-                type="date"
-                value="${window.releaseState.dates.originalReleaseDate || ''}"
-                onchange="window.releaseState.dates.originalReleaseDate = this.value"
-                class="too-lost-input"
-            >
-
-            <p class="text-[10px] text-gray-500 mt-1">
-                Leave blank if this is a brand-new release.
-            </p>
-        </div>
-
-        <div>
-            <label class="too-lost-form-label">
-                Release Time *
-            </label>
-
-            <input
-                type="time"
-                value="${window.releaseState.dates.releaseTime || ''}"
-                onchange="window.releaseState.dates.releaseTime = this.value"
-                class="too-lost-input"
-                required
-            >
-        </div>
-
-        <div>
-            <label class="too-lost-form-label">
-                Release Timezone *
-            </label>
-
-            <select
-                onchange="window.releaseState.dates.timezone = this.value"
-                class="too-lost-input"
-                required
-            >
-                <option value="Africa/Nairobi"
-                    ${window.releaseState.dates.timezone === 'Africa/Nairobi' ? 'selected' : ''}>
-                    Africa/Nairobi (EAT)
-                </option>
-
-                <option value="UTC"
-                    ${window.releaseState.dates.timezone === 'UTC' ? 'selected' : ''}>
-                    UTC
-                </option>
-
-                <option value="America/New_York"
-                    ${window.releaseState.dates.timezone === 'America/New_York' ? 'selected' : ''}>
-                    America/New York
-                </option>
-
-                <option value="Europe/London"
-                    ${window.releaseState.dates.timezone === 'Europe/London' ? 'selected' : ''}>
-                    Europe/London
-                </option>
-            </select>
-        </div>
-
-    </div>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Configure the digital release date, original release date and release time.
+                    </p>
+                </div>
 
 
-    <!-- APPLE PRE-ORDER -->
-    <div class="border-t border-brand-border pt-5 space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-        <h3 class="text-sm font-bold text-white">
-            Apple Pre-order
-        </h3>
+                    <!-- DIGITAL RELEASE DATE -->
 
-        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
-            <span class="text-xs font-medium text-gray-200">
-                Enable Apple Pre-order
-            </span>
-
-            <input
-                type="checkbox"
-                ${window.releaseState.applePreorder?.enabled ? 'checked' : ''}
-                onchange="
-                    window.releaseState.applePreorder.enabled = this.checked;
-                    if (!this.checked) window.releaseState.applePreorder.date = '';
-                    renderCurrentStep();
-                "
-                class="rounded bg-brand-card border-brand-border"
-            >
-        </label>
-
-        ${window.releaseState.applePreorder?.enabled ? `
-            <div>
-                <label class="too-lost-form-label">
-                    Apple Pre-order Date
-                </label>
-
-                <input
-                    type="date"
-                    value="${window.releaseState.applePreorder.date || ''}"
-                    onchange="window.releaseState.applePreorder.date = this.value"
-                    class="too-lost-input"
-                >
-            </div>
-        ` : ''}
-
-    </div>
-
-    
-
-
-    <!-- LICENSING -->
-    <div class="border-t border-brand-border pt-5 space-y-4">
-
-        <h3 class="text-sm font-bold text-white">
-            Rights & Licensing
-        </h3>
-
-        <div>
-            <label class="too-lost-form-label">
-                License Type
-            </label>
-
-            <select
-                onchange="window.releaseState.license.type = this.value"
-                class="too-lost-input"
-            >
-                <option value="Copyright"
-                    ${window.releaseState.license?.type === 'Copyright' ? 'selected' : ''}>
-                    Copyright
-                </option>
-
-                <option value="Creative Commons"
-                    ${window.releaseState.license?.type === 'Creative Commons' ? 'selected' : ''}>
-                    Creative Commons
-                </option>
-
-                <option value="CreativeCommons"
-                    ${window.releaseState.license?.type === 'CreativeCommons' ? 'selected' : ''}>
-                    CreativeCommons
-                </option>
-            </select>
-        </div>
-
-        <div>
-            <label class="too-lost-form-label">
-                License Information
-            </label>
-
-            <textarea
-                maxlength="500"
-                rows="3"
-                placeholder="Example: Owned by artist and label."
-                onchange="window.releaseState.license.info = this.value"
-                class="too-lost-input"
-            >${window.releaseState.license?.info || ''}</textarea>
-
-            <p class="text-[10px] text-gray-500 mt-1">
-                Maximum 500 characters.
-            </p>
-        </div>
-
-    </div>
-
-</div>
-            <div class="border-t border-brand-border pt-5 space-y-4">
-
-    <h3 class="text-sm font-bold text-white">
-        Platform Delivery Enhancements
-    </h3>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-
-        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
-            <span class="text-xs text-gray-200">YouTube Content ID</span>
-            <input
-                type="checkbox"
-                ${window.releaseState.delivery?.youtube ? 'checked' : ''}
-                onchange="window.releaseState.delivery.youtube = this.checked"
-                class="rounded"
-            >
-        </label>
-
-        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
-            <span class="text-xs text-gray-200">Facebook / Instagram</span>
-            <input
-                type="checkbox"
-                ${window.releaseState.delivery?.facebook ? 'checked' : ''}
-                onchange="window.releaseState.delivery.facebook = this.checked"
-                class="rounded"
-            >
-        </label>
-
-        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
-            <span class="text-xs text-gray-200">SoundCloud</span>
-            <input
-                type="checkbox"
-                ${window.releaseState.delivery?.soundcloud ? 'checked' : ''}
-                onchange="window.releaseState.delivery.soundcloud = this.checked"
-                class="rounded"
-            >
-        </label>
-
-        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
-            <span class="text-xs text-gray-200">SoundExchange</span>
-            <input
-                type="checkbox"
-                ${window.releaseState.delivery?.soundExchange ? 'checked' : ''}
-                onchange="window.releaseState.delivery.soundExchange = this.checked"
-                class="rounded"
-            >
-        </label>
-
-        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
-            <span class="text-xs text-gray-200">Beatport</span>
-            <input
-                type="checkbox"
-                ${window.releaseState.delivery?.beatPort ? 'checked' : ''}
-                onchange="window.releaseState.delivery.beatPort = this.checked"
-                class="rounded"
-            >
-        </label>
-
-        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
-            <span class="text-xs text-gray-200">Tracklib</span>
-            <input
-                type="checkbox"
-                ${window.releaseState.delivery?.trackLibs ? 'checked' : ''}
-                onchange="window.releaseState.delivery.trackLibs = this.checked"
-                class="rounded"
-            >
-        </label>
-
-        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
-            <span class="text-xs text-gray-200">Hook</span>
-            <input
-                type="checkbox"
-                ${window.releaseState.delivery?.hook ? 'checked' : ''}
-                onchange="window.releaseState.delivery.hook = this.checked"
-                class="rounded"
-            >
-        </label>
-
-        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
-            <span class="text-xs text-gray-200">LyricFind</span>
-            <input
-                type="checkbox"
-                ${window.releaseState.delivery?.lyricfind ? 'checked' : ''}
-                onchange="window.releaseState.delivery.lyricfind = this.checked"
-                class="rounded"
-            >
-        </label>
-
-        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
-            <span class="text-xs text-gray-200">EVEN</span>
-            <input
-                type="checkbox"
-                ${window.releaseState.delivery?.even ? 'checked' : ''}
-                onchange="window.releaseState.delivery.even = this.checked"
-                class="rounded"
-            >
-        </label>
-
-    </div>
-
-</div>
-
-
-<!-- BEATPORT DETAILS -->
-${window.releaseState.delivery?.beatPort ? `
-<div class="border-t border-brand-border pt-5 space-y-4">
-
-    <h3 class="text-sm font-bold text-white">
-        Beatport Details
-    </h3>
-
-    <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
-        <span class="text-xs text-gray-200">
-            I already have a Beatport account
-        </span>
-
-        <input
-            type="checkbox"
-            ${window.releaseState.delivery?.beatPortHasAccount ? 'checked' : ''}
-            onchange="window.releaseState.delivery.beatPortHasAccount = this.checked"
-            class="rounded"
-        >
-    </label>
-
-    <div>
-        <label class="too-lost-form-label">
-            Beatport Label Link
-        </label>
-
-        <input
-            type="url"
-            value="${window.releaseState.delivery?.beatPortLink || ''}"
-            placeholder="https://www.beatport.com/label/..."
-            onchange="window.releaseState.delivery.beatPortLink = this.value"
-            class="too-lost-input"
-        >
-    </div>
-
-    <div>
-        <label class="too-lost-form-label">
-            Beatport Label Logo
-        </label>
-
-        <input
-            type="url"
-            value="${window.releaseState.delivery?.beatPortLabelLogo || ''}"
-            placeholder="Public URL to your Beatport label logo"
-            onchange="window.releaseState.delivery.beatPortLabelLogo = this.value"
-            class="too-lost-input"
-        >
-    </div>
-
-</div>
-` : ''}
-
-            <div class="border-t border-brand-border pt-4 space-y-4">
-                <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="text-sm font-bold text-white">Target DSP Digital Storefronts</h3>
-                        <p class="text-xs text-gray-400">${selectedCount} of ${MASTER_DSP_LIST.length} platforms selected</p>
+                        <label class="too-lost-form-label">
+                            Digital Release Date *
+                        </label>
+
+                        <input
+                            type="date"
+                            value="${escapeHtml(s.dates.releaseDate || '')}"
+                            onchange="
+                                window.releaseState.dates.releaseDate =
+                                    this.value
+                            "
+                            class="too-lost-input"
+                            required
+                        >
                     </div>
-                    <button type="button" onclick="openDspModal()" class="px-4 py-2 rounded-xl bg-brand-card border border-brand-border text-cyan-400 font-bold text-xs hover:border-cyan-400 transition">
-                        <i class="fa-solid fa-sliders mr-1.5"></i> Select Platforms (${selectedCount})
-                    </button>
+
+
+                    <!-- ORIGINAL RELEASE DATE -->
+
+                    <div>
+                        <label class="too-lost-form-label">
+                            Original Release Date
+                        </label>
+
+                        <input
+                            type="date"
+                            value="${escapeHtml(s.dates.originalReleaseDate || '')}"
+                            onchange="
+                                window.releaseState.dates.originalReleaseDate =
+                                    this.value
+                            "
+                            class="too-lost-input"
+                        >
+
+                        <p class="text-[10px] text-gray-500 mt-1">
+                            Leave blank if this is a brand-new release.
+                        </p>
+                    </div>
+
+
+                    <!-- RELEASE TIME -->
+
+                    <div>
+                        <label class="too-lost-form-label">
+                            Release Time *
+                        </label>
+
+                        <input
+                            type="time"
+                            value="${escapeHtml(s.dates.releaseTime || '')}"
+                            onchange="
+                                window.releaseState.dates.releaseTime =
+                                    this.value
+                            "
+                            class="too-lost-input"
+                            required
+                        >
+                    </div>
+
+
+                    <!-- TIMEZONE -->
+
+                    <div>
+                        <label class="too-lost-form-label">
+                            Release Timezone *
+                        </label>
+
+                        <select
+                            onchange="
+                                window.releaseState.dates.timezone =
+                                    this.value
+                            "
+                            class="too-lost-input"
+                            required
+                        >
+
+                            <option
+                                value="Africa/Nairobi"
+                                ${s.dates.timezone === 'Africa/Nairobi'
+                                    ? 'selected'
+                                    : ''}
+                            >
+                                Africa/Nairobi (EAT)
+                            </option>
+
+
+                            <option
+                                value="UTC"
+                                ${s.dates.timezone === 'UTC'
+                                    ? 'selected'
+                                    : ''}
+                            >
+                                UTC
+                            </option>
+
+
+                            <option
+                                value="America/New_York"
+                                ${s.dates.timezone === 'America/New_York'
+                                    ? 'selected'
+                                    : ''}
+                            >
+                                America/New York
+                            </option>
+
+
+                            <option
+                                value="Europe/London"
+                                ${s.dates.timezone === 'Europe/London'
+                                    ? 'selected'
+                                    : ''}
+                            >
+                                Europe/London
+                            </option>
+
+                        </select>
+                    </div>
+
                 </div>
 
-                <!-- Preview Grid for Selected DSPs -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    ${MASTER_DSP_LIST.filter(dsp => !window.releaseState.dsps || window.releaseState.dsps.includes(dsp.id)).map(dsp => `
-                        <div class="p-3 rounded-xl bg-brand-card border border-brand-border flex items-center gap-3">
-                            <i class="${dsp.icon} text-lg"></i>
-                            <span class="text-xs font-semibold text-gray-200 truncate">${dsp.name}</span>
-                        </div>
-                    `).join('')}
-                </div>
             </div>
+
+
+            <!-- =================================================
+                 APPLE PRE-ORDER
+            ================================================== -->
+
+            <div class="p-5 rounded-2xl bg-brand-dark border border-brand-border space-y-4">
+
+                <div class="flex items-center justify-between gap-4">
+
+                    <div>
+                        <h3 class="text-sm font-bold text-white">
+                            Apple Pre-order
+                        </h3>
+
+                        <p class="text-xs text-gray-500 mt-1">
+                            Enable Apple pre-order for this release.
+                        </p>
+                    </div>
+
+
+                    <label class="relative inline-flex items-center cursor-pointer">
+
+                        <input
+                            type="checkbox"
+                            ${s.applePreorder.enabled ? 'checked' : ''}
+                            onchange="
+                                window.releaseState.applePreorder =
+                                    window.releaseState.applePreorder || {
+                                        enabled: false,
+                                        date: ''
+                                    };
+
+                                window.releaseState.applePreorder.enabled =
+                                    this.checked;
+
+                                if (!this.checked) {
+                                    window.releaseState.applePreorder.date = '';
+                                }
+
+                                const box =
+                                    document.getElementById(
+                                        'applePreorderDateBox'
+                                    );
+
+                                if (box) {
+                                    box.style.display =
+                                        this.checked ? 'block' : 'none';
+                                }
+                            "
+                            class="rounded bg-brand-card border-brand-border text-cyan-400 focus:ring-0"
+                        >
+
+                    </label>
+
+                </div>
+
+
+                <div
+                    id="applePreorderDateBox"
+                    style="display:${s.applePreorder.enabled ? 'block' : 'none'}"
+                >
+
+                    <label class="too-lost-form-label">
+                        Apple Pre-order Date *
+                    </label>
+
+                    <input
+                        type="date"
+                        value="${escapeHtml(s.applePreorder.date || '')}"
+                        onchange="
+                            window.releaseState.applePreorder =
+                                window.releaseState.applePreorder || {
+                                    enabled: false,
+                                    date: ''
+                                };
+
+                            window.releaseState.applePreorder.date =
+                                this.value;
+                        "
+                        class="too-lost-input"
+                    >
+
+                    <p class="text-[10px] text-gray-500 mt-1">
+                        Required when Apple Pre-order is enabled.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 RIGHTS & LICENSING
+            ================================================== -->
+
+            <div class="p-5 rounded-2xl bg-brand-dark border border-brand-border space-y-4">
+
+                <div>
+                    <h3 class="text-sm font-bold text-white">
+                        Rights & Licensing
+                    </h3>
+
+                    <p class="text-xs text-gray-500 mt-1">
+                        Define the licensing information for this release.
+                    </p>
+                </div>
+
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                    <!-- LICENSE TYPE -->
+
+                    <div>
+                        <label class="too-lost-form-label">
+                            License Type
+                        </label>
+
+                        <select
+                            onchange="
+                                window.releaseState.license =
+                                    window.releaseState.license || {
+                                        type: 'Copyright',
+                                        info: ''
+                                    };
+
+                                window.releaseState.license.type =
+                                    this.value;
+                            "
+                            class="too-lost-input"
+                        >
+
+                            <option
+                                value="Copyright"
+                                ${s.license.type === 'Copyright'
+                                    ? 'selected'
+                                    : ''}
+                            >
+                                Copyright
+                            </option>
+
+
+                            <option
+                                value="Creative Commons"
+                                ${s.license.type === 'Creative Commons'
+                                    ? 'selected'
+                                    : ''}
+                            >
+                                Creative Commons
+                            </option>
+
+
+                            <option
+                                value="CreativeCommons"
+                                ${s.license.type === 'CreativeCommons'
+                                    ? 'selected'
+                                    : ''}
+                            >
+                                CreativeCommons
+                            </option>
+
+                        </select>
+                    </div>
+
+
+                    <!-- LICENSE INFORMATION -->
+
+                    <div>
+                        <label class="too-lost-form-label">
+                            License Information
+                        </label>
+
+                        <textarea
+                            maxlength="500"
+                            rows="3"
+                            placeholder="Example: Owned by artist and label."
+                            oninput="
+                                window.releaseState.license =
+                                    window.releaseState.license || {
+                                        type: 'Copyright',
+                                        info: ''
+                                    };
+
+                                window.releaseState.license.info =
+                                    this.value;
+                            "
+                            class="too-lost-input"
+                        >${escapeHtml(s.license.info || '')}</textarea>
+
+                        <p class="text-[10px] text-gray-500 mt-1">
+                            Maximum 500 characters.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 PLATFORM DELIVERY ENHANCEMENTS
+            ================================================== -->
+
+            <div class="p-5 rounded-2xl bg-brand-dark border border-brand-border space-y-4">
+
+                <div>
+                    <h3 class="text-sm font-bold text-white">
+                        Platform Delivery Enhancements
+                    </h3>
+
+                    <p class="text-xs text-gray-500 mt-1">
+                        Select additional platforms and delivery services for this release.
+                    </p>
+                </div>
+
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+
+                    <!-- YOUTUBE -->
+
+                    <label class="p-3 rounded-xl bg-brand-card border border-brand-border flex items-center justify-between cursor-pointer">
+
+                        <span class="text-xs text-gray-200">
+                            YouTube Content ID
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            ${s.delivery.youtube ? 'checked' : ''}
+                            onchange="
+                                window.releaseState.delivery.youtube =
+                                    this.checked;
+                            "
+                            class="rounded bg-brand-dark border-brand-border text-cyan-400 focus:ring-0"
+                        >
+
+                    </label>
+
+
+                    <!-- FACEBOOK / INSTAGRAM -->
+
+                    <label class="p-3 rounded-xl bg-brand-card border border-brand-border flex items-center justify-between cursor-pointer">
+
+                        <span class="text-xs text-gray-200">
+                            Facebook / Instagram
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            ${s.delivery.facebook ? 'checked' : ''}
+                            onchange="
+                                window.releaseState.delivery.facebook =
+                                    this.checked;
+                            "
+                            class="rounded bg-brand-dark border-brand-border text-cyan-400 focus:ring-0"
+                        >
+
+                    </label>
+
+
+                    <!-- SOUNDCLOUD -->
+
+                    <label class="p-3 rounded-xl bg-brand-card border border-brand-border flex items-center justify-between cursor-pointer">
+
+                        <span class="text-xs text-gray-200">
+                            SoundCloud
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            ${s.delivery.soundcloud ? 'checked' : ''}
+                            onchange="
+                                window.releaseState.delivery.soundcloud =
+                                    this.checked;
+                            "
+                            class="rounded bg-brand-dark border-brand-border text-cyan-400 focus:ring-0"
+                        >
+
+                    </label>
+
+
+                    <!-- SOUNDEXCHANGE -->
+
+                    <label class="p-3 rounded-xl bg-brand-card border border-brand-border flex items-center justify-between cursor-pointer">
+
+                        <span class="text-xs text-gray-200">
+                            SoundExchange
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            ${s.delivery.soundExchange ? 'checked' : ''}
+                            onchange="
+                                window.releaseState.delivery.soundExchange =
+                                    this.checked;
+                            "
+                            class="rounded bg-brand-dark border-brand-border text-cyan-400 focus:ring-0"
+                        >
+
+                    </label>
+
+
+                    <!-- BEATPORT -->
+
+                    <label class="p-3 rounded-xl bg-brand-card border border-brand-border flex items-center justify-between cursor-pointer">
+
+                        <span class="text-xs text-gray-200">
+                            Beatport
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            ${s.delivery.beatPort ? 'checked' : ''}
+                            onchange="
+                                window.releaseState.delivery.beatPort =
+                                    this.checked;
+
+                                const form =
+                                    document.getElementById('beatportForm');
+
+                                if (form) {
+                                    form.style.display =
+                                        this.checked ? 'block' : 'none';
+                                }
+                            "
+                            class="rounded bg-brand-dark border-brand-border text-cyan-400 focus:ring-0"
+                        >
+
+                    </label>
+
+
+                    <!-- TRACKLIB -->
+
+                    <label class="p-3 rounded-xl bg-brand-card border border-brand-border flex items-center justify-between cursor-pointer">
+
+                        <span class="text-xs text-gray-200">
+                            Tracklib
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            ${s.delivery.trackLibs ? 'checked' : ''}
+                            onchange="
+                                window.releaseState.delivery.trackLibs =
+                                    this.checked;
+                            "
+                            class="rounded bg-brand-dark border-brand-border text-cyan-400 focus:ring-0"
+                        >
+
+                    </label>
+
+
+                    <!-- HOOK -->
+
+                    <label class="p-3 rounded-xl bg-brand-card border border-brand-border flex items-center justify-between cursor-pointer">
+
+                        <span class="text-xs text-gray-200">
+                            Hook
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            ${s.delivery.hook ? 'checked' : ''}
+                            onchange="
+                                window.releaseState.delivery.hook =
+                                    this.checked;
+                            "
+                            class="rounded bg-brand-dark border-brand-border text-cyan-400 focus:ring-0"
+                        >
+
+                    </label>
+
+
+                    <!-- LYRICFIND -->
+
+                    <label class="p-3 rounded-xl bg-brand-card border border-brand-border flex items-center justify-between cursor-pointer">
+
+                        <span class="text-xs text-gray-200">
+                            LyricFind
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            ${s.delivery.lyricfind ? 'checked' : ''}
+                            onchange="
+                                window.releaseState.delivery.lyricfind =
+                                    this.checked;
+                            "
+                            class="rounded bg-brand-dark border-brand-border text-cyan-400 focus:ring-0"
+                        >
+
+                    </label>
+
+
+                    <!-- EVEN -->
+
+                    <label class="p-3 rounded-xl bg-brand-card border border-brand-border flex items-center justify-between cursor-pointer">
+
+                        <span class="text-xs text-gray-200">
+                            EVEN
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            ${s.delivery.even ? 'checked' : ''}
+                            onchange="
+                                window.releaseState.delivery.even =
+                                    this.checked;
+                            "
+                            class="rounded bg-brand-dark border-brand-border text-cyan-400 focus:ring-0"
+                        >
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 BEATPORT DETAILS
+            ================================================== -->
+
+            <div
+                class="p-5 rounded-2xl bg-brand-dark border border-brand-border space-y-4"
+            >
+
+                <div class="flex items-center justify-between">
+
+                    <div>
+                        <h3 class="text-sm font-bold text-white">
+                            Beatport Details
+                        </h3>
+
+                        <p class="text-xs text-gray-500 mt-1">
+                            Enable Beatport delivery and provide the required label information.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="beatportForm"
+                    style="display:${s.delivery.beatPort ? 'block' : 'none'}"
+                    class="space-y-4"
+                >
+
+                    <!-- BEATPORT ACCOUNT -->
+
+                    <label class="p-3 rounded-xl bg-brand-card border border-brand-border flex items-center justify-between cursor-pointer">
+
+                        <span class="text-xs text-gray-200">
+                            I already have a Beatport account
+                        </span>
+
+                        <input
+                            type="checkbox"
+                            ${s.delivery.beatPortHasAccount ? 'checked' : ''}
+                            onchange="
+                                window.releaseState.delivery =
+                                    window.releaseState.delivery || {};
+
+                                window.releaseState.delivery.beatPortHasAccount =
+                                    this.checked;
+                            "
+                            class="rounded bg-brand-dark border-brand-border text-cyan-400 focus:ring-0"
+                        >
+
+                    </label>
+
+
+                    <!-- BEATPORT LABEL LINK -->
+
+                    <div>
+                        <label class="too-lost-form-label">
+                            Beatport Label Link
+                        </label>
+
+                        <input
+                            type="url"
+                            value="${escapeHtml(s.delivery.beatPortLink || '')}"
+                            oninput="
+                                window.releaseState.delivery.beatPortLink =
+                                    this.value;
+                            "
+                            class="too-lost-input"
+                            placeholder="https://www.beatport.com/label/..."
+                        >
+                    </div>
+
+
+                    <!-- BEATPORT LABEL LOGO -->
+
+                    <div>
+                        <label class="too-lost-form-label">
+                            Beatport Label Logo URL
+                        </label>
+
+                        <input
+                            type="url"
+                            value="${escapeHtml(s.delivery.beatPortLabelLogo || '')}"
+                            oninput="
+                                window.releaseState.delivery.beatPortLabelLogo =
+                                    this.value;
+                            "
+                            class="too-lost-input"
+                            placeholder="https://..."
+                        >
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 TARGET DSP DIGITAL STOREFRONTS
+            ================================================== -->
+
+            <div class="p-5 rounded-2xl bg-brand-dark border border-brand-border space-y-4">
+
+                <div class="flex items-center justify-between gap-4">
+
+                    <div>
+                        <h3 class="text-sm font-bold text-white">
+                            Target DSP Digital Storefronts
+                        </h3>
+
+                        <p class="text-xs text-gray-400 mt-1">
+                            ${selectedCount} of ${MASTER_DSP_LIST.length} platforms selected
+                        </p>
+                    </div>
+
+
+                    <button
+                        type="button"
+                        onclick="openDspModal()"
+                        class="px-4 py-2 rounded-xl bg-brand-card border border-brand-border text-cyan-400 font-bold text-xs hover:border-cyan-400 transition"
+                    >
+                        <i class="fa-solid fa-sliders mr-1.5"></i>
+                        Select Platforms (${selectedCount})
+                    </button>
+
+                </div>
+
+
+                <!-- SELECTED DSP PREVIEW -->
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+                    ${MASTER_DSP_LIST
+                        .filter(dsp =>
+                            !Array.isArray(s.dsps) ||
+                            s.dsps.includes(dsp.id)
+                        )
+                        .map(dsp => `
+                            <div
+                                class="p-3 rounded-xl bg-brand-card border border-brand-border flex items-center gap-3"
+                            >
+
+                                <i class="${escapeHtml(dsp.icon || '')} text-lg"></i>
+
+                                <span class="text-xs font-semibold text-gray-200 truncate">
+                                    ${escapeHtml(dsp.name || '')}
+                                </span>
+
+                            </div>
+                        `)
+                        .join('')}
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 DISTRIBUTION TERRITORIES
+            ================================================== -->
+
+            <div class="p-5 rounded-2xl bg-brand-dark border border-brand-border space-y-4">
+
+                <div>
+                    <h3 class="text-sm font-bold text-white">
+                        Distribution Territories
+                    </h3>
+
+                    <p class="text-xs text-gray-500 mt-1">
+                        Choose where this release can be distributed.
+                    </p>
+                </div>
+
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+
+                    <!-- WORLDWIDE -->
+
+                    <label class="p-3 rounded-xl bg-brand-card border border-brand-border flex items-center gap-3 cursor-pointer">
+
+                        <input
+                            type="checkbox"
+                            ${s.delivery.territories.includes('Worldwide')
+                                ? 'checked'
+                                : ''}
+                            onchange="
+                                if (this.checked) {
+
+                                    window.releaseState.delivery.territories =
+                                        ['Worldwide'];
+
+                                } else {
+
+                                    window.releaseState.delivery.territories =
+                                        [];
+
+                                }
+                            "
+                            class="rounded bg-brand-dark border-brand-border text-cyan-400"
+                        >
+
+                        <span class="text-xs text-gray-200">
+                            Worldwide
+                        </span>
+
+                    </label>
+
+
+                    <!-- UNITED STATES -->
+
+                    <label class="p-3 rounded-xl bg-brand-card border border-brand-border flex items-center gap-3 cursor-pointer">
+
+                        <input
+                            type="checkbox"
+                            ${s.delivery.territories.includes('US')
+                                ? 'checked'
+                                : ''}
+                            onchange="
+                                window.releaseState.delivery.territories =
+                                    Array.isArray(
+                                        window.releaseState.delivery.territories
+                                    )
+                                        ? window.releaseState.delivery.territories
+                                            .filter(x => x !== 'Worldwide')
+                                        : [];
+
+                                if (this.checked) {
+
+                                    if (
+                                        !window.releaseState.delivery.territories.includes('US')
+                                    ) {
+                                        window.releaseState.delivery.territories.push('US');
+                                    }
+
+                                }
+                            "
+                            class="rounded bg-brand-dark border-brand-border text-cyan-400"
+                        >
+
+                        <span class="text-xs text-gray-200">
+                            United States
+                        </span>
+
+                    </label>
+
+
+                    <!-- CANADA -->
+
+                    <label class="p-3 rounded-xl bg-brand-card border border-brand-border flex items-center gap-3 cursor-pointer">
+
+                        <input
+                            type="checkbox"
+                            ${s.delivery.territories.includes('CA')
+                                ? 'checked'
+                                : ''}
+                            onchange="
+                                window.releaseState.delivery.territories =
+                                    Array.isArray(
+                                        window.releaseState.delivery.territories
+                                    )
+                                        ? window.releaseState.delivery.territories
+                                            .filter(x => x !== 'Worldwide')
+                                        : [];
+
+                                if (this.checked) {
+
+                                    if (
+                                        !window.releaseState.delivery.territories.includes('CA')
+                                    ) {
+                                        window.releaseState.delivery.territories.push('CA');
+                                    }
+
+                                }
+                            "
+                            class="rounded bg-brand-dark border-brand-border text-cyan-400"
+                        >
+
+                        <span class="text-xs text-gray-200">
+                            Canada
+                        </span>
+
+                    </label>
+
+                </div>
+
+
+                <p class="text-[10px] text-gray-500">
+                    Territories use distribution codes such as US and CA.
+                </p>
+
+            </div>
+
         </div>
     `;
 }
