@@ -6905,6 +6905,76 @@ window.releaseState = window.releaseState || {
     }
 };
 
+// =============================================================
+// RELEASE STATE MIGRATION / SAFETY DEFAULTS
+// =============================================================
+
+window.releaseState.dates = window.releaseState.dates || {};
+
+window.releaseState.dates.releaseDate =
+    window.releaseState.dates.releaseDate || '';
+
+window.releaseState.dates.originalReleaseDate =
+    window.releaseState.dates.originalReleaseDate || '';
+
+window.releaseState.dates.releaseTime =
+    window.releaseState.dates.releaseTime || '';
+
+window.releaseState.dates.timezone =
+    window.releaseState.dates.timezone || 'Africa/Nairobi';
+
+window.releaseState.applePreorder =
+    window.releaseState.applePreorder || {
+        enabled: false,
+        date: ''
+    };
+
+window.releaseState.applePreorder.enabled =
+    Boolean(window.releaseState.applePreorder.enabled);
+
+window.releaseState.applePreorder.date =
+    window.releaseState.applePreorder.date || '';
+
+window.releaseState.license =
+    window.releaseState.license || {
+        type: 'Copyright',
+        info: ''
+    };
+
+window.releaseState.license.type =
+    window.releaseState.license.type || 'Copyright';
+
+window.releaseState.license.info =
+    window.releaseState.license.info || '';
+
+window.releaseState.delivery =
+    window.releaseState.delivery || {};
+
+Object.assign(window.releaseState.delivery, {
+    platforms: Array.isArray(window.releaseState.delivery.platforms)
+        ? window.releaseState.delivery.platforms
+        : [],
+
+    territories: Array.isArray(window.releaseState.delivery.territories)
+        ? window.releaseState.delivery.territories
+        : ['Worldwide'],
+
+    youtube: Boolean(window.releaseState.delivery.youtube ?? true),
+    facebook: Boolean(window.releaseState.delivery.facebook ?? true),
+    soundcloud: Boolean(window.releaseState.delivery.soundcloud ?? true),
+    soundExchange: Boolean(window.releaseState.delivery.soundExchange ?? true),
+
+    beatPort: Boolean(window.releaseState.delivery.beatPort),
+    beatPortHasAccount: Boolean(window.releaseState.delivery.beatPortHasAccount),
+    beatPortLink: window.releaseState.delivery.beatPortLink || '',
+    beatPortLabelLogo: window.releaseState.delivery.beatPortLabelLogo || '',
+
+    trackLibs: Boolean(window.releaseState.delivery.trackLibs),
+    hook: Boolean(window.releaseState.delivery.hook),
+    lyricfind: Boolean(window.releaseState.delivery.lyricfind),
+    even: Boolean(window.releaseState.delivery.even)
+});
+
 // Render Create Release Form Container
 window.renderCreateReleaseView = function() {
     return `
@@ -7301,6 +7371,8 @@ function renderStep2Content() {
         ` : ''}
 
     </div>
+
+    
 
 
     <!-- LICENSING -->
