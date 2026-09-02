@@ -8855,6 +8855,23 @@ window.handleFormSubmission = async function(event) {
 
             releaseTime: window.releaseState.dates?.releaseTime || null,
             timeZone: window.releaseState.dates?.timezone || 'Africa/Nairobi',
+
+            originalReleaseDate:
+                window.releaseState.dates?.originalReleaseDate || null,
+
+            applePreorder:
+                Boolean(window.releaseState.applePreorder?.enabled),
+
+            applePreorderDate:
+                window.releaseState.applePreorder?.enabled
+                    ? (window.releaseState.applePreorder?.date || null)
+                    : null,
+
+            licenseType:
+                window.releaseState.license?.type || 'Copyright',
+
+            licenseInfo:
+                window.releaseState.license?.info?.trim() || null,
             
             dsps: window.releaseState.dsps || [],
             platforms: window.releaseState.dsps || [],
