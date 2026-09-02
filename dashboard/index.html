@@ -6814,8 +6814,19 @@ window.releaseState = window.releaseState || {
     },
     dates: {
         releaseDate: '',
+        originalReleaseDate: '',
         releaseTime: '',
         timezone: 'Africa/Nairobi'
+    },
+
+    applePreorder: {
+        enabled: false,
+        date: ''
+    },
+
+    license: {
+        type: 'Copyright',
+        info: ''
     },
     label: {
         name: '',
@@ -6836,18 +6847,22 @@ window.releaseState = window.releaseState || {
     delivery: {
         platforms: [],
         territories: ['Worldwide'],
+
         youtube: true,
         facebook: true,
         soundcloud: true,
         soundExchange: true,
+
         beatPort: false,
         beatPortHasAccount: false,
         beatPortLink: '',
         beatPortLabelLogo: '',
+
         trackLibs: false,
         hook: false,
         lyricfind: false,
         even: false,
+
         video: {
             appleMusic: false,
             vevo: false
@@ -7162,85 +7177,340 @@ function renderStep2Content() {
 
     return `
         <div class="space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-    <div>
-        <label class="too-lost-form-label">Digital Release Date *</label>
-        <input
-            type="date"
-            value="${window.releaseState.dates.releaseDate || ''}"
-            onchange="window.releaseState.dates.releaseDate = this.value"
-            class="too-lost-input"
-            required
-        >
+    <!-- RELEASE DATES -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <div>
+            <label class="too-lost-form-label">
+                Digital Release Date *
+            </label>
+
+            <input
+                type="date"
+                value="${window.releaseState.dates.releaseDate || ''}"
+                onchange="window.releaseState.dates.releaseDate = this.value"
+                class="too-lost-input"
+                required
+            >
+        </div>
+
+        <div>
+            <label class="too-lost-form-label">
+                Original Release Date
+            </label>
+
+            <input
+                type="date"
+                value="${window.releaseState.dates.originalReleaseDate || ''}"
+                onchange="window.releaseState.dates.originalReleaseDate = this.value"
+                class="too-lost-input"
+            >
+
+            <p class="text-[10px] text-gray-500 mt-1">
+                Leave blank if this is a brand-new release.
+            </p>
+        </div>
+
+        <div>
+            <label class="too-lost-form-label">
+                Release Time *
+            </label>
+
+            <input
+                type="time"
+                value="${window.releaseState.dates.releaseTime || ''}"
+                onchange="window.releaseState.dates.releaseTime = this.value"
+                class="too-lost-input"
+                required
+            >
+        </div>
+
+        <div>
+            <label class="too-lost-form-label">
+                Release Timezone *
+            </label>
+
+            <select
+                onchange="window.releaseState.dates.timezone = this.value"
+                class="too-lost-input"
+                required
+            >
+                <option value="Africa/Nairobi"
+                    ${window.releaseState.dates.timezone === 'Africa/Nairobi' ? 'selected' : ''}>
+                    Africa/Nairobi (EAT)
+                </option>
+
+                <option value="UTC"
+                    ${window.releaseState.dates.timezone === 'UTC' ? 'selected' : ''}>
+                    UTC
+                </option>
+
+                <option value="America/New_York"
+                    ${window.releaseState.dates.timezone === 'America/New_York' ? 'selected' : ''}>
+                    America/New York
+                </option>
+
+                <option value="Europe/London"
+                    ${window.releaseState.dates.timezone === 'Europe/London' ? 'selected' : ''}>
+                    Europe/London
+                </option>
+            </select>
+        </div>
+
     </div>
 
-    <div>
-        <label class="too-lost-form-label">Release Time *</label>
-        <input
-            type="time"
-            value="${window.releaseState.dates.releaseTime || ''}"
-            onchange="window.releaseState.dates.releaseTime = this.value"
-            class="too-lost-input"
-            required
-        >
-        <p class="text-[10px] text-gray-500 mt-1">
-            The time your release should become available.
-        </p>
+
+    <!-- APPLE PRE-ORDER -->
+    <div class="border-t border-brand-border pt-5 space-y-4">
+
+        <h3 class="text-sm font-bold text-white">
+            Apple Pre-order
+        </h3>
+
+        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
+            <span class="text-xs font-medium text-gray-200">
+                Enable Apple Pre-order
+            </span>
+
+            <input
+                type="checkbox"
+                ${window.releaseState.applePreorder?.enabled ? 'checked' : ''}
+                onchange="
+                    window.releaseState.applePreorder.enabled = this.checked;
+                    if (!this.checked) window.releaseState.applePreorder.date = '';
+                    renderCurrentStep();
+                "
+                class="rounded bg-brand-card border-brand-border"
+            >
+        </label>
+
+        ${window.releaseState.applePreorder?.enabled ? `
+            <div>
+                <label class="too-lost-form-label">
+                    Apple Pre-order Date
+                </label>
+
+                <input
+                    type="date"
+                    value="${window.releaseState.applePreorder.date || ''}"
+                    onchange="window.releaseState.applePreorder.date = this.value"
+                    class="too-lost-input"
+                >
+            </div>
+        ` : ''}
+
     </div>
 
-    <div class="sm:col-span-2">
-        <label class="too-lost-form-label">Release Timezone *</label>
-        <select
-            onchange="window.releaseState.dates.timezone = this.value"
-            class="too-lost-input"
-            required
-        >
-            <option value="Africa/Nairobi" ${window.releaseState.dates.timezone === 'Africa/Nairobi' ? 'selected' : ''}>
-                Africa/Nairobi (EAT)
-            </option>
 
-            <option value="UTC" ${window.releaseState.dates.timezone === 'UTC' ? 'selected' : ''}>
-                UTC
-            </option>
+    <!-- LICENSING -->
+    <div class="border-t border-brand-border pt-5 space-y-4">
 
-            <option value="America/New_York" ${window.releaseState.dates.timezone === 'America/New_York' ? 'selected' : ''}>
-                America/New York (EST)
-            </option>
+        <h3 class="text-sm font-bold text-white">
+            Rights & Licensing
+        </h3>
 
-            <option value="Europe/London" ${window.releaseState.dates.timezone === 'Europe/London' ? 'selected' : ''}>
-                Europe/London (GMT)
-            </option>
-        </select>
+        <div>
+            <label class="too-lost-form-label">
+                License Type
+            </label>
 
-        <p class="text-[10px] text-gray-500 mt-1">
-            This determines the timezone used with the release time.
-        </p>
+            <select
+                onchange="window.releaseState.license.type = this.value"
+                class="too-lost-input"
+            >
+                <option value="Copyright"
+                    ${window.releaseState.license?.type === 'Copyright' ? 'selected' : ''}>
+                    Copyright
+                </option>
+
+                <option value="Creative Commons"
+                    ${window.releaseState.license?.type === 'Creative Commons' ? 'selected' : ''}>
+                    Creative Commons
+                </option>
+
+                <option value="CreativeCommons"
+                    ${window.releaseState.license?.type === 'CreativeCommons' ? 'selected' : ''}>
+                    CreativeCommons
+                </option>
+            </select>
+        </div>
+
+        <div>
+            <label class="too-lost-form-label">
+                License Information
+            </label>
+
+            <textarea
+                maxlength="500"
+                rows="3"
+                placeholder="Example: Owned by artist and label."
+                onchange="window.releaseState.license.info = this.value"
+                class="too-lost-input"
+            >${window.releaseState.license?.info || ''}</textarea>
+
+            <p class="text-[10px] text-gray-500 mt-1">
+                Maximum 500 characters.
+            </p>
+        </div>
+
+    </div>
+
+</div>
+            <div class="border-t border-brand-border pt-5 space-y-4">
+
+    <h3 class="text-sm font-bold text-white">
+        Platform Delivery Enhancements
+    </h3>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+
+        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
+            <span class="text-xs text-gray-200">YouTube Content ID</span>
+            <input
+                type="checkbox"
+                ${window.releaseState.delivery?.youtube ? 'checked' : ''}
+                onchange="window.releaseState.delivery.youtube = this.checked"
+                class="rounded"
+            >
+        </label>
+
+        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
+            <span class="text-xs text-gray-200">Facebook / Instagram</span>
+            <input
+                type="checkbox"
+                ${window.releaseState.delivery?.facebook ? 'checked' : ''}
+                onchange="window.releaseState.delivery.facebook = this.checked"
+                class="rounded"
+            >
+        </label>
+
+        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
+            <span class="text-xs text-gray-200">SoundCloud</span>
+            <input
+                type="checkbox"
+                ${window.releaseState.delivery?.soundcloud ? 'checked' : ''}
+                onchange="window.releaseState.delivery.soundcloud = this.checked"
+                class="rounded"
+            >
+        </label>
+
+        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
+            <span class="text-xs text-gray-200">SoundExchange</span>
+            <input
+                type="checkbox"
+                ${window.releaseState.delivery?.soundExchange ? 'checked' : ''}
+                onchange="window.releaseState.delivery.soundExchange = this.checked"
+                class="rounded"
+            >
+        </label>
+
+        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
+            <span class="text-xs text-gray-200">Beatport</span>
+            <input
+                type="checkbox"
+                ${window.releaseState.delivery?.beatPort ? 'checked' : ''}
+                onchange="window.releaseState.delivery.beatPort = this.checked"
+                class="rounded"
+            >
+        </label>
+
+        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
+            <span class="text-xs text-gray-200">Tracklib</span>
+            <input
+                type="checkbox"
+                ${window.releaseState.delivery?.trackLibs ? 'checked' : ''}
+                onchange="window.releaseState.delivery.trackLibs = this.checked"
+                class="rounded"
+            >
+        </label>
+
+        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
+            <span class="text-xs text-gray-200">Hook</span>
+            <input
+                type="checkbox"
+                ${window.releaseState.delivery?.hook ? 'checked' : ''}
+                onchange="window.releaseState.delivery.hook = this.checked"
+                class="rounded"
+            >
+        </label>
+
+        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
+            <span class="text-xs text-gray-200">LyricFind</span>
+            <input
+                type="checkbox"
+                ${window.releaseState.delivery?.lyricfind ? 'checked' : ''}
+                onchange="window.releaseState.delivery.lyricfind = this.checked"
+                class="rounded"
+            >
+        </label>
+
+        <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
+            <span class="text-xs text-gray-200">EVEN</span>
+            <input
+                type="checkbox"
+                ${window.releaseState.delivery?.even ? 'checked' : ''}
+                onchange="window.releaseState.delivery.even = this.checked"
+                class="rounded"
+            >
+        </label>
+
     </div>
 
 </div>
 
-            <!-- Delivery Feature Flags / DSP Toggles -->
-            <div class="border-t border-brand-border pt-4 space-y-4">
-                <h3 class="text-sm font-bold text-white">Platform Delivery Enhancements & Special DSPs</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
-                        <span class="text-xs font-medium text-gray-200">Beatport</span>
-                        <input type="checkbox" ${window.releaseState.delivery?.beatPort ? 'checked' : ''} 
-                               onchange="window.releaseState.delivery.beatPort = this.checked" class="rounded bg-brand-card border-brand-border text-cyan-400 focus:ring-0">
-                    </label>
-                    <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
-                        <span class="text-xs font-medium text-gray-200">YouTube Content ID</span>
-                        <input type="checkbox" ${window.releaseState.delivery?.youtube ? 'checked' : ''} 
-                               onchange="window.releaseState.delivery.youtube = this.checked" class="rounded bg-brand-card border-brand-border text-cyan-400 focus:ring-0">
-                    </label>
-                    <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
-                        <span class="text-xs font-medium text-gray-200">Facebook / Instagram Audio</span>
-                        <input type="checkbox" ${window.releaseState.delivery?.facebook ? 'checked' : ''} 
-                               onchange="window.releaseState.delivery.facebook = this.checked" class="rounded bg-brand-card border-brand-border text-cyan-400 focus:ring-0">
-                    </label>
-                </div>
-            </div>
+
+<!-- BEATPORT DETAILS -->
+${window.releaseState.delivery?.beatPort ? `
+<div class="border-t border-brand-border pt-5 space-y-4">
+
+    <h3 class="text-sm font-bold text-white">
+        Beatport Details
+    </h3>
+
+    <label class="p-3 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-between cursor-pointer">
+        <span class="text-xs text-gray-200">
+            I already have a Beatport account
+        </span>
+
+        <input
+            type="checkbox"
+            ${window.releaseState.delivery?.beatPortHasAccount ? 'checked' : ''}
+            onchange="window.releaseState.delivery.beatPortHasAccount = this.checked"
+            class="rounded"
+        >
+    </label>
+
+    <div>
+        <label class="too-lost-form-label">
+            Beatport Label Link
+        </label>
+
+        <input
+            type="url"
+            value="${window.releaseState.delivery?.beatPortLink || ''}"
+            placeholder="https://www.beatport.com/label/..."
+            onchange="window.releaseState.delivery.beatPortLink = this.value"
+            class="too-lost-input"
+        >
+    </div>
+
+    <div>
+        <label class="too-lost-form-label">
+            Beatport Label Logo
+        </label>
+
+        <input
+            type="url"
+            value="${window.releaseState.delivery?.beatPortLabelLogo || ''}"
+            placeholder="Public URL to your Beatport label logo"
+            onchange="window.releaseState.delivery.beatPortLabelLogo = this.value"
+            class="too-lost-input"
+        >
+    </div>
+
+</div>
+` : ''}
 
             <div class="border-t border-brand-border pt-4 space-y-4">
                 <div class="flex items-center justify-between">
