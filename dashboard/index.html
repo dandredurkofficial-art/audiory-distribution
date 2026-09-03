@@ -11574,34 +11574,52 @@ updateProgress(
 );
 
 // =========================================================
-// RESOLVE SELECTED PLATFORMS
-// =========================================================
-//
-// window.releaseState.dsps contains Audiory internal IDs.
-// Too Lost requires its exact platform names.
-//
-// Example:
-// Audiory ID -> tl-platform-123-spotify
-// Too Lost   -> Spotify
+// RESOLVE + NORMALIZE SELECTED PLATFORMS
 // =========================================================
 
-const selectedPlatforms =
-    (
-        Array.isArray(window.releaseState.dsps)
-            ? window.releaseState.dsps
-            : []
-    )
+const selectedPlatformIds =
+    Array.isArray(window.releaseState.dsps)
+        ? window.releaseState.dsps
+        : [];
+
+// Convert Audiory internal IDs -> exact Too Lost platform names.
+const resolvedPlatforms = selectedPlatformIds
     .map(id => {
-
         const platform =
             MASTER_DSP_LIST.find(
                 dsp => dsp.id === id
             );
 
         return platform?.tooLostValue || null;
-
     })
     .filter(Boolean);
+
+// Remove duplicate platform names.
+const selectedPlatforms = [
+    ...new Set(resolvedPlatforms)
+];
+
+// Debug information.
+console.log(
+    'AUDIORY PLATFORM SELECTION:',
+    {
+        uiSelectedCount: selectedPlatformIds.length,
+        resolvedCount: resolvedPlatforms.length,
+        uniqueTooLostCount: selectedPlatforms.length,
+        duplicateCount:
+            resolvedPlatforms.length -
+            selectedPlatforms.length,
+        platforms: selectedPlatforms
+    }
+);
+
+// Too Lost maximum is 120.
+if (selectedPlatforms.length > 120) {
+    throw new Error(
+        `Too Lost allows a maximum of 120 distribution platforms per release. ` +
+        `Audiory is attempting to send ${selectedPlatforms.length} unique platforms.`
+    );
+}
 
 
 // =========================================================
@@ -11661,64 +11679,45 @@ if (selectedTerritories.length !== 2) {
 // =========================================================
 
 const deliveryPayload = {
-
     delivery: {
-
         platforms: selectedPlatforms,
-
         territories: selectedTerritories,
 
         additional: {
+            youtube: Boolean(
+                window.releaseState.delivery?.youtube
+            ),
 
-            youtube:
-                Boolean(
-                    window.releaseState.delivery?.youtube
-                ),
+            facebook: Boolean(
+                window.releaseState.delivery?.facebook
+            ),
 
-            facebook:
-                Boolean(
-                    window.releaseState.delivery?.facebook
-                ),
+            soundcloud: Boolean(
+                window.releaseState.delivery?.soundcloud
+            ),
 
-            soundcloud:
-                Boolean(
-                    window.releaseState.delivery?.soundcloud
-                ),
+            soundExchange: Boolean(
+                window.releaseState.delivery?.soundExchange
+            ),
 
-            soundExchange:
-                Boolean(
-                    window.releaseState.delivery?.soundExchange
-                ),
+            trackLibs: Boolean(
+                window.releaseState.delivery?.trackLibs
+            ),
 
-            trackLibs:
-                Boolean(
-                    window.releaseState.delivery?.trackLibs
-                ),
-
-            lyricfind:
-                Boolean(
-                    window.releaseState.delivery?.lyricfind
-                )
-
+            lyricfind: Boolean(
+                window.releaseState.delivery?.lyricfind
+            )
         },
 
-        beatPort:
-            Boolean(
-                window.releaseState.delivery?.beatPort
-            )
-
+        beatPort: Boolean(
+            window.releaseState.delivery?.beatPort
+        )
     },
 
-    // Keep these aliases because your Worker currently
-    // accepts them and resolves them into the Too Lost body.
     platforms: selectedPlatforms,
-
     territories: selectedTerritories,
-
     dsps: selectedPlatforms
-
 };
-
 
 // =========================================================
 // BEATPORT FORM
