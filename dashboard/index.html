@@ -9704,7 +9704,13 @@ window.handleFormSubmission = async function(event) {
             throw new Error(apiErrMessage);
         }
 
-        releaseId = serverResponse?.id || serverResponse?.data?.id || releaseId;
+        releaseId =
+            serverResponse?.releaseId ||
+            serverResponse?.id ||
+            serverResponse?.data?.id ||
+            serverResponse?.createResponse?.data?.id ||
+            serverResponse?.metadataResponse?.data?.id ||
+            releaseId;
 
         if (!releaseId) {
             throw new Error(
