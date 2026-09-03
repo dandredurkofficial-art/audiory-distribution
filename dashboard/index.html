@@ -9420,7 +9420,7 @@ window.handleFormSubmission = async function(event) {
     }
 
     if (progressCard) progressCard.style.display = 'block';
-    updateProgress(5, 'Initializing submission pipeline...');
+    updateProgress(5, 'Initializing submission...');
 
     try {
         const totalTracks = window.releaseState.tracks?.length || 0;
@@ -10126,6 +10126,152 @@ for (let i = 0; i < totalTracks; i++) {
             'TOO LOST TRACKS SAVED:',
             tracksResponseData
         );
+
+        // ============================================================
+// SAVE DELIVERY / STORE SELECTIONS TO TOO LOST
+// ============================================================
+
+updateProgress(
+    92,
+    'Saving distribution stores and territories...'
+);
+
+const selectedPlatforms =
+    Array.isArray(window.releaseState.dsps)
+        ? window.releaseState.dsps
+        : [];
+
+const selectedTerritories =
+    Array.isArray(window.releaseState.delivery?.territories)
+        ? window.releaseState.delivery.territories
+            .filter(t => t && t !== 'Worldwide')
+        : [];
+
+// Too Lost requires at least one store/platform.
+if (!selectedPlatforms.length) {
+    throw new Error(
+        'Please select at least one distribution store before submitting.'
+    );
+}
+
+// Too Lost requires territories.
+// Worldwide is an Audiory convenience option, so do not send
+// "Worldwide" as a Too Lost territory code.
+if (!selectedTerritories.length) {
+    throw new Error(
+        'Please select at least one distribution territory before submitting.'
+    );
+}
+
+const deliveryPayload = {
+    delivery: {
+        platforms: selectedPlatforms,
+        territories: selectedTerritories,
+        additional: {
+            youtube: Boolean(
+                window.releaseState.delivery?.youtube
+            ),
+
+            facebook: Boolean(
+                window.releaseState.delivery?.facebook
+            ),
+
+            soundcloud: Boolean(
+                window.releaseState.delivery?.soundcloud
+            ),
+
+            soundExchange: Boolean(
+                window.releaseState.delivery?.soundExchange
+            ),
+
+            trackLibs: Boolean(
+                window.releaseState.delivery?.trackLibs
+            ),
+
+            lyricfind: Boolean(
+                window.releaseState.delivery?.lyricfind
+            ),
+
+            even: Boolean(
+                window.releaseState.delivery?.even
+            )
+        },
+
+        beatPort: Boolean(
+            window.releaseState.delivery?.beatPort
+        )
+    },
+
+    platforms: selectedPlatforms,
+    territories: selectedTerritories,
+    dsps: selectedPlatforms
+};
+
+// Beatport information, only when Beatport is enabled.
+if (window.releaseState.delivery?.beatPort) {
+    deliveryPayload.delivery.beatPortForm = {
+        hasAccount: Boolean(
+            window.releaseState.delivery?.beatPortHasAccount
+        ),
+
+        link:
+            window.releaseState.delivery?.beatPortLink ||
+            null,
+
+        newLogo:
+            window.releaseState.delivery?.beatPortLabelLogo ||
+            null,
+
+        removeImg: false
+    };
+}
+
+const deliveryEndpoint =
+    `${WORKER_BASE_URL}/api/releases/${releaseId}/delivery`;
+
+const deliveryRes = await fetch(
+    deliveryEndpoint,
+    {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(deliveryPayload)
+    }
+);
+
+const deliveryResponseText =
+    await deliveryRes.text();
+
+let deliveryResponseData = {};
+
+try {
+    deliveryResponseData =
+        JSON.parse(
+            deliveryResponseText || '{}'
+        );
+} catch (e) {
+    deliveryResponseData = {
+        raw: deliveryResponseText
+    };
+}
+
+if (!deliveryRes.ok) {
+    throw new Error(
+        `Too Lost delivery configuration failed (${deliveryRes.status}): ${
+            deliveryResponseData?.message ||
+            deliveryResponseData?.error ||
+            deliveryResponseText
+        }`
+    );
+}
+
+console.log(
+    'Too Lost delivery configuration saved:',
+    deliveryResponseData
+);
 
         // =============================================================
         // NOW SUBMIT RELEASE TO TOO LOST
