@@ -7299,7 +7299,7 @@ function renderStep2Content() {
     }
 
     if (!Array.isArray(s.delivery.territories)) {
-        s.delivery.territories = ['Worldwide'];
+        s.delivery.territories = [];
     }
 
 
@@ -10162,8 +10162,7 @@ const selectedPlatforms =
 
 const selectedTerritories =
     Array.isArray(window.releaseState.delivery?.territories)
-        ? window.releaseState.delivery.territories
-            .filter(t => t && t !== 'Worldwide')
+        ? window.releaseState.delivery.territories.filter(Boolean)
         : [];
 
 // Too Lost requires at least one store/platform.
@@ -10176,9 +10175,9 @@ if (!selectedPlatforms.length) {
 // Too Lost requires territories.
 // Worldwide is an Audiory convenience option, so do not send
 // "Worldwide" as a Too Lost territory code.
-if (!selectedTerritories.length) {
+if (selectedTerritories.length !== 2) {
     throw new Error(
-        'Please select at least one distribution territory before submitting.'
+        'Please select exactly 2 distribution territories before submitting.'
     );
 }
 
