@@ -9813,7 +9813,7 @@ for (let i = 0; i < totalTracks; i++) {
 
         updateProgress(
             86,
-            `Sending Track ${i + 1} instrumental to Too Lost...`
+            `Sending Track ${i + 1} instrumental...`
         );
 
         const instrumentalForm =
@@ -9891,7 +9891,7 @@ for (let i = 0; i < totalTracks; i++) {
 
         updateProgress(
             88,
-            'Saving release tracks to Too Lost...'
+            'Saving release tracks...'
         );
 
         const tooLostTracks =
@@ -9971,7 +9971,7 @@ for (let i = 0; i < totalTracks; i++) {
 
                     if (!track.audioFileKey) {
                         throw new Error(
-                            `Track "${track.metadata?.title || 'Untitled'}" is missing its Too Lost audio fileKey.`
+                            `Track "${track.metadata?.title || 'Untitled'}" is missing its audio fileKey.`
                         );
                     }
 
@@ -10133,7 +10133,7 @@ for (let i = 0; i < totalTracks; i++) {
 
         updateProgress(
             95,
-            'Submitting release package to Too Lost...'
+            'Submitting release...'
         );
 
         const submitEndpoint =
