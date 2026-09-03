@@ -10136,10 +10136,29 @@ updateProgress(
     'Saving distribution stores and territories...'
 );
 
+const TOO_LOST_PLATFORM_MAP = {
+    spotify: 'Spotify',
+    apple: 'Apple Music',
+    amazon: 'Amazon Music',
+    youtube: 'YouTube Music',
+    tiktok: 'TikTok',
+    deezer: 'Deezer',
+    tidal: 'Tidal',
+    pandora: 'Pandora',
+    soundcloud: 'Soundcloud',
+    napster: 'Napster',
+    audiomack: 'Audiomack',
+    boomplay: 'Boomplay'
+};
+
 const selectedPlatforms =
-    Array.isArray(window.releaseState.dsps)
-        ? window.releaseState.dsps
-        : [];
+    (
+        Array.isArray(window.releaseState.dsps)
+            ? window.releaseState.dsps
+            : []
+    )
+    .map(id => TOO_LOST_PLATFORM_MAP[id])
+    .filter(Boolean);
 
 const selectedTerritories =
     Array.isArray(window.releaseState.delivery?.territories)
