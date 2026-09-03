@@ -9930,28 +9930,44 @@ for (let i = 0; i < totalTracks; i++) {
                                 })
                             );
 
-                    const writers =
-                        (track.writers || [])
-                            .filter(
-                                writer =>
-                                    writer?.name?.trim()
-                            )
-                            .map(
-                                (writer) => ({
-                                    name:
-                                        writer.name.trim(),
+                    const writers = [];
 
-                                    role:
-                                        Array.isArray(writer.role)
-                                            ? writer.role
-                                            : [
-                                                String(
-                                                    writer.role ||
-                                                    'instrumentalist'
-                                                ).toLowerCase()
-                                            ]
-                                })
-                            );
+                    for (const writer of (track.writers || [])) {
+                        const name = writer?.name?.trim();
+
+                        if (!name) {
+                            continue;
+                        }
+
+                        const roles = Array.isArray(writer.role)
+                            ? writer.role
+                            : [
+                                String(
+                                    writer.role || 'instrumentalist'
+                                ).toLowerCase()
+                            ];
+
+                        const existingWriter = writers.find(
+                            existing =>
+                                existing.name.toLowerCase() === name.toLowerCase()
+                        );
+
+                        if (existingWriter) {
+                            // Same writer already exists.
+                            // Merge any additional roles instead of
+                            // sending a duplicate writer object.
+                            for (const role of roles) {
+                                if (!existingWriter.role.includes(role)) {
+                                    existingWriter.role.push(role);
+                                }
+                            }
+                        } else {
+                            writers.push({
+                                name,
+                                role: roles
+                            });
+                        }
+                    }
 
                     if (!track.audioFileKey) {
                         throw new Error(
