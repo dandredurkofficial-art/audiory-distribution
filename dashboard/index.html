@@ -216,523 +216,111 @@
             'Gospel/Christian': ['Contemporary Gospel', 'Christian Hip-Hop', 'Worship']
         };
 
-        // =========================================================
-        // TOO LOST PLATFORM LIST
-        // =========================================================
-        //
-        // IMPORTANT:
-        // - `id` is Audiory's internal ID.
-        // - `name` is what the artist sees.
-        // - `tooLostValue` is EXACTLY what Too Lost expects.
-        //
-        // Too Lost allows a maximum of 120 platforms per release.
-        // =========================================================
+        let MASTER_DSP_LIST = [];
+        let TOO_LOST_PLATFORMS_LOADED = false;
 
-        const TOO_LOST_PLATFORM_VALUES = `
-        24-7 Entertainment
-        3.DK
-        58pic
-        5sing
-        7Digital
-        ACRCloud
-        AGEDI
-        AMI Entertainment
-        AWA
-        Acer
-        Adaptr
-        Agora
-        Air Vanuatu
-        AirAsia
-        AirAsiaX
-        Akazoo
-        AliGenie
-        Alibaba
-        Alibaba Cloud Computing Co. Ltd.
-        Alibaba Group
-        Alipay
-        Amazon Music
-        Ambients App
-        Anghami
-        Aobai
-        Apple Music
-        Artie
-        Artistxite
-        Astro
-        Audible Magic - Fulfillment360
-        Audible Magic - Rights360
-        Audio Stock
-        Audioclub
-        Audiojungle
-        Audiomack
-        B612
-        BMAT
-        BUBUKA
-        Bandcamp
-        Barstool Sports
-        Beat.no
-        Beatsource
-        Beeline Music
-        Beijing Eye
-        Belgacom
-        Bijian
-        Bilibili
-        Bleep
-        Boomplay
-        Boomplay Music
-        Bose
-        Broadtime
-        Bucher.de
-        Bugs Music
-        Bugs!
-        Bzstech
-        CCA
-        CCI Distribution
-        CDON
-        CIG
-        CTS Eventim AG
-        Canva
-        Celcom
-        Changba
-        China Airlines
-        China Telecom
-        China Unicom
-        Chunghwa Mobile
-        Claro Música
-        ClickNClear
-        Clip Interactive
-        Clone Digital
-        CoSleep&Heartide
-        Coda Music
-        Coolvox
-        Curve
-        Cyberlink
-        Cyworld
-        DISCO
-        DOOLUU
-        Daily Yoga
-        Dalkom
-        Dance All Day
-        DanceFight
-        Daum
-        Deedo
-        Deezer
-        Delta
-        Deutsche Telekom Austria and Netherlands
-        DiGi
-        Dianyin
-        Digitally Imported
-        Discogs
-        Douban Music
-        Douyin
-        Dragonfly FM
-        DroitVision
-        Duanku
-        Dubset
-        Duitang
-        Echo
-        Ex Libris
-        ExLibris
-        FETnet
-        FLO
-        FNAC
-        FUHU
-        Facebook/Instagram
-        Fan Label
-        Fanxian
-        Fastweb
-        Findspire
-        Fliggy
-        Flipagram
-        Fonmix
-        Forest Incentives
-        Friday Music (Omusic)
-        GHH Commerce
-        GMF AeroAsia
-        Gaana
-        Genie Music
-        Gismart
-        Global Radio
-        Google Play
-        Gracenote
-        Grandpad
-        Gravity Mobile
-        HELLORF
-        HMV
-        HTC One
-        HUAWEI Hi-Res
-        Haitu
-        Hangout
-        Hardstyle.com
-        Hema
-        High Res Audio
-        HighResAudio
-        Himalayan FM
-        Huawei Global Radio
-        Huawei Middle East
-        Huawei Middle Eeast
-        Huawei Music
-        Huawei Music - Hi res
-        Huawei Ringtone
-        Huawei South Africa
-        Hunanzhangyue
-        Hungama
-        Huoshan
-        Hym
-        Hyundaicard Music
-        IMI Mobile
-        Iguplus
-        In8 Mobile
-        Infogo
-        Intime
-        Intoo
-        JOOX
-        JPay
-        Jaxsta
-        Jazzed
-        Jeou Tai
-        Jetstar
-        Jiadeyin
-        Jinli Music
-        Jinshan
-        JioSaavn
-        Juhuasuan
-        KDigital Media
-        KKBOX
-        KTV
-        Kakao
-        Kanjian
-        Kanjian Music
-        Keefe Group
-        Keep
-        Kids+
-        Koala FM
-        Kobo
-        Ku FM
-        Kuack Media
-        Kuaishou
-        Kugou
-        Kugou KTV
-        Kugou Live
-        Kugou Ringtone
-        Kugou Sing
-        Kuwo
-        Kuwo Boom
-        Kuwo Juxing
-        Kuwo KTV
-        Kuwo Tingshu
-        Kuwo Vedio
-        Kuyin Ringtone
-        Kwai
-        LINE Music
-        La Musica
-        Last FM
-        Lefit
-        Lenovo Music
-        Lenovo Sound
-        Lequ Music
-        Lickd
-        Line Music (JP)
-        Lissen
-        Litup
-        Lizhi FM
-        Love Music
-        Love Music (China Telecom)
-        Lululemon
-        Lutong
-        MELON
-        MGTV
-        MOO
-        MOOV
-        MQA
-        Mach by Mariposa
-        Manbo
-        Maxis
-        Me2u Music
-        MePlaylist
-        Media Markt
-        Medianet
-        Medion
-        Meishe
-        Meitu
-        Melon Kt
-        Mi Tracks
-        Migu Music
-        Migu Music (China Mobile)
-        Mixcloud
-        Mixette
-        Mixpixie
-        Mixup Digital
-        Mnet
-        Moi Mir
-        Momople
-        Monkey3
-        MoodAgent
-        Motie
-        Muserk
-        Music Reports
-        Music Worx
-        MusicQubed
-        MusicToday
-        Musixmatch
-        Muztube
-        My Melo
-        MyMelo
-        MyMusic
-        Mythical Games
-        NEC
-        Napster
-        NatWest
-        Naver
-        Naver Vibe
-        NetEase Cloud Music
-        Netease Music
-        Nile Air
-        Nuuday
-        Odnoklassniki
-        Oga Dance (MoveWorld)
-        Olleh+Genie
-        Onkyo
-        Onmobile US
-        Open Live
-        Orange France
-        Overmax
-        P.R.O. Agency
-        PEX
-        PEX Attribution Engine
-        PPTV
-        PURE ENERGY GO
-        Pandora
-        Peloton
-        Perfect World Co.,Ltd
-        Perfectpark
-        Philippine Airlines
-        Pikbest
-        Pinterest
-        Pizza Hut
-        Play Network
-        Pledge
-        Plern
-        Pono
-        PortalDisc
-        Pretzel Rocks
-        Prodigium
-        Psonar
-        Psycle
-        Pubbles
-        Pulselocker
-        Pure Music
-        Puxin
-        QNX CAR
-        QNX CAR™
-        QQ FM
-        QQ Music
-        Qantas
-        Qianku
-        Qianqian Music
-        Qingting
-        Qishui Music
-        Qobuz
-        Qub Musique
-        RBS
-        ROK mobile
-        RabbitPre
-        Rainbow Music
-        Raku
-        Rakuten
-        Rakuten Music
-        Rebelation
-        Reload
-        Resso
-        Rhapsody
-        Rhino
-        Roblox
-        Rockbot
-        Roxi
-        Rythm
-        SENYU
-        SUPERMONKEY
-        Sainsburys
-        Samsung Music
-        Saturn
-        SberZvuk
-        Senzari
-        Shazam
-        Shiliu
-        Shipingyingye
-        Shishuo
-        ShopTo
-        Sina Video
-        Sirius XM
-        Slacker
-        Slacker Radio
-        Snack Video
-        Snapchat
-        Soda Music
-        Sohu Video
-        Sona
-        Sonos
-        Soribada
-        Soundhound
-        Soundmouse
-        Soundtrack Your Brand
-        Soundtrack by Twitch
-        Spanish Broadcasting System
-        Spinlet
-        Spotify
-        Stardtb
-        Stellar
-        Styngr
-        SunExpress
-        Sunrise
-        Supernatural
-        Swisscom
-        T Star
-        T-Mobile
-        TDC
-        TDC/TDC Mobile
-        TELE2
-        TIM Music
-        TaiHua
-        Taiwan Mobile
-        Tango
-        Taobao
-        Taomailang
-        Technics Tracks
-        Tencent
-        Tencent Video
-        Tesla Music
-        Thai Airways
-        The Overflow
-        Tidal
-        Tigo
-        TikTok
-        TingTing FM
-        Tmall
-        Tonspion
-        TouchTunes
-        Toutiao
-        Trackdrip
-        Tradebit
-        Traxsource
-        Trebel
-        Triller
-        Triplay
-        Tuned Global
-        Tunewiki
-        Tuokeshangmao
-        Turnkey Corrections
-        Turntable.fm
-        Tuzhan
-        Twitch
-        U-Mobile
-        UC
-        Ucmba
-        United Media Agency (UMA)
-        VCG
-        VEVO
-        VISTOPIA
-        VIVO Hi-Res
-        VKontakte
-        VL Group
-        VUE
-        ViaPath
-        Viamaker
-        Vibe
-        Vibo Telecom
-        Videoshow
-        Viper HIFI
-        Virgin Australia
-        Vodafone
-        WAYZ
-        WEYV
-        Walkgame
-        Wasu
-        Wasu TV
-        We Sing
-        WeChat
-        WeSing
-        Weibo Music
-        Weishi
-        Weltbild DE
-        Whales
-        Wo Music
-        Wxduoduo
-        Xiaomi Music
-        Xiaoying
-        Xigua Video
-        Xinhua Zhiyun Technology Co.,Ltd.
-        Xinpianchang
-        Xinxun
-        Xiquduoduo
-        Xiumi
-        Xiutang
-        Xplore Music Stores
-        Yandex
-        Yingyintonghua
-        Yiqixiu
-        YouTube Music
-        Youku&Tudou
-        Zvooq
-        aiyinsitanFM
-        babubabu
-        babytree
-        baotu
-        dajiang
-        doubleTwist
-        eMusic
-        epub360
-        fizy
-        friDay
-        gaoding
-        hidooro
-        hmv PLAY (Soliton)
-        iFeng
-        iHeart
-        iMusica
-        iQiyi & PPS
-        iSHEJI
-        iTunes
-        iam+ Dial
-        kelakela
-        kuaijianji
-        kugouzhibobanlv
-        lrts
-        mangguofm
-        mobilcom-debitel
-        mylafe
-        nMusic
-        ooopic
-        tingxi
-        wondershare
-        xiaohongshu
-        yesoul
-        yunting
-        `
-            .split('\n')
-            .map(value => value.trim())
-            .filter(Boolean);
-
-
-        // Create Audiory-compatible objects.
-        //
-        // We generate an internal ID while preserving the exact
-        // Too Lost value separately.
-        const MASTER_DSP_LIST = TOO_LOST_PLATFORM_VALUES.map(
-            (platform, index) => ({
-                id:
-                    `tl-platform-${index}-${platform
-                        .toLowerCase()
-                        .replace(/[^a-z0-9]+/g, '-')
-                        .replace(/^-|-$/g, '')}`,
-
-                name: platform,
-
-                tooLostValue: platform,
-
-                icon: 'fa-solid fa-store text-cyan-400'
-            })
+        async function loadTooLostPlatforms() {
+    try {
+        console.log(
+            'Audiory: loading platforms from Too Lost...'
         );
 
+        const response = await fetch(
+            `${API_BASE_URL}/api/toolost/platforms`,
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }
+        );
+
+        const text = await response.text();
+
+        let data;
+
+        try {
+            data = JSON.parse(text);
+        } catch {
+            throw new Error(
+                'Too Lost returned an invalid platforms response.'
+            );
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                data?.message ||
+                data?.error ||
+                `Platform lookup failed (${response.status})`
+            );
+        }
+
+        const platforms =
+            Array.isArray(data?.data?.platforms)
+                ? data.data.platforms
+                : [];
+
+        if (!platforms.length) {
+            throw new Error(
+                'Too Lost returned no available platforms.'
+            );
+        }
+
+        MASTER_DSP_LIST = platforms
+            .map((platform, index) => {
+                const value =
+                    String(platform || '').trim();
+
+                return {
+                    id:
+                        `tl-platform-${index}-${value
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, '-')
+                            .replace(/^-|-$/g, '')}`,
+
+                    name: value,
+
+                    // THIS is the exact value that
+                    // will be sent to Too Lost.
+                    tooLostValue: value,
+
+                    icon:
+                        'fa-solid fa-store text-cyan-400'
+                };
+            })
+            .filter(platform =>
+                platform.tooLostValue
+            );
+
+        TOO_LOST_PLATFORMS_LOADED = true;
+
+        console.log(
+            'Audiory: Too Lost platforms loaded',
+            {
+                count: MASTER_DSP_LIST.length,
+                platforms:
+                    MASTER_DSP_LIST.map(
+                        platform =>
+                            platform.tooLostValue
+                    )
+            }
+        );
+
+        return MASTER_DSP_LIST;
+
+    } catch (error) {
+        console.error(
+            'Audiory: failed to load Too Lost platforms',
+            error
+        );
+
+        MASTER_DSP_LIST = [];
+        TOO_LOST_PLATFORMS_LOADED = false;
+
+        throw error;
+    }
+}
+     
         // =========================================================
 // TOO LOST TERRITORIES
 // =========================================================
@@ -9036,12 +8624,46 @@ function renderStep2Content() {
 // DSP MODAL
 // =========================================================
 
-window.openDspModal = function(searchTerm = '') {
+window.openDspModal = async function(searchTerm = '') {
+
+    // ---------------------------------------------------------
+    // LOAD AUTHORITATIVE TOO LOST PLATFORM LIST
+    // ---------------------------------------------------------
+
+    try {
+
+        if (!TOO_LOST_PLATFORMS_LOADED) {
+            await loadTooLostPlatforms();
+        }
+
+    } catch (error) {
+
+        console.error(
+            'Audiory: unable to load Too Lost platforms',
+            error
+        );
+
+        alert(
+            error?.message ||
+            'Unable to load distribution platforms from Too Lost.'
+        );
+
+        return;
+    }
+
+
+    // ---------------------------------------------------------
+    // EXISTING DSP STATE
+    // ---------------------------------------------------------
 
     if (!Array.isArray(window.releaseState.dsps)) {
         window.releaseState.dsps = [];
     }
 
+
+    // ---------------------------------------------------------
+    // OPEN MODAL
+    // ---------------------------------------------------------
 
     const modalHtml = `
 
@@ -9402,13 +9024,26 @@ window.toggleSingleDsp = function(
 // SELECT / DESELECT PLATFORMS
 // =========================================================
 
-window.toggleAllDsps = function(
-    selectAll
-) {
+window.toggleAllDsps = function(selectAll) {
+
+    if (!Array.isArray(window.releaseState.dsps)) {
+        window.releaseState.dsps = [];
+    }
+
 
     if (selectAll) {
 
-        // Too Lost maximum = 120.
+        if (!Array.isArray(MASTER_DSP_LIST) ||
+            !MASTER_DSP_LIST.length) {
+
+            alert(
+                'Distribution platforms have not loaded yet.'
+            );
+
+            return;
+        }
+
+
         window.releaseState.dsps =
             MASTER_DSP_LIST
                 .slice(0, 120)
@@ -9420,6 +9055,8 @@ window.toggleAllDsps = function(
 
     }
 
+
+    // Refresh modal list.
 
     const searchInput =
         document.getElementById(
@@ -9442,6 +9079,8 @@ window.toggleAllDsps = function(
 
     }
 
+
+    // Update selected count.
 
     const count =
         document.getElementById(
@@ -11573,9 +11212,35 @@ updateProgress(
     'Saving distribution stores and territories...'
 );
 
-// =========================================================
+
+// ============================================================
+// MAKE SURE TOO LOST PLATFORMS ARE LOADED
+// ============================================================
+
+if (
+    !TOO_LOST_PLATFORMS_LOADED ||
+    !Array.isArray(MASTER_DSP_LIST) ||
+    !MASTER_DSP_LIST.length
+) {
+
+    try {
+
+        await loadTooLostPlatforms();
+
+    } catch (error) {
+
+        throw new Error(
+            error?.message ||
+            'Unable to load the available Too Lost distribution platforms.'
+        );
+
+    }
+
+}
+
+// ============================================================
 // RESOLVE + NORMALIZE SELECTED PLATFORMS
-// =========================================================
+// ============================================================
 
 const selectedPlatformIds =
     Array.isArray(window.releaseState.dsps)
@@ -11588,45 +11253,88 @@ const selectedPlatformIds =
             .slice(0, 120)
         : [];
 
-window.releaseState.dsps = selectedPlatformIds;
 
-// Convert Audiory internal IDs -> exact Too Lost platform names.
-const resolvedPlatforms = selectedPlatformIds
-    .map(id => {
-        const platform =
-            MASTER_DSP_LIST.find(
-                dsp => dsp.id === id
-            );
+// Keep only valid loaded platform IDs.
 
-        return platform?.tooLostValue || null;
-    })
-    .filter(Boolean);
+window.releaseState.dsps =
+    selectedPlatformIds;
 
-// Remove duplicate platform names.
+
+// ============================================================
+// CONVERT AUDIORY IDs -> EXACT TOO LOST PLATFORM VALUES
+// ============================================================
+
+const resolvedPlatforms =
+    selectedPlatformIds
+        .map(id => {
+
+            const platform =
+                MASTER_DSP_LIST.find(
+                    dsp => dsp.id === id
+                );
+
+            return platform?.tooLostValue || null;
+
+        })
+        .filter(Boolean);
+
+
+// ============================================================
+// REMOVE DUPLICATES
+// ============================================================
+
 const selectedPlatforms = [
     ...new Set(resolvedPlatforms)
 ];
 
-// Debug information.
+
+// ============================================================
+// DEBUG INFORMATION
+// ============================================================
+
 console.log(
     'AUDIORY PLATFORM SELECTION:',
     {
-        uiSelectedCount: selectedPlatformIds.length,
-        resolvedCount: resolvedPlatforms.length,
-        uniqueTooLostCount: selectedPlatforms.length,
+        availablePlatformCount:
+            MASTER_DSP_LIST.length,
+
+        uiSelectedCount:
+            selectedPlatformIds.length,
+
+        resolvedCount:
+            resolvedPlatforms.length,
+
+        uniqueTooLostCount:
+            selectedPlatforms.length,
+
         duplicateCount:
             resolvedPlatforms.length -
             selectedPlatforms.length,
-        platforms: selectedPlatforms
+
+        platforms:
+            selectedPlatforms
     }
 );
+// ============================================================
+// VALIDATE PLATFORM SELECTION
+// ============================================================
 
-// Too Lost maximum is 120.
+if (!selectedPlatforms.length) {
+
+    throw new Error(
+        'Please select at least one distribution platform before submitting.'
+    );
+
+}
+
+
 if (selectedPlatforms.length > 120) {
+
     throw new Error(
         `Too Lost allows a maximum of 120 distribution platforms per release. ` +
         `Audiory is attempting to send ${selectedPlatforms.length} unique platforms.`
     );
+
 }
 
 
@@ -11646,24 +11354,38 @@ const selectedTerritories =
         TOO_LOST_TERRITORY_CODES.includes(code)
     );
 
+// ============================================================
+// VALIDATE THAT EVERY VALUE CAME FROM TOO LOST
+// ============================================================
 
-// =========================================================
-// VALIDATE PLATFORM SELECTION
-// =========================================================
-
-if (!selectedPlatforms.length) {
-
-    throw new Error(
-        'Please select at least one distribution platform before submitting.'
+const authoritativePlatformValues =
+    new Set(
+        MASTER_DSP_LIST
+            .map(dsp =>
+                dsp?.tooLostValue
+            )
+            .filter(Boolean)
     );
 
-}
+
+const invalidSelectedPlatforms =
+    selectedPlatforms.filter(
+        platform =>
+            !authoritativePlatformValues.has(
+                platform
+            )
+    );
 
 
-if (selectedPlatforms.length > 120) {
+if (invalidSelectedPlatforms.length) {
+
+    console.error(
+        'Audiory found invalid Too Lost platforms:',
+        invalidSelectedPlatforms
+    );
 
     throw new Error(
-        'Too Lost allows a maximum of 120 distribution platforms per release.'
+        'One or more selected distribution platforms are no longer available from Audiory Distribution. Please reopen the platform selector and try again.'
     );
 
 }
@@ -11682,54 +11404,78 @@ if (selectedTerritories.length !== 2) {
 }
 
 
-// =========================================================
+// ============================================================
 // DELIVERY PAYLOAD
-// =========================================================
+// ============================================================
 
 const deliveryPayload = {
+
     delivery: {
-        platforms: selectedPlatforms,
-        territories: selectedTerritories,
+
+        platforms:
+            selectedPlatforms,
+
+        territories:
+            selectedTerritories,
 
         additional: {
-            youtube: Boolean(
-                window.releaseState.delivery?.youtube
-            ),
 
-            facebook: Boolean(
-                window.releaseState.delivery?.facebook
-            ),
+            youtube:
+                Boolean(
+                    window.releaseState.delivery?.youtube
+                ),
 
-            soundcloud: Boolean(
-                window.releaseState.delivery?.soundcloud
-            ),
+            facebook:
+                Boolean(
+                    window.releaseState.delivery?.facebook
+                ),
 
-            soundExchange: Boolean(
-                window.releaseState.delivery?.soundExchange
-            ),
+            soundcloud:
+                Boolean(
+                    window.releaseState.delivery?.soundcloud
+                ),
 
-            trackLibs: Boolean(
-                window.releaseState.delivery?.trackLibs
-            ),
+            soundExchange:
+                Boolean(
+                    window.releaseState.delivery?.soundExchange
+                ),
 
-            lyricfind: Boolean(
-                window.releaseState.delivery?.lyricfind
-            )
+            trackLibs:
+                Boolean(
+                    window.releaseState.delivery?.trackLibs
+                ),
+
+            lyricfind:
+                Boolean(
+                    window.releaseState.delivery?.lyricfind
+                )
+
         },
 
-        beatPort: Boolean(
-            window.releaseState.delivery?.beatPort
-        )
+        beatPort:
+            Boolean(
+                window.releaseState.delivery?.beatPort
+            )
+
     },
 
-    platforms: selectedPlatforms,
-    territories: selectedTerritories,
-    dsps: selectedPlatforms
+    // These can remain for your Worker compatibility.
+
+    platforms:
+        selectedPlatforms,
+
+    territories:
+        selectedTerritories,
+
+    dsps:
+        selectedPlatforms
+
 };
 
-// =========================================================
+
+// ============================================================
 // BEATPORT FORM
-// =========================================================
+// ============================================================
 
 if (
     window.releaseState.delivery?.beatPort
@@ -11757,39 +11503,82 @@ if (
 
 }
 
+
+// ============================================================
+// SEND DELIVERY CONFIGURATION TO AUDIORY WORKER
+// ============================================================
+
 const deliveryEndpoint =
     `${WORKER_BASE_URL}/api/releases/${releaseId}/delivery`;
 
-const deliveryRes = await fetch(
-    deliveryEndpoint,
-    {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(deliveryPayload)
-    }
-);
+
+const deliveryRes =
+    await fetch(
+        deliveryEndpoint,
+        {
+            method: 'PATCH',
+
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+
+            body:
+                JSON.stringify(
+                    deliveryPayload
+                )
+        }
+    );
+
+
+// ============================================================
+// READ TOO LOST RESPONSE
+// ============================================================
 
 const deliveryResponseText =
     await deliveryRes.text();
 
+
 let deliveryResponseData = {};
 
 try {
+
     deliveryResponseData =
         JSON.parse(
             deliveryResponseText || '{}'
         );
+
 } catch (e) {
+
     deliveryResponseData = {
-        raw: deliveryResponseText
+        raw:
+            deliveryResponseText
     };
+
 }
 
+
+// ============================================================
+// HANDLE ERROR
+// ============================================================
+
 if (!deliveryRes.ok) {
+
+    console.error(
+        'Too Lost delivery configuration failed:',
+        {
+            status:
+                deliveryRes.status,
+
+            response:
+                deliveryResponseData,
+
+            submittedPlatforms:
+                selectedPlatforms
+        }
+    );
+
     throw new Error(
         `Too Lost delivery configuration failed (${deliveryRes.status}): ${
             deliveryResponseData?.message ||
@@ -11797,13 +11586,18 @@ if (!deliveryRes.ok) {
             deliveryResponseText
         }`
     );
+
 }
+
+
+// ============================================================
+// SUCCESS
+// ============================================================
 
 console.log(
     'Too Lost delivery configuration saved:',
     deliveryResponseData
 );
-
         // =============================================================
         // NOW SUBMIT RELEASE TO TOO LOST
         // =============================================================
