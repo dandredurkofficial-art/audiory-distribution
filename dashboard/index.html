@@ -7301,7 +7301,8 @@ window.releaseState = window.releaseState || {
     }],
     agreements: {
         termsAccepted: false,
-        rightsConfirmed: false
+        rightsConfirmed: false,
+        youtubeRightsConfirmed: false
     }
 };
 
@@ -10222,12 +10223,39 @@ function renderStep5Content() {
             <div class="p-5 rounded-2xl bg-brand-dark border border-brand-border space-y-4 text-xs text-gray-300">
                 <h3 class="font-bold text-white text-sm">Legal & Copyright Affirmation</h3>
                 <label class="flex items-start gap-3 cursor-pointer">
-                    <input type="checkbox" ${window.releaseState.agreements.termsAccepted ? 'checked' : ''} onchange="window.releaseState.agreements.termsAccepted = this.checked" class="mt-0.5 rounded border-brand-border">
-                    <span>I certify that I am authorized to grant distribution rights for all masters, lyrics, and metadata supplied in this submission package.</span>
+                    <input
+                        type="checkbox"
+                        ${window.releaseState.agreements.termsAccepted ? 'checked' : ''}
+                        onchange="window.releaseState.agreements.termsAccepted = this.checked"
+                        class="mt-0.5 rounded border-brand-border"
+                    >
+                    <span>
+                        I certify that I am authorized to grant distribution rights for all masters, lyrics, and metadata supplied in this submission package.
+                    </span>
                 </label>
+
                 <label class="flex items-start gap-3 cursor-pointer">
-                    <input type="checkbox" ${window.releaseState.agreements.rightsConfirmed ? 'checked' : ''} onchange="window.releaseState.agreements.rightsConfirmed = this.checked" class="mt-0.5 rounded border-brand-border">
-                    <span>I confirm all underlying samples, interpolations, and performances are fully cleared for commercial distribution worldwide.</span>
+                    <input
+                        type="checkbox"
+                        ${window.releaseState.agreements.rightsConfirmed ? 'checked' : ''}
+                        onchange="window.releaseState.agreements.rightsConfirmed = this.checked"
+                        class="mt-0.5 rounded border-brand-border"
+                    >
+                    <span>
+                        I confirm all underlying samples, interpolations, and performances are fully cleared for commercial distribution worldwide.
+                    </span>
+                </label>
+
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        ${window.releaseState.agreements.youtubeRightsConfirmed ? 'checked' : ''}
+                        onchange="window.releaseState.agreements.youtubeRightsConfirmed = this.checked"
+                        class="mt-0.5 rounded border-brand-border"
+                    >
+                    <span>
+                        I confirm that I own or control the rights necessary for YouTube distribution of this release and authorize its delivery to YouTube.
+                    </span>
                 </label>
             </div>
         </div>
@@ -10413,6 +10441,12 @@ window.handleFormSubmission = async function(event) {
 
     if (!window.releaseState.agreements?.rightsConfirmed) {
         return window.showToast('Please confirm that all samples, interpolations and performances are cleared.');
+    }
+
+    if (!window.releaseState.agreements?.youtubeRightsConfirmed) {
+        return window.showToast(
+            'Please confirm that you have the necessary rights for YouTube distribution.'
+        );
     }
 
     const hasArtworkFile = Boolean(window.releaseState.artwork?.file);
