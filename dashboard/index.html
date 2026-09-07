@@ -216,6 +216,147 @@
             'Gospel/Christian': ['Contemporary Gospel', 'Christian Hip-Hop', 'Worship']
         };
 
+        // =============================================================
+// TOO LOST -> AUDIORY GENRE ALIASES
+//
+// Used when Edit Release receives Too Lost's canonical
+// genre names and needs to restore Audiory's dropdown value.
+// =============================================================
+
+const TOO_LOST_GENRE_ALIASES = {
+
+    "Afrobeats":
+        "World/Afro-Beat",
+
+    "Afrobeat":
+        "World/Afro-Beat",
+
+    "Afro Pop":
+        "World/Afro-Pop",
+
+    "Afropop":
+        "World/Afro-Pop",
+
+    "Afro-Pop":
+        "World/Afro-Pop",
+
+    "African":
+        "African",
+
+    "Afro House":
+        "Afro House",
+
+    "Amapiano":
+        "Amapiano",
+
+    "Amapiano (Gqom)":
+        "Amapiano (Gqom)",
+
+    "Alternative":
+        "Alternative",
+
+    "Dance":
+        "Dance",
+
+    "Dance / Pop":
+        "Dance / Pop",
+
+    "Hip-Hop":
+        "Hip-Hop",
+
+    "Hip Hop":
+        "Hip-Hop",
+
+    "Hip-Hop/Rap":
+        "Hip-Hop/Rap",
+
+    "House":
+        "House",
+
+    "R&B":
+        "R&B",
+
+    "Reggae":
+        "Reggae",
+
+    "Rock":
+        "Rock",
+
+    "Soul":
+        "Soul",
+
+    "Pop":
+        "Dance / Pop"
+};
+
+        // =============================================================
+// LOAD TOO LOST GENRES
+// =============================================================
+
+window.TOO_LOST_GENRES = [];
+
+window.loadTooLostGenres = async function() {
+
+    try {
+
+        const token =
+            window.currentUser?.getIdToken
+                ? await window.currentUser.getIdToken()
+                : '';
+
+        const response =
+            await fetch(
+                '/api/toolost/genres',
+                {
+                    method: 'GET',
+                    headers: {
+                        'Authorization':
+                            `Bearer ${token}`,
+                        'Accept':
+                            'application/json'
+                    }
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !data?.success ||
+            !Array.isArray(data?.data?.genres)
+        ) {
+
+            console.error(
+                'Too Lost genre lookup failed:',
+                data
+            );
+
+            return [];
+        }
+
+        window.TOO_LOST_GENRES =
+            data.data.genres;
+
+        console.log(
+            'Too Lost genres loaded:',
+            window.TOO_LOST_GENRES.length,
+            window.TOO_LOST_GENRES
+        );
+
+        return window.TOO_LOST_GENRES;
+
+    } catch (error) {
+
+        console.error(
+            'Unable to load Too Lost genres:',
+            error
+        );
+
+        return [];
+    }
+};
+
         let MASTER_DSP_LIST = [];
         let TOO_LOST_PLATFORMS_LOADED = false;
 
@@ -3216,18 +3357,10 @@ window.editReleaseCatalog = async function(index) {
                     ),
 
                 primaryGenre:
-                    item.primaryGenre ||
-                    item.primary_genre ||
-                    item.genre ||
-                    item.metadata?.primaryGenre ||
-                    '',
+                    audioryPrimaryGenre || '',
 
                 secondaryGenre:
-                    item.secondaryGenre ||
-                    item.secondary_genre ||
-                    item.subgenre ||
-                    item.metadata?.secondaryGenre ||
-                    '',
+                    audiorySecondaryGenre || '',
 
                 version:
                     item.version ||
