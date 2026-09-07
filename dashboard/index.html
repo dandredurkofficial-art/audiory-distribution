@@ -3104,6 +3104,77 @@ window.editReleaseCatalog = async function(index) {
             ).toLowerCase() === 'in_review' ||
             Boolean(item.submittedAt);
 
+        function tooLostGenreToAudioryGenre(value) {
+            const raw = String(value || '').trim();
+
+            if (!raw) return '';
+
+            // Already an Audiory dropdown value
+            if (
+                typeof GENRE_MAP !== 'undefined' &&
+                Object.prototype.hasOwnProperty.call(GENRE_MAP, raw)
+            ) {
+                return raw;
+            }
+
+            // Convert Too Lost's canonical value back to Audiory's dropdown value
+            if (typeof TOO_LOST_GENRE_ALIASES !== 'undefined') {
+                const match = Object.entries(TOO_LOST_GENRE_ALIASES).find(
+                    ([audioryName, tooLostValue]) =>
+                        String(tooLostValue).trim().toLowerCase() === raw.toLowerCase()
+                );
+
+                if (match) return match[0];
+            }
+
+            // Important fallback: preserve the value instead of making it blank
+            return raw;
+        }
+
+        const rawPrimaryGenre =
+            item.primaryGenre ||
+            item.primary_genre ||
+            item.genre ||
+            item.metadata?.primaryGenre ||
+            '';
+
+        const rawSecondaryGenre =
+            item.secondaryGenre ||
+            item.secondary_genre ||
+            item.subgenre ||
+            item.metadata?.secondaryGenre ||
+            '';
+
+        const audioryPrimaryGenre =
+            tooLostGenreToAudioryGenre(rawPrimaryGenre);
+
+        const audiorySecondaryGenre =
+            tooLostGenreToAudioryGenre(rawSecondaryGenre);
+
+        const deliverySource =
+            item.delivery && typeof item.delivery === 'object'
+                ? item.delivery
+                : {};
+
+        const returnedTerritories =
+            Array.isArray(deliverySource.territories)
+                ? deliverySource.territories
+                : (
+                    Array.isArray(item.territories)
+                        ? item.territories
+                        : []
+                );
+
+        const restoredTerritories =
+            returnedTerritories
+                .map(value => String(value || '').trim().toUpperCase())
+                .filter(code =>
+                    code !== 'WORLDWIDE' &&
+                    typeof TOO_LOST_TERRITORY_CODES !== 'undefined' &&
+                    TOO_LOST_TERRITORY_CODES.includes(code)
+                )
+                .slice(0, 2);
+
         // --------------------------------------------------------
         // 10. BUILD COMPLETE EDIT STATE
         // --------------------------------------------------------
@@ -3263,7 +3334,7 @@ window.editReleaseCatalog = async function(index) {
                     returnedPlatformValues,
 
                 territories:
-                    territories,
+                    restoredTerritories,
 
                 youtube:
                     additionalDelivery.youtube !== undefined
