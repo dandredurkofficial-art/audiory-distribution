@@ -3151,11 +3151,6 @@ window.editReleaseCatalog = async function(index) {
         const audiorySecondaryGenre =
             tooLostGenreToAudioryGenre(rawSecondaryGenre);
 
-        const deliverySource =
-            item.delivery && typeof item.delivery === 'object'
-                ? item.delivery
-                : {};
-
         const returnedTerritories =
             Array.isArray(deliverySource.territories)
                 ? deliverySource.territories
