@@ -6709,8 +6709,20 @@ window.deleteReleaseCatalog = async function(releaseId) {
 
     try {
 
+        /*
+         * ---------------------------------------------------------
+         * LOAD THE PLATFORM CAPABILITY INFORMATION
+         * ---------------------------------------------------------
+         *
+         * We still use /analytics/platforms to verify that the
+         * selected platform exists.
+         *
+         * We do NOT use supportsTotalStreams here.
+         */
+
         const platformInfo =
             await loadAnalyticsPlatforms();
+
 
         const platformMeta =
             platformInfo.platforms.find(
@@ -6729,253 +6741,81 @@ window.deleteReleaseCatalog = async function(releaseId) {
         }
 
 
-        const supportsOverview =
-            platformMeta.supportsOverview === true;
-
-        const supportsTotalStreams =
-            platformMeta.supportsTotalStreams === true;
-
-
         /*
          * ---------------------------------------------------------
-         * CASE 1
-         * Platform supports overview analytics.
-         *
-         * Use /platforms/data.
+         * SELECTED PLATFORM OVERVIEW
          * ---------------------------------------------------------
+         *
+         * Use ONLY:
+         *
+         * /analytics/platforms/data
+         *
+         * This endpoint returns:
+         *
+         * countryTotal
+         * streamsTotal
+         * totalStreams
+         * tracksTotal
+         *
+         * We intentionally do NOT request:
+         *
+         * /analytics/platforms/total-streams
+         *
+         * because Too Lost is currently returning HTTP 500
+         * for that endpoint.
          */
 
-        if (supportsOverview) {
+        const query =
+            buildQuery({
+                platform:
+                    platform,
 
-            const query =
-                buildQuery({
-                    platform:
-                        platform,
+                period:
+                    currentAnalyticsPeriod,
 
-                    period:
-                        currentAnalyticsPeriod,
-
-                    release:
-                        selectedAnalyticsRelease ||
-                        undefined
-                });
+                release:
+                    selectedAnalyticsRelease ||
+                    undefined
+            });
 
 
-            const overviewResponse =
-                await analyticsApi(
-                    `/api/analytics/platforms/data${query}`
-                );
-
-
-            const overview =
-                unwrapAnalyticsResponse(
-                    overviewResponse
-                );
-
-
-            /*
-             * Total-streams is optional here.
-             *
-             * If Too Lost returns 500, we simply continue
-             * with the working overview response.
-             */
-
-            let totalStreamsData =
-                null;
-
-
-            if (
-                supportsTotalStreams
-            ) {
-
-                try {
-
-                    const response =
-                        await analyticsApi(
-                            `/api/analytics/platforms/total-streams${query}`
-                        );
-
-                    totalStreamsData =
-                        unwrapAnalyticsResponse(
-                            response
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        `Optional total-streams analytics unavailable for ${platform}:`,
-                        error
-                    );
-
-                }
-
-            }
-
-
-            renderPlatformAnalytics(
-                platform,
-                overview,
-                totalStreamsData
+        const overviewResponse =
+            await analyticsApi(
+                `/api/analytics/platforms/data${query}`
             );
 
-            return;
-        }
+
+        const overview =
+            unwrapAnalyticsResponse(
+                overviewResponse
+            );
 
 
         /*
          * ---------------------------------------------------------
-         * CASE 2
-         * Platform does NOT support overview analytics.
+         * RENDER THE WORKING PLATFORM OVERVIEW
+         * ---------------------------------------------------------
          *
-         * We can try total-streams, but if Too Lost returns
-         * 500, do NOT display "Platform analytics failed".
-         * Display a clean unavailable message instead.
-         * ---------------------------------------------------------
+         * The existing renderer already understands the response
+         * from /platforms/data.
          */
 
-        if (
-            supportsTotalStreams
-        ) {
+        renderPlatformAnalytics(
+            platform,
+            overview,
+            null
+        );
 
-            const query =
-                buildQuery({
-                    platform:
-                        platform,
+        return;
 
-                    period:
-                        currentAnalyticsPeriod,
-
-                    release:
-                        selectedAnalyticsRelease ||
-                        undefined
-                });
-
-
-            try {
-
-                const response =
-                    await analyticsApi(
-                        `/api/analytics/platforms/total-streams${query}`
-                    );
-
-
-                const totalStreamsData =
-                    unwrapAnalyticsResponse(
-                        response
-                    );
-
-
-                renderPlatformAnalytics(
-                    platform,
-                    totalStreamsData,
-                    totalStreamsData
-                );
-
-                return;
-
-            } catch (error) {
-
-                console.warn(
-                    `Audiory total-streams analytics unavailable for ${platform}:`,
-                    error
-                );
-
-
-                if (content) {
-
-                    content.innerHTML = `
-                        <div class="
-                            bg-brand-card
-                            border
-                            border-yellow-500/20
-                            rounded-2xl
-                            p-8
-                            text-center
-                        ">
-
-                            <div class="
-                                text-sm
-                                font-semibold
-                                text-yellow-400
-                            ">
-                                Platform analytics unavailable
-                            </div>
-
-                            <div class="
-                                text-xs
-                                text-gray-500
-                                mt-2
-                            ">
-                                Audiory does not currently return
-                                platform analytics for
-                                ${escapeHtml(platform)}
-                                for this period.
-                            </div>
-
-                            <div class="
-                                text-[10px]
-                                text-gray-600
-                                mt-3
-                            ">
-                                This is an upstream Too Lost
-                                analytics limitation, not an
-                                Audiory dashboard error.
-                            </div>
-
-                        </div>
-                    `;
-
-                }
-
-                return;
-            }
-
-        }
-
-
-        /*
-         * ---------------------------------------------------------
-         * CASE 3
-         * Platform supports neither endpoint.
-         * ---------------------------------------------------------
-         */
-
-        if (content) {
-
-            content.innerHTML = `
-                <div class="
-                    bg-brand-card
-                    border
-                    border-yellow-500/20
-                    rounded-2xl
-                    p-8
-                    text-center
-                ">
-
-                    <div class="
-                        text-sm
-                        font-semibold
-                        text-yellow-400
-                    ">
-                        Analytics unavailable
-                    </div>
-
-                    <div class="
-                        text-xs
-                        text-gray-500
-                        mt-2
-                    ">
-                        Audiory does not currently provide
-                        platform analytics for
-                        ${escapeHtml(platform)}.
-                    </div>
-
-                </div>
-            `;
-
-        }
 
     } catch (error) {
+
+        console.error(
+            `Platform analytics failed for ${platform}:`,
+            error
+        );
+
 
         if (content) {
 
