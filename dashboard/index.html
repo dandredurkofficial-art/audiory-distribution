@@ -5363,7 +5363,6 @@ window.deleteReleaseCatalog = async function(releaseId) {
 
                     ${[
                         ["overview", "Overview"],
-                        ["platforms", "Platforms"],
                         ["tracks", "Tracks"],
                         ["demographics", "Demographics"],
                         ["usage", "Usage Discovery"],
@@ -5564,18 +5563,6 @@ window.deleteReleaseCatalog = async function(releaseId) {
             renderOverviewLoading();
 
             await fetchOverviewData();
-
-            return;
-
-        }
-
-
-        if (
-            activeAnalyticsTab ===
-            "platforms"
-        ) {
-
-            await renderPlatformsView();
 
             return;
 
