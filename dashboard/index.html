@@ -13108,189 +13108,539 @@ window.prefState = {
 window.renderPreferencesView = function() {
     return `
     <div class="p-4 sm:p-6 max-w-6xl mx-auto space-y-6 sm:space-y-8 relative overflow-x-hidden">
-        <!-- Toast Notification Container -->
-        <div id="pref-toast" class="hidden fixed top-5 right-5 z-50 px-4 py-3 rounded-xl text-xs font-semibold shadow-lg transition-all transform duration-300 flex items-center gap-2"></div>
 
-        <!-- Header -->
+        <div id="pref-toast"
+             class="hidden fixed top-5 right-5 z-50 px-4 py-3 rounded-xl text-xs font-semibold shadow-lg transition-all transform duration-300 flex items-center gap-2">
+        </div>
+
+        <!-- HEADER -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-brand-border/40 pb-5 gap-4">
             <div>
-                <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Artist & Label Preferences</h1>
-                <p class="text-xs text-gray-400 mt-1">Manage platform profiles, metadata defaults, social links, and delivery settings.</p>
+                <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                    Artist & Label Preferences
+                </h1>
+                <p class="text-xs text-gray-400 mt-1">
+                    Manage platform profiles, metadata defaults, social links, and delivery settings.
+                </p>
             </div>
+
             <div id="pref-header-actions" class="shrink-0">
-                <button onclick="window.savePreferences()" id="btn-save-preferences" class="w-full sm:w-auto px-4 py-2 bg-brand-accent hover:brightness-110 text-black font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-floppy-disk"></i> Save Preferences
+                <button onclick="window.savePreferences()"
+                        id="btn-save-preferences"
+                        class="w-full sm:w-auto px-4 py-2 bg-brand-accent hover:brightness-110 text-black font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Save Preferences
                 </button>
             </div>
         </div>
 
-        <!-- Tab Controls -->
+        <!-- TABS -->
         <div class="flex gap-2 sm:gap-4 border-b border-brand-border/40 pb-3">
-            <button id="tab-btn-artist" onclick="switchPrefTab('artist')" class="px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80">Artist Profile</button>
-            <button id="tab-btn-label" onclick="switchPrefTab('label')" class="px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all">Label Settings</button>
+            <button id="tab-btn-artist"
+                    onclick="switchPrefTab('artist')"
+                    class="px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80">
+                Artist Profile
+            </button>
+
+            <button id="tab-btn-label"
+                    onclick="switchPrefTab('label')"
+                    class="px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all">
+                Label Settings
+            </button>
         </div>
 
-        <!-- Submitted Summary Card -->
-        <div id="pref-submitted-view" class="hidden bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-6 space-y-6">
+        <!-- =========================================================
+             ARTIST SUBMITTED VIEW
+        ========================================================== -->
+        <div id="pref-submitted-view"
+             class="hidden bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-6 space-y-6">
+
             <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-brand-border/30 pb-4 gap-3">
                 <div class="flex items-center gap-2.5">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-                    <h2 class="text-sm sm:text-base font-bold text-white">Submitted Artist Profile</h2>
+                    <h2 class="text-sm sm:text-base font-bold text-white">
+                        Submitted Artist Profile
+                    </h2>
                 </div>
-                <div class="flex items-center gap-2 self-start sm:self-auto">
-                    <button onclick="window.openEditMode()" class="px-3 py-1.5 bg-brand-dark hover:bg-black/40 text-brand-accent border border-brand-border/80 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5">
-                        <i class="fa-solid fa-pen-to-square"></i> Edit
-                    </button>
-                    <button onclick="window.promptDeleteModal()" class="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5">
-                        <i class="fa-solid fa-trash-can"></i> Delete
-                    </button>
-                </div>
-            </div>
 
-            <!-- Lightweight Inline Delete Confirmation Card -->
-            <div id="pref-delete-modal" class="hidden bg-rose-500/10 border border-rose-500/30 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all">
-                <div class="flex items-center gap-3 text-rose-300 text-xs font-medium">
-                    <i class="fa-solid fa-triangle-exclamation text-base text-rose-400 shrink-0"></i>
-                    <span>This action will clear your saved artist preferences. This cannot be undone.</span>
-                </div>
-                <div class="flex gap-2 shrink-0 w-full sm:w-auto justify-end">
-                    <button onclick="window.closeDeleteModal()" class="px-3.5 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold text-xs rounded-xl transition-all">
-                        Cancel
-                    </button>
-                    <button onclick="window.confirmDeletePreferences()" class="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl transition-all flex items-center gap-1.5">
-                        <i class="fa-solid fa-trash"></i> Delete
-                    </button>
-                </div>
+                <button onclick="window.openEditMode()"
+                        class="px-3 py-1.5 bg-brand-dark hover:bg-black/40 text-brand-accent border border-brand-border/80 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    Edit
+                </button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                 <div class="space-y-3">
-                    <h3 class="text-xs uppercase font-bold text-gray-400 tracking-wider">Basic Information</h3>
+                    <h3 class="text-xs uppercase font-bold text-gray-400 tracking-wider">
+                        Basic Information
+                    </h3>
+
                     <div class="bg-black/30 rounded-xl p-4 space-y-2 border border-brand-border/30 text-xs">
-                        <p class="text-gray-300"><strong class="text-white">Artist Name:</strong> <span id="summary-artistName" class="ml-1 text-gray-200"></span></p>
-                        <p class="text-gray-300"><strong class="text-white">Genres:</strong> <span id="summary-genres" class="ml-1 text-gray-200"></span></p>
-                        <p class="text-gray-300"><strong class="text-white">Language:</strong> <span id="summary-language" class="ml-1 text-gray-200"></span></p>
-                        <p class="text-gray-300"><strong class="text-white">Bio:</strong> <span id="summary-about" class="ml-1 text-gray-200 block mt-1 italic break-words"></span></p>
+                        <p class="text-gray-300">
+                            <strong class="text-white">Artist Name:</strong>
+                            <span id="summary-artistName" class="ml-1 text-gray-200"></span>
+                        </p>
+
+                        <p class="text-gray-300">
+                            <strong class="text-white">Genres:</strong>
+                            <span id="summary-genres" class="ml-1 text-gray-200"></span>
+                        </p>
+
+                        <p class="text-gray-300">
+                            <strong class="text-white">Language:</strong>
+                            <span id="summary-language" class="ml-1 text-gray-200"></span>
+                        </p>
+
+                        <p class="text-gray-300">
+                            <strong class="text-white">Bio:</strong>
+                            <span id="summary-about"
+                                  class="ml-1 text-gray-200 block mt-1 italic break-words"></span>
+                        </p>
                     </div>
                 </div>
 
                 <div class="space-y-3">
-                    <h3 class="text-xs uppercase font-bold text-gray-400 tracking-wider">Platform Links</h3>
+                    <h3 class="text-xs uppercase font-bold text-gray-400 tracking-wider">
+                        Platform Links
+                    </h3>
+
                     <div class="bg-black/30 rounded-xl p-4 space-y-2 border border-brand-border/30 text-xs">
-                        <p class="text-gray-300 flex items-start gap-2">
-                            <i class="fa-brands fa-spotify text-emerald-400 text-sm shrink-0 mt-0.5"></i>
-                            <span id="summary-spotify" class="break-all text-gray-200"></span>
+                        <p class="text-gray-300">
+                            <strong class="text-white">Spotify:</strong>
+                            <span id="summary-spotify" class="ml-1 break-all text-gray-200"></span>
                         </p>
-                        <p class="text-gray-300 flex items-start gap-2">
-                            <i class="fa-brands fa-apple text-gray-300 text-sm shrink-0 mt-0.5"></i>
-                            <span id="summary-appleMusic" class="break-all text-gray-200"></span>
+
+                        <p class="text-gray-300">
+                            <strong class="text-white">Apple Music:</strong>
+                            <span id="summary-appleMusic" class="ml-1 break-all text-gray-200"></span>
                         </p>
-                        <p class="text-gray-300 flex items-start gap-2">
-                            <i class="fa-brands fa-youtube text-red-400 text-sm shrink-0 mt-0.5"></i>
-                            <span id="summary-vevo" class="break-all text-gray-200"></span>
+
+                        <p class="text-gray-300">
+                            <strong class="text-white">SoundCloud:</strong>
+                            <span id="summary-soundcloud" class="ml-1 break-all text-gray-200"></span>
                         </p>
-                        <p class="text-gray-300 flex items-start gap-2">
-                            <i class="fa-solid fa-globe text-blue-400 text-sm shrink-0 mt-0.5"></i>
-                            <span id="summary-website" class="break-all text-gray-200"></span>
+
+                        <p class="text-gray-300">
+                            <strong class="text-white">YouTube:</strong>
+                            <span id="summary-youtube" class="ml-1 break-all text-gray-200"></span>
+                        </p>
+
+                        <p class="text-gray-300">
+                            <strong class="text-white">VEVO:</strong>
+                            <span id="summary-vevo" class="ml-1 break-all text-gray-200"></span>
+                        </p>
+
+                        <p class="text-gray-300">
+                            <strong class="text-white">Website:</strong>
+                            <span id="summary-website" class="ml-1 break-all text-gray-200"></span>
                         </p>
                     </div>
                 </div>
             </div>
 
             <div class="space-y-3">
-                <h3 class="text-xs uppercase font-bold text-gray-400 tracking-wider">Copyright & Record Label</h3>
+                <h3 class="text-xs uppercase font-bold text-gray-400 tracking-wider">
+                    Copyright & Release Defaults
+                </h3>
+
                 <div class="bg-black/30 rounded-xl p-4 grid grid-cols-1 md:grid-cols-3 gap-3 border border-brand-border/30 text-xs">
-                    <p class="text-gray-300"><strong class="text-white">Label:</strong> <span id="summary-label" class="ml-1 break-words"></span></p>
-                    <p class="text-gray-300"><strong class="text-white">C-Line:</strong> <span id="summary-cLine" class="ml-1 break-words"></span></p>
-                    <p class="text-gray-300"><strong class="text-white">P-Line:</strong> <span id="summary-pLine" class="ml-1 break-words"></span></p>
+                    <p class="text-gray-300">
+                        <strong class="text-white">Label:</strong>
+                        <span id="summary-label" class="ml-1 break-words"></span>
+                    </p>
+
+                    <p class="text-gray-300">
+                        <strong class="text-white">C-Line:</strong>
+                        <span id="summary-cLine" class="ml-1 break-words"></span>
+                    </p>
+
+                    <p class="text-gray-300">
+                        <strong class="text-white">P-Line:</strong>
+                        <span id="summary-pLine" class="ml-1 break-words"></span>
+                    </p>
                 </div>
             </div>
         </div>
 
-        <!-- Artist Profile Form Section -->
+        <!-- =========================================================
+             ARTIST FORM
+        ========================================================== -->
         <div id="pref-section-artist" class="space-y-6">
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Main Info Card -->
+
+                <!-- BASIC -->
                 <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
-                    <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">Basic Info</h3>
+                    <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
+                        Basic Info
+                    </h3>
+
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">Artist Name</label>
-                        <input type="text" id="pref-artistName" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-accent">
+                        <label class="block text-xs text-gray-400 mb-1">Artist Name *</label>
+                        <input type="text" id="pref-artistName"
+                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
                     </div>
+
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs text-gray-400 mb-1">Primary Genre</label>
-                            <input type="text" id="pref-primaryGenre" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                            <input type="text" id="pref-primaryGenre"
+                                   class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
                         </div>
+
                         <div>
                             <label class="block text-xs text-gray-400 mb-1">Secondary Genre</label>
-                            <input type="text" id="pref-secondaryGenre" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                            <input type="text" id="pref-secondaryGenre"
+                                   class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
                         </div>
                     </div>
+
                     <div>
                         <label class="block text-xs text-gray-400 mb-1">Language</label>
-                        <input type="text" id="pref-language" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                        <input type="text" id="pref-language"
+                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
                     </div>
+
                     <div>
                         <label class="block text-xs text-gray-400 mb-1">Bio / About</label>
-                        <textarea id="pref-about" rows="3" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
+                        <textarea id="pref-about" rows="3"
+                                  class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
                     </div>
                 </div>
 
-                <!-- Platform IDs / Links Card -->
+                <!-- PLATFORM LINKS -->
                 <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
-                    <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">Platform Identifiers</h3>
+
+                    <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
+                        Platform Profiles
+                    </h3>
+
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1"><i class="fa-brands fa-spotify text-emerald-400"></i> Spotify Link</label>
-                        <input type="text" id="pref-platform-spotify" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                        <label class="block text-xs text-gray-400 mb-1">Spotify</label>
+                        <input type="text" id="pref-platform-spotify"
+                               placeholder="https://open.spotify.com/artist/..."
+                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
                     </div>
+
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1"><i class="fa-brands fa-apple text-gray-300"></i> Apple Music Link</label>
-                        <input type="text" id="pref-platform-appleMusic" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                        <label class="block text-xs text-gray-400 mb-1">Apple Music</label>
+                        <input type="text" id="pref-platform-appleMusic"
+                               placeholder="https://music.apple.com/artist/..."
+                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
                     </div>
+
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1"><i class="fa-brands fa-youtube text-red-400"></i> VEVO Channel</label>
-                        <input type="text" id="pref-platform-vevo" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                        <label class="block text-xs text-gray-400 mb-1">SoundCloud</label>
+                        <input type="text" id="pref-platform-soundcloud"
+                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
                     </div>
+
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1"><i class="fa-solid fa-globe text-blue-400"></i> Official Website</label>
-                        <input type="text" id="pref-platform-website" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                        <label class="block text-xs text-gray-400 mb-1">YouTube Channel</label>
+                        <input type="text" id="pref-platform-youtube"
+                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">VEVO</label>
+                        <input type="text" id="pref-platform-vevo"
+                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Official Website</label>
+                        <input type="text" id="pref-platform-website"
+                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
                     </div>
                 </div>
             </div>
 
-            <!-- Defaults & Copyright Info -->
-            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">Default Label</label>
-                    <input type="text" id="pref-label" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+            <!-- SOCIAL -->
+            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
+                <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
+                    Social Profiles
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <input id="pref-social-facebook"
+                           placeholder="Facebook URL"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+
+                    <input id="pref-social-instagram"
+                           placeholder="Instagram URL"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+
+                    <input id="pref-social-twitter"
+                           placeholder="Twitter / X URL"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+
+                    <input id="pref-social-youtube"
+                           placeholder="YouTube URL"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
                 </div>
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">C-Line Copyright</label>
-                    <input type="text" id="pref-cLine" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+            </div>
+
+            <!-- ADDITIONAL IDENTIFIERS -->
+            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
+                <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
+                    Additional Identifiers
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input id="pref-additional-allmusic" placeholder="AllMusic ID / URL"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+
+                    <input id="pref-additional-ddex" placeholder="DDEX"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+
+                    <input id="pref-additional-isni" placeholder="ISNI"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+
+                    <input id="pref-additional-musicbrainz" placeholder="MusicBrainz ID"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+
+                    <input id="pref-additional-wikipedia" placeholder="Wikipedia URL"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+
+                    <input id="pref-audiomack-link" placeholder="Audiomack URL"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
                 </div>
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">P-Line Copyright</label>
-                    <input type="text" id="pref-pLine" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+
+                <label class="flex items-center gap-2 text-xs text-gray-300">
+                    <input type="checkbox" id="pref-audiomack-status">
+                    Audiomack profile is active
+                </label>
+            </div>
+
+            <!-- RELEASE / COPYRIGHT -->
+            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
+
+                <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
+                    Release & Copyright Defaults
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Default Label</label>
+                        <input type="text" id="pref-label"
+                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">C-Line</label>
+                        <input type="text" id="pref-cLine"
+                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">P-Line</label>
+                        <input type="text" id="pref-pLine"
+                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Default Release Time</label>
+                        <input type="time" id="pref-releaseTime"
+                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    </div>
+
                 </div>
+
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">
+                        Time Zone
+                    </label>
+
+                    <input type="text"
+                           id="pref-timeZone"
+                           placeholder="America/New_York"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                </div>
+            </div>
+
+            <!-- DELIVERY SETTINGS -->
+            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
+
+                <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
+                    Delivery Defaults
+                </h3>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs text-gray-300">
+
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" id="pref-delivery-beatport">
+                        Beatport
+                    </label>
+
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" id="pref-delivery-even">
+                        EVEN
+                    </label>
+
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" id="pref-delivery-facebook">
+                        Facebook
+                    </label>
+
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" id="pref-delivery-hook">
+                        Hook
+                    </label>
+
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" id="pref-delivery-lyricfind">
+                        LyricFind
+                    </label>
+
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" id="pref-delivery-soundcloud">
+                        SoundCloud
+                    </label>
+
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" id="pref-delivery-soundexchange">
+                        SoundExchange
+                    </label>
+
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" id="pref-delivery-tracklib">
+                        Tracklib
+                    </label>
+
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" id="pref-delivery-youtube">
+                        YouTube
+                    </label>
+                </div>
+
+                <input type="text"
+                       id="pref-delivery-beatport-link"
+                       placeholder="Beatport delivery link"
+                       class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+            </div>
+
+            <!-- METADATA / COLLABORATORS -->
+            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
+
+                <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
+                    Metadata Defaults
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                    <textarea id="pref-metadata-artists"
+                              rows="3"
+                              placeholder="Artists&#10;Example: Nova Waves|Main Artist"
+                              class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
+
+                    <textarea id="pref-metadata-credits"
+                              rows="3"
+                              placeholder="Credits&#10;Example: Jane Smith|Mixing Engineer"
+                              class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
+
+                    <textarea id="pref-metadata-writers"
+                              rows="3"
+                              placeholder="Writers&#10;Example: John Doe|composer"
+                              class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
+
+                </div>
+
+                <textarea id="pref-collaborators"
+                          rows="2"
+                          placeholder="Collaborators, one per line"
+                          class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
+            </div>
+
+            <!-- STORES / TERRITORIES -->
+            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
+
+                <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
+                    Stores & Territories
+                </h3>
+
+                <textarea id="pref-stores"
+                          rows="2"
+                          placeholder="Stores, one per line"
+                          class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
+
+                <textarea id="pref-territories"
+                          rows="3"
+                          placeholder="Territories&#10;Example: US|United States"
+                          class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
             </div>
         </div>
 
-        <!-- Label Settings Form Section -->
+        <!-- =========================================================
+             LABEL FORM
+        ========================================================== -->
         <div id="pref-section-label" class="space-y-6 hidden">
-            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4 max-w-2xl">
-                <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">Record Label Info</h3>
+
+            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
+
+                <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
+                    Record Label Info
+                </h3>
+
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">Label Name</label>
-                    <input type="text" id="pref-label-name" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    <label class="block text-xs text-gray-400 mb-1">Label Name *</label>
+                    <input type="text" id="pref-label-name"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
                 </div>
+
                 <div>
                     <label class="block text-xs text-gray-400 mb-1">About Label</label>
-                    <textarea id="pref-label-about" rows="3" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
+                    <textarea id="pref-label-about" rows="3"
+                              class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
                 </div>
+
                 <div>
                     <label class="block text-xs text-gray-400 mb-1">Label Website</label>
-                    <input type="text" id="pref-label-website" class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    <input type="text" id="pref-label-website"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input id="pref-label-facebook" placeholder="Facebook URL"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+
+                    <input id="pref-label-instagram" placeholder="Instagram URL"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+
+                    <input id="pref-label-twitter" placeholder="Twitter / X URL"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+
+                    <input id="pref-label-youtube" placeholder="YouTube URL"
+                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                </div>
+
+                <button onclick="window.saveLabelPreferences()"
+                        id="btn-save-label-preferences"
+                        class="px-4 py-2 bg-brand-accent hover:brightness-110 text-black font-bold text-xs rounded-xl">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Save Label Preferences
+                </button>
+            </div>
+
+            <!-- LABEL ARTISTS -->
+            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
+
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-white">
+                        Label Artists
+                    </h3>
+
+                    <span id="pref-label-artist-count"
+                          class="text-xs text-gray-500">
+                        0 artists
+                    </span>
+                </div>
+
+                <div id="pref-label-artists"
+                     class="space-y-2">
                 </div>
             </div>
         </div>
@@ -13317,224 +13667,882 @@ window.showPrefToast = function(message, type = 'success') {
     }, 4000);
 };
 
-// Toggle UI Modes between Form and Submitted View
 window.updateUIMode = function() {
     const submittedView = document.getElementById('pref-submitted-view');
     const formView = document.getElementById('pref-section-artist');
+    const labelView = document.getElementById('pref-section-label');
     const headerActions = document.getElementById('pref-header-actions');
 
-    if (window.prefState.mode === 'view' && window.prefState.artistData && window.prefState.artistData.artistName) {
+    if (!submittedView || !formView) return;
+
+    if (
+        window.prefState.mode === 'view' &&
+        window.prefState.artistData &&
+        window.prefState.artistData.artistName
+    ) {
         submittedView.classList.remove('hidden');
         formView.classList.add('hidden');
-        headerActions.classList.add('hidden');
+
+        if (labelView) labelView.classList.add('hidden');
+        if (headerActions) headerActions.classList.add('hidden');
+
         window.populateSummary(window.prefState.artistData);
     } else {
         submittedView.classList.add('hidden');
         formView.classList.remove('hidden');
-        headerActions.classList.remove('hidden');
+
+        if (headerActions) headerActions.classList.remove('hidden');
     }
 };
 
-window.populateSummary = function(data) {
-    document.getElementById('summary-artistName').innerText = data.artistName || 'Not specified';
-    const primary = data.primaryGenre || '';
-    const secondary = data.secondaryGenre ? ` / ${data.secondaryGenre}` : '';
-    document.getElementById('summary-genres').innerText = (primary + secondary) || 'Not specified';
-    document.getElementById('summary-language').innerText = data.language || 'Not specified';
-    document.getElementById('summary-about').innerText = data.about || 'No bio submitted.';
-    
-    document.getElementById('summary-label').innerText = data.label || 'None';
-    document.getElementById('summary-cLine').innerText = data.cLine || data.c_line || 'None';
-    document.getElementById('summary-pLine').innerText = data.pLine || data.p_line || 'None';
 
+window.populateSummary = function(data) {
     const p = data.platforms || {};
-    document.getElementById('summary-spotify').innerText = p.spotify || 'Not linked';
-    document.getElementById('summary-appleMusic').innerText = p.appleMusic || 'Not linked';
-    document.getElementById('summary-vevo').innerText = p.vevo || 'Not linked';
-    document.getElementById('summary-website').innerText = p.website || 'Not linked';
+
+    document.getElementById('summary-artistName').innerText =
+        data.artistName || 'Not specified';
+
+    const primary = data.primaryGenre || '';
+    const secondary = data.secondaryGenre
+        ? ` / ${data.secondaryGenre}`
+        : '';
+
+    document.getElementById('summary-genres').innerText =
+        (primary + secondary) || 'Not specified';
+
+    document.getElementById('summary-language').innerText =
+        data.language || 'Not specified';
+
+    document.getElementById('summary-about').innerText =
+        data.about || 'No bio submitted.';
+
+    document.getElementById('summary-label').innerText =
+        data.label || 'None';
+
+    document.getElementById('summary-cLine').innerText =
+        data.cLine || data.c_line || 'None';
+
+    document.getElementById('summary-pLine').innerText =
+        data.pLine || data.p_line || 'None';
+
+    document.getElementById('summary-spotify').innerText =
+        p.spotify || 'Not linked';
+
+    document.getElementById('summary-appleMusic').innerText =
+        p.appleMusic || 'Not linked';
+
+    document.getElementById('summary-soundcloud').innerText =
+        p.soundcloud || 'Not linked';
+
+    document.getElementById('summary-youtube').innerText =
+        p.youtube || 'Not linked';
+
+    document.getElementById('summary-vevo').innerText =
+        p.vevo || 'Not linked';
+
+    document.getElementById('summary-website').innerText =
+        p.website || 'Not linked';
 };
+
 
 window.openEditMode = function() {
     window.prefState.mode = 'edit';
     window.updateUIMode();
 };
 
-window.promptDeleteModal = function() {
-    document.getElementById('pref-delete-modal').classList.remove('hidden');
+
+function prefValue(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+}
+
+
+function prefChecked(id) {
+    const el = document.getElementById(id);
+    return !!el?.checked;
+}
+
+
+function parseMetadataLines(value) {
+    return String(value || '')
+        .split('\n')
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => {
+            const parts = line.split('|');
+            return {
+                name: (parts[0] || '').trim(),
+                role: (parts.slice(1).join('|') || '').trim()
+            };
+        })
+        .filter(item => item.name && item.role);
+}
+
+
+function parseNameLines(value) {
+    return String(value || '')
+        .split('\n')
+        .map(x => x.trim())
+        .filter(Boolean)
+        .map(name => ({ name }));
+}
+
+
+function parseSimpleLines(value) {
+    return String(value || '')
+        .split('\n')
+        .map(x => x.trim())
+        .filter(Boolean);
+}
+
+
+function parseTerritories(value) {
+    return String(value || '')
+        .split('\n')
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => {
+            const parts = line.split('|');
+
+            return {
+                code: (parts[0] || '').trim(),
+                name: (parts.slice(1).join('|') || '').trim()
+            };
+        })
+        .filter(item => item.code && item.name);
+}
+
+
+window.fillArtistPreferences = function(artist) {
+    const p = artist.platforms || {};
+    const social = artist.social || {};
+    const additional = artist.additional || {};
+    const deliveries = artist.deliveries || {};
+    const audiomack = artist.audiomack || {};
+
+    document.getElementById('pref-artistName').value =
+        artist.artistName || '';
+
+    document.getElementById('pref-primaryGenre').value =
+        artist.primaryGenre || '';
+
+    document.getElementById('pref-secondaryGenre').value =
+        artist.secondaryGenre || '';
+
+    document.getElementById('pref-language').value =
+        artist.language || '';
+
+    document.getElementById('pref-about').value =
+        artist.about || '';
+
+    document.getElementById('pref-label').value =
+        artist.label || '';
+
+    document.getElementById('pref-cLine').value =
+        artist.cLine || artist.c_line || '';
+
+    document.getElementById('pref-pLine').value =
+        artist.pLine || artist.p_line || '';
+
+    document.getElementById('pref-releaseTime').value =
+        artist.releaseTime || '';
+
+    document.getElementById('pref-timeZone').value =
+        artist.timeZone || '';
+
+    document.getElementById('pref-platform-spotify').value =
+        p.spotify || '';
+
+    document.getElementById('pref-platform-appleMusic').value =
+        p.appleMusic || '';
+
+    document.getElementById('pref-platform-soundcloud').value =
+        p.soundcloud || '';
+
+    document.getElementById('pref-platform-youtube').value =
+        p.youtube || '';
+
+    document.getElementById('pref-platform-vevo').value =
+        p.vevo || '';
+
+    document.getElementById('pref-platform-website').value =
+        p.website || '';
+
+    document.getElementById('pref-social-facebook').value =
+        social.facebook || '';
+
+    document.getElementById('pref-social-instagram').value =
+        social.instagram || '';
+
+    document.getElementById('pref-social-twitter').value =
+        social.twitter || '';
+
+    document.getElementById('pref-social-youtube').value =
+        social.youtube || '';
+
+    document.getElementById('pref-additional-allmusic').value =
+        additional.allmusic || '';
+
+    document.getElementById('pref-additional-ddex').value =
+        additional.ddex || '';
+
+    document.getElementById('pref-additional-isni').value =
+        additional.isni || '';
+
+    document.getElementById('pref-additional-musicbrainz').value =
+        additional.musicbrainz || '';
+
+    document.getElementById('pref-additional-wikipedia').value =
+        additional.wikipedia || '';
+
+    document.getElementById('pref-audiomack-link').value =
+        audiomack.link || '';
+
+    document.getElementById('pref-audiomack-status').checked =
+        !!audiomack.status;
+
+    document.getElementById('pref-delivery-beatport').checked =
+        !!deliveries.beatport;
+
+    document.getElementById('pref-delivery-even').checked =
+        !!deliveries.delivery_even;
+
+    document.getElementById('pref-delivery-facebook').checked =
+        !!deliveries.delivery_facebook;
+
+    document.getElementById('pref-delivery-hook').checked =
+        !!deliveries.delivery_hook;
+
+    document.getElementById('pref-delivery-lyricfind').checked =
+        !!deliveries.delivery_lyricfind;
+
+    document.getElementById('pref-delivery-soundcloud').checked =
+        !!deliveries.delivery_soundcloud;
+
+    document.getElementById('pref-delivery-soundexchange').checked =
+        !!deliveries.delivery_soundexchange;
+
+    document.getElementById('pref-delivery-tracklib').checked =
+        !!deliveries.delivery_tracklib;
+
+    document.getElementById('pref-delivery-youtube').checked =
+        !!deliveries.delivery_youtube;
+
+    document.getElementById('pref-delivery-beatport-link').value =
+        deliveries.delivery_beatport_link || '';
+
+    const metadata = artist.metadata || {};
+
+    document.getElementById('pref-metadata-artists').value =
+        (metadata.artists || [])
+            .map(x => `${x.name}|${x.role}`)
+            .join('\n');
+
+    document.getElementById('pref-metadata-credits').value =
+        (metadata.credits || [])
+            .map(x => `${x.name}|${x.role}`)
+            .join('\n');
+
+    document.getElementById('pref-metadata-writers').value =
+        (metadata.writers || [])
+            .map(x => `${x.name}|${x.role}`)
+            .join('\n');
+
+    document.getElementById('pref-collaborators').value =
+        (artist.collaborators || [])
+            .map(x => x.name || '')
+            .filter(Boolean)
+            .join('\n');
+
+    document.getElementById('pref-stores').value =
+        (artist.stores || []).join('\n');
+
+    document.getElementById('pref-territories').value =
+        (artist.territories || [])
+            .map(x => `${x.code}|${x.name}`)
+            .join('\n');
 };
 
-window.closeDeleteModal = function() {
-    document.getElementById('pref-delete-modal').classList.add('hidden');
-};
 
-window.confirmDeletePreferences = async function() {
-    window.closeDeleteModal();
-    const token = window.currentUser?.getIdToken ? await window.currentUser.getIdToken() : '';
-    const baseUrl = window.WORKER_BASE_URL || '';
+window.buildArtistPayload = function() {
+    const artistName = prefValue('pref-artistName');
 
-    try {
-        const emptyPayload = {
-            artistName: "",
-            primaryGenre: "",
-            secondaryGenre: "",
-            language: "",
-            about: "",
-            label: "",
-            cLine: "",
-            pLine: "",
-            platforms: { spotify: "", appleMusic: "", vevo: "", website: "" }
-        };
-
-        const res = await fetch(`${baseUrl}/api/preferences/artist/submit`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(emptyPayload)
-        });
-
-        if (res.ok) {
-            window.prefState.artistData = null;
-            window.prefState.mode = 'edit';
-            
-            document.getElementById('pref-artistName').value = '';
-            document.getElementById('pref-primaryGenre').value = '';
-            document.getElementById('pref-secondaryGenre').value = '';
-            document.getElementById('pref-language').value = '';
-            document.getElementById('pref-about').value = '';
-            document.getElementById('pref-label').value = '';
-            document.getElementById('pref-cLine').value = '';
-            document.getElementById('pref-pLine').value = '';
-            document.getElementById('pref-platform-spotify').value = '';
-            document.getElementById('pref-platform-appleMusic').value = '';
-            document.getElementById('pref-platform-vevo').value = '';
-            document.getElementById('pref-platform-website').value = '';
-
-            window.updateUIMode();
-            window.showPrefToast('Artist preferences deleted successfully.', 'success');
-        } else {
-            window.showPrefToast('Failed to clear preferences.', 'error');
-        }
-    } catch (err) {
-        console.error('Delete error:', err);
-        window.showPrefToast('Server connection error.', 'error');
+    if (!artistName) {
+        throw new Error('Artist name is required.');
     }
+
+    return {
+        artistName,
+
+        metadata: {
+            artists: parseMetadataLines(
+                prefValue('pref-metadata-artists')
+            ),
+            credits: parseMetadataLines(
+                prefValue('pref-metadata-credits')
+            ),
+            writers: parseMetadataLines(
+                prefValue('pref-metadata-writers')
+            )
+        },
+
+        about: prefValue('pref-about'),
+
+        additional: {
+            allmusic: prefValue('pref-additional-allmusic'),
+            ddex: prefValue('pref-additional-ddex'),
+            isni: prefValue('pref-additional-isni'),
+            musicbrainz: prefValue('pref-additional-musicbrainz'),
+            wikipedia: prefValue('pref-additional-wikipedia')
+        },
+
+        audiomack: {
+            link: prefValue('pref-audiomack-link'),
+            status: prefChecked('pref-audiomack-status')
+        },
+
+        c_line: prefValue('pref-cLine'),
+
+        collaborators: parseNameLines(
+            prefValue('pref-collaborators')
+        ),
+
+        deliveries: {
+            beatport: prefChecked('pref-delivery-beatport'),
+            delivery_beatport_link:
+                prefValue('pref-delivery-beatport-link'),
+            delivery_even: prefChecked('pref-delivery-even'),
+            delivery_facebook: prefChecked('pref-delivery-facebook'),
+            delivery_hook: prefChecked('pref-delivery-hook'),
+            delivery_lyricfind: prefChecked('pref-delivery-lyricfind'),
+            delivery_soundcloud: prefChecked('pref-delivery-soundcloud'),
+            delivery_soundexchange:
+                prefChecked('pref-delivery-soundexchange'),
+            delivery_tracklib:
+                prefChecked('pref-delivery-tracklib'),
+            delivery_youtube:
+                prefChecked('pref-delivery-youtube')
+        },
+
+        img: null,
+
+        label: prefValue('pref-label'),
+
+        language: prefValue('pref-language'),
+
+        p_line: prefValue('pref-pLine'),
+
+        platforms: {
+            appleMusic: prefValue('pref-platform-appleMusic'),
+            soundcloud: prefValue('pref-platform-soundcloud'),
+            spotify: prefValue('pref-platform-spotify'),
+            vevo: prefValue('pref-platform-vevo'),
+            website: prefValue('pref-platform-website'),
+            youtube: prefValue('pref-platform-youtube')
+        },
+
+        primaryGenre: prefValue('pref-primaryGenre'),
+
+        releaseTime: prefValue('pref-releaseTime'),
+
+        removeImg: false,
+
+        secondaryGenre: prefValue('pref-secondaryGenre'),
+
+        social: {
+            facebook: prefValue('pref-social-facebook'),
+            instagram: prefValue('pref-social-instagram'),
+            twitter: prefValue('pref-social-twitter'),
+            youtube: prefValue('pref-social-youtube')
+        },
+
+        stores: parseSimpleLines(
+            prefValue('pref-stores')
+        ),
+
+        territories: parseTerritories(
+            prefValue('pref-territories')
+        ),
+
+        timeZone: prefValue('pref-timeZone')
+    };
 };
 
-window.switchPrefTab = function(tab) {
-    const artistTab = document.getElementById('tab-btn-artist');
-    const labelTab = document.getElementById('tab-btn-label');
-    const artistSec = document.getElementById('pref-section-artist');
-    const labelSec = document.getElementById('pref-section-label');
-    const submittedView = document.getElementById('pref-submitted-view');
-
-    if (tab === 'artist') {
-        artistTab.className = "px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80";
-        labelTab.className = "px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all";
-        labelSec.classList.add('hidden');
-        window.updateUIMode();
-    } else {
-        labelTab.className = "px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80";
-        artistTab.className = "px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all";
-        labelSec.classList.remove('hidden');
-        artistSec.classList.add('hidden');
-        submittedView.classList.add('hidden');
-    }
-};
 
 window.initPreferencesPage = async function() {
-    const token = window.currentUser?.getIdToken ? await window.currentUser.getIdToken() : '';
+
+    const token =
+        window.currentUser?.getIdToken
+            ? await window.currentUser.getIdToken()
+            : '';
+
     const baseUrl = window.WORKER_BASE_URL || '';
 
     try {
-        const res = await fetch(`${baseUrl}/api/preferences/artist`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-            const body = await res.json();
-            const artist = body.data?.artist || {};
-            
+
+        const artistRes = await fetch(
+            `${baseUrl}/api/preferences/artist`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+
+        if (artistRes.ok) {
+
+            const body = await artistRes.json();
+
+            const artist =
+                body.data?.artist || {};
+
             window.prefState.artistData = artist;
 
-            document.getElementById('pref-artistName').value = artist.artistName || '';
-            document.getElementById('pref-primaryGenre').value = artist.primaryGenre || '';
-            document.getElementById('pref-secondaryGenre').value = artist.secondaryGenre || '';
-            document.getElementById('pref-language').value = artist.language || '';
-            document.getElementById('pref-about').value = artist.about || '';
-            document.getElementById('pref-label').value = artist.label || '';
-            document.getElementById('pref-cLine').value = artist.cLine || artist.c_line || '';
-            document.getElementById('pref-pLine').value = artist.pLine || artist.p_line || '';
+            window.fillArtistPreferences(artist);
 
-            if (artist.platforms) {
-                document.getElementById('pref-platform-spotify').value = artist.platforms.spotify || '';
-                document.getElementById('pref-platform-appleMusic').value = artist.platforms.appleMusic || '';
-                document.getElementById('pref-platform-vevo').value = artist.platforms.vevo || '';
-                document.getElementById('pref-platform-website').value = artist.platforms.website || '';
-            }
+            window.prefState.mode =
+                artist.artistName
+                    ? 'view'
+                    : 'edit';
 
-            if (artist.artistName) {
-                window.prefState.mode = 'view';
-            } else {
-                window.prefState.mode = 'edit';
-            }
             window.updateUIMode();
         }
+
+        await window.loadLabelPreferences();
+
     } catch (err) {
-        console.error('Failed to load preferences:', err);
-        window.showPrefToast('Failed to load preferences from server.', 'error');
+
+        console.error(
+            'Failed to load preferences:',
+            err
+        );
+
+        window.showPrefToast(
+            'Failed to load preferences from server.',
+            'error'
+        );
     }
 };
 
+
 window.savePreferences = async function() {
-    const btn = document.getElementById('btn-save-preferences');
-    btn.disabled = true;
-    btn.innerText = 'Saving...';
 
-    const token = window.currentUser?.getIdToken ? await window.currentUser.getIdToken() : '';
-    const baseUrl = window.WORKER_BASE_URL || '';
+    const btn =
+        document.getElementById(
+            'btn-save-preferences'
+        );
 
-    const payload = {
-        artistName: document.getElementById('pref-artistName').value,
-        primaryGenre: document.getElementById('pref-primaryGenre').value,
-        secondaryGenre: document.getElementById('pref-secondaryGenre').value,
-        language: document.getElementById('pref-language').value,
-        about: document.getElementById('pref-about').value,
-        label: document.getElementById('pref-label').value,
-        cLine: document.getElementById('pref-cLine').value,
-        pLine: document.getElementById('pref-pLine').value,
-        platforms: {
-            spotify: document.getElementById('pref-platform-spotify').value,
-            appleMusic: document.getElementById('pref-platform-appleMusic').value,
-            vevo: document.getElementById('pref-platform-vevo').value,
-            website: document.getElementById('pref-platform-website').value
-        }
-    };
+    if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'Saving...';
+    }
+
+    const token =
+        window.currentUser?.getIdToken
+            ? await window.currentUser.getIdToken()
+            : '';
+
+    const baseUrl =
+        window.WORKER_BASE_URL || '';
 
     try {
-        const res = await fetch(`${baseUrl}/api/preferences/artist/submit`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-        
-        if (res.ok) {
-            window.prefState.artistData = payload;
-            window.prefState.mode = 'view';
-            window.updateUIMode();
-            window.showPrefToast('Preferences saved successfully!', 'success');
-        } else {
-            window.showPrefToast('Failed to save preferences.', 'error');
+
+        const payload =
+            window.buildArtistPayload();
+
+        const res = await fetch(
+            `${baseUrl}/api/preferences/artist/submit`,
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            }
+        );
+
+        const body = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+
+            throw new Error(
+                body.error ||
+                body.message ||
+                'Failed to save artist preferences.'
+            );
         }
+
+        window.prefState.artistData =
+            body.data || payload;
+
+        window.prefState.mode = 'view';
+
+        window.updateUIMode();
+
+        window.showPrefToast(
+            'Artist preferences saved successfully!',
+            'success'
+        );
+
     } catch (err) {
-        console.error('Error saving preferences:', err);
-        window.showPrefToast('Error connecting to the server.', 'error');
-    } finally { // <-- Fixed typo here
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save Preferences`;
+
+        console.error(
+            'Error saving artist preferences:',
+            err
+        );
+
+        window.showPrefToast(
+            err.message ||
+            'Error connecting to the server.',
+            'error'
+        );
+
+    } finally {
+
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML =
+                `<i class="fa-solid fa-floppy-disk"></i> Save Preferences`;
+        }
+    }
+};
+
+
+window.loadLabelPreferences = async function() {
+
+    const token =
+        window.currentUser?.getIdToken
+            ? await window.currentUser.getIdToken()
+            : '';
+
+    const baseUrl =
+        window.WORKER_BASE_URL || '';
+
+    const res = await fetch(
+        `${baseUrl}/api/preferences/label`,
+        {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        }
+    );
+
+    if (!res.ok) return;
+
+    const body = await res.json();
+
+    const data = body.data || {};
+    const label = data.label || {};
+
+    document.getElementById('pref-label-name').value =
+        label.name || '';
+
+    document.getElementById('pref-label-about').value =
+        label.about || '';
+
+    document.getElementById('pref-label-website').value =
+        label.platforms?.website || '';
+
+    document.getElementById('pref-label-facebook').value =
+        label.social?.facebook || '';
+
+    document.getElementById('pref-label-instagram').value =
+        label.social?.instagram || '';
+
+    document.getElementById('pref-label-twitter').value =
+        label.social?.twitter || '';
+
+    document.getElementById('pref-label-youtube').value =
+        label.social?.youtube || '';
+
+    window.renderLabelArtists(
+        data.artists || []
+    );
+};
+
+
+window.saveLabelPreferences = async function() {
+
+    const btn =
+        document.getElementById(
+            'btn-save-label-preferences'
+        );
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'Saving...';
+    }
+
+    const token =
+        window.currentUser?.getIdToken
+            ? await window.currentUser.getIdToken()
+            : '';
+
+    const baseUrl =
+        window.WORKER_BASE_URL || '';
+
+    try {
+
+        const name =
+            prefValue('pref-label-name');
+
+        if (!name) {
+            throw new Error(
+                'Label name is required.'
+            );
+        }
+
+        const payload = {
+            name,
+
+            about:
+                prefValue('pref-label-about'),
+
+            img: null,
+
+            platforms: {
+                website:
+                    prefValue('pref-label-website')
+            },
+
+            removeImg: false,
+
+            social: {
+                facebook:
+                    prefValue('pref-label-facebook'),
+
+                instagram:
+                    prefValue('pref-label-instagram'),
+
+                twitter:
+                    prefValue('pref-label-twitter'),
+
+                youtube:
+                    prefValue('pref-label-youtube')
+            }
+        };
+
+        const res = await fetch(
+            `${baseUrl}/api/preferences/label/submit`,
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            }
+        );
+
+        const body =
+            await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+            throw new Error(
+                body.error ||
+                body.message ||
+                'Failed to save label preferences.'
+            );
+        }
+
+        window.showPrefToast(
+            'Label preferences saved successfully!',
+            'success'
+        );
+
+        await window.loadLabelPreferences();
+
+    } catch (err) {
+
+        console.error(
+            'Error saving label preferences:',
+            err
+        );
+
+        window.showPrefToast(
+            err.message ||
+            'Error connecting to the server.',
+            'error'
+        );
+
+    } finally {
+
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML =
+                `<i class="fa-solid fa-floppy-disk"></i> Save Label Preferences`;
+        }
+    }
+};
+
+
+window.renderLabelArtists = function(artists) {
+
+    const container =
+        document.getElementById(
+            'pref-label-artists'
+        );
+
+    const count =
+        document.getElementById(
+            'pref-label-artist-count'
+        );
+
+    if (!container) return;
+
+    if (count) {
+        count.innerText =
+            `${artists.length} artist${artists.length === 1 ? '' : 's'}`;
+    }
+
+    if (!artists.length) {
+        container.innerHTML =
+            `<p class="text-xs text-gray-500">
+                No artists are currently attached to this label.
+             </p>`;
+        return;
+    }
+
+    container.innerHTML =
+        artists.map(artist => `
+            <div class="flex items-center justify-between gap-3 bg-black/30 border border-brand-border/30 rounded-xl p-3">
+
+                <div class="min-w-0">
+                    <p class="text-xs font-bold text-white truncate">
+                        ${artist.artistName || artist.name || 'Unnamed Artist'}
+                    </p>
+
+                    <p class="text-[11px] text-gray-500 truncate">
+                        ${artist.primaryGenre || ''}
+                        ${artist.language ? ` · ${artist.language}` : ''}
+                    </p>
+                </div>
+
+                <button
+                    onclick="window.removeLabelArtist(${Number(artist.id)})"
+                    class="shrink-0 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20">
+                    Remove
+                </button>
+
+            </div>
+        `).join('');
+};
+
+
+window.removeLabelArtist = async function(artistId) {
+
+    if (!artistId) return;
+
+    if (!confirm('Remove this artist from label management?')) {
+        return;
+    }
+
+    const token =
+        window.currentUser?.getIdToken
+            ? await window.currentUser.getIdToken()
+            : '';
+
+    const baseUrl =
+        window.WORKER_BASE_URL || '';
+
+    try {
+
+        const res = await fetch(
+            `${baseUrl}/api/preferences/label/artist/remove`,
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    artistId: Number(artistId)
+                })
+            }
+        );
+
+        const body =
+            await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+            throw new Error(
+                body.error ||
+                body.message ||
+                'Failed to remove artist.'
+            );
+        }
+
+        window.showPrefToast(
+            'Artist removed from label.',
+            'success'
+        );
+
+        await window.loadLabelPreferences();
+
+    } catch (err) {
+
+        console.error(
+            'Remove label artist error:',
+            err
+        );
+
+        window.showPrefToast(
+            err.message ||
+            'Failed to remove artist.',
+            'error'
+        );
+    }
+};
+
+
+window.switchPrefTab = function(tab) {
+
+    const artistTab =
+        document.getElementById('tab-btn-artist');
+
+    const labelTab =
+        document.getElementById('tab-btn-label');
+
+    const artistSec =
+        document.getElementById('pref-section-artist');
+
+    const labelSec =
+        document.getElementById('pref-section-label');
+
+    const submittedView =
+        document.getElementById('pref-submitted-view');
+
+    const headerActions =
+        document.getElementById('pref-header-actions');
+
+    if (tab === 'artist') {
+
+        artistTab.className =
+            "px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80";
+
+        labelTab.className =
+            "px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all";
+
+        labelSec.classList.add('hidden');
+
+        window.updateUIMode();
+
+    } else {
+
+        labelTab.className =
+            "px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80";
+
+        artistTab.className =
+            "px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all";
+
+        labelSec.classList.remove('hidden');
+
+        artistSec.classList.add('hidden');
+
+        submittedView.classList.add('hidden');
+
+        headerActions.classList.add('hidden');
     }
 };
         
