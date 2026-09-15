@@ -1150,8 +1150,8 @@ onAuthStateChanged(auth, async (user) => {
     }
 }
 
-// Store active user role globally (defaults to 'owner' for workspace account creators)
-let currentUserRole = 'owner';
+// Store active user role globally (defaults to 'member' until explicitly fetched to prevent unauthorized leaks)
+let currentUserRole = 'member';
 
 /**
  * Enforces role access across sidebar navigation buttons and view switching
@@ -1160,7 +1160,7 @@ async function applyRolePermissions(user) {
     if (!user) return;
 
     try {
-        const idToken = await user.getIdToken();
+        const idToken = await user.getIdToken(true); // Force refresh to get latest workspace context
 
         // Query workspace endpoint for assigned role
         const res = await fetch("https://audiorydistribution.dandredurkofficial.workers.dev/api/workspace/permissions", {
@@ -1173,15 +1173,19 @@ async function applyRolePermissions(user) {
 
         if (res.ok) {
             const data = await res.json();
-            currentUserRole = (data.role || 'owner').toLowerCase();
+            currentUserRole = (data.role || 'member').toLowerCase().trim();
+        } else {
+            console.warn(`Permissions endpoint returned status ${res.status}. Defaulting to member.`);
+            currentUserRole = 'member';
         }
     } catch (err) {
-        console.warn("Could not fetch user role, defaulting to owner:", err);
+        console.warn("Could not fetch user role, defaulting to member:", err);
+        currentUserRole = 'member';
     }
 
     // Hide unauthorized navigation buttons
     document.querySelectorAll('[data-role]').forEach(button => {
-        const allowedRoles = button.getAttribute('data-role').split(',');
+        const allowedRoles = button.getAttribute('data-role').split(',').map(r => r.trim().toLowerCase());
         const canAccess = allowedRoles.includes('all') || allowedRoles.includes(currentUserRole);
 
         if (canAccess) {
@@ -1190,6 +1194,19 @@ async function applyRolePermissions(user) {
             button.classList.add('hidden');
         }
     });
+
+    // If currently viewing a restricted view upon loading, redirect back to home
+    const currentActiveNav = document.querySelector('nav button:not(.hidden)');
+    const activeViewId = window.currentView || 'home';
+    const activeNavBtn = document.getElementById(`nav_${activeViewId}`);
+    
+    if (activeNavBtn) {
+        const allowedRoles = activeNavBtn.getAttribute('data-role')?.split(',').map(r => r.trim().toLowerCase()) || [];
+        const isAllowed = allowedRoles.includes('all') || allowedRoles.includes(currentUserRole);
+        if (!isAllowed && typeof window.switchView === 'function') {
+            window.switchView('home');
+        }
+    }
 }
 
 /**
@@ -1201,7 +1218,7 @@ window.switchView = function(viewName) {
     const targetNav = document.getElementById(`nav_${viewName}`);
 
     if (targetNav) {
-        const allowedRoles = targetNav.getAttribute('data-role')?.split(',') || [];
+        const allowedRoles = targetNav.getAttribute('data-role')?.split(',').map(r => r.trim().toLowerCase()) || [];
         const isAllowed = allowedRoles.includes('all') || allowedRoles.includes(currentUserRole);
 
         if (!isAllowed) {
@@ -1218,25 +1235,22 @@ window.switchView = function(viewName) {
     }
 };
 
-// Trigger permissions check using modular auth
-// Assumes 'auth' is already initialized via: const auth = getAuth();
+// Listen for auth state initialization
 if (typeof auth !== 'undefined') {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
-            applyRolePermissions(user);
+            await applyRolePermissions(user);
         }
     });
 } else {
-    // Fallback if 'auth' is declared globally later
     window.addEventListener('DOMContentLoaded', () => {
         if (window.auth) {
-            onAuthStateChanged(window.auth, (user) => {
-                if (user) applyRolePermissions(user);
+            onAuthStateChanged(window.auth, async (user) => {
+                if (user) await applyRolePermissions(user);
             });
         }
     });
 }
-
         
         // Direct Multipart Upload to Cloudflare Worker R2 Bucket
         async function uploadFileToR2(file, folder = 'audio') {
