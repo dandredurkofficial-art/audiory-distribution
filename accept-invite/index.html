@@ -169,14 +169,25 @@
       btn.disabled = true;
       btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Processing...</span>`;
 
-      // Store invitation parameters in localStorage for auto-linking after login/signup
-      localStorage.setItem('audiory_pending_invite_id', inviteId);
-      localStorage.setItem('audiory_pending_invite_owner', ownerId);
+      try {
+        const res = await fetch(`${WORKER_BASE_URL}/api/members/accept`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ inviteId, ownerId })
+        });
 
-      // Redirect directly to your dashboard application
-      setTimeout(() => {
-        window.location.href = `https://distro.audiory.site/dashboard/?invite=${inviteId}&owner=${ownerId}`;
-      }, 800);
+        const data = await res.json();
+
+        if (res.ok) {
+          localStorage.setItem('audiory_pending_invite_id', inviteId);
+          localStorage.setItem('audiory_pending_invite_owner', ownerId);
+          window.location.href = `https://distro.audiory.site/dashboard/?invite=${inviteId}&owner=${ownerId}`;
+        } else {
+          showError(data.error || "Failed to accept invitation.");
+        }
+      } catch (err) {
+        showError("Could not reach backend server to accept invitation.");
+      }
     }
   </script>
 </body>
