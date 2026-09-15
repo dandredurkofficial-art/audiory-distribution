@@ -15098,6 +15098,49 @@ window.initPreferencesPage = async function() {
 
             window.prefState.artistData = artist;
 
+            const artistImageUrl =
+                artist.profileImg ||
+                artist.img ||
+                '';
+
+            const artistImageInput =
+                document.getElementById(
+                    'pref-artist-profileImg'
+                );
+
+            const artistImagePreview =
+                document.getElementById(
+                    'pref-artist-image-preview'
+                );
+
+            if (artistImageInput) {
+                artistImageInput.value =
+                    artistImageUrl;
+            }
+
+            if (artistImagePreview) {
+
+                if (artistImageUrl) {
+
+                    artistImagePreview.src =
+                        artistImageUrl;
+
+                    artistImagePreview.classList.remove(
+                        'hidden'
+                    );
+
+                } else {
+
+                    artistImagePreview.removeAttribute(
+                        'src'
+                    );
+
+                    artistImagePreview.classList.add(
+                        'hidden'
+                    );
+                }
+            }
+
             window.fillArtistPreferences(artist);
 
             window.prefState.mode =
@@ -15531,6 +15574,13 @@ window.savePreferences = async function() {
         const payload =
             window.buildArtistPayload();
 
+        if (
+          window.prefState?.artistData?.id
+      ) {
+          payload.id =
+              window.prefState.artistData.id;
+      }
+
         /*
          * Preserve the existing Artist payload.
          * Only make sure the uploaded profile image URL
@@ -15630,7 +15680,50 @@ window.loadLabelPreferences = async function() {
     const body = await res.json();
 
     const data = body.data || {};
-    const label = data.label || {};
+    const label = body.data?.label || {};
+
+    const labelImageUrl =
+        label.profileImg ||
+        label.img ||
+        '';
+
+    const labelImageInput =
+        document.getElementById(
+            'pref-label-profileImg'
+        );
+
+    const labelImagePreview =
+        document.getElementById(
+            'pref-label-image-preview'
+        );
+
+    if (labelImageInput) {
+        labelImageInput.value =
+            labelImageUrl;
+    }
+
+    if (labelImagePreview) {
+
+        if (labelImageUrl) {
+
+            labelImagePreview.src =
+                labelImageUrl;
+
+            labelImagePreview.classList.remove(
+                'hidden'
+            );
+
+        } else {
+
+            labelImagePreview.removeAttribute(
+                'src'
+            );
+
+            labelImagePreview.classList.add(
+                'hidden'
+            );
+        }
+    }
 
     document.getElementById('pref-label-name').value =
         label.name || '';
