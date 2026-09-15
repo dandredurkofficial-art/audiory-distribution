@@ -1673,15 +1673,32 @@ window.initSupportPage = async function() {
 
 window.fetchSupportTickets = async function() {
     try {
-        const res = await fetch("/api/support/tickets");
+        // Ensure WORKER_BASE_URL is defined, fallback gracefully if not set globally
+        const baseUrl = typeof WORKER_BASE_URL !== 'undefined' 
+            ? WORKER_BASE_URL.replace(/\/$/, '') 
+            : 'https://audiorydistribution.dandredurkofficial.workers.dev';
+
+        const res = await fetch(`${baseUrl}/api/support/tickets`, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json",
+                // Pass user auth headers if required by your worker context
+                "Authorization": `Bearer ${localStorage.getItem('accessToken') || ''}`
+            }
+        });
+
+        if (!res.ok) {
+            throw new Error(`Server returned status ${res.status}`);
+        }
+
         const data = await res.json();
         window.allTickets = data.tickets || [];
         window.renderTicketsList(window.allTickets);
     } catch (e) {
-        console.error("Failed to load tickets", e);
+        console.error("Failed to load tickets:", e);
         document.getElementById('ticketsListContainer').innerHTML = `
             <div class="p-6 text-center text-red-400 bg-red-950/20 border border-red-800/40 rounded-2xl text-xs">
-                Failed to fetch support tickets.
+                Failed to fetch support tickets. Please check your backend connection.
             </div>`;
     }
 };
@@ -1753,9 +1770,17 @@ window.handleTicketSubmit = async function(e) {
     };
 
     try {
-        const res = await fetch("/api/support/tickets", {
+        const baseUrl = typeof WORKER_BASE_URL !== 'undefined' 
+            ? WORKER_BASE_URL.replace(/\/$/, '') 
+            : 'https://audiorydistribution.dandredurkofficial.workers.dev';
+
+        const res = await fetch(`${baseUrl}/api/support/tickets`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem('accessToken') || ''}`
+            },
             body: JSON.stringify(payload)
         });
 
@@ -1768,13 +1793,14 @@ window.handleTicketSubmit = async function(e) {
             alert(data.error || "Failed to create ticket");
         }
     } catch (err) {
+        console.error("Error submitting ticket:", err);
         alert("Error connecting to support backend");
     } finally {
         btn.disabled = false;
         btn.innerHTML = `<span>Submit Ticket</span>`;
     }
 };
-
+        
 function renderEarningsView() {
     return `
         <div class="max-w-7xl mx-auto space-y-6">
