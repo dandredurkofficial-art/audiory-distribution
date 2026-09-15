@@ -1150,8 +1150,8 @@ onAuthStateChanged(auth, async (user) => {
     }
 }
 
-// Store active user role globally (defaults to 'member' until explicitly fetched to prevent unauthorized leaks)
-let currentUserRole = 'member';
+// Default to 'owner' so primary workspace accounts are never locked out
+let currentUserRole = 'owner';
 
 /**
  * Enforces role access across sidebar navigation buttons and view switching
@@ -1159,10 +1159,23 @@ let currentUserRole = 'member';
 async function applyRolePermissions(user) {
     if (!user) return;
 
-    try {
-        const idToken = await user.getIdToken(true); // Force refresh to get latest workspace context
+    // Check if the user signed up via an invite link (stored in localStorage during sign-up/invite flow)
+    const pendingInviteOwner = localStorage.getItem('audiory_pending_invite_owner');
+    const isInvitedUser = Boolean(pendingInviteOwner);
 
-        // Query workspace endpoint for assigned role
+    // If NOT an invited user, maintain full 'owner' status and display all elements
+    if (!isInvitedUser) {
+        currentUserRole = 'owner';
+        document.querySelectorAll('[data-role]').forEach(button => {
+            button.classList.remove('hidden');
+        });
+        return;
+    }
+
+    // Only query workspace permissions for invited workspace members
+    try {
+        const idToken = await user.getIdToken(true);
+
         const res = await fetch("https://audiorydistribution.dandredurkofficial.workers.dev/api/workspace/permissions", {
             method: "GET",
             headers: {
@@ -1175,15 +1188,15 @@ async function applyRolePermissions(user) {
             const data = await res.json();
             currentUserRole = (data.role || 'member').toLowerCase().trim();
         } else {
-            console.warn(`Permissions endpoint returned status ${res.status}. Defaulting to member.`);
+            console.warn(`Permissions endpoint returned status ${res.status}. Defaulting invited user to member.`);
             currentUserRole = 'member';
         }
     } catch (err) {
-        console.warn("Could not fetch user role, defaulting to member:", err);
+        console.warn("Could not fetch invited user role, defaulting to member:", err);
         currentUserRole = 'member';
     }
 
-    // Hide unauthorized navigation buttons
+    // Filter sidebar navigation buttons for invited users
     document.querySelectorAll('[data-role]').forEach(button => {
         const allowedRoles = button.getAttribute('data-role').split(',').map(r => r.trim().toLowerCase());
         const canAccess = allowedRoles.includes('all') || allowedRoles.includes(currentUserRole);
@@ -1195,8 +1208,7 @@ async function applyRolePermissions(user) {
         }
     });
 
-    // If currently viewing a restricted view upon loading, redirect back to home
-    const currentActiveNav = document.querySelector('nav button:not(.hidden)');
+    // Guard active view for invited accounts
     const activeViewId = window.currentView || 'home';
     const activeNavBtn = document.getElementById(`nav_${activeViewId}`);
     
