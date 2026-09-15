@@ -1150,6 +1150,92 @@ onAuthStateChanged(auth, async (user) => {
     }
 }
 
+// Store active user role globally (defaults to 'owner' for workspace account creators)
+let currentUserRole = 'owner';
+
+/**
+ * Enforces role access across sidebar navigation buttons and view switching
+ */
+async function applyRolePermissions(user) {
+    if (!user) return;
+
+    try {
+        const idToken = await user.getIdToken();
+
+        // Query workspace endpoint for assigned role
+        const res = await fetch("https://audiorydistribution.dandredurkofficial.workers.dev/api/workspace/permissions", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${idToken}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            currentUserRole = (data.role || 'owner').toLowerCase();
+        }
+    } catch (err) {
+        console.warn("Could not fetch user role, defaulting to owner:", err);
+    }
+
+    // Hide unauthorized navigation buttons
+    document.querySelectorAll('[data-role]').forEach(button => {
+        const allowedRoles = button.getAttribute('data-role').split(',');
+        const canAccess = allowedRoles.includes('all') || allowedRoles.includes(currentUserRole);
+
+        if (canAccess) {
+            button.classList.remove('hidden');
+        } else {
+            button.classList.add('hidden');
+        }
+    });
+}
+
+/**
+ * Enhanced view switcher with built-in permission guard
+ */
+const originalSwitchView = window.switchView;
+
+window.switchView = function(viewName) {
+    const targetNav = document.getElementById(`nav_${viewName}`);
+
+    if (targetNav) {
+        const allowedRoles = targetNav.getAttribute('data-role')?.split(',') || [];
+        const isAllowed = allowedRoles.includes('all') || allowedRoles.includes(currentUserRole);
+
+        if (!isAllowed) {
+            console.warn(`Access denied to view '${viewName}' for role: '${currentUserRole}'`);
+            if (typeof originalSwitchView === 'function') {
+                originalSwitchView('home');
+            }
+            return;
+        }
+    }
+
+    if (typeof originalSwitchView === 'function') {
+        originalSwitchView(viewName);
+    }
+};
+
+// Trigger permissions check using modular auth
+// Assumes 'auth' is already initialized via: const auth = getAuth();
+if (typeof auth !== 'undefined') {
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            applyRolePermissions(user);
+        }
+    });
+} else {
+    // Fallback if 'auth' is declared globally later
+    window.addEventListener('DOMContentLoaded', () => {
+        if (window.auth) {
+            onAuthStateChanged(window.auth, (user) => {
+                if (user) applyRolePermissions(user);
+            });
+        }
+    });
+}
 
         
         // Direct Multipart Upload to Cloudflare Worker R2 Bucket
