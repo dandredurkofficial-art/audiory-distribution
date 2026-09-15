@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accept Workspace Invitation | Audiory Distribution</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandDark: '#07090e',
+            brandCard: '#0f141d',
+            brandBorder: '#1e293b',
+            brandCyan: '#06b6d4',
+            brandPurple: '#8b5cf6'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #07090e;
+      color: #f8fafc;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+    
+    /* Audiory Gradient Button Style */
+    .btn-gradient {
+      background: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%);
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-gradient:hover {
+      opacity: 0.95;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.35);
+    }
+
+    /* Text Gradient */
+    .text-gradient {
+      background: linear-gradient(135deg, #22d3ee 0%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between items-center p-4 relative overflow-x-hidden">
+
+  <!-- Ambient Glow Effects -->
+  <div class="absolute top-10 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+  <div class="absolute bottom-10 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-purple-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+
+  <!-- Navbar -->
+  <header class="w-full max-w-6xl flex justify-between items-center py-6 px-4 z-10">
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 rounded-xl btn-gradient flex items-center justify-center shadow-lg shadow-cyan-500/20">
+        <i class="fa-solid fa-wave-square text-white text-base"></i>
+      </div>
+      <span class="font-bold text-lg tracking-wider">AUDIORY <span class="text-xs font-normal text-slate-400 block tracking-widest -mt-1">DISTRIBUTION</span></span>
+    </div>
+    <a href="https://distro.audiory.site" class="text-xs text-slate-400 hover:text-white transition-colors">Back to Site</a>
+  </header>
+
+  <!-- Main Invitation Card Container -->
+  <main class="w-full max-w-md z-10 my-auto">
+    <div class="bg-[#0f141d]/80 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-8 shadow-2xl shadow-black/80 text-center relative overflow-hidden">
+      
+      <!-- Top Accent Line -->
+      <div class="absolute top-0 left-0 right-0 h-1 btn-gradient"></div>
+
+      <!-- State 1: Loading -->
+      <div id="stateLoading" class="py-8">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl text-cyan-400 mb-4"></i>
+        <h2 class="text-lg font-medium text-slate-200">Verifying Invitation...</h2>
+        <p class="text-xs text-slate-400 mt-2">Connecting to Audiory Distribution servers</p>
+      </div>
+
+      <!-- State 2: Invitation Ready -->
+      <div id="stateReady" class="hidden">
+        <div class="w-14 h-14 bg-cyan-500/10 border border-cyan-500/20 rounded-2xl flex items-center justify-center mx-auto mb-5 text-cyan-400 text-xl">
+          <i class="fa-solid fa-user-plus"></i>
+        </div>
+
+        <span class="inline-block px-3 py-1 bg-cyan-950/40 border border-cyan-500/30 text-cyan-400 text-[10px] uppercase tracking-widest font-semibold rounded-full mb-3">Workspace Invitation</span>
+        
+        <h1 class="text-2xl font-bold text-slate-100 mb-2">You've Been Invited!</h1>
+        <p class="text-xs text-slate-400 leading-relaxed mb-6">
+          You've been invited to join an artist or label workspace. Accept below to access assigned releases, royalties, and tools.
+        </p>
+
+        <!-- Dynamic Invite Info Box -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-left mb-6 space-y-2 text-xs">
+          <div class="flex justify-between items-center text-slate-400">
+            <span>Invite Code:</span>
+            <span id="displayInviteId" class="font-mono text-slate-200 font-medium">--</span>
+          </div>
+          <div class="flex justify-between items-center text-slate-400">
+            <span>Workspace Owner:</span>
+            <span id="displayOwnerId" class="font-mono text-slate-200 font-medium">--</span>
+          </div>
+        </div>
+
+        <button id="acceptBtn" onclick="processAcceptance()" class="w-full btn-gradient py-3 px-6 rounded-xl font-semibold text-sm text-white shadow-lg transition-all flex items-center justify-center space-x-2">
+          <span>Accept & Go to Dashboard</span>
+          <i class="fa-solid fa-arrow-right text-xs"></i>
+        </button>
+      </div>
+
+      <!-- State 3: Error -->
+      <div id="stateError" class="hidden py-6">
+        <div class="w-14 h-14 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-red-400 text-xl">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h2 class="text-lg font-bold text-slate-100 mb-2">Invalid Invitation Link</h2>
+        <p id="errorMessage" class="text-xs text-slate-400 leading-relaxed mb-6">
+          This invitation link is missing required parameters or has expired.
+        </p>
+        <a href="https://distro.audiory.site" class="inline-block w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium py-3 rounded-xl text-xs transition-colors">
+          Return to Audiory
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full max-w-6xl text-center py-6 text-xs text-slate-600 z-10">
+    &copy; <script>document.write(new Date().getFullYear())</script> Audiory Distribution. All rights reserved.
+  </footer>
+
+  <!-- Invitation Processing JS -->
+  <script>
+    const WORKER_BASE_URL = "https://audiorydistribution.dandredurkofficial.workers.dev";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const inviteId = urlParams.get('id');
+    const ownerId = urlParams.get('owner');
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (!inviteId || !ownerId) {
+        showError("Invalid invitation parameters. Please ask your workspace owner to resend the invitation.");
+        return;
+      }
+
+      document.getElementById('displayInviteId').innerText = inviteId;
+      document.getElementById('displayOwnerId').innerText = ownerId.substring(0, 12) + "...";
+
+      // Show invitation state
+      document.getElementById('stateLoading').classList.add('hidden');
+      document.getElementById('stateReady').classList.remove('hidden');
+    });
+
+    function showError(msg) {
+      document.getElementById('stateLoading').classList.add('hidden');
+      document.getElementById('stateReady').classList.add('hidden');
+      document.getElementById('errorMessage').innerText = msg;
+      document.getElementById('stateError').classList.remove('hidden');
+    }
+
+    async function processAcceptance() {
+      const btn = document.getElementById('acceptBtn');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Processing...</span>`;
+
+      // Store invitation parameters in localStorage for auto-linking after login/signup
+      localStorage.setItem('audiory_pending_invite_id', inviteId);
+      localStorage.setItem('audiory_pending_invite_owner', ownerId);
+
+      // Redirect directly to your dashboard application
+      setTimeout(() => {
+        window.location.href = `https://distro.audiory.site/dashboard/?invite=${inviteId}&owner=${ownerId}`;
+      }, 800);
+    }
+  </script>
+</body>
+</html>
