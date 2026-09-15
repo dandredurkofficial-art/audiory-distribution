@@ -490,6 +490,15 @@
                 setLoading(true);
                 try {
                     await processAccountCreation(pendingUserData, { gateway: 'none' });
+
+                    const pendingInviteId = localStorage.getItem('audiory_pending_invite_id');
+                    const pendingOwnerId = localStorage.getItem('audiory_pending_invite_owner');
+
+                    if (pendingInviteId && pendingOwnerId) {
+                        localStorage.removeItem('audiory_pending_invite_id');
+                        localStorage.removeItem('audiory_pending_invite_owner');
+                        console.log(`Successfully joined workspace of owner ${pendingOwnerId}`);
+                    }
                     showAlert("Account successfully created! Redirecting...", false);
                     setTimeout(() => { window.location.href = "/dashboard/"; }, 1500);
                 } catch (error) {
@@ -674,6 +683,15 @@
                     subscriptionPlan: "starter",
                     createdAt: serverTimestamp()
                 }, { merge: true });
+
+                const pendingInviteId = localStorage.getItem('audiory_pending_invite_id');
+                const pendingOwnerId = localStorage.getItem('audiory_pending_invite_owner');
+
+                if (pendingInviteId && pendingOwnerId) {
+                    localStorage.removeItem('audiory_pending_invite_id');
+                    localStorage.removeItem('audiory_pending_invite_owner');
+                    console.log(`Successfully joined workspace of owner ${pendingOwnerId}`);
+                }
 
                 showAlert("Google Sign-In successful! Redirecting...", false);
                 setTimeout(() => { window.location.href = "/dashboard/"; }, 1500);
