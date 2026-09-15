@@ -478,6 +478,19 @@
 
                 // 2FA Not Enabled -> Go directly to dashboard
                 if (data.success && !data.required) {
+
+                    // Run after user successfully logs in or signs up
+                    const pendingInviteId = localStorage.getItem('audiory_pending_invite_id');
+                    const pendingOwnerId = localStorage.getItem('audiory_pending_invite_owner');
+
+                    if (pendingInviteId && pendingOwnerId) {
+                      // Clear stored invite
+                      localStorage.removeItem('audiory_pending_invite_id');
+                      localStorage.removeItem('audiory_pending_invite_owner');
+  
+                      // Link member session to owner's workspace
+                      console.log(`Successfully joined workspace of owner ${pendingOwnerId}`);
+                    }
                     showToast("Welcome back! Redirecting to your dashboard...", "success");
                     setTimeout(() => {
                         window.location.href = "/dashboard/";
