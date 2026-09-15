@@ -320,395 +320,183 @@
     </footer>
 
     <!-- ==================== FIREBASE & GATEWAY ENGINE ==================== -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { 
-            getAuth, 
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword,
-            updateProfile, 
-            GoogleAuthProvider, 
-            signInWithPopup 
-        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            setDoc, 
-            serverTimestamp 
-        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+        getAuth, 
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        updateProfile, 
+        GoogleAuthProvider, 
+        signInWithPopup,
+        signOut 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { 
+        getFirestore, 
+        doc, 
+        setDoc, 
+        serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-          apiKey: "AIzaSyBtii4iYkm7ummyi5SHiQMOMUPrOpwhdrk",
-          authDomain: "audiory-distribution.firebaseapp.com",
-          projectId: "audiory-distribution",
-          storageBucket: "audiory-distribution.firebasestorage.app",
-          messagingSenderId: "944053428828",
-          appId: "1:944053428828:web:30277072355728f9c8fc99",
-          measurementId: "G-MXDJH52XX4"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const googleProvider = new GoogleAuthProvider();
-
-        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-        const auth = getAuth(app);
-
-        // Check if URL contains invite parameters and clear existing session to prevent auth state conflicts
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('invite')) {
-            await signOut(auth);
-        }
-
-        // Production Configuration Endpoints
-        window.WORKER_BASE_URL = "https://audiorydistribution.dandredurkofficial.workers.dev";
-        const WORKER_BASE_URL = window.WORKER_BASE_URL;
-
-        const UPGRADE_ENDPOINT = `${WORKER_BASE_URL}/api/subscription/upgrade`;
-        const STATUS_ENDPOINT = `${WORKER_BASE_URL}/api/subscription/status`;
-
-        // Read Plan from Query String
-        const urlParams = new URLSearchParams(window.location.search);
-        const selectedPlan = (urlParams.get('plan') || 'starter').toLowerCase();
-
-        // UI DOM Elements
-        const signupForm = document.getElementById('signupForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const btnText = document.getElementById('btnText');
-        const btnIcon = document.getElementById('btnIcon');
-        const googleBtn = document.getElementById('googleBtn');
-        const alertBox = document.getElementById('alertBox');
-        const alertIcon = document.getElementById('alertIcon');
-        const alertMessage = document.getElementById('alertMessage');
-        const passwordInput = document.getElementById('password');
-        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
-        const passwordIcon = document.getElementById('passwordIcon');
-
-        // Modal DOM Elements
-        const paymentModal = document.getElementById('paymentModal');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
-        const mpesaField = document.getElementById('mpesaField');
-        const cardFields = document.getElementById('cardFields');
-        const paypalNotice = document.getElementById('paypalNotice');
-        const modalPrice = document.getElementById('modalPrice');
-        const planBadge = document.getElementById('planBadge');
-        const modalAlertBox = document.getElementById('modalAlertBox');
-        const modalAlertIcon = document.getElementById('modalAlertIcon');
-        const modalAlertMessage = document.getElementById('modalAlertMessage');
-
-        const PLAN_DETAILS = {
-            starter: { name: "Starter Plan", price: "0.00", text: "Create Free Account" },
-            pro: { name: "Pro Artist Plan", price: "19.99", text: "Proceed to Checkout ($19.99/yr)" },
-            label: { name: "Label Partner Plan", price: "49.99", text: "Proceed to Checkout ($49.99/yr)" }
-        };
-
-        const currentPlan = PLAN_DETAILS[selectedPlan] || PLAN_DETAILS.starter;
-        btnText.textContent = currentPlan.text;
-        modalPrice.textContent = `$${currentPlan.price}/year`;
-        planBadge.textContent = currentPlan.name;
-
-        // Toggle Password Visibility
-        togglePasswordBtn.addEventListener('click', () => {
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                passwordIcon.classList.remove('fa-eye');
-                passwordIcon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                passwordIcon.classList.remove('fa-eye-slash');
-                passwordIcon.classList.add('fa-eye');
-            }
-        });
-
-        function showAlert(message, isError = true) {
-            alertBox.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/30', 'text-red-400', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
-            if (isError) {
-                alertBox.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-400');
-                alertIcon.className = 'fa-solid fa-circle-exclamation text-base mt-0.5';
-            } else {
-                alertBox.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
-                alertIcon.className = 'fa-solid fa-circle-check text-base mt-0.5';
-            }
-            alertMessage.textContent = message;
-        }
-
-        function showModalAlert(message, isError = true) {
-            modalAlertBox.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/30', 'text-red-400', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
-            if (isError) {
-                modalAlertBox.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-400');
-                modalAlertIcon.className = 'fa-solid fa-circle-exclamation text-sm mt-0.5';
-            } else {
-                modalAlertBox.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
-                modalAlertIcon.className = 'fa-solid fa-circle-check text-sm mt-0.5';
-            }
-            modalAlertMessage.textContent = message;
-        }
-
-        function setLoading(isLoading) {
-            submitBtn.disabled = isLoading;
-            googleBtn.disabled = isLoading;
-            if (isLoading) {
-                btnText.textContent = "Processing...";
-                btnIcon.className = "fa-solid fa-circle-notch fa-spin text-xs";
-            } else {
-                btnText.textContent = currentPlan.text;
-                btnIcon.className = "fa-solid fa-arrow-right text-xs";
-            }
-        }
-
-        document.querySelectorAll('input[name="paymentGateway"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                modalAlertBox.classList.add('hidden');
-                mpesaField.classList.add('hidden');
-                cardFields.classList.add('hidden');
-                paypalNotice.classList.add('hidden');
-
-                if (e.target.value === 'mpesa') {
-                    mpesaField.classList.remove('hidden');
-                    document.getElementById('paymentBtnText').textContent = "Pay Now & Create Account";
-                } else if (e.target.value === 'pesapal') {
-                    cardFields.classList.remove('hidden');
-                    document.getElementById('paymentBtnText').textContent = "Pay with Card & Create Account";
-                } else if (e.target.value === 'paypal') {
-                    paypalNotice.classList.remove('hidden');
-                    document.getElementById('paymentBtnText').textContent = "Continue to PayPal";
-                }
-            });
-        });
-
-        closeModalBtn.addEventListener('click', () => {
-            paymentModal.classList.add('hidden');
-            modalAlertBox.classList.add('hidden');
-        });
-
-        let pendingUserData = null;
-
-        signupForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            pendingUserData = {
-                displayName: document.getElementById('displayName').value.trim(),
-                email: document.getElementById('email').value.trim(),
-                password: passwordInput.value,
-                accountRole: document.getElementById('accountRole').value
-            };
-
-            if (selectedPlan === 'starter' || selectedPlan === 'free') {
-                setLoading(true);
-                try {
-                    await processAccountCreation(pendingUserData, { gateway: 'none' });
-
-                    const pendingInviteId = localStorage.getItem('audiory_pending_invite_id');
-                    const pendingOwnerId = localStorage.getItem('audiory_pending_invite_owner');
-
-                    if (pendingInviteId && pendingOwnerId) {
-                        localStorage.removeItem('audiory_pending_invite_id');
-                        localStorage.removeItem('audiory_pending_invite_owner');
-                        console.log(`Successfully joined workspace of owner ${pendingOwnerId}`);
-                    }
-                    showAlert("Account successfully created! Redirecting...", false);
-                    setTimeout(() => { window.location.href = "/dashboard/"; }, 1500);
-                } catch (error) {
-                    showAlert(error.message, true);
-                    setLoading(false);
-                }
-            } else {
-                modalAlertBox.classList.add('hidden');
-                paymentModal.classList.remove('hidden');
-            }
-        });
-
-        // Payment Confirmation inside Modal
-        confirmPaymentBtn.addEventListener('click', async () => {
-            const selectedGateway = document.querySelector('input[name="paymentGateway"]:checked').value;
-            const phone = document.getElementById('mpesaPhone').value.trim();
-
-            if (selectedGateway === 'mpesa' && !phone) {
-                showModalAlert("Please enter a valid M-Pesa phone number.", true);
-                return;
-            }
-
-            if (selectedGateway === 'pesapal') {
-                const cardNum = document.getElementById('cardNumber').value.trim();
-                const cardExpiry = document.getElementById('cardExpiry').value.trim();
-                const cardCvc = document.getElementById('cardCvc').value.trim();
-                if (!cardNum || !cardExpiry || !cardCvc) {
-                    showModalAlert("Please complete all credit card details.", true);
-                    return;
-                }
-            }
-
-            confirmPaymentBtn.disabled = true;
-            document.getElementById('paymentBtnText').textContent = selectedGateway === 'paypal' ? "Redirecting..." : "Processing Payment...";
-
-            try {
-                // 1. Create User in Firebase Auth & Firestore
-                const authUser = await processAccountCreation(pendingUserData, {
-                    gateway: selectedGateway,
-                    phone: phone
-                });
-
-                // 2. Fetch Firebase ID Token
-                const idToken = await authUser.getIdToken();
-
-                // 3. Post to Subscription Upgrade Endpoint
-                const response = await fetch(UPGRADE_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${idToken}`
-                    },
-                    body: JSON.stringify({
-                        planId: selectedPlan,
-                        paymentMethod: selectedGateway,
-                        phone: phone,
-                        email: pendingUserData.email,
-                        displayName: pendingUserData.displayName
-                    })
-                });
-
-                const result = await response.json();
-
-                if (!response.ok || result.error) {
-                    throw new Error(result.error || "Payment processing failed on gateway server.");
-                }
-
-                // 4. Redirect based on Gateway Response
-                if ((selectedGateway === 'paypal' || selectedGateway === 'pesapal') && result.redirectUrl) {
-                    window.location.href = result.redirectUrl;
-                } else if (selectedGateway === 'mpesa') {
-                    showModalAlert("STK Push sent! Please enter your PIN on your phone...", false);
-                    document.getElementById('paymentBtnText').textContent = "Waiting for PIN...";
-
-                    let attempts = 0;
-                    const maxAttempts = 15; // Poll for 45 seconds max
-
-                    const pollInterval = setInterval(async () => {
-                        attempts++;
-
-                        try {
-                            const statusRes = await fetch(STATUS_ENDPOINT, {
-                                method: 'GET',
-                                headers: { 'Authorization': `Bearer ${idToken}` }
-                            });
-                            const statusData = await statusRes.json();
-
-                            if (statusData.status === "Active") {
-                                clearInterval(pollInterval);
-                                showModalAlert("Payment confirmed! Redirecting to dashboard...", false);
-                                setTimeout(() => {
-                                    paymentModal.classList.add('hidden');
-                                    window.location.href = "/dashboard/";
-                                }, 1500);
-                            } else if (statusData.status === "Failed") {
-                                clearInterval(pollInterval);
-                                showModalAlert("Payment failed, was cancelled, or balance was insufficient.", true);
-                                confirmPaymentBtn.disabled = false;
-                                document.getElementById('paymentBtnText').textContent = "Pay Now & Create Account";
-                            }
-                        } catch (err) {
-                            console.error("Polling status error:", err);
-                        }
-
-                        if (attempts >= maxAttempts) {
-                            clearInterval(pollInterval);
-                            showModalAlert("Payment confirmation timed out. If you entered your PIN, log in shortly.", true);
-                            confirmPaymentBtn.disabled = false;
-                            document.getElementById('paymentBtnText').textContent = "Pay Now & Create Account";
-                        }
-                    }, 3000);
-
-                } else {
-                    showModalAlert("Payment processed! Redirecting to dashboard...", false);
-                    setTimeout(() => { 
-                        paymentModal.classList.add('hidden');
-                        window.location.href = "/dashboard/"; 
-                    }, 1500);
-                }
-
-            } catch (err) {
-                showModalAlert(err.message || "Checkout failed. Please try again.", true);
-                confirmPaymentBtn.disabled = false;
-                document.getElementById('paymentBtnText').textContent = "Pay Now & Create Account";
-            }
-        });
-
-        async function processAccountCreation(userData, paymentInfo) {
-    let user = auth.currentUser;
-    let isNewUser = false;
-
-    // 1. If already logged in with the same email (e.g., retrying payment in active session)
-    if (user && user.email.toLowerCase() === userData.email.toLowerCase()) {
-        await updateProfile(user, { displayName: userData.displayName });
-    } else {
-        // 2. If logged in with a DIFFERENT account (common during testing/invites), sign out first
-        if (user) {
-            await signOut(auth);
-        }
-
-        try {
-            // Attempt to create a new user account
-            const userCred = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
-            user = userCred.user;
-            await updateProfile(user, { displayName: userData.displayName });
-            isNewUser = true;
-        } catch (error) {
-            // Retrying payment with existing account
-            if (error.code === 'auth/email-already-in-use') {
-                try {
-                    const userCred = await signInWithEmailAndPassword(auth, userData.email, userData.password);
-                    user = userCred.user;
-                } catch (signInErr) {
-                    // Converts confusing auth/invalid-credential into a clear user message
-                    if (signInErr.code === 'auth/invalid-credential' || signInErr.code === 'auth/wrong-password') {
-                        throw new Error("This email is already registered. The password you entered is incorrect.");
-                    }
-                    throw signInErr;
-                }
-            } else {
-                throw error;
-            }
-        }
-    }
-
-    // 3. Prepare Firestore payload (Preserved exact behavior)
-    const userDocData = {
-        uid: user.uid,
-        email: userData.email,
-        displayName: userData.displayName,
-        accountRole: userData.accountRole,
-        subscriptionPlan: selectedPlan,
-        paymentGateway: paymentInfo.gateway,
-        updatedAt: serverTimestamp()
+    const firebaseConfig = {
+      apiKey: "AIzaSyBtii4iYkm7ummyi5SHiQMOMUPrOpwhdrk",
+      authDomain: "audiory-distribution.firebaseapp.com",
+      projectId: "audiory-distribution",
+      storageBucket: "audiory-distribution.firebasestorage.app",
+      messagingSenderId: "944053428828",
+      appId: "1:944053428828:web:30277072355728f9c8fc99",
+      measurementId: "G-MXDJH52XX4"
     };
 
-    if (isNewUser) {
-        userDocData.createdAt = serverTimestamp();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    // Read Plan and Invite Parameters from Query String
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Safe Non-Blocking Session Cleanup on Invite Landing
+    if (urlParams.has('invite')) {
+        signOut(auth).catch(err => console.warn("Session signout skip:", err));
     }
 
-    await setDoc(doc(db, "users", user.uid), userDocData, { merge: true });
+    // Production Configuration Endpoints
+    window.WORKER_BASE_URL = "https://audiorydistribution.dandredurkofficial.workers.dev";
+    const WORKER_BASE_URL = window.WORKER_BASE_URL;
 
-    return user;
-}
+    const UPGRADE_ENDPOINT = `${WORKER_BASE_URL}/api/subscription/upgrade`;
+    const STATUS_ENDPOINT = `${WORKER_BASE_URL}/api/subscription/status`;
 
-        // Google Sign-In Handler
-        googleBtn.addEventListener('click', async () => {
+    const selectedPlan = (urlParams.get('plan') || 'starter').toLowerCase();
+
+    // UI DOM Elements
+    const signupForm = document.getElementById('signupForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnIcon = document.getElementById('btnIcon');
+    const googleBtn = document.getElementById('googleBtn');
+    const alertBox = document.getElementById('alertBox');
+    const alertIcon = document.getElementById('alertIcon');
+    const alertMessage = document.getElementById('alertMessage');
+    const passwordInput = document.getElementById('password');
+    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+    const passwordIcon = document.getElementById('passwordIcon');
+
+    // Modal DOM Elements
+    const paymentModal = document.getElementById('paymentModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+    const mpesaField = document.getElementById('mpesaField');
+    const cardFields = document.getElementById('cardFields');
+    const paypalNotice = document.getElementById('paypalNotice');
+    const modalPrice = document.getElementById('modalPrice');
+    const planBadge = document.getElementById('planBadge');
+    const modalAlertBox = document.getElementById('modalAlertBox');
+    const modalAlertIcon = document.getElementById('modalAlertIcon');
+    const modalAlertMessage = document.getElementById('modalAlertMessage');
+
+    const PLAN_DETAILS = {
+        starter: { name: "Starter Plan", price: "0.00", text: "Create Free Account" },
+        pro: { name: "Pro Artist Plan", price: "19.99", text: "Proceed to Checkout ($19.99/yr)" },
+        label: { name: "Label Partner Plan", price: "49.99", text: "Proceed to Checkout ($49.99/yr)" }
+    };
+
+    const currentPlan = PLAN_DETAILS[selectedPlan] || PLAN_DETAILS.starter;
+    btnText.textContent = currentPlan.text;
+    modalPrice.textContent = `$${currentPlan.price}/year`;
+    planBadge.textContent = currentPlan.name;
+
+    // Toggle Password Visibility
+    togglePasswordBtn.addEventListener('click', () => {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            passwordIcon.classList.remove('fa-eye');
+            passwordIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            passwordIcon.classList.remove('fa-eye-slash');
+            passwordIcon.classList.add('fa-eye');
+        }
+    });
+
+    function showAlert(message, isError = true) {
+        alertBox.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/30', 'text-red-400', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+        if (isError) {
+            alertBox.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-400');
+            alertIcon.className = 'fa-solid fa-circle-exclamation text-base mt-0.5';
+        } else {
+            alertBox.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+            alertIcon.className = 'fa-solid fa-circle-check text-base mt-0.5';
+        }
+        alertMessage.textContent = message;
+    }
+
+    function showModalAlert(message, isError = true) {
+        modalAlertBox.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/30', 'text-red-400', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+        if (isError) {
+            modalAlertBox.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-400');
+            modalAlertIcon.className = 'fa-solid fa-circle-exclamation text-sm mt-0.5';
+        } else {
+            modalAlertBox.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+            modalAlertIcon.className = 'fa-solid fa-circle-check text-sm mt-0.5';
+        }
+        modalAlertMessage.textContent = message;
+    }
+
+    function setLoading(isLoading) {
+        submitBtn.disabled = isLoading;
+        googleBtn.disabled = isLoading;
+        if (isLoading) {
+            btnText.textContent = "Processing...";
+            btnIcon.className = "fa-solid fa-circle-notch fa-spin text-xs";
+        } else {
+            btnText.textContent = currentPlan.text;
+            btnIcon.className = "fa-solid fa-arrow-right text-xs";
+        }
+    }
+
+    document.querySelectorAll('input[name="paymentGateway"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            modalAlertBox.classList.add('hidden');
+            mpesaField.classList.add('hidden');
+            cardFields.classList.add('hidden');
+            paypalNotice.classList.add('hidden');
+
+            if (e.target.value === 'mpesa') {
+                mpesaField.classList.remove('hidden');
+                document.getElementById('paymentBtnText').textContent = "Pay Now & Create Account";
+            } else if (e.target.value === 'pesapal') {
+                cardFields.classList.remove('hidden');
+                document.getElementById('paymentBtnText').textContent = "Pay with Card & Create Account";
+            } else if (e.target.value === 'paypal') {
+                paypalNotice.classList.remove('hidden');
+                document.getElementById('paymentBtnText').textContent = "Continue to PayPal";
+            }
+        });
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+        paymentModal.classList.add('hidden');
+        modalAlertBox.classList.add('hidden');
+    });
+
+    let pendingUserData = null;
+
+    signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        pendingUserData = {
+            displayName: document.getElementById('displayName').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            password: passwordInput.value,
+            accountRole: document.getElementById('accountRole').value
+        };
+
+        if (selectedPlan === 'starter' || selectedPlan === 'free') {
             setLoading(true);
             try {
-                const result = await signInWithPopup(auth, googleProvider);
-                const user = result.user;
-
-                await setDoc(doc(db, "users", user.uid), {
-                    uid: user.uid,
-                    email: user.email,
-                    displayName: user.displayName,
-                    accountRole: "artist",
-                    subscriptionPlan: "starter",
-                    createdAt: serverTimestamp()
-                }, { merge: true });
+                await processAccountCreation(pendingUserData, { gateway: 'none' });
 
                 const pendingInviteId = localStorage.getItem('audiory_pending_invite_id');
                 const pendingOwnerId = localStorage.getItem('audiory_pending_invite_owner');
@@ -718,15 +506,224 @@
                     localStorage.removeItem('audiory_pending_invite_owner');
                     console.log(`Successfully joined workspace of owner ${pendingOwnerId}`);
                 }
-
-                showAlert("Google Sign-In successful! Redirecting...", false);
+                showAlert("Account successfully created! Redirecting...", false);
                 setTimeout(() => { window.location.href = "/dashboard/"; }, 1500);
-
             } catch (error) {
-                showAlert("Google authentication failed.", true);
+                showAlert(error.message, true);
                 setLoading(false);
             }
-        });
-    </script>
+        } else {
+            modalAlertBox.classList.add('hidden');
+            paymentModal.classList.remove('hidden');
+        }
+    });
+
+    // Payment Confirmation inside Modal
+    confirmPaymentBtn.addEventListener('click', async () => {
+        const selectedGateway = document.querySelector('input[name="paymentGateway"]:checked').value;
+        const phone = document.getElementById('mpesaPhone').value.trim();
+
+        if (selectedGateway === 'mpesa' && !phone) {
+            showModalAlert("Please enter a valid M-Pesa phone number.", true);
+            return;
+        }
+
+        if (selectedGateway === 'pesapal') {
+            const cardNum = document.getElementById('cardNumber').value.trim();
+            const cardExpiry = document.getElementById('cardExpiry').value.trim();
+            const cardCvc = document.getElementById('cardCvc').value.trim();
+            if (!cardNum || !cardExpiry || !cardCvc) {
+                showModalAlert("Please complete all credit card details.", true);
+                return;
+            }
+        }
+
+        confirmPaymentBtn.disabled = true;
+        document.getElementById('paymentBtnText').textContent = selectedGateway === 'paypal' ? "Redirecting..." : "Processing Payment...";
+
+        try {
+            // 1. Create User in Firebase Auth & Firestore
+            const authUser = await processAccountCreation(pendingUserData, {
+                gateway: selectedGateway,
+                phone: phone
+            });
+
+            // 2. Fetch Firebase ID Token
+            const idToken = await authUser.getIdToken();
+
+            // 3. Post to Subscription Upgrade Endpoint
+            const response = await fetch(UPGRADE_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({
+                    planId: selectedPlan,
+                    paymentMethod: selectedGateway,
+                    phone: phone,
+                    email: pendingUserData.email,
+                    displayName: pendingUserData.displayName
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || result.error) {
+                throw new Error(result.error || "Payment processing failed on gateway server.");
+            }
+
+            // 4. Redirect based on Gateway Response
+            if ((selectedGateway === 'paypal' || selectedGateway === 'pesapal') && result.redirectUrl) {
+                window.location.href = result.redirectUrl;
+            } else if (selectedGateway === 'mpesa') {
+                showModalAlert("STK Push sent! Please enter your PIN on your phone...", false);
+                document.getElementById('paymentBtnText').textContent = "Waiting for PIN...";
+
+                let attempts = 0;
+                const maxAttempts = 15; // Poll for 45 seconds max
+
+                const pollInterval = setInterval(async () => {
+                    attempts++;
+
+                    try {
+                        const statusRes = await fetch(STATUS_ENDPOINT, {
+                            method: 'GET',
+                            headers: { 'Authorization': `Bearer ${idToken}` }
+                        });
+                        const statusData = await statusRes.json();
+
+                        if (statusData.status === "Active") {
+                            clearInterval(pollInterval);
+                            showModalAlert("Payment confirmed! Redirecting to dashboard...", false);
+                            setTimeout(() => {
+                                paymentModal.classList.add('hidden');
+                                window.location.href = "/dashboard/";
+                            }, 1500);
+                        } else if (statusData.status === "Failed") {
+                            clearInterval(pollInterval);
+                            showModalAlert("Payment failed, was cancelled, or balance was insufficient.", true);
+                            confirmPaymentBtn.disabled = false;
+                            document.getElementById('paymentBtnText').textContent = "Pay Now & Create Account";
+                        }
+                    } catch (err) {
+                        console.error("Polling status error:", err);
+                    }
+
+                    if (attempts >= maxAttempts) {
+                        clearInterval(pollInterval);
+                        showModalAlert("Payment confirmation timed out. If you entered your PIN, log in shortly.", true);
+                        confirmPaymentBtn.disabled = false;
+                        document.getElementById('paymentBtnText').textContent = "Pay Now & Create Account";
+                    }
+                }, 3000);
+
+            } else {
+                showModalAlert("Payment processed! Redirecting to dashboard...", false);
+                setTimeout(() => { 
+                    paymentModal.classList.add('hidden');
+                    window.location.href = "/dashboard/"; 
+                }, 1500);
+            }
+
+        } catch (err) {
+            showModalAlert(err.message || "Checkout failed. Please try again.", true);
+            confirmPaymentBtn.disabled = false;
+            document.getElementById('paymentBtnText').textContent = "Pay Now & Create Account";
+        }
+    });
+
+    async function processAccountCreation(userData, paymentInfo) {
+        let user = auth.currentUser;
+        let isNewUser = false;
+
+        // 1. If already logged in with the same email (e.g., retrying payment in active session)
+        if (user && user.email.toLowerCase() === userData.email.toLowerCase()) {
+            await updateProfile(user, { displayName: userData.displayName });
+        } else {
+            // 2. If logged in with a DIFFERENT account (common during testing/invites), sign out first
+            if (user) {
+                await signOut(auth);
+            }
+
+            try {
+                // Attempt to create a new user account
+                const userCred = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+                user = userCred.user;
+                await updateProfile(user, { displayName: userData.displayName });
+                isNewUser = true;
+            } catch (error) {
+                // Retrying payment with existing account
+                if (error.code === 'auth/email-already-in-use') {
+                    try {
+                        const userCred = await signInWithEmailAndPassword(auth, userData.email, userData.password);
+                        user = userCred.user;
+                    } catch (signInErr) {
+                        // Converts confusing auth/invalid-credential into a clear user message
+                        if (signInErr.code === 'auth/invalid-credential' || signInErr.code === 'auth/wrong-password') {
+                            throw new Error("This email is already registered. The password you entered is incorrect.");
+                        }
+                        throw signInErr;
+                    }
+                } else {
+                    throw error;
+                }
+            }
+        }
+
+        // 3. Prepare Firestore payload (Preserved exact behavior)
+        const userDocData = {
+            uid: user.uid,
+            email: userData.email,
+            displayName: userData.displayName,
+            accountRole: userData.accountRole,
+            subscriptionPlan: selectedPlan,
+            paymentGateway: paymentInfo.gateway,
+            updatedAt: serverTimestamp()
+        };
+
+        if (isNewUser) {
+            userDocData.createdAt = serverTimestamp();
+        }
+
+        await setDoc(doc(db, "users", user.uid), userDocData, { merge: true });
+
+        return user;
+    }
+
+    // Google Sign-In Handler
+    googleBtn.addEventListener('click', async () => {
+        setLoading(true);
+        try {
+            const result = await signInWithPopup(auth, googleProvider);
+            const user = result.user;
+
+            await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName,
+                accountRole: "artist",
+                subscriptionPlan: "starter",
+                createdAt: serverTimestamp()
+            }, { merge: true });
+
+            const pendingInviteId = localStorage.getItem('audiory_pending_invite_id');
+            const pendingOwnerId = localStorage.getItem('audiory_pending_invite_owner');
+
+            if (pendingInviteId && pendingOwnerId) {
+                localStorage.removeItem('audiory_pending_invite_id');
+                localStorage.removeItem('audiory_pending_invite_owner');
+                console.log(`Successfully joined workspace of owner ${pendingOwnerId}`);
+            }
+
+            showAlert("Google Sign-In successful! Redirecting...", false);
+            setTimeout(() => { window.location.href = "/dashboard/"; }, 1500);
+
+        } catch (error) {
+            showAlert("Google authentication failed.", true);
+            setLoading(false);
+        }
+    });
+</script>
 </body>
 </html>
