@@ -1698,7 +1698,7 @@ window.fetchSupportTickets = async function() {
         console.error("Failed to load tickets:", e);
         document.getElementById('ticketsListContainer').innerHTML = `
             <div class="p-6 text-center text-red-400 bg-red-950/20 border border-red-800/40 rounded-2xl text-xs">
-                Failed to fetch support tickets. Please check your backend connection.
+                Failed to fetch support tickets.
             </div>`;
     }
 };
@@ -13392,75 +13392,121 @@ window.renderPreferencesView = function() {
     return `
     <div class="p-4 sm:p-6 max-w-6xl mx-auto space-y-6 sm:space-y-8 relative overflow-x-hidden">
 
+        <!-- =========================================================
+             TOAST
+        ========================================================== -->
         <div id="pref-toast"
              class="hidden fixed top-5 right-5 z-50 px-4 py-3 rounded-xl text-xs font-semibold shadow-lg transition-all transform duration-300 flex items-center gap-2">
         </div>
 
-        <!-- HEADER -->
+
+        <!-- =========================================================
+             HEADER
+        ========================================================== -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-brand-border/40 pb-5 gap-4">
+
             <div>
                 <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
                     Artist & Label Preferences
                 </h1>
+
                 <p class="text-xs text-gray-400 mt-1">
                     Manage platform profiles, metadata defaults, social links, and delivery settings.
                 </p>
             </div>
 
             <div id="pref-header-actions" class="shrink-0">
-                <button onclick="window.savePreferences()"
-                        id="btn-save-preferences"
-                        class="w-full sm:w-auto px-4 py-2 bg-brand-accent hover:brightness-110 text-black font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2">
+
+                <button
+                    onclick="window.savePreferences()"
+                    id="btn-save-preferences"
+                    class="w-full sm:w-auto px-4 py-2 bg-brand-accent hover:brightness-110 text-black font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2"
+                >
                     <i class="fa-solid fa-floppy-disk"></i>
                     Save Preferences
                 </button>
+
             </div>
         </div>
 
-        <!-- TABS -->
+
+        <!-- =========================================================
+             TABS
+        ========================================================== -->
         <div class="flex gap-2 sm:gap-4 border-b border-brand-border/40 pb-3">
-            <button id="tab-btn-artist"
-                    onclick="switchPrefTab('artist')"
-                    class="px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80">
+
+            <button
+                id="tab-btn-artist"
+                onclick="switchPrefTab('artist')"
+                class="px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg bg-brand-dark text-brand-accent border border-brand-border/80"
+            >
                 Artist Profile
             </button>
 
-            <button id="tab-btn-label"
-                    onclick="switchPrefTab('label')"
-                    class="px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all">
+            <button
+                id="tab-btn-label"
+                onclick="switchPrefTab('label')"
+                class="px-3 sm:px-4 py-1.5 text-xs font-bold rounded-lg text-gray-400 hover:text-white transition-all"
+            >
                 Label Settings
             </button>
+
         </div>
+
 
         <!-- =========================================================
              ARTIST SUBMITTED VIEW
         ========================================================== -->
-        <div id="pref-submitted-view"
-             class="hidden bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-6 space-y-6">
+        <div
+            id="pref-submitted-view"
+            class="hidden bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-6 space-y-6"
+        >
 
             <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-brand-border/30 pb-4 gap-3">
-                <div class="flex items-center gap-2.5">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-                    <h2 class="text-sm sm:text-base font-bold text-white">
-                        Submitted Artist Profile
-                    </h2>
+
+                <div class="flex items-center gap-3">
+
+                    <div
+                        id="summary-artist-image-wrap"
+                        class="w-12 h-12 rounded-xl overflow-hidden bg-black/40 border border-brand-border/50 shrink-0 flex items-center justify-center"
+                    >
+                        <i class="fa-solid fa-user text-gray-600"></i>
+                    </div>
+
+                    <div class="flex items-center gap-2.5">
+
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+
+                        <h2 class="text-sm sm:text-base font-bold text-white">
+                            Submitted Artist Profile
+                        </h2>
+
+                    </div>
                 </div>
 
-                <button onclick="window.openEditMode()"
-                        class="px-3 py-1.5 bg-brand-dark hover:bg-black/40 text-brand-accent border border-brand-border/80 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5">
+
+                <button
+                    onclick="window.openEditMode()"
+                    class="px-3 py-1.5 bg-brand-dark hover:bg-black/40 text-brand-accent border border-brand-border/80 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5"
+                >
                     <i class="fa-solid fa-pen-to-square"></i>
                     Edit
                 </button>
+
             </div>
+
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
+                <!-- BASIC SUMMARY -->
                 <div class="space-y-3">
+
                     <h3 class="text-xs uppercase font-bold text-gray-400 tracking-wider">
                         Basic Information
                     </h3>
 
                     <div class="bg-black/30 rounded-xl p-4 space-y-2 border border-brand-border/30 text-xs">
+
                         <p class="text-gray-300">
                             <strong class="text-white">Artist Name:</strong>
                             <span id="summary-artistName" class="ml-1 text-gray-200"></span>
@@ -13478,18 +13524,25 @@ window.renderPreferencesView = function() {
 
                         <p class="text-gray-300">
                             <strong class="text-white">Bio:</strong>
-                            <span id="summary-about"
-                                  class="ml-1 text-gray-200 block mt-1 italic break-words"></span>
+                            <span
+                                id="summary-about"
+                                class="ml-1 text-gray-200 block mt-1 italic break-words"
+                            ></span>
                         </p>
+
                     </div>
                 </div>
 
+
+                <!-- PLATFORM SUMMARY -->
                 <div class="space-y-3">
+
                     <h3 class="text-xs uppercase font-bold text-gray-400 tracking-wider">
                         Platform Links
                     </h3>
 
                     <div class="bg-black/30 rounded-xl p-4 space-y-2 border border-brand-border/30 text-xs">
+
                         <p class="text-gray-300">
                             <strong class="text-white">Spotify:</strong>
                             <span id="summary-spotify" class="ml-1 break-all text-gray-200"></span>
@@ -13519,16 +13572,22 @@ window.renderPreferencesView = function() {
                             <strong class="text-white">Website:</strong>
                             <span id="summary-website" class="ml-1 break-all text-gray-200"></span>
                         </p>
+
                     </div>
                 </div>
+
             </div>
 
+
+            <!-- COPYRIGHT -->
             <div class="space-y-3">
+
                 <h3 class="text-xs uppercase font-bold text-gray-400 tracking-wider">
                     Copyright & Release Defaults
                 </h3>
 
                 <div class="bg-black/30 rounded-xl p-4 grid grid-cols-1 md:grid-cols-3 gap-3 border border-brand-border/30 text-xs">
+
                     <p class="text-gray-300">
                         <strong class="text-white">Label:</strong>
                         <span id="summary-label" class="ml-1 break-words"></span>
@@ -13543,214 +13602,544 @@ window.renderPreferencesView = function() {
                         <strong class="text-white">P-Line:</strong>
                         <span id="summary-pLine" class="ml-1 break-words"></span>
                     </p>
+
                 </div>
             </div>
+
         </div>
+
 
         <!-- =========================================================
              ARTIST FORM
         ========================================================== -->
         <div id="pref-section-artist" class="space-y-6">
 
+
+            <!-- =====================================================
+                 BASIC + ARTIST IMAGE
+            ====================================================== -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
 
                 <!-- BASIC -->
                 <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
+
                     <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
                         Basic Info
                     </h3>
 
+
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">Artist Name *</label>
-                        <input type="text" id="pref-artistName"
-                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                        <label class="block text-xs text-gray-400 mb-1">
+                            Artist Name *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="pref-artistName"
+                            class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                        >
                     </div>
+
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1">Primary Genre</label>
-                            <input type="text" id="pref-primaryGenre"
-                                   class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
-                        </div>
 
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1">Secondary Genre</label>
-                            <input type="text" id="pref-secondaryGenre"
-                                   class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                            <label class="block text-xs text-gray-400 mb-1">
+                                Primary Genre
+                            </label>
+
+                            <input
+                                type="text"
+                                id="pref-primaryGenre"
+                                class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                            >
                         </div>
+
+
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">
+                                Secondary Genre
+                            </label>
+
+                            <input
+                                type="text"
+                                id="pref-secondaryGenre"
+                                class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                            >
+                        </div>
+
                     </div>
 
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Language</label>
-                        <input type="text" id="pref-language"
-                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
-                    </div>
 
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">Bio / About</label>
-                        <textarea id="pref-about" rows="3"
-                                  class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
+                        <label class="block text-xs text-gray-400 mb-1">
+                            Language
+                        </label>
+
+                        <input
+                            type="text"
+                            id="pref-language"
+                            class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                        >
                     </div>
+
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">
+                            Bio / About
+                        </label>
+
+                        <textarea
+                            id="pref-about"
+                            rows="3"
+                            class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                        ></textarea>
+                    </div>
+
                 </div>
 
-                <!-- PLATFORM LINKS -->
+
+                <!-- ARTIST PROFILE IMAGE -->
                 <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
 
                     <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
-                        Platform Profiles
+                        Artist Profile Image
                     </h3>
 
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Spotify</label>
-                        <input type="text" id="pref-platform-spotify"
-                               placeholder="https://open.spotify.com/artist/..."
-                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+
+                    <div class="flex flex-col items-center justify-center gap-4">
+
+                        <div
+                            id="pref-artist-image-preview"
+                            class="w-32 h-32 rounded-2xl overflow-hidden bg-black/40 border border-brand-border/60 flex items-center justify-center"
+                        >
+                            <i class="fa-solid fa-user text-3xl text-gray-700"></i>
+                        </div>
+
+
+                        <input
+                            type="hidden"
+                            id="pref-artist-profileImg"
+                        >
+
+
+                        <input
+                            type="file"
+                            id="pref-artist-image-file"
+                            accept="image/*"
+                            class="hidden"
+                            onchange="window.handlePreferenceProfileImage(this, 'artist')"
+                        >
+
+
+                        <button
+                            type="button"
+                            onclick="document.getElementById('pref-artist-image-file').click()"
+                            class="px-4 py-2 bg-brand-dark hover:bg-black/50 border border-brand-border/70 text-brand-accent text-xs font-bold rounded-xl transition-all"
+                        >
+                            <i class="fa-solid fa-image mr-1.5"></i>
+                            Choose Artist Image
+                        </button>
+
+
+                        <p
+                            id="pref-artist-image-status"
+                            class="text-[10px] text-gray-600 text-center"
+                        >
+                            JPG, PNG, WEBP — maximum 10 MB
+                        </p>
+
                     </div>
 
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Apple Music</label>
-                        <input type="text" id="pref-platform-appleMusic"
-                               placeholder="https://music.apple.com/artist/..."
-                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">SoundCloud</label>
-                        <input type="text" id="pref-platform-soundcloud"
-                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">YouTube Channel</label>
-                        <input type="text" id="pref-platform-youtube"
-                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">VEVO</label>
-                        <input type="text" id="pref-platform-vevo"
-                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Official Website</label>
-                        <input type="text" id="pref-platform-website"
-                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
-                    </div>
                 </div>
+
             </div>
 
-            <!-- SOCIAL -->
+
+            <!-- =====================================================
+                 PLATFORM PROFILES + SEARCH
+            ====================================================== -->
+            <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-5">
+
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-brand-border/30 pb-3">
+
+                    <div>
+                        <h3 class="text-sm font-bold text-white">
+                            Platform Profiles
+                        </h3>
+
+                        <p class="text-[10px] text-gray-500 mt-1">
+                            Search Spotify, YouTube, Apple Music or Audiomack and select the correct profile.
+                        </p>
+                    </div>
+
+                    <i class="fa-solid fa-magnifying-glass text-gray-600"></i>
+
+                </div>
+
+
+                <!-- SEARCH FILTER -->
+                <div class="bg-black/20 border border-brand-border/30 rounded-xl p-3 space-y-3">
+
+                    <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr_auto] gap-2">
+
+                        <select
+                            id="pref-platform-search-type"
+                            class="bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                        >
+                            <option value="spotify">
+                                Spotify
+                            </option>
+
+                            <option value="youtube">
+                                YouTube
+                            </option>
+
+                            <option value="apple">
+                                Apple Music
+                            </option>
+
+                            <option value="audiomack">
+                                Audiomack
+                            </option>
+                        </select>
+
+
+                        <input
+                            type="text"
+                            id="pref-platform-search-term"
+                            placeholder="Search artist or channel..."
+                            class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 outline-none"
+                            onkeydown="if(event.key === 'Enter') window.searchPreferencePlatform()"
+                        >
+
+
+                        <button
+                            type="button"
+                            onclick="window.searchPreferencePlatform()"
+                            id="btn-pref-platform-search"
+                            class="px-4 py-2 rounded-xl bg-brand-primary text-white text-xs font-bold hover:opacity-90 transition-all"
+                        >
+                            <i class="fa-solid fa-magnifying-glass mr-1"></i>
+                            Search
+                        </button>
+
+                    </div>
+
+
+                    <div class="flex items-center justify-between">
+
+                        <span class="text-[10px] uppercase tracking-wider font-bold text-gray-500">
+                            Search Results
+                        </span>
+
+                        <span
+                            id="pref-platform-search-status"
+                            class="text-[10px] text-gray-600"
+                        ></span>
+
+                    </div>
+
+
+                    <div
+                        id="pref-platform-search-results"
+                        class="hidden space-y-2 max-h-72 overflow-y-auto"
+                    ></div>
+
+                </div>
+
+
+                <!-- SELECTED LINKS -->
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">
+                            Spotify
+                        </label>
+
+                        <input
+                            type="text"
+                            id="pref-platform-spotify"
+                            placeholder="https://open.spotify.com/artist/..."
+                            class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                        >
+                    </div>
+
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">
+                            Apple Music
+                        </label>
+
+                        <input
+                            type="text"
+                            id="pref-platform-appleMusic"
+                            placeholder="https://music.apple.com/artist/..."
+                            class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                        >
+                    </div>
+
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">
+                            SoundCloud
+                        </label>
+
+                        <input
+                            type="text"
+                            id="pref-platform-soundcloud"
+                            class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                        >
+                    </div>
+
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">
+                            YouTube Channel
+                        </label>
+
+                        <input
+                            type="text"
+                            id="pref-platform-youtube"
+                            placeholder="https://youtube.com/@..."
+                            class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                        >
+                    </div>
+
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">
+                            VEVO
+                        </label>
+
+                        <input
+                            type="text"
+                            id="pref-platform-vevo"
+                            placeholder="https://youtube.com/@..."
+                            class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                        >
+                    </div>
+
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">
+                            Official Website
+                        </label>
+
+                        <input
+                            type="text"
+                            id="pref-platform-website"
+                            class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                        >
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =====================================================
+                 SOCIAL
+            ====================================================== -->
             <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
+
                 <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
                     Social Profiles
                 </h3>
 
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                    <input id="pref-social-facebook"
-                           placeholder="Facebook URL"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    <input
+                        id="pref-social-facebook"
+                        placeholder="Facebook URL"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
 
-                    <input id="pref-social-instagram"
-                           placeholder="Instagram URL"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    <input
+                        id="pref-social-instagram"
+                        placeholder="Instagram URL"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
 
-                    <input id="pref-social-twitter"
-                           placeholder="Twitter / X URL"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    <input
+                        id="pref-social-twitter"
+                        placeholder="Twitter / X URL"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
 
-                    <input id="pref-social-youtube"
-                           placeholder="YouTube URL"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    <input
+                        id="pref-social-youtube"
+                        placeholder="YouTube URL"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
+
                 </div>
+
             </div>
 
-            <!-- ADDITIONAL IDENTIFIERS -->
+
+            <!-- =====================================================
+                 ADDITIONAL IDENTIFIERS
+            ====================================================== -->
             <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
+
                 <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
                     Additional Identifiers
                 </h3>
 
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input id="pref-additional-allmusic" placeholder="AllMusic ID / URL"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
 
-                    <input id="pref-additional-ddex" placeholder="DDEX"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    <input
+                        id="pref-additional-allmusic"
+                        placeholder="AllMusic ID / URL"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
 
-                    <input id="pref-additional-isni" placeholder="ISNI"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    <input
+                        id="pref-additional-ddex"
+                        placeholder="DDEX"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
 
-                    <input id="pref-additional-musicbrainz" placeholder="MusicBrainz ID"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    <input
+                        id="pref-additional-isni"
+                        placeholder="ISNI"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
 
-                    <input id="pref-additional-wikipedia" placeholder="Wikipedia URL"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    <input
+                        id="pref-additional-musicbrainz"
+                        placeholder="MusicBrainz ID"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
 
-                    <input id="pref-audiomack-link" placeholder="Audiomack URL"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    <input
+                        id="pref-additional-wikipedia"
+                        placeholder="Wikipedia URL"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
+
+                    <input
+                        id="pref-audiomack-link"
+                        placeholder="Audiomack URL"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
+
                 </div>
 
+
                 <label class="flex items-center gap-2 text-xs text-gray-300">
-                    <input type="checkbox" id="pref-audiomack-status">
+
+                    <input
+                        type="checkbox"
+                        id="pref-audiomack-status"
+                    >
+
                     Audiomack profile is active
+
                 </label>
+
             </div>
 
-            <!-- RELEASE / COPYRIGHT -->
+
+            <!-- =====================================================
+                 RELEASE / COPYRIGHT
+            ====================================================== -->
             <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
 
                 <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
                     Release & Copyright Defaults
                 </h3>
 
+
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">Default Label</label>
-                        <input type="text" id="pref-label"
-                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                        <label class="block text-xs text-gray-400 mb-1">
+                            Default Label
+                        </label>
+
+                        <input
+                            type="text"
+                            id="pref-label"
+                            class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                        >
                     </div>
 
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">C-Line</label>
-                        <input type="text" id="pref-cLine"
-                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
-                    </div>
 
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">P-Line</label>
-                        <input type="text" id="pref-pLine"
-                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                        <label class="block text-xs text-gray-400 mb-1">
+                            C-Line
+                        </label>
+
+                        <input
+                            type="text"
+                            id="pref-cLine"
+                            class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                        >
                     </div>
 
+
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">Default Release Time</label>
-                        <input type="time" id="pref-releaseTime"
-                               class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                        <label class="block text-xs text-gray-400 mb-1">
+                            P-Line
+                        </label>
+
+                        <input
+                            type="text"
+                            id="pref-pLine"
+                            class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                        >
+                    </div>
+
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">
+                            Default Release Time
+                        </label>
+
+                        <input
+                            type="time"
+                            id="pref-releaseTime"
+                            class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                        >
                     </div>
 
                 </div>
 
+
                 <div>
+
                     <label class="block text-xs text-gray-400 mb-1">
                         Time Zone
                     </label>
 
-                    <input type="text"
-                           id="pref-timeZone"
-                           placeholder="America/New_York"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    <input
+                        type="text"
+                        id="pref-timeZone"
+                        placeholder="Africa/Nairobi"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
+
                 </div>
+
             </div>
 
-            <!-- DELIVERY SETTINGS -->
+
+            <!-- =====================================================
+                 DELIVERY
+            ====================================================== -->
             <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
 
                 <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
                     Delivery Defaults
                 </h3>
+
 
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs text-gray-300">
 
@@ -13798,137 +14187,397 @@ window.renderPreferencesView = function() {
                         <input type="checkbox" id="pref-delivery-youtube">
                         YouTube
                     </label>
+
                 </div>
 
-                <input type="text"
-                       id="pref-delivery-beatport-link"
-                       placeholder="Beatport delivery link"
-                       class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+
+                <input
+                    type="text"
+                    id="pref-delivery-beatport-link"
+                    placeholder="Beatport delivery link"
+                    class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                >
+
             </div>
 
-            <!-- METADATA / COLLABORATORS -->
+
+            <!-- =====================================================
+                 METADATA
+            ====================================================== -->
             <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
 
                 <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
                     Metadata Defaults
                 </h3>
 
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-                    <textarea id="pref-metadata-artists"
-                              rows="3"
-                              placeholder="Artists&#10;Example: Nova Waves|Main Artist"
-                              class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
+                    <textarea
+                        id="pref-metadata-artists"
+                        rows="3"
+                        placeholder="Artists&#10;Example: Nova Waves|Main Artist"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    ></textarea>
 
-                    <textarea id="pref-metadata-credits"
-                              rows="3"
-                              placeholder="Credits&#10;Example: Jane Smith|Mixing Engineer"
-                              class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
 
-                    <textarea id="pref-metadata-writers"
-                              rows="3"
-                              placeholder="Writers&#10;Example: John Doe|composer"
-                              class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
+                    <textarea
+                        id="pref-metadata-credits"
+                        rows="3"
+                        placeholder="Credits&#10;Example: Jane Smith|Mixing Engineer"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    ></textarea>
+
+
+                    <textarea
+                        id="pref-metadata-writers"
+                        rows="3"
+                        placeholder="Writers&#10;Example: John Doe|composer"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    ></textarea>
 
                 </div>
 
-                <textarea id="pref-collaborators"
-                          rows="2"
-                          placeholder="Collaborators, one per line"
-                          class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
+
+                <textarea
+                    id="pref-collaborators"
+                    rows="2"
+                    placeholder="Collaborators, one per line"
+                    class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                ></textarea>
+
             </div>
 
-            <!-- STORES / TERRITORIES -->
+
+            <!-- =====================================================
+                 STORES / TERRITORIES
+            ====================================================== -->
             <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
 
                 <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
                     Stores & Territories
                 </h3>
 
-                <textarea id="pref-stores"
-                          rows="2"
-                          placeholder="Stores, one per line"
-                          class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
 
-                <textarea id="pref-territories"
-                          rows="3"
-                          placeholder="Territories&#10;Example: US|United States"
-                          class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
+                <textarea
+                    id="pref-stores"
+                    rows="2"
+                    placeholder="Stores, one per line"
+                    class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                ></textarea>
+
+
+                <textarea
+                    id="pref-territories"
+                    rows="3"
+                    placeholder="Territories&#10;Example: US|United States"
+                    class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                ></textarea>
+
             </div>
+
         </div>
+
 
         <!-- =========================================================
              LABEL FORM
         ========================================================== -->
         <div id="pref-section-label" class="space-y-6 hidden">
 
+
+            <!-- LABEL INFORMATION -->
             <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
 
                 <h3 class="text-sm font-bold text-white border-b border-brand-border/30 pb-2">
                     Record Label Info
                 </h3>
 
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">Label Name *</label>
-                    <input type="text" id="pref-label-name"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
-                </div>
 
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">About Label</label>
-                    <textarea id="pref-label-about" rows="3"
-                              class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"></textarea>
+                    <label class="block text-xs text-gray-400 mb-1">
+                        Label Name *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="pref-label-name"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
                 </div>
+
 
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">Label Website</label>
-                    <input type="text" id="pref-label-website"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    <label class="block text-xs text-gray-400 mb-1">
+                        About Label
+                    </label>
+
+                    <textarea
+                        id="pref-label-about"
+                        rows="3"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    ></textarea>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input id="pref-label-facebook" placeholder="Facebook URL"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
 
-                    <input id="pref-label-instagram" placeholder="Instagram URL"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">
+                        Label Website
+                    </label>
 
-                    <input id="pref-label-twitter" placeholder="Twitter / X URL"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
-
-                    <input id="pref-label-youtube" placeholder="YouTube URL"
-                           class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white">
+                    <input
+                        type="text"
+                        id="pref-label-website"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
                 </div>
 
-                <button onclick="window.saveLabelPreferences()"
-                        id="btn-save-label-preferences"
-                        class="px-4 py-2 bg-brand-accent hover:brightness-110 text-black font-bold text-xs rounded-xl">
+
+                <!-- LABEL IMAGE -->
+                <div class="border-t border-brand-border/30 pt-4">
+
+                    <label class="block text-xs text-gray-400 mb-2">
+                        Label Profile Image
+                    </label>
+
+
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+
+                        <div
+                            id="pref-label-image-preview"
+                            class="w-24 h-24 rounded-2xl overflow-hidden bg-black/40 border border-brand-border/60 flex items-center justify-center shrink-0"
+                        >
+                            <i class="fa-solid fa-building text-2xl text-gray-700"></i>
+                        </div>
+
+
+                        <div class="space-y-2">
+
+                            <input
+                                type="hidden"
+                                id="pref-label-profileImg"
+                            >
+
+
+                            <input
+                                type="file"
+                                id="pref-label-image-file"
+                                accept="image/*"
+                                class="hidden"
+                                onchange="window.handlePreferenceProfileImage(this, 'label')"
+                            >
+
+
+                            <button
+                                type="button"
+                                onclick="document.getElementById('pref-label-image-file').click()"
+                                class="px-4 py-2 bg-brand-dark hover:bg-black/50 border border-brand-border/70 text-brand-accent text-xs font-bold rounded-xl transition-all"
+                            >
+                                <i class="fa-solid fa-image mr-1.5"></i>
+                                Choose Label Image
+                            </button>
+
+
+                            <p
+                                id="pref-label-image-status"
+                                class="text-[10px] text-gray-600"
+                            >
+                                JPG, PNG, WEBP — maximum 10 MB
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- LABEL SOCIAL -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+
+                    <input
+                        id="pref-label-facebook"
+                        placeholder="Facebook URL"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
+
+                    <input
+                        id="pref-label-instagram"
+                        placeholder="Instagram URL"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
+
+                    <input
+                        id="pref-label-twitter"
+                        placeholder="Twitter / X URL"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
+
+                    <input
+                        id="pref-label-youtube"
+                        placeholder="YouTube URL"
+                        class="w-full bg-black/40 border border-brand-border/60 rounded-xl px-3 py-2 text-xs text-white"
+                    >
+
+                </div>
+
+
+                <button
+                    onclick="window.saveLabelPreferences()"
+                    id="btn-save-label-preferences"
+                    class="px-4 py-2 bg-brand-accent hover:brightness-110 text-black font-bold text-xs rounded-xl"
+                >
                     <i class="fa-solid fa-floppy-disk"></i>
                     Save Label Preferences
                 </button>
+
             </div>
+
 
             <!-- LABEL ARTISTS -->
             <div class="bg-brand-dark/40 border border-brand-border/60 rounded-2xl p-4 sm:p-5 space-y-4">
 
                 <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-bold text-white">
-                        Label Artists
-                    </h3>
 
-                    <span id="pref-label-artist-count"
-                          class="text-xs text-gray-500">
+                    <div>
+                        <h3 class="text-sm font-bold text-white">
+                            Label Artists
+                        </h3>
+
+                        <p class="text-[10px] text-gray-500 mt-1">
+                            Artists currently connected to this label.
+                        </p>
+                    </div>
+
+
+                    <span
+                        id="pref-label-artist-count"
+                        class="text-xs text-gray-500"
+                    >
                         0 artists
                     </span>
+
                 </div>
 
-                <div id="pref-label-artists"
-                     class="space-y-2">
-                </div>
+
+                <div
+                    id="pref-label-artists"
+                    class="space-y-2"
+                ></div>
+
             </div>
+
         </div>
+
     </div>
     `;
+};
+
+// =========================================================
+// PROFILE IMAGE HANDLER
+// =========================================================
+
+window.handlePreferenceProfileImage = async function(input, type) {
+
+    const file = input?.files?.[0];
+
+    if (!file) {
+        return;
+    }
+
+    const isArtist = type === 'artist';
+
+    const folder =
+        isArtist
+            ? 'artists'
+            : 'labels';
+
+    const hiddenId =
+        isArtist
+            ? 'pref-artist-profileImg'
+            : 'pref-label-profileImg';
+
+    const previewId =
+        isArtist
+            ? 'pref-artist-image-preview'
+            : 'pref-label-image-preview';
+
+    const statusId =
+        isArtist
+            ? 'pref-artist-image-status'
+            : 'pref-label-image-status';
+
+    const hidden =
+        document.getElementById(hiddenId);
+
+    const preview =
+        document.getElementById(previewId);
+
+    const status =
+        document.getElementById(statusId);
+
+    if (status) {
+        status.innerHTML =
+            `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Uploading image...`;
+    }
+
+    try {
+
+        const imageUrl =
+            await window.uploadPreferenceImage(
+                file,
+                folder
+            );
+
+        if (hidden) {
+            hidden.value = imageUrl;
+        }
+
+
+        if (preview) {
+
+            preview.innerHTML = `
+                <img
+                    src="${imageUrl}"
+                    alt="${isArtist ? 'Artist' : 'Label'} profile image"
+                    class="w-full h-full object-cover"
+                >
+            `;
+
+        }
+
+
+        if (status) {
+            status.innerHTML =
+                `<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> Image uploaded`;
+        }
+
+
+        window.showPrefToast(
+            `${isArtist ? 'Artist' : 'Label'} profile image uploaded successfully.`,
+            'success'
+        );
+
+    } catch (error) {
+
+        console.error(
+            'Preference profile image upload failed:',
+            error
+        );
+
+        if (status) {
+            status.innerHTML =
+                `<span class="text-red-400">Image upload failed.</span>`;
+        }
+
+        window.showPrefToast(
+            error?.message ||
+            'Profile image upload failed.',
+            'error'
+        );
+
+        input.value = '';
+
+    }
 };
 
 // UI Toast Notification Helper
@@ -14095,6 +14744,74 @@ function parseTerritories(value) {
         .filter(item => item.code && item.name);
 }
 
+window.uploadPreferenceImage = async function(file, folder) {
+    if (!file) {
+        throw new Error('No image selected.');
+    }
+
+    if (!file.type.startsWith('image/')) {
+        throw new Error('Please select an image file.');
+    }
+
+    const maxSize = 10 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+        throw new Error('Image must be smaller than 10 MB.');
+    }
+
+    const token =
+        window.currentUser?.getIdToken
+            ? await window.currentUser.getIdToken()
+            : '';
+
+    const baseUrl =
+        window.WORKER_BASE_URL || '';
+
+    const formData =
+        new FormData();
+
+    formData.append(
+        'file',
+        file
+    );
+
+    formData.append(
+        'folder',
+        folder
+    );
+
+    const response =
+        await fetch(
+            `${baseUrl}/api/upload`,
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization':
+                        `Bearer ${token}`
+                },
+                body: formData
+            }
+        );
+
+    const data =
+        await response.json()
+            .catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(
+            data?.error ||
+            'Image upload failed.'
+        );
+    }
+
+    if (!data?.url) {
+        throw new Error(
+            'Upload succeeded but no image URL was returned.'
+        );
+    }
+
+    return data.url;
+};
 
 window.fillArtistPreferences = function(artist) {
     const p = artist.platforms || {};
@@ -14407,6 +15124,387 @@ window.initPreferencesPage = async function() {
     }
 };
 
+// =========================================================
+// PLATFORM SEARCH
+// =========================================================
+
+window.searchPreferencePlatform = async function() {
+
+    const platform =
+        document.getElementById(
+            'pref-platform-search-type'
+        )?.value || 'spotify';
+
+    const term =
+        document.getElementById(
+            'pref-platform-search-term'
+        )?.value?.trim() || '';
+
+    const resultsBox =
+        document.getElementById(
+            'pref-platform-search-results'
+        );
+
+    const status =
+        document.getElementById(
+            'pref-platform-search-status'
+        );
+
+    const button =
+        document.getElementById(
+            'btn-pref-platform-search'
+        );
+
+    if (!term) {
+
+        window.showPrefToast(
+            'Enter an artist or channel name first.',
+            'error'
+        );
+
+        return;
+    }
+
+    const token =
+        window.currentUser?.getIdToken
+            ? await window.currentUser.getIdToken()
+            : '';
+
+    const baseUrl =
+        window.WORKER_BASE_URL || '';
+
+    button.disabled = true;
+
+    button.innerHTML =
+        `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Searching...`;
+
+    status.innerText =
+        'Searching...';
+
+    resultsBox.classList.remove('hidden');
+
+    resultsBox.innerHTML = `
+        <div class="text-center py-5 text-xs text-gray-500">
+            <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+            Searching...
+        </div>
+    `;
+
+    try {
+
+        const res =
+            await fetch(
+                `${baseUrl}/api/preferences/search/artist-platform`,
+                {
+                    method: 'POST',
+
+                    headers: {
+                        'Authorization':
+                            `Bearer ${token}`,
+
+                        'Content-Type':
+                            'application/json'
+                    },
+
+                    body: JSON.stringify({
+                        platform,
+                        term,
+                        limit: 10
+                    })
+                }
+            );
+
+        const body =
+            await res.json()
+                .catch(() => ({}));
+
+        if (!res.ok) {
+
+            throw new Error(
+                body?.error ||
+                body?.message ||
+                'Platform search failed.'
+            );
+        }
+
+
+        const results =
+            body?.data?.results ||
+            body?.data ||
+            [];
+
+
+        if (!Array.isArray(results) || !results.length) {
+
+            status.innerText =
+                'No results';
+
+            resultsBox.innerHTML = `
+                <div class="text-center py-5 text-xs text-gray-500">
+                    No matching profiles found.
+                </div>
+            `;
+
+            return;
+        }
+
+
+        window._preferencePlatformSearchResults =
+            results;
+
+        window._preferencePlatformSearchPlatform =
+            platform;
+
+
+        status.innerText =
+            `${results.length} result${results.length === 1 ? '' : 's'}`;
+
+
+        resultsBox.innerHTML =
+            results.map((item, index) => {
+
+                const name =
+                    String(
+                        item.name ||
+                        'Unknown Artist'
+                    )
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+
+
+                const url =
+                    String(
+                        item.url || ''
+                    )
+                    .replace(/"/g, '&quot;');
+
+
+                const image =
+                    String(
+                        item.image || ''
+                    )
+                    .replace(/"/g, '&quot;');
+
+
+                const followers =
+                    Number.isFinite(
+                        Number(item.followers)
+                    )
+                        ? Number(item.followers)
+                            .toLocaleString()
+                        : '';
+
+
+                return `
+                    <button
+                        type="button"
+                        onclick="window.selectPreferencePlatformResult(${index})"
+                        class="w-full text-left bg-black/30 hover:bg-white/5 border border-brand-border/30 hover:border-brand-border/60 rounded-xl p-3 transition-all"
+                    >
+
+                        <div class="flex items-center gap-3">
+
+                            ${
+                                image
+                                    ? `
+                                        <img
+                                            src="${image}"
+                                            class="w-10 h-10 rounded-lg object-cover bg-black/40 shrink-0"
+                                            onerror="this.style.display='none'"
+                                        >
+                                      `
+                                    : `
+                                        <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                                            <i class="fa-solid fa-user text-gray-600"></i>
+                                        </div>
+                                      `
+                            }
+
+
+                            <div class="min-w-0 flex-1">
+
+                                <div class="text-xs font-bold text-white truncate">
+                                    ${name}
+                                </div>
+
+                                ${
+                                    followers
+                                        ? `
+                                            <div class="text-[10px] text-gray-500 mt-0.5">
+                                                ${followers} followers
+                                            </div>
+                                          `
+                                        : ''
+                                }
+
+                                <div class="text-[10px] text-gray-600 truncate mt-0.5">
+                                    ${url}
+                                </div>
+
+                            </div>
+
+
+                            <div class="text-[10px] text-brand-primary font-bold shrink-0">
+                                Select
+                            </div>
+
+                        </div>
+
+                    </button>
+                `;
+
+            }).join('');
+
+
+    } catch (error) {
+
+        console.error(
+            'Preference platform search failed:',
+            error
+        );
+
+        status.innerText =
+            'Search failed';
+
+        resultsBox.innerHTML = `
+            <div class="text-center py-5 text-xs text-red-400">
+                ${String(
+                    error?.message ||
+                    'Unable to search this platform.'
+                ).replace(/</g, '&lt;')}
+            </div>
+        `;
+
+    } finally {
+
+        button.disabled = false;
+
+        button.innerHTML =
+            `<i class="fa-solid fa-magnifying-glass mr-1"></i> Search`;
+    }
+};
+
+
+// =========================================================
+// SELECT SEARCH RESULT
+// =========================================================
+
+window.selectPreferencePlatformResult =
+    function(index) {
+
+        const results =
+            window._preferencePlatformSearchResults ||
+            [];
+
+        const platform =
+            window._preferencePlatformSearchPlatform ||
+            'spotify';
+
+        const selected =
+            results[index];
+
+        if (!selected) {
+            return;
+        }
+
+        const url =
+            selected.url || '';
+
+        if (!url) {
+
+            window.showPrefToast(
+                'This result does not contain a profile URL.',
+                'error'
+            );
+
+            return;
+        }
+
+
+        if (platform === 'spotify') {
+
+            const field =
+                document.getElementById(
+                    'pref-platform-spotify'
+                );
+
+            if (field) {
+                field.value = url;
+            }
+
+        } else if (platform === 'apple') {
+
+            const field =
+                document.getElementById(
+                    'pref-platform-appleMusic'
+                );
+
+            if (field) {
+                field.value = url;
+            }
+
+        } else if (platform === 'youtube') {
+
+            const field =
+                document.getElementById(
+                    'pref-platform-youtube'
+                );
+
+            if (field) {
+                field.value = url;
+            }
+
+        } else if (platform === 'audiomack') {
+
+            const field =
+                document.getElementById(
+                    'pref-audiomack-link'
+                );
+
+            if (field) {
+                field.value = url;
+            }
+
+            const status =
+                document.getElementById(
+                    'pref-audiomack-status'
+                );
+
+            if (status) {
+                status.checked = true;
+            }
+        }
+
+
+        window.showPrefToast(
+            `${platform === 'apple'
+                ? 'Apple Music'
+                : platform.charAt(0).toUpperCase() + platform.slice(1)
+            } profile selected.`,
+            'success'
+        );
+
+
+        const resultsBox =
+            document.getElementById(
+                'pref-platform-search-results'
+            );
+
+        if (resultsBox) {
+            resultsBox.classList.add('hidden');
+        }
+
+
+        const searchStatus =
+            document.getElementById(
+                'pref-platform-search-status'
+            );
+
+        if (searchStatus) {
+            searchStatus.innerText =
+                'Profile selected';
+        }
+    };
 
 window.savePreferences = async function() {
 
@@ -14433,6 +15531,21 @@ window.savePreferences = async function() {
         const payload =
             window.buildArtistPayload();
 
+        /*
+         * Preserve the existing Artist payload.
+         * Only make sure the uploaded profile image URL
+         * is included in the existing `img` field.
+         */
+        payload.img =
+            typeof toNullableString === 'function'
+                ? toNullableString(
+                    prefValue('pref-artist-profileImg')
+                  )
+                : (
+                    prefValue('pref-artist-profileImg') ||
+                    null
+                  );
+
         const res = await fetch(
             `${baseUrl}/api/preferences/artist/submit`,
             {
@@ -14445,7 +15558,8 @@ window.savePreferences = async function() {
             }
         );
 
-        const body = await res.json().catch(() => ({}));
+        const body =
+            await res.json().catch(() => ({}));
 
         if (!res.ok) {
 
@@ -14576,33 +15690,85 @@ window.saveLabelPreferences = async function() {
             );
         }
 
+        const labelImage =
+            prefValue('pref-label-profileImg');
+
         const payload = {
             name,
 
+            /*
+             * Too Lost currently accepts the label About field
+             * up to 500 characters.
+             */
             about:
-                prefValue('pref-label-about'),
+                (
+                    prefValue('pref-label-about') ||
+                    ''
+                ).slice(0, 500) || null,
 
-            img: null,
+            /*
+             * Use the URL returned by your existing
+             * profile-image upload helper.
+             */
+            img:
+                typeof toNullableString === 'function'
+                    ? toNullableString(labelImage)
+                    : (labelImage || null),
 
             platforms: {
                 website:
-                    prefValue('pref-label-website')
+                    typeof toNullableString === 'function'
+                        ? toNullableString(
+                            prefValue('pref-label-website')
+                          )
+                        : (
+                            prefValue('pref-label-website') ||
+                            null
+                          )
             },
 
             removeImg: false,
 
             social: {
                 facebook:
-                    prefValue('pref-label-facebook'),
+                    typeof toNullableString === 'function'
+                        ? toNullableString(
+                            prefValue('pref-label-facebook')
+                          )
+                        : (
+                            prefValue('pref-label-facebook') ||
+                            null
+                          ),
 
                 instagram:
-                    prefValue('pref-label-instagram'),
+                    typeof toNullableString === 'function'
+                        ? toNullableString(
+                            prefValue('pref-label-instagram')
+                          )
+                        : (
+                            prefValue('pref-label-instagram') ||
+                            null
+                          ),
 
                 twitter:
-                    prefValue('pref-label-twitter'),
+                    typeof toNullableString === 'function'
+                        ? toNullableString(
+                            prefValue('pref-label-twitter')
+                          )
+                        : (
+                            prefValue('pref-label-twitter') ||
+                            null
+                          ),
 
                 youtube:
-                    prefValue('pref-label-youtube')
+                    typeof toNullableString === 'function'
+                        ? toNullableString(
+                            prefValue('pref-label-youtube')
+                          )
+                        : (
+                            prefValue('pref-label-youtube') ||
+                            null
+                          )
             }
         };
 
@@ -14622,6 +15788,7 @@ window.saveLabelPreferences = async function() {
             await res.json().catch(() => ({}));
 
         if (!res.ok) {
+
             throw new Error(
                 body.error ||
                 body.message ||
@@ -14658,7 +15825,6 @@ window.saveLabelPreferences = async function() {
         }
     }
 };
-
 
 window.renderLabelArtists = function(artists) {
 
