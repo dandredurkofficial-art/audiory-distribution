@@ -352,6 +352,16 @@
         const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
 
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        const auth = getAuth(app);
+
+        // Check if URL contains invite parameters and clear existing session to prevent auth state conflicts
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('invite')) {
+            await signOut(auth);
+        }
+
         // Production Configuration Endpoints
         window.WORKER_BASE_URL = "https://audiorydistribution.dandredurkofficial.workers.dev";
         const WORKER_BASE_URL = window.WORKER_BASE_URL;
@@ -627,26 +637,44 @@
         });
 
         async function processAccountCreation(userData, paymentInfo) {
-    let user;
+    let user = auth.currentUser;
     let isNewUser = false;
 
-    try {
-        // Attempt to create a new user account
-        const userCred = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
-        user = userCred.user;
+    // 1. If already logged in with the same email (e.g., retrying payment in active session)
+    if (user && user.email.toLowerCase() === userData.email.toLowerCase()) {
         await updateProfile(user, { displayName: userData.displayName });
-        isNewUser = true;
-    } catch (error) {
-        // If account already exists (e.g., retrying payment), authenticate existing user
-        if (error.code === 'auth/email-already-in-use') {
-            const userCred = await signInWithEmailAndPassword(auth, userData.email, userData.password);
+    } else {
+        // 2. If logged in with a DIFFERENT account (common during testing/invites), sign out first
+        if (user) {
+            await signOut(auth);
+        }
+
+        try {
+            // Attempt to create a new user account
+            const userCred = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
             user = userCred.user;
-        } else {
-            throw error; // Rethrow other authentication errors (e.g., weak-password)
+            await updateProfile(user, { displayName: userData.displayName });
+            isNewUser = true;
+        } catch (error) {
+            // Retrying payment with existing account
+            if (error.code === 'auth/email-already-in-use') {
+                try {
+                    const userCred = await signInWithEmailAndPassword(auth, userData.email, userData.password);
+                    user = userCred.user;
+                } catch (signInErr) {
+                    // Converts confusing auth/invalid-credential into a clear user message
+                    if (signInErr.code === 'auth/invalid-credential' || signInErr.code === 'auth/wrong-password') {
+                        throw new Error("This email is already registered. The password you entered is incorrect.");
+                    }
+                    throw signInErr;
+                }
+            } else {
+                throw error;
+            }
         }
     }
 
-    // Prepare Firestore payload
+    // 3. Prepare Firestore payload (Preserved exact behavior)
     const userDocData = {
         uid: user.uid,
         email: userData.email,
@@ -657,12 +685,10 @@
         updatedAt: serverTimestamp()
     };
 
-    // Only set createdAt if the account was freshly registered
     if (isNewUser) {
         userDocData.createdAt = serverTimestamp();
     }
 
-    // Merge updates into the Firestore user document
     await setDoc(doc(db, "users", user.uid), userDocData, { merge: true });
 
     return user;
