@@ -1150,11 +1150,11 @@ onAuthStateChanged(auth, async (user) => {
     }
 }
 
-// Store active user role globally (defaults to 'member' until verified)
-let currentUserRole = 'member';
+// Global active user role
+window.currentUserRole = 'guest';
 
 /**
- * Enforces role access across sidebar navigation buttons and view switching
+ * Enforces strict role access across sidebar navigation and views
  */
 async function applyRolePermissions(user) {
     if (!user) return;
@@ -1162,7 +1162,7 @@ async function applyRolePermissions(user) {
     try {
         const idToken = await user.getIdToken(true);
 
-        // Fetch user permissions from backend
+        // 1. Fetch exact role from your workspace permissions API
         const res = await fetch("https://audiorydistribution.dandredurkofficial.workers.dev/api/workspace/permissions", {
             method: "GET",
             headers: {
@@ -1173,38 +1173,47 @@ async function applyRolePermissions(user) {
 
         if (res.ok) {
             const data = await res.json();
-            // If the user owns the workspace, default to 'owner', otherwise use assigned role
-            currentUserRole = (data.role || (data.isOwner ? 'owner' : 'member')).toLowerCase().trim();
+            // Assign explicitly: 'owner', 'editor', 'viewer', etc.
+            window.currentUserRole = (data.role || (data.isOwner ? 'owner' : 'guest')).toLowerCase().trim();
         } else {
-            // Fallback: Check if current logged-in user matches workspace primary owner ID
-            currentUserRole = (window.workspaceOwnerId === user.uid) ? 'owner' : 'member';
+            console.warn(`Permissions endpoint returned ${res.status}. Restricting user.`);
+            window.currentUserRole = 'guest'; 
         }
     } catch (err) {
-        console.warn("Could not fetch permissions, safe fallback active:", err);
-        currentUserRole = (window.workspaceOwnerId === user.uid) ? 'owner' : 'member';
+        console.error("Failed to fetch permissions:", err);
+        window.currentUserRole = 'guest';
     }
 
-    // Toggle navigation UI visibility based on calculated role
+    // 2. Hide/Show navigation buttons strictly
     document.querySelectorAll('[data-role]').forEach(button => {
-        const allowedRoles = button.getAttribute('data-role').split(',').map(r => r.trim().toLowerCase());
-        const canAccess = allowedRoles.includes('all') || allowedRoles.includes(currentUserRole);
+        const rawRoles = button.getAttribute('data-role') || '';
+        const allowedRoles = rawRoles.split(',').map(r => r.trim().toLowerCase());
 
-        if (canAccess) {
+        // Owners see everything. Otherwise, user's exact role MUST be listed.
+        const isOwner = window.currentUserRole === 'owner';
+        const hasExplicitAccess = allowedRoles.includes(window.currentUserRole);
+
+        if (isOwner || hasExplicitAccess) {
             button.classList.remove('hidden');
+            button.style.display = ''; // Ensure display isn't overridden
         } else {
             button.classList.add('hidden');
+            button.style.display = 'none';
         }
     });
 
-    // Enforce view guard on current route
+    // 3. Kick user out of current view if they don't have permission
     const activeViewId = window.currentView || 'home';
     const activeNavBtn = document.getElementById(`nav_${activeViewId}`);
     
     if (activeNavBtn) {
-        const allowedRoles = activeNavBtn.getAttribute('data-role')?.split(',').map(r => r.trim().toLowerCase()) || [];
-        const isAllowed = allowedRoles.includes('all') || allowedRoles.includes(currentUserRole);
+        const rawRoles = activeNavBtn.getAttribute('data-role') || '';
+        const allowedRoles = rawRoles.split(',').map(r => r.trim().toLowerCase());
+        const isOwner = window.currentUserRole === 'owner';
+        const isAllowed = isOwner || allowedRoles.includes(window.currentUserRole);
+
         if (!isAllowed && typeof window.switchView === 'function') {
-            window.switchView('home');
+            window.switchView('home'); // Redirect unauthorized user to default view
         }
     }
 }
