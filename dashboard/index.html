@@ -1150,8 +1150,8 @@ onAuthStateChanged(auth, async (user) => {
     }
 }
 
-// Default to 'owner' so primary workspace accounts are never locked out
-let currentUserRole = 'owner';
+// Store active user role globally (defaults to 'member' until verified)
+let currentUserRole = 'member';
 
 /**
  * Enforces role access across sidebar navigation buttons and view switching
@@ -1159,23 +1159,10 @@ let currentUserRole = 'owner';
 async function applyRolePermissions(user) {
     if (!user) return;
 
-    // Check if the user signed up via an invite link (stored in localStorage during sign-up/invite flow)
-    const pendingInviteOwner = localStorage.getItem('audiory_pending_invite_owner');
-    const isInvitedUser = Boolean(pendingInviteOwner);
-
-    // If NOT an invited user, maintain full 'owner' status and display all elements
-    if (!isInvitedUser) {
-        currentUserRole = 'owner';
-        document.querySelectorAll('[data-role]').forEach(button => {
-            button.classList.remove('hidden');
-        });
-        return;
-    }
-
-    // Only query workspace permissions for invited workspace members
     try {
         const idToken = await user.getIdToken(true);
 
+        // Fetch user permissions from backend
         const res = await fetch("https://audiorydistribution.dandredurkofficial.workers.dev/api/workspace/permissions", {
             method: "GET",
             headers: {
@@ -1186,17 +1173,18 @@ async function applyRolePermissions(user) {
 
         if (res.ok) {
             const data = await res.json();
-            currentUserRole = (data.role || 'member').toLowerCase().trim();
+            // If the user owns the workspace, default to 'owner', otherwise use assigned role
+            currentUserRole = (data.role || (data.isOwner ? 'owner' : 'member')).toLowerCase().trim();
         } else {
-            console.warn(`Permissions endpoint returned status ${res.status}. Defaulting invited user to member.`);
-            currentUserRole = 'member';
+            // Fallback: Check if current logged-in user matches workspace primary owner ID
+            currentUserRole = (window.workspaceOwnerId === user.uid) ? 'owner' : 'member';
         }
     } catch (err) {
-        console.warn("Could not fetch invited user role, defaulting to member:", err);
-        currentUserRole = 'member';
+        console.warn("Could not fetch permissions, safe fallback active:", err);
+        currentUserRole = (window.workspaceOwnerId === user.uid) ? 'owner' : 'member';
     }
 
-    // Filter sidebar navigation buttons for invited users
+    // Toggle navigation UI visibility based on calculated role
     document.querySelectorAll('[data-role]').forEach(button => {
         const allowedRoles = button.getAttribute('data-role').split(',').map(r => r.trim().toLowerCase());
         const canAccess = allowedRoles.includes('all') || allowedRoles.includes(currentUserRole);
@@ -1208,7 +1196,7 @@ async function applyRolePermissions(user) {
         }
     });
 
-    // Guard active view for invited accounts
+    // Enforce view guard on current route
     const activeViewId = window.currentView || 'home';
     const activeNavBtn = document.getElementById(`nav_${activeViewId}`);
     
@@ -1219,49 +1207,6 @@ async function applyRolePermissions(user) {
             window.switchView('home');
         }
     }
-}
-
-/**
- * Enhanced view switcher with built-in permission guard
- */
-const originalSwitchView = window.switchView;
-
-window.switchView = function(viewName) {
-    const targetNav = document.getElementById(`nav_${viewName}`);
-
-    if (targetNav) {
-        const allowedRoles = targetNav.getAttribute('data-role')?.split(',').map(r => r.trim().toLowerCase()) || [];
-        const isAllowed = allowedRoles.includes('all') || allowedRoles.includes(currentUserRole);
-
-        if (!isAllowed) {
-            console.warn(`Access denied to view '${viewName}' for role: '${currentUserRole}'`);
-            if (typeof originalSwitchView === 'function') {
-                originalSwitchView('home');
-            }
-            return;
-        }
-    }
-
-    if (typeof originalSwitchView === 'function') {
-        originalSwitchView(viewName);
-    }
-};
-
-// Listen for auth state initialization
-if (typeof auth !== 'undefined') {
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            await applyRolePermissions(user);
-        }
-    });
-} else {
-    window.addEventListener('DOMContentLoaded', () => {
-        if (window.auth) {
-            onAuthStateChanged(window.auth, async (user) => {
-                if (user) await applyRolePermissions(user);
-            });
-        }
-    });
 }
         
         // Direct Multipart Upload to Cloudflare Worker R2 Bucket
