@@ -13715,11 +13715,17 @@ window.renderPreferencesView = function() {
 
                     <div class="flex flex-col items-center justify-center gap-4">
 
-                        <div
+                        <img
                             id="pref-artist-image-preview"
-                            class="w-32 h-32 rounded-2xl overflow-hidden bg-black/40 border border-brand-border/60 flex items-center justify-center"
+                            class="hidden w-20 h-20 rounded-2xl object-cover"
+                            alt="Artist profile image"
                         >
-                            <i class="fa-solid fa-user text-3xl text-gray-700"></i>
+
+                        <div
+                            id="pref-artist-image-placeholder"
+                            class="w-20 h-20 rounded-2xl bg-black/30 border border-brand-border/60 flex items-center justify-center"
+                        >
+                            <i class="fa-solid fa-user text-gray-500"></i>
                         </div>
 
 
@@ -14347,11 +14353,17 @@ window.renderPreferencesView = function() {
 
                     <div class="flex flex-col sm:flex-row sm:items-center gap-4">
 
-                        <div
+                        <img
                             id="pref-label-image-preview"
-                            class="w-24 h-24 rounded-2xl overflow-hidden bg-black/40 border border-brand-border/60 flex items-center justify-center shrink-0"
+                            class="hidden w-20 h-20 rounded-2xl object-cover"
+                            alt="Label profile image"
                         >
-                            <i class="fa-solid fa-building text-2xl text-gray-700"></i>
+
+                        <div
+                            id="pref-label-image-placeholder"
+                            class="w-20 h-20 rounded-2xl bg-black/30 border border-brand-border/60 flex items-center justify-center"
+                        >
+                            <i class="fa-solid fa-building text-gray-500"></i>
                         </div>
 
 
@@ -14582,6 +14594,74 @@ window.handlePreferenceProfileImage = async function(input, type) {
 
         input.value = '';
 
+    }
+};
+
+window.renderPreferenceProfileImage = function(
+    imageUrl,
+    previewId,
+    placeholderId
+) {
+
+    const preview =
+        document.getElementById(
+            previewId
+        );
+
+    const placeholder =
+        document.getElementById(
+            placeholderId
+        );
+
+    const url =
+        String(imageUrl || '').trim();
+
+    if (!preview) {
+        return;
+    }
+
+    if (url) {
+
+        preview.src = url;
+
+        preview.classList.remove(
+            'hidden'
+        );
+
+        preview.onerror = function() {
+
+            preview.classList.add(
+                'hidden'
+            );
+
+            if (placeholder) {
+                placeholder.classList.remove(
+                    'hidden'
+                );
+            }
+        };
+
+        if (placeholder) {
+            placeholder.classList.add(
+                'hidden'
+            );
+        }
+
+    } else {
+
+        preview.removeAttribute(
+            'src'
+        );
+
+        preview.classList.add(
+            'hidden'
+        );
+
+        if (placeholder) {
+            placeholder.classList.remove(
+                'hidden'
+            );
+        }
     }
 };
 
@@ -16197,6 +16277,18 @@ window.removeLabelArtist = async function(
         }
     );
 };
+
+window.renderPreferenceProfileImage(
+    artist.profileImg,
+    'pref-artist-image-preview',
+    'pref-artist-image-placeholder'
+);
+
+window.renderPreferenceProfileImage(
+    label.profileImg,
+    'pref-label-image-preview',
+    'pref-label-image-placeholder'
+);
 
 window.switchPrefTab = function(tab) {
 
