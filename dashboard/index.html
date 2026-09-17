@@ -15321,12 +15321,17 @@ window.initPreferencesPage = async function() {
                     'pref-artist-image-preview'
                 );
 
+            const artistImagePlaceholder =
+                document.getElementById(
+                    'pref-artist-image-placeholder'
+                );
+
             if (artistImageInput) {
                 artistImageInput.value =
                     artistImageUrl;
             }
 
-            if (artistImagePreview) {
+            if (artistImagePreview && artistImagePlaceholder) {
 
                 if (artistImageUrl) {
 
@@ -15337,6 +15342,10 @@ window.initPreferencesPage = async function() {
                         'hidden'
                     );
 
+                    artistImagePlaceholder.classList.add(
+                        'hidden'
+                    );
+
                 } else {
 
                     artistImagePreview.removeAttribute(
@@ -15344,6 +15353,10 @@ window.initPreferencesPage = async function() {
                     );
 
                     artistImagePreview.classList.add(
+                        'hidden'
+                    );
+
+                    artistImagePlaceholder.classList.remove(
                         'hidden'
                     );
                 }
@@ -15905,12 +15918,17 @@ window.loadLabelPreferences = async function() {
             'pref-label-image-preview'
         );
 
+    const labelImagePlaceholder =
+        document.getElementById(
+            'pref-label-image-placeholder'
+        );
+
     if (labelImageInput) {
         labelImageInput.value =
             labelImageUrl;
     }
 
-    if (labelImagePreview) {
+    if (labelImagePreview && labelImagePlaceholder) {
 
         if (labelImageUrl) {
 
@@ -15921,6 +15939,10 @@ window.loadLabelPreferences = async function() {
                 'hidden'
             );
 
+            labelImagePlaceholder.classList.add(
+                'hidden'
+            );
+
         } else {
 
             labelImagePreview.removeAttribute(
@@ -15928,6 +15950,10 @@ window.loadLabelPreferences = async function() {
             );
 
             labelImagePreview.classList.add(
+                'hidden'
+            );
+
+            labelImagePlaceholder.classList.remove(
                 'hidden'
             );
         }
@@ -16277,18 +16303,6 @@ window.removeLabelArtist = async function(
         }
     );
 };
-
-window.renderPreferenceProfileImage(
-    artist.profileImg,
-    'pref-artist-image-preview',
-    'pref-artist-image-placeholder'
-);
-
-window.renderPreferenceProfileImage(
-    label.profileImg,
-    'pref-label-image-preview',
-    'pref-label-image-placeholder'
-);
 
 window.switchPrefTab = function(tab) {
 
