@@ -14604,6 +14604,129 @@ window.showPrefToast = function(message, type = 'success') {
     }, 4000);
 };
 
+window.showPreferenceConfirm = function(
+    message,
+    onConfirm
+) {
+    const existing =
+        document.getElementById(
+            'pref-confirm-modal'
+        );
+
+    if (existing) {
+        existing.remove();
+    }
+
+    const modal =
+        document.createElement('div');
+
+    modal.id =
+        'pref-confirm-modal';
+
+    modal.className =
+        'fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4';
+
+    modal.innerHTML = `
+        <div class="w-full max-w-sm bg-brand-dark border border-brand-border/70 rounded-2xl shadow-2xl p-5">
+
+            <div class="flex items-start gap-3">
+
+                <div class="w-9 h-9 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+                </div>
+
+                <div class="min-w-0">
+                    <h3 class="text-sm font-bold text-white">
+                        Remove Artist
+                    </h3>
+
+                    <p class="text-xs text-gray-400 mt-1 leading-relaxed">
+                        ${String(message)
+                            .replace(/&/g, '&amp;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/"/g, '&quot;')
+                            .replace(/'/g, '&#039;')}
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="flex justify-end gap-2 mt-5">
+
+                <button
+                    type="button"
+                    id="pref-confirm-cancel"
+                    class="px-3 py-2 rounded-xl bg-black/30 border border-brand-border/60 text-xs font-bold text-gray-300 hover:text-white hover:bg-black/50 transition-all">
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    id="pref-confirm-yes"
+                    class="px-3 py-2 rounded-xl bg-red-500 hover:bg-red-400 text-xs font-bold text-white transition-all">
+                    Remove Artist
+                </button>
+
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const close =
+        () => {
+            modal.remove();
+        };
+
+    document
+        .getElementById(
+            'pref-confirm-cancel'
+        )
+        ?.addEventListener(
+            'click',
+            close
+        );
+
+    document
+        .getElementById(
+            'pref-confirm-yes'
+        )
+        ?.addEventListener(
+            'click',
+            async () => {
+
+                const button =
+                    document.getElementById(
+                        'pref-confirm-yes'
+                    );
+
+                if (button) {
+                    button.disabled = true;
+                    button.innerText =
+                        'Removing...';
+                }
+
+                try {
+                    await onConfirm();
+                } finally {
+                    close();
+                }
+            }
+        );
+
+    modal.addEventListener(
+        'click',
+        event => {
+            if (
+                event.target === modal
+            ) {
+                close();
+            }
+        }
+    );
+};
+        
 window.updateUIMode = function() {
     const submittedView = document.getElementById('pref-submitted-view');
     const formView = document.getElementById('pref-section-artist');
@@ -15977,71 +16100,103 @@ window.renderLabelArtists = function(artists) {
 };
 
 
-window.removeLabelArtist = async function(artistId) {
+window.removeLabelArtist = async function(
+    artistId
+) {
 
-    if (!artistId) return;
-
-    if (!confirm('Remove this artist from label management?')) {
+    if (!artistId) {
         return;
     }
 
-    const token =
-        window.currentUser?.getIdToken
-            ? await window.currentUser.getIdToken()
-            : '';
+    window.showPreferenceConfirm(
+        'Remove this artist from label management?',
+        async () => {
 
-    const baseUrl =
-        window.WORKER_BASE_URL || '';
+            const token =
+                window.currentUser?.getIdToken
+                    ? await window.currentUser.getIdToken()
+                    : '';
 
-    try {
+            const baseUrl =
+                window.WORKER_BASE_URL || '';
 
-        const res = await fetch(
-            `${baseUrl}/api/preferences/label/artist/remove`,
-            {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    artistId: Number(artistId)
-                })
+            try {
+
+                const res =
+                    await fetch(
+                        `${baseUrl}/api/preferences/label/artist/remove`,
+                        {
+                            method: 'POST',
+
+                            headers: {
+                                'Authorization':
+                                    `Bearer ${token}`,
+
+                                'Content-Type':
+                                    'application/json',
+
+                                'Accept':
+                                    'application/json'
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    artistId:
+                                        Number(
+                                            artistId
+                                        )
+                                })
+                        }
+                    );
+
+                const text =
+                    await res.text();
+
+                let body = {};
+
+                try {
+                    body =
+                        text
+                            ? JSON.parse(text)
+                            : {};
+                } catch {
+                    body = {
+                        raw: text
+                    };
+                }
+
+                if (!res.ok) {
+                    throw new Error(
+                        body?.error ||
+                        body?.message ||
+                        body?.details ||
+                        `Failed to remove artist (${res.status}).`
+                    );
+                }
+
+                window.showPrefToast(
+                    'Artist removed from label.',
+                    'success'
+                );
+
+                await window.loadLabelPreferences();
+
+            } catch (err) {
+
+                console.error(
+                    'Remove label artist error:',
+                    err
+                );
+
+                window.showPrefToast(
+                    err.message ||
+                    'Failed to remove artist.',
+                    'error'
+                );
             }
-        );
-
-        const body =
-            await res.json().catch(() => ({}));
-
-        if (!res.ok) {
-            throw new Error(
-                body.error ||
-                body.message ||
-                'Failed to remove artist.'
-            );
         }
-
-        window.showPrefToast(
-            'Artist removed from label.',
-            'success'
-        );
-
-        await window.loadLabelPreferences();
-
-    } catch (err) {
-
-        console.error(
-            'Remove label artist error:',
-            err
-        );
-
-        window.showPrefToast(
-            err.message ||
-            'Failed to remove artist.',
-            'error'
-        );
-    }
+    );
 };
-
 
 window.switchPrefTab = function(tab) {
 
