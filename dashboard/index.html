@@ -786,6 +786,11 @@ const TOO_LOST_TERRITORIES =
         window.releasesCatalog = [];
         window.currentStep = 1;
 
+        window.distributionConnection = {
+            connected: false,
+            checking: true
+        };
+
         window.releaseState = {
             metadata: {
                 title: '',
@@ -869,18 +874,22 @@ onAuthStateChanged(auth, async (user) => {
         if (nameEl) nameEl.innerText = displayName;
         if (initEl) initEl.innerText = displayName.substring(0, 2).toUpperCase();
 
-        // 3. Update any other display name elements in the dashboard
+        // 3. Update any other display name elements
         if (typeof updateDashboardProfileName === 'function') {
             updateDashboardProfileName(displayName);
         }
 
-        await loadLiveCatalog();
+        // Check distribution connection first
+        const connection =
+            await checkDistributionConnection();
+
+        if (connection.connected) {
+            await loadLiveCatalog();
+        }
+
         window.switchView('home');
-    } else {
-        lastRecordedUserId = null; // Reset tracker on sign out
-        window.location.href = '/login/';
-    }
-});
+
+        updateDistributionConnectionUI();
 
         window.handleSignOut = () => signOut(auth).then(() => window.location.href = '/login/');
 
@@ -909,6 +918,99 @@ onAuthStateChanged(auth, async (user) => {
                 sidebar.classList.toggle('-translate-x-full');
                 backdrop.classList.toggle('hidden');
             }
+        }
+
+        async function checkDistributionConnection() {
+    try {
+        if (!window.currentUser) {
+            return {
+                connected: false,
+                reason: 'unauthenticated'
+            };
+        }
+
+        const token = await window.currentUser.getIdToken();
+
+        const workerUrl =
+            window.WORKER_BASE_URL || WORKER_BASE_URL;
+
+        const res = await fetch(
+            `${workerUrl}/api/distribution/status`,
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+            console.error(
+                'Distribution connection status failed:',
+                res.status,
+                data
+            );
+
+            return {
+                connected: false,
+                reason: data?.reason || 'status_failed'
+            };
+        }
+
+        const connected =
+            data?.connected === true ||
+            data?.data?.connected === true;
+
+        window.distributionConnection = {
+            connected,
+            checking: false
+        };
+
+        return {
+            connected,
+            data
+        };
+
+    } catch (error) {
+
+        console.error(
+            'Distribution connection check failed:',
+            error
+        );
+
+        window.distributionConnection = {
+            connected: false,
+            checking: false
+        };
+
+        return {
+            connected: false,
+            reason: 'network_error'
+        };
+    }
+}
+
+window.checkDistributionConnection =
+    checkDistributionConnection;
+
+        if (
+            window.distributionConnection &&
+            window.distributionConnection.connected !== true
+        ) {
+            console.log(
+                'Distribution account not connected. Catalog loading skipped.'
+            );
+
+            window.releasesCatalog = [];
+
+            renderCatalogView();
+
+            updateDistributionConnectionUI();
+
+            return;
         }
 
         async function loadLiveCatalog() {
@@ -1306,6 +1408,44 @@ function renderHomeView() {
                 <p class="text-xs text-gray-400 mt-1">Grow, manage, and monetize your music catalog.</p>
             </div>
 
+            <div id="distributionConnectionCard"
+     class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+
+        <div class="flex items-start gap-4">
+            <div class="w-11 h-11 rounded-xl bg-cyan-500/10
+                        border border-cyan-500/20
+                        flex items-center justify-center
+                        text-cyan-400">
+                <i class="fa-solid fa-plug"></i>
+            </div>
+
+            <div>
+                <h2 class="text-sm font-bold text-white">
+                    Distribution Services
+                </h2>
+
+                <p id="distributionConnectionText"
+                   class="text-xs text-gray-400 mt-1">
+                    Checking your distribution connection...
+                </p>
+            </div>
+        </div>
+
+        <button
+            id="distributionConnectButton"
+            onclick="window.connectDistributionAccount()"
+            class="px-4 py-2.5 rounded-xl
+                   bg-brand-accent text-brand-dark
+                   font-bold text-xs
+                   hover:bg-cyan-300
+                   transition-all">
+            Connect
+        </button>
+
+    </div>
+</div>
+
             <!-- KPI Cards Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="home-kpi-container">
                 <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-1">
@@ -1493,6 +1633,179 @@ async function initHomeDashboard() {
         console.error("Home Dashboard API error:", err);
     }
 }
+
+function updateDistributionConnectionUI() {
+
+    const card =
+        document.getElementById(
+            'distributionConnectionCard'
+        );
+
+    const text =
+        document.getElementById(
+            'distributionConnectionText'
+        );
+
+    const button =
+        document.getElementById(
+            'distributionConnectButton'
+        );
+
+    if (!card || !text || !button) return;
+
+    if (
+        window.distributionConnection?.checking
+    ) {
+        text.textContent =
+            'Checking your distribution connection...';
+
+        button.disabled = true;
+        button.textContent = 'Checking...';
+
+        return;
+    }
+
+    if (
+        window.distributionConnection?.connected
+    ) {
+        text.textContent =
+            'Your distribution account is connected.';
+
+        button.disabled = false;
+        button.textContent = 'Connected';
+
+        button.classList.remove(
+            'bg-brand-accent',
+            'text-brand-dark'
+        );
+
+        button.classList.add(
+            'bg-emerald-500/10',
+            'text-emerald-400',
+            'border',
+            'border-emerald-500/30'
+        );
+
+        return;
+    }
+
+    text.textContent =
+        'Connect your distribution account to load your releases, analytics, and delivery data.';
+
+    button.disabled = false;
+    button.textContent = 'Connect';
+
+    button.classList.remove(
+        'bg-emerald-500/10',
+        'text-emerald-400',
+        'border',
+        'border-emerald-500/30'
+    );
+
+    button.classList.add(
+        'bg-brand-accent',
+        'text-brand-dark'
+    );
+}
+
+window.updateDistributionConnectionUI =
+    updateDistributionConnectionUI;
+
+window.connectDistributionAccount = async function() {
+
+    try {
+
+        if (!window.currentUser) {
+            window.showToast(
+                'Please sign in before connecting distribution services.'
+            );
+            return;
+        }
+
+        const token =
+            await window.currentUser.getIdToken();
+
+        const workerUrl =
+            window.WORKER_BASE_URL || WORKER_BASE_URL;
+
+        const button =
+            document.getElementById(
+                'distributionConnectButton'
+            );
+
+        if (button) {
+            button.disabled = true;
+            button.textContent = 'Connecting...';
+        }
+
+        const res = await fetch(
+            `${workerUrl}/api/distribution/connect`,
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+
+        const data =
+            await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+            throw new Error(
+                data?.error ||
+                data?.message ||
+                'Unable to start distribution connection.'
+            );
+        }
+
+        /*
+         * Worker returns the provider authorization URL.
+         *
+         * Example:
+         * {
+         *   "success": true,
+         *   "authorizationUrl": "https://..."
+         * }
+         */
+
+        const authorizationUrl =
+            data?.authorizationUrl ||
+            data?.data?.authorizationUrl;
+
+        if (!authorizationUrl) {
+            throw new Error(
+                'The distribution connection URL was not returned.'
+            );
+        }
+
+        window.location.href =
+            authorizationUrl;
+
+    } catch (error) {
+
+        console.error(
+            'Distribution connection failed:',
+            error
+        );
+
+        window.showToast(
+            error?.message ||
+            'Unable to connect distribution services.'
+        );
+
+        const button =
+            document.getElementById(
+                'distributionConnectButton'
+            );
+
+        if (button) {
+            button.disabled = false;
+            button.textContent = 'Connect';
+        }
+    }
+};
         
 function renderHomeChart(chartData) {
     const canvas = document.getElementById('homeOverviewChart');
