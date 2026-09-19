@@ -993,27 +993,24 @@ onAuthStateChanged(auth, async (user) => {
     }
 }
 
-window.checkDistributionConnection =
-    checkDistributionConnection;
-
-        if (
-            window.distributionConnection &&
-            window.distributionConnection.connected !== true
-        ) {
-            console.log(
-                'Distribution account not connected. Catalog loading skipped.'
-            );
-
-            window.releasesCatalog = [];
-
-            renderCatalogView();
-
-            updateDistributionConnectionUI();
-
-            return;
-        }
-
         async function loadLiveCatalog() {
+    if (
+        window.distributionConnection &&
+        window.distributionConnection.connected !== true
+    ) {
+        console.log(
+            'Distribution account not connected. Catalog loading skipped.'
+        );
+
+        window.releasesCatalog = [];
+
+        renderCatalogView();
+
+        updateDistributionConnectionUI();
+
+        return;
+    }
+
     try {
         const currentUid =
             window.currentUser
