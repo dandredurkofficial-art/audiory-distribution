@@ -1134,7 +1134,7 @@ window.handleSignOut = () => signOut(auth).then(() => window.location.href = '/l
             window.WORKER_BASE_URL || WORKER_BASE_URL;
 
         const res = await fetch(
-            `${workerUrl}/api/distribution/status`,
+            `${workerUrl}/api/integrations/distribution/status`,
             {
                 method: 'GET',
                 headers: {
@@ -1297,7 +1297,7 @@ window.connectDistributionAccount = async function() {
         }
 
         const res = await fetch(
-            `${workerUrl}/api/distribution/connect`,
+            `${workerUrl}/api/integrations/distribution/connect`,
             {
                 method: 'GET',
                 headers: {
