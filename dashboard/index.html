@@ -832,55 +832,220 @@ const TOO_LOST_TERRITORIES =
 
         let lastRecordedUserId = null;
 
-function handleDistributionOAuthReturn() {
+async function handleDistributionOAuthReturn() {
 
-    const params =
-        new URLSearchParams(
-            window.location.search
-        );
+    const params = new URLSearchParams(
+        window.location.search
+    );
 
-    const status =
-        params.get('distribution');
+    const status = params.get('distribution');
+    const code = params.get('code');
+    const state = params.get('state');
 
-    if (!status) {
-        return;
+    // ---------------------------------------------------------
+    // CASE 1: OAuth provider returned code + state
+    // ---------------------------------------------------------
+
+    if (code && state) {
+
+        try {
+
+            window.distributionConnection = {
+                connected: false,
+                checking: true
+            };
+
+            const workerUrl =
+                window.WORKER_BASE_URL || WORKER_BASE_URL;
+
+            const res = await fetch(
+                `${workerUrl}/api/integrations/distribution/exchange`,
+                {
+                    method: 'POST',
+
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+
+                    body: JSON.stringify({
+                        code,
+                        state
+                    })
+                }
+            );
+
+            const data =
+                await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+
+                console.error(
+                    'Distribution OAuth exchange failed:',
+                    res.status,
+                    data
+                );
+
+                window.distributionConnection = {
+                    connected: false,
+                    checking: false
+                };
+
+                // Clean OAuth parameters first
+                window.history.replaceState(
+                    {},
+                    document.title,
+                    window.location.pathname
+                );
+
+                if (typeof window.showToast === 'function') {
+                    window.showToast(
+                        data?.error ||
+                        'We could not connect your distribution account.'
+                    );
+                }
+
+                return false;
+            }
+
+            console.log(
+                'Distribution OAuth exchange successful:',
+                data
+            );
+
+            // The Worker has now stored the Too Lost OAuth
+            // credentials against this Audiory user.
+
+            window.distributionConnection = {
+                connected: true,
+                checking: false
+            };
+
+            // Remove code/state from the browser URL.
+            window.history.replaceState(
+                {},
+                document.title,
+                `${window.location.pathname}?distribution=connected`
+            );
+
+            return true;
+
+        } catch (error) {
+
+            console.error(
+                'Distribution OAuth callback failed:',
+                error
+            );
+
+            window.distributionConnection = {
+                connected: false,
+                checking: false
+            };
+
+            window.history.replaceState(
+                {},
+                document.title,
+                window.location.pathname
+            );
+
+            if (typeof window.showToast === 'function') {
+                window.showToast(
+                    'We could not complete the distribution connection.'
+                );
+            }
+
+            return false;
+        }
     }
 
-    if (status === 'connected') {
 
-        window.showToast(
-            'Distribution services connected successfully.',
-            false
-        );
+    // ---------------------------------------------------------
+    // CASE 2: Audiory completed OAuth successfully
+    // /dashboard/?distribution=connected
+    // ---------------------------------------------------------
+
+    if (status === 'connected') {
 
         window.distributionConnection = {
             connected: true,
             checking: false
         };
 
+        window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+        );
+
+        if (typeof window.showToast === 'function') {
+
+            window.showToast(
+                'Distribution services connected successfully.',
+                false
+            );
+        }
+
+        return true;
     }
+
+
+    // ---------------------------------------------------------
+    // CASE 3: OAuth failed
+    // ---------------------------------------------------------
 
     if (status === 'failed') {
 
-        window.showToast(
-            'We could not connect your distribution account.'
+        window.distributionConnection = {
+            connected: false,
+            checking: false
+        };
+
+        window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
         );
 
+        if (typeof window.showToast === 'function') {
+
+            window.showToast(
+                'We could not connect your distribution account.'
+            );
+        }
+
+        return false;
     }
+
+
+    // ---------------------------------------------------------
+    // CASE 4: User cancelled OAuth
+    // ---------------------------------------------------------
 
     if (status === 'cancelled') {
 
-        window.showToast(
-            'Distribution connection was cancelled.'
+        window.distributionConnection = {
+            connected: false,
+            checking: false
+        };
+
+        window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
         );
+
+        if (typeof window.showToast === 'function') {
+
+            window.showToast(
+                'Distribution connection was cancelled.'
+            );
+        }
+
+        return false;
     }
 
-    // Clean URL
-    window.history.replaceState(
-        {},
-        document.title,
-        window.location.pathname
-    );
+
+    return null;
 }
 
 window.handleDistributionOAuthReturn =
