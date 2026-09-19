@@ -786,6 +786,11 @@ const TOO_LOST_TERRITORIES =
         window.releasesCatalog = [];
         window.currentStep = 1;
 
+        window.distributionConnection = {
+            connected: false,
+            checking: true
+        };
+
         window.releaseState = {
             metadata: {
                 title: '',
@@ -826,6 +831,60 @@ const TOO_LOST_TERRITORIES =
         ];
 
         let lastRecordedUserId = null;
+
+function handleDistributionOAuthReturn() {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const status =
+        params.get('distribution');
+
+    if (!status) {
+        return;
+    }
+
+    if (status === 'connected') {
+
+        window.showToast(
+            'Distribution services connected successfully.',
+            false
+        );
+
+        window.distributionConnection = {
+            connected: true,
+            checking: false
+        };
+
+    }
+
+    if (status === 'failed') {
+
+        window.showToast(
+            'We could not connect your distribution account.'
+        );
+
+    }
+
+    if (status === 'cancelled') {
+
+        window.showToast(
+            'Distribution connection was cancelled.'
+        );
+    }
+
+    // Clean URL
+    window.history.replaceState(
+        {},
+        document.title,
+        window.location.pathname
+    );
+}
+
+window.handleDistributionOAuthReturn =
+    handleDistributionOAuthReturn;
 
 // Auth Observer Hook
 onAuthStateChanged(auth, async (user) => {
@@ -869,20 +928,29 @@ onAuthStateChanged(auth, async (user) => {
         if (nameEl) nameEl.innerText = displayName;
         if (initEl) initEl.innerText = displayName.substring(0, 2).toUpperCase();
 
-        // 3. Update any other display name elements in the dashboard
+        // 3. Update any other display name elements
         if (typeof updateDashboardProfileName === 'function') {
             updateDashboardProfileName(displayName);
         }
 
-        await loadLiveCatalog();
+        // Check distribution connection first
+        const connection =
+            await checkDistributionConnection();
+
+        if (connection.connected) {
+            await loadLiveCatalog();
+        }
+
         window.switchView('home');
+
+        updateDistributionConnectionUI();
     } else {
-        lastRecordedUserId = null; // Reset tracker on sign out
+        lastRecordedUserId = null;
         window.location.href = '/login/';
     }
 });
 
-        window.handleSignOut = () => signOut(auth).then(() => window.location.href = '/login/');
+window.handleSignOut = () => signOut(auth).then(() => window.location.href = '/login/');
 
         // UI Toast Alert
         window.showToast = function(message, isError = true) {
@@ -911,7 +979,270 @@ onAuthStateChanged(auth, async (user) => {
             }
         }
 
+        async function checkDistributionConnection() {
+    try {
+        if (!window.currentUser) {
+            return {
+                connected: false,
+                reason: 'unauthenticated'
+            };
+        }
+
+        const token = await window.currentUser.getIdToken();
+
+        const workerUrl =
+            window.WORKER_BASE_URL || WORKER_BASE_URL;
+
+        const res = await fetch(
+            `${workerUrl}/api/distribution/status`,
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+            console.error(
+                'Distribution connection status failed:',
+                res.status,
+                data
+            );
+
+            return {
+                connected: false,
+                reason: data?.reason || 'status_failed'
+            };
+        }
+
+        const connected =
+            data?.connected === true ||
+            data?.data?.connected === true;
+
+        window.distributionConnection = {
+            connected,
+            checking: false
+        };
+
+        return {
+            connected,
+            data
+        };
+
+    } catch (error) {
+
+        console.error(
+            'Distribution connection check failed:',
+            error
+        );
+
+        window.distributionConnection = {
+            connected: false,
+            checking: false
+        };
+
+        return {
+            connected: false,
+            reason: 'network_error'
+        };
+    }
+}
+
+function updateDistributionConnectionUI() {
+
+    const card =
+        document.getElementById(
+            'distributionConnectionCard'
+        );
+
+    const text =
+        document.getElementById(
+            'distributionConnectionText'
+        );
+
+    const button =
+        document.getElementById(
+            'distributionConnectButton'
+        );
+
+    if (!card || !text || !button) return;
+
+    if (
+        window.distributionConnection?.checking
+    ) {
+        text.textContent =
+            'Checking your distribution connection...';
+
+        button.disabled = true;
+        button.textContent = 'Checking...';
+
+        return;
+    }
+
+    if (
+        window.distributionConnection?.connected
+    ) {
+        text.textContent =
+            'Your distribution account is connected.';
+
+        button.disabled = false;
+        button.textContent = 'Connected';
+
+        button.classList.remove(
+            'bg-brand-accent',
+            'text-brand-dark'
+        );
+
+        button.classList.add(
+            'bg-emerald-500/10',
+            'text-emerald-400',
+            'border',
+            'border-emerald-500/30'
+        );
+
+        return;
+    }
+
+    text.textContent =
+        'Connect your distribution account to load your releases, analytics, and delivery data.';
+
+    button.disabled = false;
+    button.textContent = 'Connect';
+
+    button.classList.remove(
+        'bg-emerald-500/10',
+        'text-emerald-400',
+        'border',
+        'border-emerald-500/30'
+    );
+
+    button.classList.add(
+        'bg-brand-accent',
+        'text-brand-dark'
+    );
+}
+
+window.updateDistributionConnectionUI =
+    updateDistributionConnectionUI;
+
+window.connectDistributionAccount = async function() {
+
+    try {
+
+        if (!window.currentUser) {
+            window.showToast(
+                'Please sign in before connecting distribution services.'
+            );
+            return;
+        }
+
+        const token =
+            await window.currentUser.getIdToken();
+
+        const workerUrl =
+            window.WORKER_BASE_URL || WORKER_BASE_URL;
+
+        const button =
+            document.getElementById(
+                'distributionConnectButton'
+            );
+
+        if (button) {
+            button.disabled = true;
+            button.textContent = 'Connecting...';
+        }
+
+        const res = await fetch(
+            `${workerUrl}/api/distribution/connect`,
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+
+        const data =
+            await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+            throw new Error(
+                data?.error ||
+                data?.message ||
+                'Unable to start distribution connection.'
+            );
+        }
+
+        /*
+         * Worker returns the provider authorization URL.
+         *
+         * Example:
+         * {
+         *   "success": true,
+         *   "authorizationUrl": "https://..."
+         * }
+         */
+
+        const authorizationUrl =
+            data?.authorizationUrl ||
+            data?.data?.authorizationUrl;
+
+        if (!authorizationUrl) {
+            throw new Error(
+                'The distribution connection URL was not returned.'
+            );
+        }
+
+        window.location.href =
+            authorizationUrl;
+
+    } catch (error) {
+
+        console.error(
+            'Distribution connection failed:',
+            error
+        );
+
+        window.showToast(
+            error?.message ||
+            'Unable to connect distribution services.'
+        );
+
+        const button =
+            document.getElementById(
+                'distributionConnectButton'
+            );
+
+        if (button) {
+            button.disabled = false;
+            button.textContent = 'Connect';
+        }
+    }
+};
+
         async function loadLiveCatalog() {
+    if (
+        window.distributionConnection &&
+        window.distributionConnection.connected !== true
+    ) {
+        console.log(
+            'Distribution account not connected. Catalog loading skipped.'
+        );
+
+        window.releasesCatalog = [];
+
+        renderCatalogView();
+
+        updateDistributionConnectionUI();
+
+        return;
+    }
+
     try {
         const currentUid =
             window.currentUser
@@ -1216,13 +1547,66 @@ window.switchView = function(viewName) {
     
     // UPDATED: Render HTML AND initialize analytics fetching
     if (viewName === 'analytics') {
-        viewport.innerHTML = renderAnalyticsView();
-        if (typeof window.initAnalyticsDashboard === 'function') {
-            window.initAnalyticsDashboard();
-        } else {
-            console.error("window.initAnalyticsDashboard is not loaded yet.");
-        }
+
+    viewport.innerHTML =
+        renderAnalyticsView();
+
+    if (
+        window.distributionConnection?.connected !== true
+    ) {
+        viewport.insertAdjacentHTML(
+            'afterbegin',
+            `
+            <div class="max-w-7xl mx-auto mb-6
+                        p-5 rounded-2xl
+                        bg-brand-card
+                        border border-brand-border">
+
+                <div class="flex items-center gap-4">
+
+                    <div class="w-10 h-10 rounded-xl
+                                bg-cyan-500/10
+                                border border-cyan-500/20
+                                flex items-center justify-center
+                                text-cyan-400">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+
+                    <div class="flex-1">
+                        <h3 class="text-sm font-bold text-white">
+                            Connect distribution services
+                        </h3>
+
+                        <p class="text-xs text-gray-400 mt-1">
+                            Connect your distribution account to view
+                            streaming analytics and performance data.
+                        </p>
+                    </div>
+
+                    <button
+                        onclick="window.connectDistributionAccount()"
+                        class="px-4 py-2 rounded-xl
+                               bg-brand-accent
+                               text-brand-dark
+                               text-xs font-bold">
+                        Connect
+                    </button>
+
+                </div>
+            </div>
+            `
+        );
+
+        return;
     }
+
+    if (
+        typeof window.initAnalyticsDashboard ===
+        'function'
+    ) {
+        window.initAnalyticsDashboard();
+    }
+}
 
     if (viewName === 'earnings') {
         viewport.innerHTML = renderEarningsView();
@@ -1304,6 +1688,44 @@ function renderHomeView() {
             <div class="pb-4 border-b border-brand-border/60">
                 <h1 class="text-2xl font-bold text-white tracking-tight">Welcome back, <span class="text-brand-accent">${window.currentUser?.displayName || 'Partner'}</span></h1>
                 <p class="text-xs text-gray-400 mt-1">Grow, manage, and monetize your music catalog.</p>
+            </div>
+
+            <div id="distributionConnectionCard"
+                 class="p-5 rounded-2xl bg-brand-card border border-brand-border">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-11 h-11 rounded-xl bg-cyan-500/10
+                                    border border-cyan-500/20
+                                    flex items-center justify-center
+                                    text-cyan-400">
+                            <i class="fa-solid fa-plug"></i>
+                        </div>
+
+                        <div>
+                            <h2 class="text-sm font-bold text-white">
+                                Distribution Services
+                            </h2>
+
+                            <p id="distributionConnectionText"
+                               class="text-xs text-gray-400 mt-1">
+                                Checking your distribution connection...
+                            </p>
+                        </div>
+                    </div>
+
+                    <button
+                        id="distributionConnectButton"
+                        onclick="window.connectDistributionAccount()"
+                        class="px-4 py-2.5 rounded-xl
+                               bg-brand-accent text-brand-dark
+                               font-bold text-xs
+                               hover:bg-cyan-300
+                               transition-all">
+                        Connect
+                    </button>
+
+                </div>
             </div>
 
             <!-- KPI Cards Grid -->
@@ -1469,6 +1891,16 @@ async function initHomeDashboard() {
             : window.currentUser.accessToken;
 
         if (!token) return;
+
+        if (
+            window.distributionConnection?.connected !== true
+        ) {
+            console.log(
+                'Distribution account not connected. Analytics loading skipped.'
+            );
+
+            return;
+        }
 
         const workerUrl = window.WORKER_BASE_URL || 'https://audiorydistribution.dandredurkofficial.workers.dev';
         const res = await fetch(`${workerUrl}/api/analytics/overview?period=lastThirtyDays`, {
